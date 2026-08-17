@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * The game paints its own background and owns the whole viewport. Everything
+ * else it needs is plain Tailwind utilities, so there is no theme layer here.
+ */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #0b0b10;
+  color: #ffffff;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The arena is a game, not a document: no rubber-banding, no text selection. */
+body {
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+}
