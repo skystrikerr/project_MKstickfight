@@ -83,8 +83,6 @@
       ],
       "category": "Game",
       "icon": "electron/icon.png",
-      "desktopName": "stickfighter.desktop",
-      "synopsis": "A 2D fighting game with a roster drawn from history",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "mac": {
@@ -94,5 +92,7 @@
       "category": "public.app-category.games",
       "icon": "electron/icon.png"
     }
-  }
+  },
+  "description": "A 2D fighting game with a roster drawn from documented history",
+  "author": "skystrikerr"
 }
