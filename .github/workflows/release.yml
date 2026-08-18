@@ -1,0 +1,63 @@
+# Builds the desktop game and publishes the installers.
+#
+# Windows binaries are built on a Windows runner rather than cross-compiled,
+# so what ships is what electron-builder produces natively. Pushing a tag like
+# v1.0.0 creates a GitHub Release with the .exe attached; running the workflow
+# by hand just leaves the artifacts on the run for download.
+name: Build desktop
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist:win
+            artifact: windows
+          - os: ubuntu-latest
+            script: dist:linux
+            artifact: linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # The simulation tests are cheap and catch a broken build before it is
+      # packaged into something people download.
+      - run: npm test
+
+      - run: npm run ${{ matrix.script }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stickfighter-${{ matrix.artifact }}
+          path: |
+            release/*.exe
+            release/*.AppImage
+          if-no-files-found: error
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.exe
+            release/*.AppImage
+          fail_on_unmatched_files: false

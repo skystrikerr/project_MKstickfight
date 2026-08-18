@@ -11,6 +11,41 @@ npm run test     # headless simulation self-tests
 npm run build    # typecheck + production bundle
 ```
 
+## Desktop build
+
+The game ships as a desktop app too. It is genuinely offline — there is no
+server behind it, so the whole application is the static bundle plus an Electron
+shell.
+
+**To get a Windows `.exe`:** push a tag and let CI build it.
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+`.github/workflows/release.yml` builds on a real Windows runner and attaches
+both an NSIS installer and a standalone portable `.exe` to the GitHub Release.
+You can also run the workflow by hand from the Actions tab, which leaves the
+binaries as downloadable run artifacts instead of publishing a release.
+
+**To build locally**, on the platform you are targeting:
+
+```bash
+npm run electron:dev   # run the shell against the Vite dev server
+npm run dist:win       # -> release/Stick Fighter-1.0.0-x64.exe   (needs Windows)
+npm run dist:linux     # -> release/Stick Fighter-1.0.0-x64.AppImage
+npm run dist:mac       # -> release/Stick Fighter-1.0.0-x64.dmg   (needs macOS)
+```
+
+Cross-building Windows from Linux needs Wine and is not worth the trouble — the
+CI workflow exists so you never have to.
+
+One note if you touch `electron/main.cjs`: the bundle is served over a
+registered `app://` scheme rather than loaded with `loadFile`. That is
+load-bearing. The bundle is an ES module, and a module script fetched over
+`file://` has an opaque origin, so Chromium blocks it by CORS and the window
+comes up black with nothing but `ERR_FAILED` in the console.
+
 ## The roster
 
 | Fighter | Era | Archetype |
