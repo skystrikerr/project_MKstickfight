@@ -1,8 +1,82 @@
-# Stick Fighter
+<p align="center">
+  <img src=".github/social-preview.png" alt="Stick Fighter" width="820">
+</p>
 
-A 2D fighting game in the browser, built on three.js. Fifteen fighters, every
-one of them a person the historical record actually names, drawn as inked stick
-figures and armed with the weapon the sources give them.
+<h1 align="center">Stick Fighter</h1>
+
+<p align="center">
+  A 2D fighting game in the browser, built on three.js.<br>
+  Fifteen fighters, every one of them a person the historical record actually names,
+  drawn as inked stick figures and armed with the weapon the sources give them.
+</p>
+
+<p align="center">
+  <a href="https://skystrikerr.github.io/project_MKstickfight/"><b>▶ Play in your browser</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/skystrikerr/project_MKstickfight/releases/latest"><b>⬇ Download for Windows</b></a>
+  &nbsp;·&nbsp;
+  <a href="#controls"><b>🎮 Controller supported</b></a>
+</p>
+
+---
+
+## Play
+
+**In your browser** — nothing to install:
+[skystrikerr.github.io/project_MKstickfight](https://skystrikerr.github.io/project_MKstickfight/)
+
+**On Windows** — grab the latest
+[release](https://github.com/skystrikerr/project_MKstickfight/releases/latest) and pick either:
+
+| File | What it is |
+|---|---|
+| `Stick Fighter-x.y.z-x64.exe` | Installer. Adds a Start-menu and desktop shortcut. |
+| `Stick Fighter-x.y.z-portable.exe` | Single file. Double-click and play, installs nothing. |
+
+Windows will show a blue "Windows protected your PC" box the first time, because
+the build is not code-signed. Click **More info → Run anyway**. Signing needs a
+certificate from a certificate authority, which costs money annually; until that
+exists, the warning is unavoidable for any independent release.
+
+**On Linux** — the same release page has an `.AppImage`. `chmod +x` it and run it.
+
+The game is fully offline once you have it. There is no server, no account and
+no network traffic of any kind.
+
+## Controls
+
+Two players share one keyboard, or plug in up to two gamepads — pads are
+detected automatically, and a "gamepad connected" note appears when one is live.
+
+**Gamepad** (standard mapping — Xbox, PlayStation, most third-party pads):
+
+| Input | Action |
+|---|---|
+| D-pad / left stick | Move, jump, crouch |
+| ✕ / A | Light attack |
+| ○ / B | Medium attack |
+| □ / X | Heavy attack |
+| △ / Y, L1, L2 | Guard |
+| R1 | Character skill |
+| R2 | Throw |
+| Start | Pause |
+
+**Keyboard:**
+
+| | Player 1 | Player 2 |
+|---|---|---|
+| Move / jump / crouch | `W` `A` `S` `D` | Arrow keys |
+| Light / Medium / Heavy | `J` `K` `L` | `N` `M` `,` |
+| Guard | hold `U` or `;` | `.` or Numpad&nbsp;0 |
+
+Guard combines with a direction: `←` + Guard parries, `→` + Guard rolls through
+an attack. `A + B` throws, `A + C` is the character's own skill.
+
+Every fighter has five specials on motion inputs — `↓↘→` for quarter circles,
+`→↓↘` for dragon punches — plus EX versions on the Guard button for 50 meter and
+a super for 100.
+
+## Building it yourself
 
 ```bash
 npm install
@@ -69,21 +143,6 @@ comes up black with nothing but `ERR_FAILED` in the console.
 The last of these is the one deliberate exception: the unit, the valley and
 every piece of the kit are real, but the man is a composite rather than a named
 individual.
-
-## Controls
-
-| | Player 1 | Player 2 |
-|---|---|---|
-| Move / jump / crouch | `W A S D` | Arrow keys |
-| Light / Medium / Heavy | `J` `K` `L` | `N` `M` `,` |
-| Guard | hold `U` or `;` | `.` or Numpad 0 |
-
-Gamepads work too — plug one in and press a button. `←` + Guard parries, `→` +
-Guard rolls, `A + B` throws, `A + C` is the character's skill.
-
-Every fighter has five specials on motion inputs (`↓↘→` quarter circles, `→↓↘`
-dragon punches), EX versions on the Guard button for 50 meter, and a super for
-100.
 
 ## How it is put together
 

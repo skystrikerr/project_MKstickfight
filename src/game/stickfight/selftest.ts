@@ -11,7 +11,7 @@
  */
 
 import { AiController } from "./engine/ai";
-import { EMPTY_INPUT, type RawInput } from "./engine/input";
+import { EMPTY_INPUT, GamepadReader, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
 import { getFighter, ROSTER } from "./fighters";
 import { applySkin, distinctSkin, getSkin } from "./skins";
@@ -428,6 +428,59 @@ function scriptFor(move: MoveDef): RawInput[] {
     }
   }
   check("AI finishes every matchup", finished === ROSTER.length * ROSTER.length, `${finished}/${ROSTER.length ** 2}`);
+}
+
+{
+  // Gamepad mapping. A pad is the way most people will actually play this, and
+  // the mapping is the kind of thing that breaks silently, so it is pinned here
+  // against a fake standard-mapping pad rather than trusted.
+  const pad = (buttons: number[] = [], axes: number[] = [0, 0]) => ({
+    id: "Fake (STANDARD GAMEPAD)",
+    index: 0,
+    connected: true,
+    mapping: "standard",
+    timestamp: 0,
+    axes,
+    buttons: Array.from({ length: 17 }, (_, i) => ({
+      pressed: buttons.includes(i),
+      touched: buttons.includes(i),
+      value: buttons.includes(i) ? 1 : 0,
+    })),
+  });
+  // Node defines `navigator` as a getter-only global, so it has to be swapped
+  // with defineProperty rather than assigned to.
+  const withPad = <T,>(p: unknown, fn: () => T): T => {
+    const saved = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+    Object.defineProperty(globalThis, "navigator", {
+      value: { getGamepads: () => [p] },
+      configurable: true,
+      writable: true,
+    });
+    try {
+      return fn();
+    } finally {
+      if (saved) Object.defineProperty(globalThis, "navigator", saved);
+      else delete (globalThis as { navigator?: unknown }).navigator;
+    }
+  };
+
+  const reader = new GamepadReader();
+  const read = (p: unknown) => withPad(p, () => reader.read(0));
+
+  check("pad: no pad reads as nothing", withPad(null, () => reader.read(0)) === null);
+  check("pad: face buttons map to A/B/C", !!read(pad([0]))?.A && !!read(pad([1]))?.B && !!read(pad([2]))?.C);
+  check("pad: triangle and both left triggers guard", !!read(pad([3]))?.S && !!read(pad([4]))?.S && !!read(pad([6]))?.S);
+  check("pad: R1 is the skill (A + C)", !!read(pad([5]))?.A && !!read(pad([5]))?.C);
+  check("pad: R2 is the throw (A + B)", !!read(pad([7]))?.A && !!read(pad([7]))?.B);
+  check(
+    "pad: d-pad maps to directions",
+    !!read(pad([12]))?.up && !!read(pad([13]))?.down && !!read(pad([14]))?.left && !!read(pad([15]))?.right,
+  );
+  // The stick has to be pushed properly, or a resting stick drifts you around.
+  check("pad: stick past the dead zone moves", !!read(pad([], [1, 0]))?.right && !!read(pad([], [0, 1]))?.down);
+  check("pad: stick inside the dead zone does not", !read(pad([], [0.3, 0.3]))?.right);
+  check("pad: a resting pad is a neutral input", !read(pad())?.A && !read(pad())?.left && !read(pad())?.down);
+  check("pad: counts what is plugged in", withPad(pad(), () => reader.count()) === 1);
 }
 
 // ---------------------------------------------------------------------------
