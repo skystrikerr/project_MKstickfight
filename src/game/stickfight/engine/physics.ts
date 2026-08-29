@@ -256,7 +256,10 @@ export class Ragdoll {
       torsoAngle: angle(neck, pelvis),
       weapon: 0,
       weaponBack: 0,
+      // A ragdoll is already posed in world space; the renderer must not
+      // rotate it again.
       spin: 0,
+      spinPivot: 0,
     };
   }
 

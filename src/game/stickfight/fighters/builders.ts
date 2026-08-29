@@ -198,13 +198,52 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
         { at: 22, x: 0 },
       ],
       friction: 0.86,
-      desc: "Rolls through attacks and past the opponent. Vulnerable on recovery.",
+      desc: "Dives into a shoulder roll, passing through attacks and out the other side. Vulnerable on the way up.",
       notation: "→ + S",
+      /**
+       * A forward shoulder roll, not a figure spinning on the spot.
+       *
+       * Three things make it read: the body tucks into a ball before it turns
+       * (knees to chest, arms wrapped in, spine curled over), the turn happens
+       * about the middle of that ball via `spinPivot` rather than about the
+       * feet, and the ball squashes down so its silhouette is compact. Without
+       * the tuck it is a stick figure cartwheeling; without the pivot it
+       * swings around its own ankles.
+       */
       frames: [
-        kf(0, { ...w, torso: 20, crouch: 0.6, hipF: 30, kneeF: 50 }, "out"),
-        kf(8, { free: 1, spin: -140, torso: 30, crouch: 1, offY: 16, hipF: 70, kneeF: 110, hipB: -40, kneeB: 120, shoulderF: 60, elbowF: 90, shoulderB: 50, elbowB: 84 }, "linear"),
-        kf(16, { free: 1, spin: -300, torso: 24, crouch: 1, offY: 14, hipF: 60, kneeF: 100, hipB: -30, kneeB: 110, shoulderF: 40, elbowF: 80, shoulderB: 34, elbowB: 76 }, "linear"),
-        kf(22, { ...w, spin: -360, torso: 16, crouch: 0.7, hipF: 34, kneeF: 60, hipB: -20, kneeB: 60 }, "out"),
+        // Drop and commit - the lead shoulder goes down first.
+        kf(0, { ...w, torso: 26, crouch: 0.55, hipF: 34, kneeF: 56, hipB: -16, kneeB: 44, shoulderF: 44, elbowF: 66, weapon: -46 }, "out"),
+        kf(3, {
+          free: 1, spin: -38, spinPivot: 30, squash: 0.82, offY: 12,
+          torso: 64, crouch: 1, hipF: 116, kneeF: 146, hipB: 92, kneeB: 150,
+          shoulderF: 150, elbowF: 138, shoulderB: 142, elbowB: 140,
+          head: 34, weapon: -96,
+        }, "in"),
+        // Tucked: knees to chest, arms wrapped, weapon folded in along the
+        // body. A long spear or staff left sticking out turns the whole roll
+        // into a windmill, so it comes in with everything else.
+        kf(8, {
+          free: 1, spin: -128, spinPivot: 32, squash: 0.76, offY: 10,
+          torso: 74, crouch: 1, hipF: 134, kneeF: 158, hipB: 118, kneeB: 160,
+          shoulderF: 162, elbowF: 148, shoulderB: 156, elbowB: 150,
+          head: 40, weapon: -112,
+        }, "linear"),
+        kf(14, {
+          free: 1, spin: -224, spinPivot: 32, squash: 0.76, offY: 10,
+          torso: 76, crouch: 1, hipF: 138, kneeF: 160, hipB: 124, kneeB: 162,
+          shoulderF: 164, elbowF: 150, shoulderB: 158, elbowB: 152,
+          head: 40, weapon: -112,
+        }, "linear"),
+        // Round onto the feet and start to open out.
+        kf(19, {
+          free: 1, spin: -312, spinPivot: 28, squash: 0.82, offY: 12,
+          torso: 60, crouch: 1, hipF: 118, kneeF: 144, hipB: 96, kneeB: 148,
+          shoulderF: 148, elbowF: 134, shoulderB: 140, elbowB: 138,
+          head: 32, weapon: -92,
+        }, "out"),
+        // Feet under him, low and still carrying the momentum forward.
+        kf(24, { ...w, spin: -360, torso: 32, crouch: 0.78, hipF: 48, kneeF: 78, hipB: -24, kneeB: 70, shoulderF: 56, elbowF: 64, shoulderB: 48, elbowB: 60, weapon: -58 }, "out"),
+        kf(27, { ...w, torso: 18, crouch: 0.4, hipF: 38, kneeF: 60, shoulderF: 50, elbowF: 62, weapon: -20 }, "inOut"),
         kf(30, { ...w }),
       ],
     },

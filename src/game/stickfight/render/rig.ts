@@ -362,9 +362,24 @@ export class StickRig {
     },
   ) {
     const g = this.group;
-    g.position.set(opts.x, opts.y, opts.z ?? 0);
     g.scale.set(opts.facing * this.scale, this.scale, 1);
     g.rotation.z = sk.spin * DEG;
+
+    // Three rotates the group about its own origin, which sits on the floor
+    // between the fighter's feet. That is what you want for a spinning attack
+    // with a foot planted, but a tuck-and-roll has to turn about the body's
+    // middle or it pinwheels around the ankles. Moving the group so the pivot
+    // point lands in the same place before and after the rotation gives us a
+    // pivot at any height without nesting another object in the hierarchy.
+    let px = opts.x;
+    let py = opts.y;
+    if (sk.spinPivot !== 0 && sk.spin !== 0) {
+      const h = sk.spinPivot * this.scale;
+      const a = sk.spin * DEG;
+      px += h * Math.sin(a);
+      py += h * (1 - Math.cos(a));
+    }
+    g.position.set(px, py, opts.z ?? 0);
 
     const L = this.limbs;
     L.thighB.set(sk.pelvis.x, sk.pelvis.y, sk.kneeB.x, sk.kneeB.y);

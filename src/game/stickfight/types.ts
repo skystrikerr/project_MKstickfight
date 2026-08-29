@@ -57,6 +57,14 @@ export interface Pose {
   crouch?: number;
   /** Whole-body rotation in degrees (rolls, flips, spin attacks). */
   spin?: number;
+  /**
+   * Height above the ground that `spin` turns about, in units. The default of
+   * 0 pivots on the floor between the feet, which is right for a cartwheel or
+   * a spinning attack that keeps a foot planted. A tuck-and-roll needs the
+   * body turning about its own middle instead, or the figure pinwheels around
+   * its ankles rather than rolling along the ground.
+   */
+  spinPivot?: number;
   /** Vertical squash/stretch, 1 = neutral. */
   squash?: number;
   /** When true the feet are not glued to the floor (airborne poses). */

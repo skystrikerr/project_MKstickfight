@@ -48,8 +48,10 @@ export interface Skeleton {
   /** Weapon rotation to apply on top of the holding forearm. */
   weapon: number;
   weaponBack: number;
-  /** Whole-body roll applied by the renderer around the hip. */
+  /** Whole-body roll applied by the renderer. */
   spin: number;
+  /** Height the roll turns about; 0 is the floor between the feet. */
+  spinPivot: number;
 }
 
 const DEG = Math.PI / 180;
@@ -81,6 +83,7 @@ export const NEUTRAL: Required<Omit<Pose, never>> = {
   offY: 0,
   crouch: 0,
   spin: 0,
+  spinPivot: 0,
   squash: 1,
   free: 0,
 };
@@ -239,6 +242,7 @@ export function buildSkeleton(pose: Pose, grounded: boolean, scale = 1): Skeleto
     weapon: p.weapon,
     weaponBack: p.weaponBack,
     spin: p.spin,
+    spinPivot: p.spinPivot,
   };
 
   // Ground the pose, then apply the authored offset.
