@@ -13,7 +13,7 @@
 <p align="center">
   <a href="https://skystrikerr.github.io/project_MKstickfight/"><b>▶ Play in your browser</b></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/skystrikerr/project_MKstickfight/releases/latest"><b>⬇ Download for Windows</b></a>
+  <a href="https://github.com/skystrikerr/project_MKstickfight/releases"><b>⬇ Download for Windows</b></a>
   &nbsp;·&nbsp;
   <a href="#controls"><b>🎮 Controller supported</b></a>
 </p>
@@ -25,20 +25,25 @@
 **In your browser** — nothing to install:
 [skystrikerr.github.io/project_MKstickfight](https://skystrikerr.github.io/project_MKstickfight/)
 
-**On Windows** — grab the latest
-[release](https://github.com/skystrikerr/project_MKstickfight/releases/latest) and pick either:
+**On Windows** — open
+[Releases](https://github.com/skystrikerr/project_MKstickfight/releases), take
+the newest one, and pick either:
 
 | File | What it is |
 |---|---|
-| `Stick Fighter-x.y.z-x64.exe` | Installer. Adds a Start-menu and desktop shortcut. |
 | `Stick Fighter-x.y.z-portable.exe` | Single file. Double-click and play, installs nothing. |
+| `Stick Fighter-x.y.z-x64.exe` | Installer. Adds a Start-menu and desktop shortcut. |
 
 Windows will show a blue "Windows protected your PC" box the first time, because
 the build is not code-signed. Click **More info → Run anyway**. Signing needs a
 certificate from a certificate authority, which costs money annually; until that
 exists, the warning is unavoidable for any independent release.
 
-**On Linux** — the same release page has an `.AppImage`. `chmod +x` it and run it.
+**On Linux** — the same release has an `.AppImage`. `chmod +x` it and run it.
+
+These links point at the Releases *page* rather than `/releases/latest`, because
+`latest` resolves to the newest **stable** release and every 0.x build is
+flagged as a pre-release — so `latest` would 404 until 1.0.
 
 The game is fully offline once you have it. There is no server, no account and
 no network traffic of any kind.
