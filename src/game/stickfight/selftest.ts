@@ -13,6 +13,7 @@
 import { AiController } from "./engine/ai";
 import { EMPTY_INPUT, GamepadReader, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
+import { Music, TRACKS, type MusicCue } from "./engine/music";
 import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
@@ -614,6 +615,32 @@ function scriptFor(move: MoveDef): RawInput[] {
   // Letting go of guard clears the hold, so the next block raises the arms again.
   for (let i = 0; i < 12; i++) m.step([inp(), inp()]);
   check("guard: dropping the guard resets the raise", def.guardHold === 0, `${def.guardHold}`);
+}
+
+// ---------------------------------------------------------------------------
+// Music
+// ---------------------------------------------------------------------------
+{
+  const CUES: MusicCue[] = ["menu", "select", "fight", "victory"];
+  for (const cue of Object.keys(TRACKS)) {
+    check(`music: "${cue}" is a real cue`, CUES.includes(cue as MusicCue));
+    const entry = TRACKS[cue as MusicCue];
+    for (const t of Array.isArray(entry) ? entry : entry ? [entry] : []) {
+      check(`music: ${cue} names a file`, !!t.file && !t.file.includes("/"), t.file);
+      check(`music: ${cue} gain is sane`, t.gain === undefined || (t.gain > 0 && t.gain <= 1), `${t.gain}`);
+    }
+  }
+
+  // The whole point is that the game runs with no music at all. Nothing here
+  // has an `Audio` constructor, which is the same situation as a track that
+  // fails to load.
+  const m = new Music();
+  m.unlock();
+  for (const cue of CUES) m.play(cue);
+  m.setMuted(true);
+  m.setVolume(0.2);
+  m.stop();
+  check("music: an empty soundtrack is silent, not broken", m.cue === null, `${m.cue}`);
 }
 
 // ---------------------------------------------------------------------------

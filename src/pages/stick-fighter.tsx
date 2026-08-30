@@ -11,6 +11,7 @@ import { GameCanvas, type MatchConfig } from "@/game/stickfight/ui/GameCanvas";
 import { MoveList } from "@/game/stickfight/ui/MoveList";
 import { FighterPortrait } from "@/game/stickfight/ui/Portrait";
 import { ROSTER } from "@/game/stickfight/fighters";
+import { music } from "@/game/stickfight/engine/music";
 
 type Screen = "title" | "select" | "fight";
 
@@ -55,6 +56,23 @@ export default function StickFighter() {
   useEffect(() => {
     setTouch(typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
   }, []);
+
+  // Music needs a gesture before a browser will start it, same as the sound
+  // effects. Whichever comes first wins; the cue asked for meanwhile is held.
+  useEffect(() => {
+    const wake = () => music.unlock();
+    window.addEventListener("pointerdown", wake);
+    window.addEventListener("keydown", wake);
+    return () => {
+      window.removeEventListener("pointerdown", wake);
+      window.removeEventListener("keydown", wake);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (screen === "title") music.play("menu");
+    else if (screen === "select") music.play("select");
+  }, [screen]);
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-[#0b0b10] text-white">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { AiLevel } from "../constants";
+import { music } from "../engine/music";
 import { GameSession, type GameMode, type HudState } from "../engine/game";
 import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
@@ -83,7 +84,10 @@ export function GameCanvas({
     }, 120);
 
     // WebAudio needs a gesture before it will make a sound.
-    const wake = () => session.sfx.resume();
+    const wake = () => {
+      session.sfx.resume();
+      music.unlock();
+    };
     window.addEventListener("pointerdown", wake);
     window.addEventListener("keydown", wake);
 
@@ -91,6 +95,7 @@ export function GameCanvas({
       if (e.code === "KeyM") {
         const next = !session.sfx.muted;
         session.sfx.setMuted(next);
+        music.setMuted(next);
         setMuted(next);
       }
       if (e.code === "Escape") {
@@ -258,6 +263,7 @@ export function GameCanvas({
             if (!s) return;
             s.sfx.resume();
             s.sfx.setMuted(!s.sfx.muted);
+            music.setMuted(s.sfx.muted);
             setMuted(s.sfx.muted);
           }}
           className="rounded-md border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/80 hover:bg-black/70"

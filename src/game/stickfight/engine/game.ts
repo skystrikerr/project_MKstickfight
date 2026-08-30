@@ -13,6 +13,7 @@ import { applySkin, distinctSkin, getSkin } from "../skins";
 import type { FighterDef } from "../types";
 import { AiController } from "./ai";
 import { Sfx } from "./audio";
+import { music } from "./music";
 import { GamepadReader, Keyboard, mergeInputs, P1_KEYS, P2_KEYS, type RawInput } from "./input";
 import { Match, type Phase } from "./match";
 import { DEFAULT_TRAINING, TrainingRoom, type TrainingOptions, type TrainingReadout } from "./training";
@@ -242,9 +243,12 @@ export class GameSession {
 
     for (const e of this.match.fx) this.sfx.play(e);
     if (this.match.phase !== phaseBefore) {
-      if (this.match.phase === "fight") this.sfx.cue("fight");
-      else if (this.match.phase === "roundEnd") this.sfx.cue("win");
+      if (this.match.phase === "fight") {
+        this.sfx.cue("fight");
+        music.play("fight");
+      } else if (this.match.phase === "roundEnd") this.sfx.cue("win");
       else if (this.match.phase === "intro" && announcementBefore > 0) this.sfx.cue("round");
+      if (this.match.phase === "matchEnd") music.play("victory");
     }
   }
 
