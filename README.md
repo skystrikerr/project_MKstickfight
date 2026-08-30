@@ -121,8 +121,13 @@ git tag v0.2.0 && git push origin v0.2.0
 
 `.github/workflows/release.yml` builds on a real Windows runner and attaches
 both an NSIS installer and a standalone portable `.exe` to the GitHub Release.
-You can also run the workflow by hand from the Actions tab, which leaves the
-binaries as downloadable run artifacts instead of publishing a release.
+You can also run it by hand from the Actions tab — tick **Publish a GitHub
+Release** and it tags the version in `package.json` and publishes it; leave it
+unticked and the binaries are just downloadable artifacts on the run.
+
+The binaries are about 104 MB each, which is over GitHub's 100 MB per-file
+limit for anything committed with git. A Release is the only place in this
+repository they can live, which is why there is no `releases/` folder.
 
 **To build locally**, on the platform you are targeting:
 

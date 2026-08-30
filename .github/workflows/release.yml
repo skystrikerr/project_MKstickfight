@@ -1,15 +1,27 @@
 # Builds the desktop game and publishes the installers.
 #
 # Windows binaries are built on a Windows runner rather than cross-compiled,
-# so what ships is what electron-builder produces natively. Pushing a tag like
-# v1.0.0 creates a GitHub Release with the .exe attached; running the workflow
-# by hand just leaves the artifacts on the run for download.
+# so what ships is what electron-builder produces natively.
+#
+# Three ways in:
+#   - push a tag like v0.2.0            -> builds and publishes a Release
+#   - run by hand with "publish" ticked -> same, tagging the current version
+#   - run by hand without it            -> just leaves artifacts on the run
+#
+# The hand-run publish exists because the binaries are ~104 MB each. That is
+# over GitHub's 100 MB per-file limit for anything pushed with git, so a
+# Release is the only place in this repository they can actually live.
 name: Build desktop
 
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish a GitHub Release with these binaries
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -29,6 +41,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
+      # A hand-run publish has no tag to take a name from, so it uses the
+      # version in package.json - which is the number the release is anyway.
+      - id: meta
+        shell: bash
+        run: echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-node@v4
         with:
@@ -53,10 +71,25 @@ jobs:
             release/*.AppImage
           if-no-files-found: error
 
-      - name: Attach to release
-        if: startsWith(github.ref, 'refs/tags/v')
+      # Both matrix jobs target the same release; the second adds its files to
+      # the one the first created.
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.meta.outputs.tag }}
+          name: Stick Fighter ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.meta.outputs.tag }}
+          # Everything below 1.0 is pre-early-access and should say so.
+          prerelease: ${{ startsWith(steps.meta.outputs.tag, 'v0.') }}
+          body: |
+            Download **`Stick Fighter-*-portable.exe`** to just play — one file,
+            double-click, installs nothing. Take the `-x64.exe` instead if you
+            want a Start-menu shortcut, or the `.AppImage` on Linux.
+
+            Windows shows a blue "Windows protected your PC" box the first time,
+            because the build is not code-signed. **More info → Run anyway.**
+
+            The game is fully offline. No server, no account, no network traffic.
           files: |
             release/*.exe
             release/*.AppImage
