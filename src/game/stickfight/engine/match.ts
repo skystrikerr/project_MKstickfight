@@ -78,7 +78,8 @@ export class Match {
     this.resetPositions();
   }
 
-  private resetPositions() {
+  /** Puts both fighters back on their marks. Training mode reuses this. */
+  resetPositions() {
     const [a, b] = this.fighters;
     a.x = -150;
     b.x = 150;

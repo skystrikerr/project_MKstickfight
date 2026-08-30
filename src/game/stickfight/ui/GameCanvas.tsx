@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { AiLevel } from "../constants";
 import { GameSession, type GameMode, type HudState } from "../engine/game";
+import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
 import { Announcement, Hud } from "./Hud";
 import { TouchControls } from "./TouchControls";
@@ -39,6 +40,7 @@ export function GameCanvas({
   const [pads, setPads] = useState(0);
   const [muted, setMuted] = useState(false);
   const [quality, setQuality] = useState<"high" | "low">("high");
+  const [dummy, setDummy] = useState<DummyAction>("stand");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -96,6 +98,7 @@ export function GameCanvas({
         setPaused(session.paused);
       }
       if (e.code === "F2") session.toggleBoxes();
+      if (e.code === "KeyR" && session.training) session.training.reset(session.match);
     };
     window.addEventListener("keydown", onKey);
 
@@ -149,6 +152,83 @@ export function GameCanvas({
       {pads > 0 && (
         <div className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-md border border-white/15 bg-black/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
           {pads === 1 ? "Gamepad connected" : `${pads} gamepads connected`}
+        </div>
+      )}
+
+
+      {hud?.training && sessionRef.current?.training && (
+        <div className="absolute left-3 top-36 z-20 w-56 rounded-lg border border-white/15 bg-black/70 p-3 text-white backdrop-blur-sm sm:left-4 sm:top-40">
+          <div className="mb-2 flex items-baseline justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">Training</span>
+            <button
+              type="button"
+              onClick={() => {
+                const s = sessionRef.current;
+                if (s?.training) s.training.reset(s.match);
+              }}
+              className="text-[10px] font-bold uppercase tracking-wider text-white/50 hover:text-white"
+            >
+              Reset (R)
+            </button>
+          </div>
+
+          <div className="mb-1 text-[10px] uppercase tracking-widest text-white/40">Dummy</div>
+          <div className="mb-3 grid grid-cols-2 gap-1">
+            {DUMMY_ACTIONS.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                title={a.hint}
+                onClick={() => {
+                  const s = sessionRef.current;
+                  if (!s?.training) return;
+                  s.training.options.dummy = a.id;
+                  setDummy(a.id);
+                }}
+                className={`rounded px-1.5 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                  dummy === a.id ? "bg-amber-400 text-black" : "bg-white/10 text-white/70 hover:bg-white/20"
+                }`}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mb-1 text-[10px] uppercase tracking-widest text-white/40">Last move</div>
+          {hud.training.last ? (
+            <>
+              <div className="text-sm font-bold leading-tight">{hud.training.last.name}</div>
+              {hud.training.last.notation && (
+                <div className="mb-1.5 font-mono text-[11px] text-amber-300">{hud.training.last.notation}</div>
+              )}
+              <div className="grid grid-cols-3 gap-1 text-center">
+                {[
+                  ["Startup", hud.training.last.startup],
+                  ["Active", hud.training.last.active],
+                  ["Recovery", hud.training.last.recovery],
+                ].map(([label, value]) => (
+                  <div key={String(label)} className="rounded bg-white/5 py-1">
+                    <div className="text-[9px] uppercase tracking-wider text-white/40">{label}</div>
+                    <div className="font-mono text-sm font-bold">{value ?? "—"}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-1.5 flex justify-between text-[10px] text-white/50">
+                <span>{hud.training.last.duration}f total</span>
+                {hud.training.last.damage > 0 && <span>{hud.training.last.damage} dmg</span>}
+              </div>
+            </>
+          ) : (
+            <div className="text-[11px] leading-snug text-white/40">
+              Throw something. Frame data appears here.
+            </div>
+          )}
+
+          {hud.training.comboHits > 1 && (
+            <div className="mt-2 rounded bg-amber-400/15 px-2 py-1 text-[11px] font-bold text-amber-200">
+              {hud.training.comboHits} hits · {hud.training.comboDamage} damage
+            </div>
+          )}
         </div>
       )}
 

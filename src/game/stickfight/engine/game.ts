@@ -15,8 +15,9 @@ import { AiController } from "./ai";
 import { Sfx } from "./audio";
 import { GamepadReader, Keyboard, mergeInputs, P1_KEYS, P2_KEYS, type RawInput } from "./input";
 import { Match, type Phase } from "./match";
+import { DEFAULT_TRAINING, TrainingRoom, type TrainingOptions, type TrainingReadout } from "./training";
 
-export type GameMode = "cpu" | "versus";
+export type GameMode = "cpu" | "versus" | "training";
 
 export interface GameOptions {
   p1: string;
@@ -31,6 +32,8 @@ export interface GameOptions {
   stage?: StageTheme | "random";
   /** "high" adds bloom, grade and vignette; "low" is a plain render. */
   quality?: "high" | "low";
+  /** Only read when `mode` is "training". */
+  training?: TrainingOptions;
 }
 
 export interface PlayerHud {
@@ -58,6 +61,8 @@ export interface HudState {
   winnerName: string | null;
   winQuote: string | null;
   paused: boolean;
+  /** Present only in training mode, for the practice panel. */
+  training?: TrainingReadout;
 }
 
 export class GameSession {
@@ -67,6 +72,7 @@ export class GameSession {
   readonly gamepads = new GamepadReader();
   readonly sfx = new Sfx();
   private ai: AiController | null = null;
+  readonly training: TrainingRoom | null;
   private raf = 0;
   private last = 0;
   private acc = 0;
@@ -95,7 +101,12 @@ export class GameSession {
       options.stage === "random"
         ? randomTheme()
         : (options.stage ?? themeForFighter(options.p1));
-    if (options.mode === "cpu") this.ai = new AiController(options.aiLevel);
+    // Training keeps an AI around too, because "fight back" is one of the
+    // dummy settings.
+    if (options.mode === "cpu" || options.mode === "training") {
+      this.ai = new AiController(options.aiLevel);
+    }
+    this.training = options.mode === "training" ? new TrainingRoom(options.training ?? DEFAULT_TRAINING) : null;
   }
 
   /** The stage actually in use once "random" has been resolved. */
@@ -216,12 +227,18 @@ export class GameSession {
     let p2: RawInput;
     if (this.options.mode === "versus") {
       p2 = mergeInputs(this.keyboard.read(P2_KEYS, "p2"), this.gamepads.read(1));
+    } else if (this.training) {
+      // A null dummy input means "let the AI have it" - the fight-back setting.
+      p2 = this.training.dummyInput() ?? this.ai!.step(this.match, this.match.fighters[1], this.match.fighters[0]);
     } else {
       p2 = this.ai!.step(this.match, this.match.fighters[1], this.match.fighters[0]);
     }
     const phaseBefore = this.match.phase;
     const announcementBefore = this.match.phaseFrame;
     this.match.step([p1, p2]);
+    // Training rules run after the step so the hit is already scored: the
+    // readout can report what it did before the health is handed back.
+    this.training?.apply(this.match);
 
     for (const e of this.match.fx) this.sfx.play(e);
     if (this.match.phase !== phaseBefore) {
@@ -254,6 +271,9 @@ export class GameSession {
       state.announcement,
       state.matchWinner,
       state.paused,
+      state.training?.last?.name ?? "",
+      state.training?.comboHits ?? 0,
+      state.training?.comboDamage ?? 0,
       ...state.players.flatMap((p) => [
         Math.round(p.health),
         Math.round(p.meter),
@@ -314,6 +334,7 @@ export class GameSession {
       winnerName: winner !== null ? m.fighters[winner].def.name : null,
       winQuote: winner !== null ? m.fighters[winner].def.winQuote : null,
       paused: this.paused,
+      training: this.training?.readout,
     };
   }
 }

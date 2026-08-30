@@ -206,7 +206,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-white/15">
-            {(["cpu", "versus"] as GameMode[]).map((m) => (
+            {(["cpu", "versus", "training"] as GameMode[]).map((m) => (
               <button
                 key={m}
                 type="button"
@@ -215,12 +215,12 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
                   mode === m ? "bg-amber-400 text-black" : "text-white/70 hover:bg-white/10"
                 }`}
               >
-                {m === "cpu" ? "1P vs CPU" : "2 Players"}
+                {m === "cpu" ? "1P vs CPU" : m === "versus" ? "2 Players" : "Training"}
               </button>
             ))}
           </div>
 
-          {mode === "cpu" && (
+          {(mode === "cpu" || mode === "training") && (
             <select
               value={aiLevel}
               onChange={(e) => setAiLevel(e.target.value as AiLevel)}
@@ -234,6 +234,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             </select>
           )}
 
+          {mode !== "training" && (
           <select
             value={rounds}
             onChange={(e) => setRounds(Number(e.target.value))}
@@ -243,6 +244,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             <option value={2}>Best of 3</option>
             <option value={3}>Best of 5</option>
           </select>
+          )}
         </div>
       </div>
 
@@ -358,7 +360,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
           onClick={() => onStart({ p1, p2, mode, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] })}
           className="rounded-md bg-amber-400 px-8 py-3 text-lg font-black uppercase italic tracking-wide text-black transition hover:bg-amber-300"
         >
-          Fight
+          {mode === "training" ? "Train" : "Fight"}
         </button>
       </div>
     </div>

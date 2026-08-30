@@ -13,6 +13,7 @@
 import { AiController } from "./engine/ai";
 import { EMPTY_INPUT, GamepadReader, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
+import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
 import { getFighter, ROSTER } from "./fighters";
 import { applySkin, distinctSkin, getSkin } from "./skins";
 import type { FighterDef, MoveDef } from "./types";
@@ -481,6 +482,69 @@ function scriptFor(move: MoveDef): RawInput[] {
   check("pad: stick inside the dead zone does not", !read(pad([], [0.3, 0.3]))?.right);
   check("pad: a resting pad is a neutral input", !read(pad())?.A && !read(pad())?.left && !read(pad())?.down);
   check("pad: counts what is plugged in", withPad(pad(), () => reader.count()) === 1);
+}
+
+{
+  // Training mode. The point of it is that you can hold a button down forever
+  // and the world does not move on, so that is what gets asserted.
+  const room = new TrainingRoom({ ...DEFAULT_TRAINING, dummy: "stand" });
+  const m = newMatch("roman", "pirate");
+  const [player, dummy] = m.fighters;
+
+  // Frame data is read off the move's own hit windows.
+  const jab = getFighter("roman").moves.find((mv) => mv.id === "5A")!;
+  const fd = frameData(jab);
+  check("training: startup is the first active frame", fd.startup === 4, `${fd.startup}`);
+  check("training: active counts inclusively", fd.active === 3, `${fd.active}`);
+  check("training: recovery is what is left", fd.recovery === jab.duration - 6 - 1, `${fd.recovery}`);
+  const block = getFighter("roman").moves.find((mv) => mv.id === "block")!;
+  check("training: a move with no hitboxes has no startup", frameData(block).startup === null);
+
+  // The clock never runs out, so a practice session does not end on you.
+  m.timer = 3;
+  for (let i = 0; i < 30; i++) {
+    m.step([inp(), inp()]);
+    room.apply(m);
+  }
+  check("training: the round clock never expires", m.phase !== "roundEnd", m.phase);
+
+  // Health comes back, but only once they are out of hitstun - otherwise the
+  // bar snaps back mid-combo and you cannot read what the combo did.
+  player.x = -40;
+  dummy.x = 20;
+  let sawDamage = false;
+  for (let i = 0; i < 40; i++) {
+    m.step([inp({ C: i < 3 }), inp()]);
+    if (dummy.health < dummy.def.stats.health) sawDamage = true;
+    room.apply(m);
+  }
+  check("training: hits still land", sawDamage);
+  for (let i = 0; i < 120; i++) {
+    m.step([inp(), inp()]);
+    room.apply(m);
+  }
+  check("training: health refills once the dummy recovers", dummy.health === dummy.def.stats.health, `${dummy.health}`);
+  check("training: meter stays full", player.meter === 200, `${player.meter}`);
+  check("training: the readout remembers the last move", room.readout.last !== null, room.readout.last?.name ?? "none");
+
+  // The dummy settings produce the inputs they claim to.
+  const stand = new TrainingRoom({ ...DEFAULT_TRAINING, dummy: "stand" }).dummyInput();
+  check("training: the standing dummy presses nothing", !!stand && !stand.down && !stand.S && !stand.up);
+  check("training: the crouching dummy holds down", new TrainingRoom({ ...DEFAULT_TRAINING, dummy: "crouch" }).dummyInput()?.down === true);
+  check("training: the blocking dummy holds guard", new TrainingRoom({ ...DEFAULT_TRAINING, dummy: "block" }).dummyInput()?.S === true);
+  check("training: fight-back hands over to the AI", new TrainingRoom({ ...DEFAULT_TRAINING, dummy: "cpu" }).dummyInput() === null);
+
+  // The jumping dummy has to actually leave the ground, and has to stop, or
+  // there is no window to anti-air it.
+  const hopper = new TrainingRoom({ ...DEFAULT_TRAINING, dummy: "jump" });
+  let pressed = 0;
+  for (let i = 0; i < 46; i++) if (hopper.dummyInput()?.up) pressed++;
+  check("training: the jumping dummy hops on a loop", pressed > 0 && pressed < 46, `${pressed}/46 frames`);
+
+  // Reset puts them back on their marks and lets play continue.
+  room.reset(m);
+  check("training: reset restores full health", m.fighters[1].health === m.fighters[1].def.stats.health);
+  check("training: reset leaves the round playable", m.phase === "fight", m.phase);
 }
 
 // ---------------------------------------------------------------------------

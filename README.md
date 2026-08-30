@@ -76,6 +76,22 @@ Every fighter has five specials on motion inputs — `↓↘→` for quarter cir
 `→↓↘` for dragon punches — plus EX versions on the Guard button for 50 meter and
 a super for 100.
 
+## Training mode
+
+Pick **Training** on the select screen. It is a room for holding a button down
+and seeing what the move actually does:
+
+- **Frame data for whatever you just threw** — startup, active and recovery,
+  read off the move's own hitbox windows, plus its total length and damage.
+- **A dummy that behaves** — stand, crouch, jump on a loop, hold guard, or
+  fight back with the normal AI at the difficulty you picked.
+- **Nothing runs out** — health refills once the dummy leaves hitstun (not
+  during, so you can still read what a combo did), meter and character
+  resources stay full, and the round clock never expires.
+- **`R` resets** both fighters to their starting marks.
+
+`F2` draws the hitboxes, in training or a real match.
+
 ## Building it yourself
 
 ```bash
