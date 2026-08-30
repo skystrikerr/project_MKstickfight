@@ -44,4 +44,10 @@ in this file. A track you merely have a copy of is not one you can ship.
 
 ## Tracks in this build
 
-_None yet._
+| File            | Cue    | Length | Source                                  |
+| --------------- | ------ | ------ | --------------------------------------- |
+| `ambient-1.mp3` | `menu` | 2:00   | Supplied by the project owner - **attribution and licence still to be filled in** |
+
+`ambient-1.mp3` is wired to `menu` only. Because a cue with no track leaves
+whatever is playing alone, it carries through character select and into the
+match rather than cutting out. Giving `fight` its own track takes over there.

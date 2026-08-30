@@ -631,6 +631,20 @@ function scriptFor(move: MoveDef): RawInput[] {
     }
   }
 
+  // A cue asked for before the page has had its gesture has to actually start
+  // once the gesture arrives. `play` ignores the cue it is already on, and the
+  // held cue is that cue, so unlocking has to clear it first - getting this
+  // wrong means the title music never plays at all, which is what shipped for
+  // about ten minutes.
+  const held = new Music();
+  const first = (Object.keys(TRACKS) as MusicCue[])[0];
+  if (first) {
+    held.play(first);
+    check("music: a cue asked for before the gesture is held", held.started === null);
+    held.unlock();
+    check("music: unlocking starts the held cue", held.started !== null, `${held.started}`);
+  }
+
   // The whole point is that the game runs with no music at all. Nothing here
   // has an `Audio` constructor, which is the same situation as a track that
   // fails to load.

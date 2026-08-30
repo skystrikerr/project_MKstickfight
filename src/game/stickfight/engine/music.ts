@@ -28,7 +28,13 @@ export interface TrackDef {
  *
  * See `public/music/README.md` for how to add one.
  */
-export const TRACKS: Partial<Record<MusicCue, TrackDef | TrackDef[]>> = {};
+export const TRACKS: Partial<Record<MusicCue, TrackDef | TrackDef[]>> = {
+  // One ambient bed, wired to the title only. A cue with no track of its own
+  // leaves whatever is playing alone, so this carries through select and into
+  // the match without ever restarting. Give `fight` its own track and it will
+  // take over there instead.
+  menu: { file: "ambient-1.mp3" },
+};
 
 // Vite rewrites this at build time; the fallback keeps the module importable
 // from node (the self-tests) where `import.meta.env` does not exist.
@@ -57,6 +63,8 @@ export class Music {
   private fade: ReturnType<typeof setInterval> | null = null;
   /** The cue currently playing, so repeated requests do not restart the track. */
   cue: MusicCue | null = null;
+  /** The file the deck was last pointed at. Read by the self-tests. */
+  started: string | null = null;
   muted = false;
   volume = 0.4;
   /** Set once a real gesture has happened; before that, play requests are held. */
@@ -78,11 +86,13 @@ export class Music {
   unlock() {
     if (this.unlocked) return;
     this.unlocked = true;
-    if (this.pending) {
-      const cue = this.pending;
-      this.pending = null;
-      this.play(cue);
-    }
+    const cue = this.pending;
+    if (!cue) return;
+    this.pending = null;
+    // `play` ignores the cue it is already on, and the held cue *is* the one
+    // it is already on - so clear it, or the deferred track never starts.
+    this.cue = null;
+    this.play(cue);
   }
 
   /**
@@ -103,10 +113,12 @@ export class Music {
       return;
     }
 
+    const src = `${BASE}music/${track.file}`;
+    this.started = src;
     const next = this.active === 0 ? 1 : 0;
     const el = this.deck(next);
     if (!el) return;
-    el.src = `${BASE}music/${track.file}`;
+    el.src = src;
     el.loop = track.loop ?? cue !== "victory";
     el.currentTime = 0;
     el.volume = 0;
@@ -123,6 +135,7 @@ export class Music {
   stop() {
     this.cue = null;
     this.pending = null;
+    this.started = null;
     this.crossfade(-1, 0);
   }
 
