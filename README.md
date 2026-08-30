@@ -43,6 +43,12 @@ exists, the warning is unavoidable for any independent release.
 The game is fully offline once you have it. There is no server, no account and
 no network traffic of any kind.
 
+### Versions
+
+`0.x` means the game has not reached early access yet. `1.0` is reserved for
+the early-access release, and nothing before it should be read as finished.
+The current version is **0.2**.
+
 ## Controls
 
 Two players share one keyboard, or plug in up to two gamepads — pads are
@@ -110,7 +116,7 @@ shell.
 **To get a Windows `.exe`:** push a tag and let CI build it.
 
 ```bash
-git tag v1.0.0 && git push origin v1.0.0
+git tag v0.2.0 && git push origin v0.2.0
 ```
 
 `.github/workflows/release.yml` builds on a real Windows runner and attaches
@@ -122,9 +128,9 @@ binaries as downloadable run artifacts instead of publishing a release.
 
 ```bash
 npm run electron:dev   # run the shell against the Vite dev server
-npm run dist:win       # -> release/Stick Fighter-1.0.0-x64.exe   (needs Windows)
-npm run dist:linux     # -> release/Stick Fighter-1.0.0-x64.AppImage
-npm run dist:mac       # -> release/Stick Fighter-1.0.0-x64.dmg   (needs macOS)
+npm run dist:win       # -> release/Stick Fighter-0.2.0-x64.exe   (needs Windows)
+npm run dist:linux     # -> release/Stick Fighter-0.2.0-x64.AppImage
+npm run dist:mac       # -> release/Stick Fighter-0.2.0-x64.dmg   (needs macOS)
 ```
 
 Cross-building Windows from Linux needs Wine and is not worth the trouble — the
