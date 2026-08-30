@@ -8,7 +8,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const IRON = "#b9c0c8";
 const LEATHER = "#6d4a2c";
@@ -69,6 +69,12 @@ export const VIKING: FighterDef = {
     scale: 1.03,
   },
   stance: STANCE,
+  // A buckler is too small to hide behind, so it gets punched out to meet
+  // the blow instead, axe still cocked over the shoulder.
+  clips: guardClips({
+    high: { torso: 4, head: -8, shoulderF: 18, elbowF: 126, shoulderB: 168, elbowB: -84, weaponBack: 128, hipF: 15, kneeF: 22, hipB: -20, kneeB: 34, offX: -3 },
+    low: { torso: 10, head: -6, shoulderF: 6, elbowF: 122, shoulderB: 160, elbowB: -80, weaponBack: 128, hipF: 32, kneeF: 74, hipB: -22, kneeB: 84, offX: -3 },
+  }),
   resource: {
     name: "Fury",
     max: 100,

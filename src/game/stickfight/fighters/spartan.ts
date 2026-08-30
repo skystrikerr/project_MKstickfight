@@ -7,7 +7,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const BRONZE = "#c98f3a";
 const CRIMSON = "#9e2b2b";
@@ -67,6 +67,13 @@ export const SPARTAN: FighterDef = {
     scale: 1.04,
   },
   stance: STANCE,
+  // Behind the aspis: elbow tucked to the ribs, shield across the body,
+  // spear withdrawn overhand. The head stays above the rim - that is what the
+  // helmet is for.
+  clips: guardClips({
+    high: { torso: 4, head: -9, shoulderF: -10, elbowF: 116, shoulderB: 146, elbowB: -96, weaponBack: 40, hipF: 14, kneeF: 22, hipB: -20, kneeB: 34, offX: -3 },
+    low: { torso: 10, head: -6, shoulderF: -26, elbowF: 122, shoulderB: 138, elbowB: -92, weaponBack: 40, hipF: 32, kneeF: 74, hipB: -22, kneeB: 84, offX: -3 },
+  }),
   resource: {
     name: "Aegis",
     max: 100,
@@ -235,9 +242,15 @@ export const SPARTAN: FighterDef = {
       notation: "B",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(5, { ...STANCE, shoulderB: 148, elbowB: -50, weaponBack: 46, torso: -6, offX: -3 }),
-        kf(9, { ...STANCE, shoulderB: 96, elbowB: -12, weaponBack: 12, torso: 18, hipF: 30, kneeF: 20, offX: 8 }, "out"),
-        kf(16, { ...STANCE, shoulderB: 104, elbowB: -18, weaponBack: 18, torso: 14, offX: 6 }),
+        // Cock: hand drawn back past the ear, elbow folded tight, weight on the
+        // back leg. The point stays level - this is a thrust, not a chop.
+        kf(5, { ...STANCE, shoulderB: 124, elbowB: -76, weaponBack: 40, torso: -10, hipB: -28, kneeB: 42, offX: -6 }, "inOut"),
+        // Stab: the elbow locks out and the lunge carries the point forward.
+        kf(9, { ...STANCE, shoulderB: 102, elbowB: 2, weaponBack: 2, torso: 20, hipF: 36, kneeF: 18, hipB: -20, kneeB: 30, offX: 12 }, "out"),
+        // Held at full extension while the point is live.
+        kf(13, { ...STANCE, shoulderB: 100, elbowB: 4, weaponBack: 2, torso: 18, hipF: 34, kneeF: 18, offX: 11 }),
+        // The arm recovers before the feet do.
+        kf(18, { ...STANCE, shoulderB: 112, elbowB: -40, weaponBack: 24, torso: 10, offX: 4 }, "inOut"),
         kf(24, { ...STANCE }),
       ],
     },
@@ -609,9 +622,16 @@ export const SPARTAN: FighterDef = {
       notation: "↓↙← + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(8, { ...STANCE, torso: -14, hipF: -22, kneeF: 74, hipB: -28, kneeB: 46, shoulderF: 40, elbowF: 60, offX: -4 }, "inOut"),
-        kf(14, { ...STANCE, torso: 26, hipF: 96, kneeF: 4, hipB: -30, kneeB: 34, shoulderF: 20, elbowF: 30, shoulderB: 150, elbowB: -50, offX: 8 }, "out"),
-        kf(26, { ...STANCE, torso: 18, hipF: 60, kneeF: 30, hipB: -22, kneeB: 40, offX: 4 }, "inOut"),
+        // Chamber: knee driven up to the chest, weight settled on the back leg,
+        // shield hauled across so the kick comes out from behind it.
+        kf(8, { ...STANCE, torso: -6, hipF: 78, kneeF: 112, hipB: -16, kneeB: 40, shoulderF: 34, elbowF: 78, shoulderB: 142, elbowB: -62, offX: -5 }, "inOut"),
+        // Boot: the leg snaps straight and the body counterweights backwards.
+        // Leaning into a push kick is what made this look like a stumble.
+        kf(14, { ...STANCE, torso: -24, head: 8, hipF: 112, kneeF: 6, hipB: -34, kneeB: 26, shoulderF: 4, elbowF: 24, shoulderB: 168, elbowB: -84, weaponBack: 46, offX: 6 }, "out"),
+        // Held out at the top of the extension for a beat.
+        kf(19, { ...STANCE, torso: -22, head: 7, hipF: 108, kneeF: 10, hipB: -32, kneeB: 28, shoulderF: 6, elbowF: 26, shoulderB: 164, elbowB: -80, weaponBack: 44, offX: 5 }),
+        // The leg comes down and the shield comes back to cover.
+        kf(28, { ...STANCE, torso: 4, hipF: 46, kneeF: 44, hipB: -24, kneeB: 38, shoulderF: 50, elbowF: 62, offX: 2 }, "inOut"),
         kf(44, { ...STANCE }),
       ],
     },

@@ -14,7 +14,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const OCHRE = "#c8722c";
 const ROBE = "#6d2f14";
@@ -78,6 +78,11 @@ export const SHAOLIN: FighterDef = {
     scale: 1,
   },
   stance: STANCE,
+  // The staff comes up across the body and he blocks on the shaft.
+  clips: guardClips({
+    high: { torso: 0, head: -6, shoulderF: 126, elbowF: 34, weapon: -34, shoulderB: 30, elbowB: 116, hipF: 16, kneeF: 24, hipB: -18, kneeB: 34, offX: -2 },
+    low: { torso: 8, head: -5, shoulderF: 118, elbowF: 38, weapon: -30, shoulderB: 34, elbowB: 112, hipF: 34, kneeF: 76, hipB: -20, kneeB: 86, offX: -2 },
+  }),
   resource: {
     name: "Chi",
     max: 100,

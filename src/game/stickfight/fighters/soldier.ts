@@ -8,7 +8,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const OLIVE = "#4f5d3a";
 const KHAKI = "#8d8560";
@@ -69,6 +69,11 @@ export const SOLDIER: FighterDef = {
     scale: 1,
   },
   stance: STANCE,
+  // High port: the rifle taken across the body and used like a quarterstaff.
+  clips: guardClips({
+    high: { torso: 0, head: -6, shoulderB: 34, elbowB: 92, weaponBack: -6, shoulderF: 116, elbowF: 32, hipF: 13, kneeF: 20, hipB: -18, kneeB: 32, offX: -2 },
+    low: { torso: 8, head: -5, shoulderB: 40, elbowB: 86, weaponBack: -6, shoulderF: 110, elbowF: 36, hipF: 32, kneeF: 72, hipB: -20, kneeB: 82, offX: -2 },
+  }),
   resource: {
     name: "Rounds",
     max: 20,

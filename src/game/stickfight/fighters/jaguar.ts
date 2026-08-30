@@ -13,7 +13,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const PELT = "#d9a441";
 const PELT_DARK = "#a97425";
@@ -78,6 +78,11 @@ export const JAGUAR: FighterDef = {
     scale: 0.98,
   },
   stance: STANCE,
+  // Macuahuitl held across the face with the off hand braced behind it.
+  clips: guardClips({
+    high: { torso: 2, head: -7, shoulderF: 24, elbowF: 126, weapon: 52, shoulderB: 16, elbowB: 120, hipF: 14, kneeF: 24, hipB: -18, kneeB: 36, offX: -2 },
+    low: { torso: 10, head: -5, shoulderF: 32, elbowF: 114, weapon: 48, shoulderB: 22, elbowB: 114, hipF: 34, kneeF: 76, hipB: -22, kneeB: 86, offX: -2 },
+  }),
   resource: {
     name: "Obsidian",
     max: 6,

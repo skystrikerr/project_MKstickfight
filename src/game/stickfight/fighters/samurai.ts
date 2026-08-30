@@ -7,7 +7,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const STEEL = "#e2e8f0";
 const LACQUER = "#1d2733";
@@ -68,6 +68,12 @@ export const SAMURAI: FighterDef = {
     scale: 1,
   },
   stance: STANCE,
+  // Hilt above the head, blade angled down across the line - a receiving
+  // guard, not a static block.
+  clips: guardClips({
+    high: { torso: 0, head: -6, shoulderF: 134, elbowF: 26, weapon: 96, shoulderB: 108, elbowB: 44, hipF: 13, kneeF: 20, hipB: -18, kneeB: 32, offX: -2 },
+    low: { torso: 8, head: -5, shoulderF: 126, elbowF: 30, weapon: 88, shoulderB: 102, elbowB: 46, hipF: 32, kneeF: 72, hipB: -20, kneeB: 82, offX: -2 },
+  }),
   resource: {
     name: "Ki",
     max: 3,

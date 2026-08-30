@@ -6,7 +6,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const LEATHER = "#8a5a2b";
 const PONCHO = "#b2543a";
@@ -66,6 +66,12 @@ export const WESTERN: FighterDef = {
     scale: 1,
   },
   stance: STANCE,
+  // No shield and no blade worth parrying with - the forearms go up and
+  // he eats it.
+  clips: guardClips({
+    high: { torso: 0, head: -6, shoulderF: 32, elbowF: 132, weapon: -30, shoulderB: 16, elbowB: 136, hipF: 12, kneeF: 20, hipB: -16, kneeB: 30, offX: -2 },
+    low: { torso: 8, head: -5, shoulderF: 38, elbowF: 124, weapon: -30, shoulderB: 22, elbowB: 128, hipF: 32, kneeF: 72, hipB: -18, kneeB: 82, offX: -2 },
+  }),
   resource: {
     name: "Rounds",
     max: 6,

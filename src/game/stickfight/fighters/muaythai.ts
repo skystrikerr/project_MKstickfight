@@ -8,7 +8,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const SILK = "#c8352f";
 const GOLD = "#e0b13a";
@@ -68,6 +68,12 @@ export const MUAYTHAI: FighterDef = {
     scale: 0.99,
   },
   stance: STANCE,
+  // Thai high guard: forearms vertical, fists at the cheeks, elbows in
+  // front of the ribs.
+  clips: guardClips({
+    high: { torso: -2, head: -7, shoulderF: 34, elbowF: 142, shoulderB: 18, elbowB: 146, hipF: 12, kneeF: 22, hipB: -16, kneeB: 32, offX: -2 },
+    low: { torso: 8, head: -5, shoulderF: 40, elbowF: 132, shoulderB: 24, elbowB: 138, hipF: 32, kneeF: 74, hipB: -20, kneeB: 84, offX: -2 },
+  }),
   resource: {
     name: "Rhythm",
     max: 100,

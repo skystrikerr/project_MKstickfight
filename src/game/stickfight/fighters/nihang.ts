@@ -14,7 +14,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const NIHANG_BLUE = "#1f3f7a";
 const DEEP_BLUE = "#152c57";
@@ -78,6 +78,11 @@ export const NIHANG: FighterDef = {
     scale: 1.02,
   },
   stance: STANCE,
+  // Tulwar in a hanging guard with the chakram hand tucked in under it.
+  clips: guardClips({
+    high: { torso: 0, head: -6, shoulderF: 136, elbowF: 28, weapon: -104, shoulderB: 24, elbowB: 122, hipF: 16, kneeF: 22, hipB: -18, kneeB: 34, offX: -2 },
+    low: { torso: 8, head: -5, shoulderF: 128, elbowF: 32, weapon: -98, shoulderB: 30, elbowB: 116, hipF: 34, kneeF: 76, hipB: -20, kneeB: 86, offX: -2 },
+  }),
   resource: {
     name: "Chakram",
     max: 5,

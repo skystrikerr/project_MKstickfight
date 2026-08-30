@@ -9,7 +9,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const HIDE = "#efe8dc";
 const HIDE_DARK = "#3a3229";
@@ -73,6 +73,12 @@ export const ZULU: FighterDef = {
     scale: 1.02,
   },
   stance: STANCE,
+  // The isihlangu covers him from head to knee; the iklwa waits behind it,
+  // which is exactly how the shield and the stabbing spear were meant to work.
+  clips: guardClips({
+    high: { torso: 4, head: -8, shoulderB: -12, elbowB: 100, shoulderF: 6, elbowF: 96, weapon: 58, hipF: 15, kneeF: 24, hipB: -18, kneeB: 34, offX: -3 },
+    low: { torso: 10, head: -6, shoulderB: -26, elbowB: 108, shoulderF: 10, elbowF: 92, weapon: 58, hipF: 32, kneeF: 74, hipB: -20, kneeB: 84, offX: -3 },
+  }),
   resource: {
     name: "Impi",
     max: 100,

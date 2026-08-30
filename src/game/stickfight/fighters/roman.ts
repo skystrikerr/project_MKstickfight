@@ -6,7 +6,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const RED = "#c0392b";
 const BRONZE = "#d9a441";
@@ -68,6 +68,12 @@ export const ROMAN: FighterDef = {
     scale: 1.02,
   },
   stance: STANCE,
+  // The scutum does the work. Shield up and square, gladius withdrawn to
+  // the hip where it can come out again without moving the shield.
+  clips: guardClips({
+    high: { torso: 3, head: -8, shoulderB: -12, elbowB: 102, shoulderF: 26, elbowF: -14, weapon: 74, hipF: 13, kneeF: 20, hipB: -18, kneeB: 32, offX: -3 },
+    low: { torso: 9, head: -6, shoulderB: -26, elbowB: 110, shoulderF: 30, elbowF: -18, weapon: 74, hipF: 32, kneeF: 72, hipB: -20, kneeB: 82, offX: -3 },
+  }),
   resource: {
     name: "Pila",
     max: 3,

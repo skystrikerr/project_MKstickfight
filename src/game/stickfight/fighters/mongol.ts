@@ -9,7 +9,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const FELT = "#5c6f4a";
 const DEEL = "#7d5a2e";
@@ -74,6 +74,11 @@ export const MONGOL: FighterDef = {
     scale: 1,
   },
   stance: STANCE,
+  // Nothing to block with but the bow, so the stave comes up across the face.
+  clips: guardClips({
+    high: { torso: -2, head: -6, shoulderF: 24, elbowF: 118, weapon: 6, shoulderB: 14, elbowB: 132, hipF: 12, kneeF: 22, hipB: -20, kneeB: 34, offX: -2 },
+    low: { torso: 8, head: -5, shoulderF: 30, elbowF: 110, weapon: 6, shoulderB: 20, elbowB: 126, hipF: 32, kneeF: 74, hipB: -22, kneeB: 84, offX: -2 },
+  }),
   resource: {
     name: "Quiver",
     max: 6,

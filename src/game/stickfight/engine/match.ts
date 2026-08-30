@@ -441,6 +441,10 @@ export class Match {
       attacker.addResource(attacker.def.resource?.gainOnBlocked ?? 0);
       attacker.hitstop = Math.max(2, (hit.hitstop ?? 6) - 2);
       defender.hitstop = Math.max(2, (hit.hitstop ?? 6) - 2);
+      defender.guardShove = Math.min(
+        COMBAT.guardShoveMax,
+        COMBAT.guardShoveBase + hit.damage * COMBAT.guardShovePerDamage,
+      );
       this.shake = Math.max(this.shake, 1.4);
       this.pushFx({ kind: "block", x: contact.x, y: contact.y, scale: 0.9 });
 

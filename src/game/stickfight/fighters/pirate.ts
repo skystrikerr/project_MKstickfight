@@ -6,7 +6,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const COAT = "#2b3a67";
 const GOLD = "#e0b13a";
@@ -65,6 +65,11 @@ export const PIRATE: FighterDef = {
     scale: 0.99,
   },
   stance: STANCE,
+  // Cutlass in a hanging guard, pistol hand tucked in behind the elbow.
+  clips: guardClips({
+    high: { torso: 0, head: -6, shoulderF: 132, elbowF: 28, weapon: -96, shoulderB: 20, elbowB: 126, hipF: 16, kneeF: 22, hipB: -18, kneeB: 32, offX: -2 },
+    low: { torso: 8, head: -5, shoulderF: 124, elbowF: 32, weapon: -90, shoulderB: 26, elbowB: 120, hipF: 33, kneeF: 74, hipB: -20, kneeB: 84, offX: -2 },
+  }),
   resource: {
     name: "Powder",
     max: 2,

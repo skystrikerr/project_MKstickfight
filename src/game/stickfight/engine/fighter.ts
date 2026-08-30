@@ -104,6 +104,21 @@ export class Fighter {
   hitstop = 0;
   hitstun = 0;
   blockstun = 0;
+  /**
+   * Frames spent continuously guarding. The guard clips run off this instead
+   * of `stateFrame`, because taking a blocked hit means `setState("blockstun")`
+   * and that zeroes `stateFrame` - which used to drop the guard and re-raise it
+   * between every hit of a blockstring.
+   */
+  guardHold = 0;
+  /**
+   * Frames since the guard was last up. Blockstun ends by dropping to `idle`
+   * for a frame before the guard check runs again, so the hold survives a
+   * short gap - otherwise the arms flicker back down between blocked hits.
+   */
+  private guardGap = 0;
+  /** Recoil from the last blocked hit, 0..1.5, decaying back to 0. */
+  guardShove = 0;
   /** Frames left before a knocked-down fighter can get up. */
   downTimer = 0;
 
@@ -185,6 +200,16 @@ export class Fighter {
       this.state === "ko" ||
       this.state === "win" ||
       this.state === "intro"
+    );
+  }
+
+  /** Holding a guard, or being shoved back inside one. */
+  guarding(): boolean {
+    return (
+      this.state === "block" ||
+      this.state === "blockLow" ||
+      this.state === "blockAir" ||
+      this.state === "blockstun"
     );
   }
 
@@ -344,6 +369,13 @@ export class Fighter {
     }
 
     this.stateFrame++;
+    if (this.guarding()) {
+      this.guardHold++;
+      this.guardGap = 0;
+    } else if (++this.guardGap > COMBAT.guardHoldGrace) {
+      this.guardHold = 0;
+    }
+    if (this.guardShove > 0) this.guardShove = Math.max(0, this.guardShove - COMBAT.guardShoveDecay);
     this.regenResource();
     if (this.guard < COMBAT.maxGuard) this.guard = Math.min(COMBAT.maxGuard, this.guard + COMBAT.guardRegen);
 
@@ -972,7 +1004,32 @@ export class Fighter {
     const clipName = this.clipForState();
     const clip = clipFor(clipName, clips);
     const frame = this.clipFrame(clipName);
-    return { pose: sampleClip(clip, frame, base), grounded: this.grounded && clipName !== "backdash" };
+    const pose = sampleClip(clip, frame, base);
+    if (this.guardShove > 0 && this.guarding()) this.applyGuardShove(pose);
+    return { pose, grounded: this.grounded && clipName !== "backdash" };
+  }
+
+  /**
+   * Blocked hits shove the guard rather than replacing it: the body gives
+   * ground, the elbows fold in and the head snaps back, all decaying over the
+   * next few frames. Doing it here rather than as its own clip means a fighter
+   * with a custom guard gets the reaction for free.
+   */
+  private applyGuardShove(pose: Pose) {
+    const s = this.guardShove;
+    const add = (key: keyof Pose, d: number) => {
+      pose[key] = (pose[key] ?? 0) + d * s;
+    };
+    add("offX", -6);
+    add("torso", -7);
+    add("head", -5);
+    add("shoulderF", 6);
+    add("shoulderB", 5);
+    add("elbowF", 11);
+    add("elbowB", 9);
+    add("kneeF", 7);
+    add("kneeB", 6);
+    pose.squash = (pose.squash ?? 1) - 0.03 * s;
   }
 
   private clipForState(): ClipName {
@@ -1026,6 +1083,10 @@ export class Fighter {
 
   private clipFrame(name: ClipName): number {
     switch (name) {
+      case "blockHigh":
+      case "blockLow":
+      case "blockAir":
+        return this.guardHold;
       case "idle":
       case "walkF":
       case "walkB":

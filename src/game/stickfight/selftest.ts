@@ -14,7 +14,10 @@ import { AiController } from "./engine/ai";
 import { EMPTY_INPUT, GamepadReader, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
 import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
+import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
+import { attachTransform } from "./render/rig";
+import { buildSkeleton, sampleClip } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
 import type { FighterDef, MoveDef } from "./types";
 
@@ -545,6 +548,72 @@ function scriptFor(move: MoveDef): RawInput[] {
   room.reset(m);
   check("training: reset restores full health", m.fighters[1].health === m.fighters[1].def.stats.health);
   check("training: reset leaves the round playable", m.phase === "fight", m.phase);
+}
+
+// ---------------------------------------------------------------------------
+// Guards
+// ---------------------------------------------------------------------------
+{
+  const SHIELDS = /shield|aspis|buckler|isihlangu/i;
+
+  for (const def of ROSTER) {
+    check(`${def.id}: guards are authored, not inherited`, !!def.clips?.blockHigh && !!def.clips?.blockLow);
+
+    for (const clipName of ["blockHigh", "blockLow"] as const) {
+      const pose = sampleClip(clipFor(clipName, def.clips), 8, def.stance);
+      const sk = buildSkeleton(pose, true, 1);
+      // Whatever they guard with has to be in front of them. A guard that ends
+      // up behind the fighter is the bug this replaced.
+      const lead = Math.max(sk.handF.x, sk.handB.x);
+      check(`${def.id}: ${clipName} keeps the hands in front`, lead > 6, `lead hand x=${lead.toFixed(1)}`);
+
+      const shield = def.props.find((prop) => SHIELDS.test(prop.id));
+      if (!shield) continue;
+      const t = attachTransform(sk, shield.attach);
+      const main = shield.parts.reduce((a, b) =>
+        Math.max(...b.size.map(Math.abs)) > Math.max(...a.size.map(Math.abs)) ? b : a,
+      );
+      const a = t.rot * (Math.PI / 180);
+      const [ox, oy] = main.pos ?? [0, 0];
+      const cx = t.x + Math.cos(a) * ox - Math.sin(a) * oy;
+      const cy = t.y + Math.sin(a) * ox + Math.cos(a) * oy;
+      check(`${def.id}: ${clipName} puts the shield in front of the body`, cx > 8, `shield x=${cx.toFixed(1)}`);
+      check(`${def.id}: ${clipName} holds the shield at body height`, cy > 35 && cy < 95, `shield y=${cy.toFixed(1)}`);
+      // The tall shields read as shields only while they stand upright.
+      if (/isihlangu|^shield$/i.test(shield.id)) {
+        const tilt = Math.abs((((t.rot % 360) + 540) % 360) - 180);
+        check(`${def.id}: ${clipName} keeps the shield upright`, tilt < 30, `tilt=${tilt.toFixed(1)}`);
+      }
+    }
+  }
+
+  // A blockstring must not drop the guard between hits. `setState("blockstun")`
+  // zeroes stateFrame, so the guard clips run off `guardHold` instead.
+  const m = newMatch("roman", "spartan");
+  const def = m.fighters[1];
+  // Close the gap first - a blockstring at round-start spacing whiffs.
+  run(m, 60, () => inp({ right: true }), () => inp({ S: true }));
+  const beforeHold = def.guardHold;
+  let held = true;
+  let sawShove = false;
+  let sawBlock = false;
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ B: i % 26 === 0 }), inp({ S: true })]);
+    if (def.state === "blockstun") sawBlock = true;
+    if (def.guardShove > 0) sawShove = true;
+    if (def.guardHold < beforeHold) held = false;
+  }
+  check("guard: a blockstring lands", sawBlock);
+  check("guard: the guard does not drop between blocked hits", held, `hold=${def.guardHold}`);
+  check("guard: a blocked hit shoves the guard", sawShove);
+
+  // ...and the shove decays instead of sticking.
+  for (let i = 0; i < 40; i++) m.step([inp(), inp({ S: true })]);
+  check("guard: the shove settles back to the guard", def.guardShove === 0, `${def.guardShove}`);
+
+  // Letting go of guard clears the hold, so the next block raises the arms again.
+  for (let i = 0; i < 12; i++) m.step([inp(), inp()]);
+  check("guard: dropping the guard resets the raise", def.guardHold === 0, `${def.guardHold}`);
 }
 
 // ---------------------------------------------------------------------------

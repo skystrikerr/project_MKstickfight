@@ -9,7 +9,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const CLOTH = "#2b3350";
 const DARK = "#1b2138";
@@ -75,6 +75,12 @@ export const NINJA: FighterDef = {
     scale: 0.975,
   },
   stance: STANCE,
+  // The reverse grip already lays the tanto along her forearm, so guarding
+  // is just raising the arm and letting the blade cover it.
+  clips: guardClips({
+    high: { torso: 0, head: -6, shoulderB: 16, elbowB: 144, weaponBack: 168, shoulderF: 30, elbowF: 122, crouch: 0.1, hipF: 16, kneeF: 24, hipB: -20, kneeB: 34, offX: -2 },
+    low: { torso: 8, head: -5, shoulderB: 24, elbowB: 134, weaponBack: 168, shoulderF: 36, elbowF: 114, hipF: 34, kneeF: 76, hipB: -22, kneeB: 86, offX: -2 },
+  }),
   resource: {
     name: "Kage",
     max: 3,

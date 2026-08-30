@@ -54,6 +54,13 @@ export const COMBAT = {
   maxGuard: 100,
   guardRegen: 0.35,
   guardBreakStun: 60,
+  // Recoil on a blocked hit. The shove is a decaying multiplier on the guard
+  // pose rather than an animation, so custom guards get it for free.
+  guardShoveBase: 0.45,
+  guardShovePerDamage: 0.011,
+  guardShoveMax: 1.5,
+  guardShoveDecay: 0.11,
+  guardHoldGrace: 4,
   /**
    * Knockback scaling. A hit's authored `pushX` is the shove a *mid-weight*
    * blow gives; the multiplier below reads the damage on top of that, so a jab

@@ -3,7 +3,7 @@
  * a wall of object literals, plus the universal moves every fighter gets.
  */
 
-import type { Box, Ease, HitDef, Keyframe, MoveDef, Pose } from "../types";
+import type { Box, ClipDef, Ease, HitDef, Keyframe, MoveDef, Pose } from "../types";
 
 /** Box in facing space: x forward from the fighter, y up from the ground. */
 export const bx = (x: number, y: number, w: number, h: number): Box => ({ x, y, w, h });
@@ -248,4 +248,66 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       ],
     },
   ];
+}
+
+// ---------------------------------------------------------------------------
+// Guards
+// ---------------------------------------------------------------------------
+
+/**
+ * A fighter's three guard poses, written as absolute angles.
+ *
+ * The shared block clips are additive deltas on top of the stance, which means
+ * a fighter who already holds their hands high ends up with the arms folded
+ * into their own head, and a fighter with a shield covers with the wrong arm.
+ * Authoring the guard per fighter fixes both: everyone blocks with the thing
+ * they are actually carrying.
+ */
+export interface Guard {
+  /** Standing guard, held while blocking high. */
+  high: Pose;
+  /** Crouching guard. `crouch` is filled in if the pose leaves it out. */
+  low: Pose;
+  /** Airborne guard. Defaults to the standing guard with the legs tucked. */
+  air?: Pose;
+}
+
+/** Nudges a guard pose a little tighter, for the overshoot on the way in. */
+function tighten(p: Pose, k: number): Pose {
+  const bump = (v: number | undefined, d: number) => (v === undefined ? undefined : v + d * k);
+  return {
+    ...p,
+    torso: bump(p.torso, -4),
+    head: bump(p.head, -2),
+    shoulderF: bump(p.shoulderF, 5),
+    shoulderB: bump(p.shoulderB, 4),
+    elbowF: bump(p.elbowF, 7),
+    elbowB: bump(p.elbowB, 6),
+    offX: (p.offX ?? 0) - 2 * k,
+  };
+}
+
+/**
+ * Builds the three guard clips from a fighter's authored guard.
+ *
+ * The shape is the same for everyone so blocking feels consistent across the
+ * roster: the guard snaps up over four frames, overshoots slightly, then
+ * settles. Being hit while guarding does not restart these clips - the recoil
+ * is a separate decaying shove, so a blockstring keeps the arms up.
+ */
+export function guardClips(g: Guard): { blockHigh: ClipDef; blockLow: ClipDef; blockAir: ClipDef } {
+  const low: Pose = { crouch: 1, ...g.low };
+  const air: Pose = g.air ?? { ...g.high, free: 1, hipF: 34, kneeF: 52, hipB: -22, kneeB: 46 };
+  air.free = 1;
+
+  const clip = (p: Pose, raise: number): ClipDef => ({
+    length: 8,
+    frames: [
+      { t: 0, add: {}, ease: "out" },
+      { t: raise, p: tighten(p, 1) },
+      { t: 8, p, ease: "inOut" },
+    ],
+  });
+
+  return { blockHigh: clip(g.high, 4), blockLow: clip(low, 4), blockAir: clip(air, 3) };
 }

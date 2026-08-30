@@ -14,7 +14,7 @@
  */
 
 import type { FighterDef } from "../types";
-import { bx, hit, kf, universalMoves } from "./builders";
+import { bx, guardClips, hit, kf, universalMoves } from "./builders";
 
 const STEEL = "#c6cfd8";
 const DARK_STEEL = "#8b959f";
@@ -88,6 +88,12 @@ export const KNIGHT: FighterDef = {
     scale: 1.05,
   },
   stance: STANCE,
+  // Heater shield across the body, sword carried above it in a hanging
+  // guard so the riposte is already loaded.
+  clips: guardClips({
+    high: { torso: 2, head: -8, shoulderB: -12, elbowB: 102, shoulderF: 100, elbowF: 62, weapon: 58, hipF: 12, kneeF: 22, hipB: -18, kneeB: 34, offX: -3 },
+    low: { torso: 8, head: -6, shoulderB: -26, elbowB: 110, shoulderF: 92, elbowF: 66, weapon: 54, hipF: 32, kneeF: 74, hipB: -22, kneeB: 84, offX: -3 },
+  }),
   resource: {
     name: "Vow",
     max: 100,
