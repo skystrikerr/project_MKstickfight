@@ -40,7 +40,11 @@ async function api(url) {
 }
 
 const release = await api(`https://api.github.com/repos/${REPO}/releases/tags/${tag}`);
-const exes = release.assets.filter((a) => a.name.endsWith(".exe"));
+// GitHub replaces spaces in an asset's `name` with dots; the `label` keeps the
+// filename the build actually produced. Use that, so what lands in ./release
+// matches what `npm run dist:win` writes there.
+const named = (a) => a.label || a.name;
+const exes = release.assets.filter((a) => named(a).endsWith(".exe"));
 
 if (exes.length === 0) {
   console.error(`Release "${tag}" has no .exe attached.`);
@@ -57,18 +61,18 @@ console.log("");
 await mkdir(OUT, { recursive: true });
 
 for (const asset of exes) {
-  const dest = path.join(OUT, asset.name);
+  const dest = path.join(OUT, named(asset));
   const existing = await stat(dest).catch(() => null);
   if (existing?.size === asset.size) {
-    console.log(`= ${asset.name} (${mb(asset.size)}) already current`);
+    console.log(`= ${named(asset)} (${mb(asset.size)}) already current`);
     continue;
   }
 
-  process.stdout.write(`↓ ${asset.name} (${mb(asset.size)}) `);
+  process.stdout.write(`↓ ${named(asset)} (${mb(asset.size)}) `);
   const res = await fetch(asset.browser_download_url, {
     headers: { accept: "application/octet-stream", "user-agent": "stickfighter-get-exe" },
   });
-  if (!res.ok || !res.body) throw new Error(`${res.status} downloading ${asset.name}`);
+  if (!res.ok || !res.body) throw new Error(`${res.status} downloading ${named(asset)}`);
 
   // Download beside the target and move it into place, so an interrupted run
   // cannot leave a half-written .exe that looks like a real one.
