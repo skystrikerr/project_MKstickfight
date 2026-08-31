@@ -15,7 +15,8 @@
     "electron": "electron .",
     "electron:dev": "VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
     "preview": "vite preview",
-    "test": "tsx src/game/stickfight/selftest.ts"
+    "test": "tsx src/game/stickfight/selftest.ts",
+    "get:exe": "node scripts/get-exe.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

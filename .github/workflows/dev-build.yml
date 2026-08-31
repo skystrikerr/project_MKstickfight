@@ -1,0 +1,75 @@
+# Rebuilds the Windows game on every push to main and keeps it on one rolling
+# `dev` release, so there is always a current .exe to test without waiting for
+# a version to be tagged.
+#
+# The release is replaced in place rather than added to: `dev` is always "what
+# is on main right now", never a history. Tagged versions are separate, and
+# `release.yml` still handles those.
+#
+# Pull it with `npm run get:exe`, which drops it straight into ./release.
+name: Dev build
+
+on:
+  push:
+    branches: [main]
+    # Nothing here changes the game, so do not spend a Windows runner on them.
+    paths-ignore:
+      - "**/*.md"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+# Only the newest push matters - cancel a build that has already been
+# superseded rather than racing it to publish.
+concurrency:
+  group: dev-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # A build that fails its own tests is not worth downloading.
+      - run: npm test
+
+      - run: npm run dist:win
+
+      # `dev` has to point at this commit, or the release page credits the
+      # build to whichever commit first created the tag.
+      - name: Move the dev tag
+        shell: bash
+        run: |
+          git tag -f dev
+          git push -f origin dev
+
+      - name: Update the dev release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: dev
+          name: Latest dev build
+          prerelease: true
+          body: |
+            The current state of `main`, rebuilt on every push. Replaced each
+            time — this is not a version, it is a test build.
+
+            Run **`Stick Fighter-*-portable.exe`**: one file, double-click, installs
+            nothing. Windows shows a blue "Windows protected your PC" box because
+            the build is not code-signed — **More info → Run anyway**.
+
+            Or `npm run get:exe`, which downloads it into `./release`.
+
+            Built from ${{ github.sha }}
+            > ${{ github.event.head_commit.message }}
+          files: release/*.exe
+          fail_on_unmatched_files: true

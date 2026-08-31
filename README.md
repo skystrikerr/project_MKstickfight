@@ -134,6 +134,18 @@ The binaries are about 104 MB each, which is over GitHub's 100 MB per-file
 limit for anything committed with git. A Release is the only place in this
 repository they can live, which is why there is no `releases/` folder.
 
+**To test the current `main` without building it:**
+
+```bash
+npm run get:exe        # newest dev build -> ./release
+npm run get:exe v0.2.0 # a specific tagged release instead
+```
+
+Every push to `main` rebuilds the game on a Windows runner and replaces the
+files on the [`dev`](https://github.com/skystrikerr/project_MKstickfight/releases/tag/dev)
+release, so this always fetches whatever is on `main` right now. It prints the
+commit it came from, and skips the download if you already have that build.
+
 **To build locally**, on the platform you are targeting:
 
 ```bash
