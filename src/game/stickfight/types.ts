@@ -135,6 +135,19 @@ export interface Box {
 
 export type GuardHeight = "high" | "mid" | "low" | "overhead" | "unblockable";
 
+/**
+ * A ledge you can stand on, jump up through from below, and drop off by
+ * holding down. Thickness is drawn, not simulated: only the top edge exists to
+ * the physics, which is what makes passing up through one feel right.
+ */
+export interface Platform {
+  /** Left edge, in stage coordinates. */
+  x: number;
+  /** Height of the top surface above the floor. */
+  y: number;
+  w: number;
+}
+
 export type KnockdownKind =
   | "none"
   | "soft"

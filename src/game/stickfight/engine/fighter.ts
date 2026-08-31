@@ -17,6 +17,7 @@ import type {
   HitDef,
   InvulnKind,
   MoveDef,
+  Platform,
   Pose,
   Stance,
 } from "../types";
@@ -170,8 +171,43 @@ export class Fighter {
   // Queries
   // -------------------------------------------------------------------------
 
+  /** Ledges in this stage. Empty on a flat stage, which is the default. */
+  platforms: Platform[] = [];
+  /** The ledge currently underfoot, or null when standing on the floor. */
+  standing: Platform | null = null;
+  /** Frames left ignoring platforms, after deliberately dropping through one. */
+  private dropping = 0;
+
+  /** Height of whatever is holding this fighter up. */
+  get supportY(): number {
+    return this.standing ? this.standing.y : GROUND_Y;
+  }
+
   get grounded(): boolean {
-    return this.y <= GROUND_Y + 0.001;
+    return this.y <= this.supportY + 0.001;
+  }
+
+  /** Standing on a ledge with nothing but air below - so they can drop off. */
+  get onPlatform(): boolean {
+    return this.standing !== null && this.grounded;
+  }
+
+  /** Frames left waiting to see whether a down-down was meant as a special. */
+  private dropArmed = 0;
+
+  /** True while any attack button is within its buffer window. */
+  private attackPressed(): boolean {
+    return (["A", "B", "C", "S"] as const).some((b) => this.input.pressedWithin(b, COMBAT.bufferFrames));
+  }
+
+  /** Steps off the ledge underfoot. */
+  dropThrough() {
+    if (!this.onPlatform) return;
+    this.standing = null;
+    this.dropping = COMBAT.dropThroughFrames;
+    this.y -= 1;
+    this.vy = -1;
+    this.setState("air");
   }
 
   get stance(): Stance {
@@ -501,6 +537,29 @@ export class Fighter {
       return;
     }
 
+    // Tap down twice to step off the ledge underfoot. Jump is up on this pad,
+    // so "down and jump" is a contradiction no d-pad can express; down-down is
+    // a motion the buffer already knows and every controller can make.
+    //
+    // Eleven fighters already spend down-down on a special, so the drop waits
+    // a few frames for a button rather than firing the instant the motion
+    // completes. Press one and the special wins; press nothing and you step
+    // off. The delay is shorter than the jump squat nobody complains about.
+    if (this.onPlatform && this.dropArmed <= 0 && this.input.hasMotion("dd")) {
+      this.dropArmed = COMBAT.dropArmFrames;
+    }
+    if (this.dropArmed > 0) {
+      if (this.attackPressed()) {
+        this.dropArmed = 0;
+      } else if (--this.dropArmed <= 0) {
+        if (this.onPlatform) {
+          this.input.consumeMotion();
+          this.dropThrough();
+          return;
+        }
+      }
+    }
+
     if (this.input.holdingUp()) {
       this.setState("jumpSquat");
       return;
@@ -777,10 +836,33 @@ export class Fighter {
       if (this.vy < -PHYSICS.terminalVelocity) this.vy = -PHYSICS.terminalVelocity;
     }
 
+    const wasY = this.y;
     this.x += this.vx;
     this.y += this.vy;
 
+    if (this.dropping > 0) this.dropping--;
+
+    // Ledges only exist to someone falling onto them from above. Rising
+    // through one, or walking under it, has to pass clean through.
+    if (this.vy < 0 && this.dropping <= 0 && !this.standing) {
+      for (const p of this.platforms) {
+        if (this.x < p.x || this.x > p.x + p.w) continue;
+        if (wasY < p.y || this.y > p.y) continue;
+        this.y = p.y;
+        this.vy = 0;
+        this.standing = p;
+        this.onLand();
+        break;
+      }
+    }
+
+    // Walked off the end of the ledge.
+    if (this.standing && (this.x < this.standing.x || this.x > this.standing.x + this.standing.w)) {
+      this.standing = null;
+    }
+
     if (this.y <= GROUND_Y) {
+      this.standing = null;
       const impact = this.vy;
       this.y = GROUND_Y;
       this.vy = 0;

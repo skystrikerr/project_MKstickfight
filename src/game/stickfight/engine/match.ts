@@ -4,7 +4,8 @@
  */
 
 import { COMBAT, FPS, GROUND_Y, MATCH, STAGE_HALF_WIDTH } from "../constants";
-import type { FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn } from "../types";
+import type { FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn, Platform,
+} from "../types";
 import { Fighter, boxesOverlap, toWorldBox, type WorldBox } from "./fighter";
 import { EMPTY_INPUT, type RawInput } from "./input";
 
@@ -72,9 +73,19 @@ export class Match {
   matchWinner: 0 | 1 | null = null;
   roundsToWin: number;
 
-  constructor(defs: [FighterDef, FighterDef], roundsToWin = MATCH.roundsToWin) {
+  /**
+   * `platforms` are the ledges of whatever stage this is being played on. The
+   * engine is handed them rather than looking a stage up, so it stays free of
+   * anything to do with drawing.
+   */
+  constructor(
+    defs: [FighterDef, FighterDef],
+    roundsToWin = MATCH.roundsToWin,
+    platforms: Platform[] = [],
+  ) {
     this.fighters = [new Fighter(defs[0], 0), new Fighter(defs[1], 1)];
     this.roundsToWin = roundsToWin;
+    for (const f of this.fighters) f.platforms = platforms;
     this.resetPositions();
   }
 
@@ -85,6 +96,7 @@ export class Match {
     b.x = 150;
     for (const f of this.fighters) {
       f.y = GROUND_Y;
+      f.standing = null;
       f.vx = 0;
       f.vy = 0;
       f.health = f.def.stats.health;

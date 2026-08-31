@@ -61,6 +61,12 @@ export const COMBAT = {
   guardShoveMax: 1.5,
   guardShoveDecay: 0.11,
   guardHoldGrace: 4,
+  // Long enough to clear a ledge you deliberately stepped off, short enough
+  // that the one below still catches you.
+  dropThroughFrames: 12,
+  // How long a down-down waits for an attack button before it counts as a
+  // request to step off the ledge instead.
+  dropArmFrames: 5,
   /**
    * Knockback scaling. A hit's authored `pushX` is the shove a *mid-weight*
    * blow gives; the multiplier below reads the damage on top of that, so a jab

@@ -8,7 +8,7 @@ import type { AiLevel } from "../constants";
 import { COMBAT, FPS, MATCH } from "../constants";
 import { getFighter } from "../fighters";
 import { GameRenderer } from "../render/renderer";
-import { randomTheme, themeForFighter, type StageTheme } from "../render/stage";
+import { randomTheme, STAGE_THEMES, themeForFighter, type StageTheme } from "../render/stage";
 import { applySkin, distinctSkin, getSkin } from "../skins";
 import type { FighterDef } from "../types";
 import { AiController } from "./ai";
@@ -106,11 +106,15 @@ export class GameSession {
       applySkin(getFighter(options.p1), getSkin(p1Skin)),
       applySkin(getFighter(options.p2), getSkin(p2Skin)),
     ];
-    this.match = new Match(this.defs, options.roundsToWin ?? MATCH.roundsToWin);
     this.theme =
       options.stage === "random"
         ? randomTheme()
         : (options.stage ?? themeForFighter(options.p1));
+    this.match = new Match(
+      this.defs,
+      options.roundsToWin ?? MATCH.roundsToWin,
+      STAGE_THEMES[this.theme].platforms ?? [],
+    );
     // Training keeps an AI around too, because "fight back" is one of the
     // dummy settings.
     if (options.mode === "cpu" || options.mode === "training") {
@@ -156,7 +160,11 @@ export class GameSession {
   }
 
   restart() {
-    this.match = new Match(this.defs, this.options.roundsToWin ?? MATCH.roundsToWin);
+    this.match = new Match(
+      this.defs,
+      this.options.roundsToWin ?? MATCH.roundsToWin,
+      STAGE_THEMES[this.theme].platforms ?? [],
+    );
     this.ai?.reset();
     this.renderer?.resetEffects();
     this.paused = false;

@@ -17,6 +17,7 @@ import { Music, TRACKS, type MusicCue } from "./engine/music";
 import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
+import { STAGE_THEMES } from "./render/stage";
 import { attachTransform } from "./render/rig";
 import { buildSkeleton, sampleClip } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
@@ -847,6 +848,97 @@ function scriptFor(move: MoveDef): RawInput[] {
   check("trooper: three thirty-round magazines", trooper.max === 30 && trooper.spares === 2, `${trooper.max}x${(trooper.spares ?? 0) + 1}`);
   check("Earp: a six-round cylinder he can keep refilling", getFighter("western").resource!.max === 6 && getFighter("western").resource!.spares === undefined);
   check("Subutai: a hundred arrows", getFighter("mongol").resource!.max === 100);
+}
+
+// ---------------------------------------------------------------------------
+// Platforms
+// ---------------------------------------------------------------------------
+{
+  const ledges = STAGE_THEMES.aqueduct.platforms ?? [];
+  check("aqueduct has ledges", ledges.length === 3, `${ledges.length}`);
+
+  const stage = () => {
+    const m = new Match([getFighter("roman"), getFighter("pirate")], 2, ledges);
+    run(m, 80, () => inp());
+    const f = m.fighters[0];
+    f.x = -220;
+    m.fighters[1].x = 400;
+    return { m, f };
+  };
+  const jumpUp = (m: Match, f: (typeof m)["fighters"][0]) => {
+    for (let i = 0; i < 90 && !f.standing; i++) m.step([inp({ up: i < 4 }), inp()]);
+  };
+
+  // Land on one from below.
+  {
+    const { m, f } = stage();
+    jumpUp(m, f);
+    check("platform: a jump lands on the ledge", !!f.standing && f.grounded, `y=${f.y.toFixed(0)}`);
+    check("platform: standing on it counts as grounded", f.stance !== "air", f.stance);
+  }
+
+  // Pass up through one instead of bumping into it.
+  {
+    const { m, f } = stage();
+    f.x = 0; // under the high centre span
+    run(m, 3, () => inp());
+    let caughtRising = false;
+    for (let i = 0; i < 24; i++) {
+      m.step([inp({ up: i < 4 }), inp()]);
+      if (f.standing && f.vy > 0) caughtRising = true;
+    }
+    check("platform: rising passes through it", !caughtRising);
+  }
+
+  // Walk off the end and fall to the floor.
+  {
+    const { m, f } = stage();
+    jumpUp(m, f);
+    run(m, 70, () => inp({ left: true }));
+    check("platform: walking off the end drops you", !f.standing && f.y <= 2, `y=${f.y.toFixed(0)}`);
+  }
+
+  // Down-down steps off it.
+  {
+    const { m, f } = stage();
+    jumpUp(m, f);
+    run(m, 20, () => inp());
+    const from = f.y;
+    for (const d of [{ down: true }, { down: true }, {}, { down: true }, { down: true }]) m.step([inp(d), inp()]);
+    run(m, 40, () => inp());
+    check("platform: down-down steps off the ledge", f.y < from - 40, `${from.toFixed(0)} -> ${f.y.toFixed(0)}`);
+  }
+
+  // ...but a down-down move still wins, because on eleven fighters that input
+  // is the super, which is the last thing that should lose to a platform.
+  {
+    const dd = getFighter("ninja").moves.find((mv) => mv.input.motion === "dd")!;
+    const m = new Match([getFighter("ninja"), getFighter("roman")], 2, ledges);
+    run(m, 80, () => inp());
+    const f = m.fighters[0];
+    f.x = -220;
+    m.fighters[1].x = 400;
+    jumpUp(m, f);
+    run(m, 20, () => inp());
+    // About the input, not the economy - pay for it, the way the specials
+    // check above does.
+    f.meter = 200;
+    let came = false;
+    for (const step of scriptFor(dd)) {
+      m.step([step, inp()]);
+      if (f.move?.id === dd.id) came = true;
+    }
+    check(`platform: a down-down special still comes out on a ledge`, came, f.move?.id ?? "nothing");
+  }
+
+  // A flat stage behaves exactly as it did.
+  {
+    const m = new Match([getFighter("roman"), getFighter("pirate")]);
+    run(m, 80, () => inp());
+    const f = m.fighters[0];
+    run(m, 60, (i) => inp({ up: i < 4 }));
+    check("flat stage: nothing to stand on but the floor", !f.standing && f.grounded, `y=${f.y.toFixed(0)}`);
+  }
 }
 
 // ---------------------------------------------------------------------------

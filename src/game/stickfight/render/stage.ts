@@ -7,6 +7,7 @@
  * build method. Nothing else needs to change - the select screen reads the
  * registry.
  */
+import type { Platform } from "../types";
 
 import * as THREE from "three";
 import { STAGE_HALF_WIDTH } from "../constants";
@@ -20,7 +21,11 @@ export type StageTheme =
   | "tundra"
   | "forge"
   | "skyward"
-  | "delta";
+  | "delta"
+  // Stages with ledges to fight on as well as a floor.
+  | "aqueduct"
+  | "terraces"
+  | "siegeworks";
 
 export type AmbientKind = "none" | "rain" | "snow" | "petal" | "ember" | "dust";
 
@@ -44,6 +49,8 @@ export interface StageDef {
   ground: string;
   accent: string;
   ambient: AmbientDef;
+  /** Ledges to stand on. Absent means a flat stage, which most of them are. */
+  platforms?: Platform[];
 }
 
 /** Use for a stage with clear skies. */
@@ -122,6 +129,50 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     accent: "#a7d16a",
     ambient: { kind: "rain", count: 80, colors: ["#b7cfa8", "#dfe9cf"], speed: 12, wind: -1.8, size: [1.3, 20], opacity: 0.42 },
   },
+  aqueduct: {
+    name: "The Aqueduct",
+    blurb: "Two tiers of Roman arches over a dry channel.",
+    sky: ["#241a2e", "#b9784a"],
+    ground: "#b9a17e",
+    accent: "#d8a24a",
+    ambient: { kind: "dust", count: 22, colors: ["#e6d6b4", "#b9a17e"], speed: -0.1, wind: 0.14, size: [2, 5], opacity: 0.36 },
+    // Two side spans and a high centre - the classic three-ledge shape.
+    platforms: [
+      { x: -320, y: 66, w: 200 },
+      { x: 120, y: 66, w: 200 },
+      { x: -100, y: 116, w: 200 },
+    ],
+  },
+
+  terraces: {
+    name: "Temple Terraces",
+    blurb: "Cut stone steps above the cloud line.",
+    sky: ["#132330", "#5c8fa6"],
+    ground: "#8f9aa2",
+    accent: "#cfe3ea",
+    ambient: { kind: "petal", count: 20, colors: ["#e8f2f6", "#b9d4de"], speed: -0.14, wind: 0.2, size: [3, 6], opacity: 0.5 },
+    // One wide pair, low enough to fight on rather than hide on.
+    platforms: [
+      { x: -350, y: 74, w: 250 },
+      { x: 100, y: 74, w: 250 },
+    ],
+  },
+
+  siegeworks: {
+    name: "The Siege Works",
+    blurb: "Scaffolding thrown up against a wall that has not fallen yet.",
+    sky: ["#1d1a24", "#8a5638"],
+    ground: "#6f5a44",
+    accent: "#c08a44",
+    ambient: { kind: "ember", count: 24, colors: ["#e8a34a", "#c07a30"], speed: 0.18, wind: 0.1, size: [2, 4], opacity: 0.5 },
+    // Deliberately lopsided: a stack on the left, one long run on the right.
+    platforms: [
+      { x: -430, y: 58, w: 210 },
+      { x: -280, y: 108, w: 175 },
+      { x: 140, y: 70, w: 260 },
+    ],
+  },
+
   skyward: {
     name: "Cloudbreak Temple",
     blurb: "A stone platform floating in clear morning air.",
@@ -377,6 +428,7 @@ export class Stage {
 
     this.buildHaze(cfg.sky[1]);
     this.buildGround(cfg.ground, theme);
+    if (cfg.platforms?.length) this.buildPlatforms(cfg.platforms, cfg.ground, cfg.accent);
 
     this.ambient = new Ambient(cfg.ambient);
     this.group.add(this.ambient.group);
@@ -423,6 +475,32 @@ export class Stage {
       // The platform has an edge instead of running off-screen.
       g.add(rect(0, -180, 1240, 180, "#8d8064", 8));
       g.add(rect(0, -30, 1300, 30, "#b3a486", 8));
+    }
+    this.addLayer(g, 1);
+  }
+
+  /**
+   * Draws the ledges the physics already knows about, from the same numbers -
+   * so what you can stand on is exactly what you can see.
+   *
+   * Only the top edge is solid, so the slab is drawn hanging below its surface
+   * with a bright lip along the top. That lip is the whole contract with the
+   * player: land on the light line, pass through everything under it.
+   */
+  private buildPlatforms(platforms: Platform[], ground: string, accent: string) {
+    const g = new THREE.Group();
+    const THICK = 15;
+    for (const p of platforms) {
+      const cx = p.x + p.w / 2;
+      // Body, hanging below the surface.
+      g.add(rect(cx, p.y - THICK, p.w, THICK, ground, 7));
+      g.add(rect(cx, p.y - THICK - 3, p.w - 10, 3, "#000000", 7, 0.28));
+      // The lip you actually land on.
+      g.add(rect(cx, p.y - 3.5, p.w, 3.5, accent, 8));
+      // Stone ends, so it reads as built rather than floating.
+      for (const side of [-1, 1]) {
+        g.add(rect(cx + (side * (p.w / 2 - 7)), p.y - THICK, 14, THICK, ground, 8, 0.85));
+      }
     }
     this.addLayer(g, 1);
   }
