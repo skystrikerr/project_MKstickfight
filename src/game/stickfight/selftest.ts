@@ -836,6 +836,10 @@ function scriptFor(move: MoveDef): RawInput[] {
       if ((f.move?.resourceGain ?? 0) > 0) rearmed = true;
     }
     check(`${def.id}: firing on empty rearms instead of doing nothing`, rearmed, f.move?.id ?? "nothing came out");
+
+    // ...and the move it picked has to leave him better off than before.
+    run(m, 80, () => inp());
+    check(`${def.id}: the automatic reload actually gains ammunition`, f.resource >= 1, `${f.resource.toFixed(1)}`);
   }
 
   // The numbers the roster is meant to carry.

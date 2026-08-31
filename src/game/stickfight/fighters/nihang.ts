@@ -875,7 +875,7 @@ export const NIHANG: FighterDef = {
           scale: 1.25,
         },
       ],
-      desc: "A heavy quoit thrown flat, slowing as it goes and hitting twice. He catches it again, so the belt costs him nothing.",
+      desc: "Throws a quoit on a line that brings it back to his hand. Costs a chakram and returns it - spacing, not resupply.",
       notation: "↓↙← + C",
       frames: [
         kf(0, { ...STANCE }, "out"),

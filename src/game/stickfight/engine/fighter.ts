@@ -925,12 +925,22 @@ export class Fighter {
     if (!res || this.resource >= res.max) return null;
     if (res.spares !== undefined && this.spares <= 0) return null;
     const gains = this.def.moves.filter(
-      (m) => (m.resourceGain ?? 0) > 0 && !m.internal && !m.meterCost && this.stanceAllows(m, this.stance),
+      (m) =>
+        !m.internal &&
+        !m.meterCost &&
+        this.stanceAllows(m, this.stance) &&
+        // Net gain only. A quoit that costs one and returns one is a boomerang,
+        // not a reload: picking it on an empty quiver leaves the player with
+        // nothing, because it cannot pay its own cost either.
+        (m.resourceGain ?? 0) - (m.resourceCost ?? 0) > 0 &&
+        (m.resourceMin === undefined || this.resource >= m.resourceMin),
     );
     if (!gains.length) return null;
     return (
       gains.find((m) => m.input.buttons?.length === 2) ??
-      gains.reduce((a, b) => ((b.resourceGain ?? 0) > (a.resourceGain ?? 0) ? b : a))
+      gains.reduce((a, b) =>
+        (b.resourceGain ?? 0) - (b.resourceCost ?? 0) > (a.resourceGain ?? 0) - (a.resourceCost ?? 0) ? b : a,
+      )
     );
   }
 
