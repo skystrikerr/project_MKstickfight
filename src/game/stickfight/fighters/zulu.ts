@@ -294,9 +294,9 @@ export const ZULU: FighterDef = {
       notation: "↓ + B",
       frames: [
         kf(0, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 76, hipB: -22, kneeB: 86 }, "out"),
-        kf(5, { ...STANCE, crouch: 1, torso: 8, hipF: 34, kneeF: 76, hipB: -22, kneeB: 86, shoulderF: 6, elbowF: 84, weapon: 58 }),
-        kf(9, { ...STANCE, crouch: 1, torso: 26, hipF: 42, kneeF: 80, hipB: -26, kneeB: 90, shoulderF: 52, elbowF: 8, weapon: 4, offX: 9 }, "out"),
-        kf(15, { ...STANCE, crouch: 1, torso: 24, hipF: 40, kneeF: 78, hipB: -24, kneeB: 88, shoulderF: 48, elbowF: 12, weapon: 6, offX: 7 }),
+        kf(5, { ...STANCE, crouch: 1, torso: 8, hipF: 34, kneeF: 76, hipB: -22, kneeB: 86, shoulderF: 6, elbowF: 84, weapon: 52 }),
+        kf(9, { ...STANCE, crouch: 1, torso: 26, hipF: 42, kneeF: 80, hipB: -26, kneeB: 90, shoulderF: 52, elbowF: 8, weapon: -9, offX: 9 }, "out"),
+        kf(15, { ...STANCE, crouch: 1, torso: 24, hipF: 40, kneeF: 78, hipB: -24, kneeB: 88, shoulderF: 48, elbowF: 12, weapon: -13, offX: 7 }),
         kf(24, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 76, hipB: -22, kneeB: 86 }),
       ],
     },

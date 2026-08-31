@@ -236,10 +236,14 @@ export const ROMAN: FighterDef = {
       notation: "B",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(5, { ...STANCE, shoulderF: 52, elbowF: -60, torso: -6, offX: -4, weapon: 62 }),
-        kf(8, { ...STANCE, shoulderF: 84, elbowF: -2, torso: 14, offX: 8, weapon: 42, hipF: 30, kneeF: 20 }, "out"),
-        kf(13, { ...STANCE, shoulderF: 82, elbowF: 0, torso: 12, offX: 7, weapon: 42, hipF: 28, kneeF: 18 }),
-        kf(19, { ...STANCE, shoulderF: 70, elbowF: -18, torso: 8, offX: 2 }, "inOut"),
+        // The shaft stays level the whole way. `weapon` unwinds as the shoulder
+        // and elbow open, so the point tracks straight down the line instead of
+        // being swung round with the arm - it used to drop to 38 degrees below
+        // horizontal and come up 39 above, which is a windmill, not a thrust.
+        kf(5, { ...STANCE, shoulderF: 52, elbowF: -60, torso: -6, offX: -4, weapon: 100 }),
+        kf(8, { ...STANCE, shoulderF: 84, elbowF: -2, torso: 14, offX: 8, weapon: 3, hipF: 30, kneeF: 20 }, "out"),
+        kf(13, { ...STANCE, shoulderF: 82, elbowF: 0, torso: 12, offX: 7, weapon: 4, hipF: 28, kneeF: 18 }),
+        kf(19, { ...STANCE, shoulderF: 70, elbowF: -18, torso: 8, offX: 2, weapon: 35 }, "inOut"),
         kf(24, { ...STANCE }),
       ],
     },
@@ -388,9 +392,9 @@ export const ROMAN: FighterDef = {
       notation: "↘ + C",
       frames: [
         kf(0, { ...STANCE, crouch: 0.5, hipF: 26, kneeF: 44, hipB: -20, kneeB: 52 }, "out"),
-        kf(6, { ...STANCE, crouch: 0.7, torso: 12, shoulderF: 40, elbowF: -50, weapon: 74 }),
-        kf(9, { ...STANCE, torso: -14, shoulderF: 140, elbowF: -16, weapon: 42, hipF: 22, kneeF: 12, offY: 4 }, "out"),
-        kf(16, { ...STANCE, torso: -10, shoulderF: 132, elbowF: -12, weapon: 40, hipF: 18, kneeF: 10 }),
+        kf(6, { ...STANCE, crouch: 0.7, torso: 12, shoulderF: 40, elbowF: -50, weapon: 46 }),
+        kf(9, { ...STANCE, torso: -14, shoulderF: 140, elbowF: -16, weapon: 26, hipF: 22, kneeF: 12, offY: 4 }, "out"),
+        kf(16, { ...STANCE, torso: -10, shoulderF: 132, elbowF: -12, weapon: 103, hipF: 18, kneeF: 10 }),
         kf(26, { ...STANCE, torso: 4, shoulderF: 80, elbowF: -22 }, "inOut"),
         kf(34, { ...STANCE }),
       ],

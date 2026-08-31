@@ -429,9 +429,9 @@ export const KNIGHT: FighterDef = {
       notation: "↘ + C",
       frames: [
         kf(0, { ...STANCE, crouch: 0.5, hipF: 24, kneeF: 46, hipB: -20, kneeB: 52 }, "out"),
-        kf(6, { ...STANCE, crouch: 0.7, torso: 14, shoulderF: 16, elbowF: 84, weapon: 92 }),
-        kf(11, { ...STANCE, torso: -16, shoulderF: 146, elbowF: 12, weapon: 34, hipF: 20, kneeF: 12, offY: 4 }, "out"),
-        kf(18, { ...STANCE, torso: -12, shoulderF: 138, elbowF: 16, weapon: 32, hipF: 16, kneeF: 10 }),
+        kf(6, { ...STANCE, crouch: 0.7, torso: 14, shoulderF: 16, elbowF: 84, weapon: -65 }),
+        kf(11, { ...STANCE, torso: -16, shoulderF: 146, elbowF: 12, weapon: -7, hipF: 20, kneeF: 12, offY: 4 }, "out"),
+        kf(18, { ...STANCE, torso: -12, shoulderF: 138, elbowF: 16, weapon: 70, hipF: 16, kneeF: 10 }),
         kf(28, { ...STANCE, torso: 4, shoulderF: 70, elbowF: 56 }, "inOut"),
         kf(36, { ...STANCE }),
       ],

@@ -39,13 +39,36 @@ function partReach(part: ShapePart): number {
   return part.pos[0] + half;
 }
 
-/** The weapon most likely being used: the longest thing held in a hand. */
-function mainWeapon(def: FighterDef): PropDef | null {
+/**
+ * The weapon a given move is actually using: of everything held in a hand, the
+ * one whose point comes nearest that move's hitbox. A fighter carrying both a
+ * tulwar and a chakram uses one or the other depending on the button, and
+ * measuring the longest thing they own reports the wrong weapon standing still.
+ */
+function weaponFor(def: FighterDef, move: MoveDef, hit: { from: number; to: number; box: { x: number; y: number; w: number; h: number } }): PropDef | null {
   const held = def.props.filter((p) => p.attach === "handF" || p.attach === "handB");
   if (!held.length) return null;
-  return held.reduce((a, b) =>
-    Math.max(...b.parts.map(partReach)) > Math.max(...a.parts.map(partReach)) ? b : a,
-  );
+  let best: PropDef | null = null;
+  let bestDist = Infinity;
+  for (const prop of held) {
+    let near = Infinity;
+    for (let f = hit.from; f <= hit.to; f++) {
+      const pose = sampleFrames(move.frames, f, def.stance);
+      const sk = buildSkeleton(pose, !pose.free, def.stats.scale);
+      const { tip, dir, grip } = tipAndAxis(sk, prop);
+      for (const t of [1, 0.75, 0.5, 0.25]) {
+        const px = grip.x + (tip.x - grip.x) * t;
+        const py = grip.y + (tip.y - grip.y) * t;
+        const dx = Math.max(hit.box.x - px, 0, px - (hit.box.x + hit.box.w));
+        const dy = Math.max(hit.box.y - py, 0, py - (hit.box.y + hit.box.h));
+        near = Math.min(near, Math.hypot(dx, dy));
+      }
+      void dir;
+    }
+    if (near < bestDist) { bestDist = near; best = prop; }
+  }
+  // If nothing held comes near the box, this is a fist or a foot, not a weapon.
+  return bestDist <= 26 ? best : null;
 }
 
 function tipAndAxis(sk: Skeleton, prop: PropDef) {
@@ -53,7 +76,7 @@ function tipAndAxis(sk: Skeleton, prop: PropDef) {
   const reach = Math.max(...prop.parts.map(partReach));
   const a = t.rot * DEG;
   const dir = { x: Math.cos(a), y: Math.sin(a) };
-  return { tip: { x: t.x + dir.x * reach, y: t.y + dir.y * reach }, dir };
+  return { tip: { x: t.x + dir.x * reach, y: t.y + dir.y * reach }, dir, grip: { x: t.x, y: t.y } };
 }
 
 const showAll = process.argv.includes("--all");
@@ -61,14 +84,17 @@ let mismatches = 0;
 let checked = 0;
 
 for (const def of ROSTER) {
-  const prop = mainWeapon(def);
-  if (!prop) continue;
   const rows: string[] = [];
 
   for (const move of def.moves as MoveDef[]) {
     for (const hit of move.hits ?? []) {
       const fx = hit.fx;
       if (fx !== "pierce" && fx !== "slash") continue;
+      const spins = move.frames.some((k) => (k.p?.spin ?? k.add?.spin ?? 0) !== 0);
+      if (spins) continue;
+      const prop = weaponFor(def, move, hit);
+      // Unarmed strikes carry a slash fx for claws and elbows; nothing to check.
+      if (!prop) continue;
       checked++;
 
       // Sample from just before the hit through it, so the swing is included.
@@ -100,13 +126,13 @@ for (const def of ROSTER) {
       if (wrong) mismatches++;
       if (wrong || showAll) {
         rows.push(
-          `  ${wrong ? "!" : " "} ${move.id.padEnd(12)} ${move.name.padEnd(22)} ` +
+          `  ${wrong ? "!" : " "} ${move.id.padEnd(12)} ${move.name.padEnd(20)} ${prop.id.padEnd(11)}` +
           `fx=${fx.padEnd(6)} sweep ${sweep.toFixed(0).padStart(3)}\u00b0  point moves ${drive.toFixed(0).padStart(3)}u  ` +
           `${wrong ? (fx === "pierce" ? (drive < 10 ? "the point barely moves" : "swings too much for a thrust") : "too straight for a cut") : "ok"}`,
         );
       }
     }
   }
-  if (rows.length) console.log(`${def.name} (${def.id}) - ${prop.id}\n${rows.join("\n")}\n`);
+  if (rows.length) console.log(`${def.name} (${def.id})\n${rows.join("\n")}\n`);
 }
 console.log(`${checked} armed hits checked, ${mismatches} where the motion contradicts the damage type.`);

@@ -572,9 +572,9 @@ export const SPARTAN: FighterDef = {
       notation: "(air) B",
       frames: [
         kf(0, { ...STANCE, free: 1, hipF: 30, kneeF: 40, hipB: -22, kneeB: 38 }, "out"),
-        kf(4, { ...STANCE, free: 1, shoulderB: 156, elbowB: -56, weaponBack: 54, torso: -8 }),
-        kf(7, { ...STANCE, free: 1, shoulderB: 84, elbowB: -4, weaponBack: -8, torso: 24, hipF: 40, kneeF: 34 }, "out"),
-        kf(17, { ...STANCE, free: 1, shoulderB: 92, elbowB: -10, weaponBack: 0, torso: 20 }),
+        kf(4, { ...STANCE, free: 1, shoulderB: 156, elbowB: -56, weaponBack: 48, torso: -8 }),
+        kf(7, { ...STANCE, free: 1, shoulderB: 84, elbowB: -4, weaponBack: -28, torso: 24, hipF: 40, kneeF: 34 }, "out"),
+        kf(17, { ...STANCE, free: 1, shoulderB: 92, elbowB: -10, weaponBack: -34, torso: 20 }),
         kf(26, { ...STANCE, free: 1 }),
       ],
     },
