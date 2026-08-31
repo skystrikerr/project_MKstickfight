@@ -906,6 +906,28 @@ export class Fighter {
     this.meter = Math.min(COMBAT.maxMeter, this.meter + amount);
   }
 
+  /**
+   * The move that puts ammunition back, if this fighter has one it can use
+   * right now. Prefers the dedicated skill over a special that happens to
+   * return a projectile as a side effect.
+   */
+  reloadMove(): MoveDef | null {
+    const res = this.def.resource;
+    if (!res || this.resource >= res.max) return null;
+    if (res.spares !== undefined && this.spares <= 0) return null;
+    const gains = this.def.moves.filter(
+      (m) => (m.resourceGain ?? 0) > 0 && !m.internal && !m.meterCost && this.stanceAllows(m, this.stance),
+    );
+    if (!gains.length) return null;
+    return (
+      gains.find((m) => m.input.buttons?.length === 2) ??
+      gains.reduce((a, b) => ((b.resourceGain ?? 0) > (a.resourceGain ?? 0) ? b : a))
+    );
+  }
+
+  /** True on the frame an empty weapon rearmed itself, for the HUD to flag. */
+  autoReloaded = false;
+
   addResource(amount: number) {
     if (!amount || !this.def.resource) return;
     this.resource = Math.max(0, Math.min(this.def.resource.max, this.resource + amount));
@@ -926,14 +948,30 @@ export class Fighter {
     let best: MoveDef | null = null;
     let bestScore = -1;
 
+    // How specific an input the player used for a shot they cannot pay for.
+    // Scored like any other match, because a deliberate quarter circle on an
+    // empty gun should beat whatever plain normal shares that button - it is
+    // still the shot they asked for.
+    let dryFireScore = -1;
+
     for (const move of this.def.moves) {
       if (move.internal) continue;
       if (allowTags && !move.tags?.some((t) => allowTags.includes(t))) continue;
       if (!this.stanceAllows(move, stance)) continue;
       if (stance === "air" && this.airMovesUsed >= this.def.stats.airMoves && !allowTags) continue;
       if (move.meterCost && this.meter < move.meterCost) continue;
-      if (move.resourceMin !== undefined && this.resource < move.resourceMin) continue;
-      if (move.resourceCost && this.resource < move.resourceCost) continue;
+      // A shot can be blocked by either gate - a minimum to draw at all, or
+      // the cost of the shot itself - and both mean the same thing to the
+      // player: the weapon is empty.
+      const cannotAfford =
+        (move.resourceMin !== undefined && this.resource < move.resourceMin) ||
+        (!!move.resourceCost && this.resource < move.resourceCost);
+      if (cannotAfford) {
+        if (this.grounded && move.projectiles?.length && this.inputMatches(move)) {
+          dryFireScore = Math.max(dryFireScore, this.moveScore(move));
+        }
+        continue;
+      }
       // Out of magazines: there is nothing to reload with.
       if (move.resourceGain && this.def.resource?.spares !== undefined && this.spares <= 0) continue;
       if (!this.inputMatches(move)) continue;
@@ -942,6 +980,17 @@ export class Fighter {
       if (score > bestScore) {
         best = move;
         bestScore = score;
+      }
+    }
+
+    // Nothing came out and the weapon is empty: rearm instead. This is the
+    // only way most players will ever reload - the skill button exists, but
+    // asking someone to remember it mid-round is asking them to lose.
+    if (dryFireScore > bestScore && !allowTags) {
+      const reload = this.reloadMove();
+      if (reload) {
+        this.autoReloaded = true;
+        return this.startMove(reload, true);
       }
     }
 

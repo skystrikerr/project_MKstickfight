@@ -781,6 +781,10 @@ function scriptFor(move: MoveDef): RawInput[] {
     check(`${def.id}: cannot shoot on an empty ${res.name.toLowerCase()}`, f.move?.id !== shot.id, f.move?.id ?? "none");
 
     if (!reload) continue;
+    // The empty-shot check above may have started an automatic reload, which
+    // is the point of it. Let it finish, then count from a full belt.
+    run(m, reload.duration + 8, () => inp());
+    f.spares = res.spares ?? 0;
     // Reloading refills it, and only as often as they have spares for.
     let reloads = 0;
     for (let i = 0; i < 8; i++) {
@@ -799,6 +803,42 @@ function scriptFor(move: MoveDef): RawInput[] {
       check(`${def.id}: carries exactly ${res.spares} spare`, reloads === res.spares, `${reloads} reloads`);
       check(`${def.id}: is out once the spares are gone`, f.spares === 0, `${f.spares} left`);
     }
+  }
+
+  // Pulling the trigger on an empty weapon reloads it. Nobody reaches for a
+  // two-button skill mid-round; if reloading needs remembering, it does not
+  // happen, and a zoner who cannot rearm is just a worse melee fighter.
+  for (const def of ROSTER) {
+    const res = def.resource;
+    if (!res) continue;
+    const grounded = (mv: MoveDef) => {
+      const st = mv.input.stance;
+      return Array.isArray(st) ? st.includes("stand") : st === "stand";
+    };
+    const shot = def.moves.find(
+      (mv) =>
+        (mv.projectiles?.length ?? 0) > 0 &&
+        ((mv.resourceCost ?? 0) > 0 || mv.resourceMin !== undefined) &&
+        !mv.meterCost &&
+        !mv.internal &&
+        grounded(mv),
+    );
+    if (!shot || !def.moves.some((mv) => (mv.resourceGain ?? 0) > 0)) continue;
+
+    const m = newMatch(def.id, "roman");
+    const f = m.fighters[0];
+    f.x = -200;
+    m.fighters[1].x = 200;
+    f.resource = 0;
+    run(m, 3, () => inp());
+
+    const script = scriptFor(shot);
+    let rearmed = false;
+    for (const step of script) {
+      m.step([step, inp()]);
+      if ((f.move?.resourceGain ?? 0) > 0) rearmed = true;
+    }
+    check(`${def.id}: firing on empty rearms instead of doing nothing`, rearmed, f.move?.id ?? "nothing came out");
   }
 
   // The numbers the roster is meant to carry.
