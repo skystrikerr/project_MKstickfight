@@ -31,7 +31,12 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      # Turn Pages on from here rather than needing someone to click it in
+      # Settings. Without this the whole workflow fails at this step with
+      # "Get Pages site failed", which is why the site was never up.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

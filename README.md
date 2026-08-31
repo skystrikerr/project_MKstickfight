@@ -134,17 +134,38 @@ The binaries are about 104 MB each, which is over GitHub's 100 MB per-file
 limit for anything committed with git. A Release is the only place in this
 repository they can live, which is why there is no `releases/` folder.
 
-**To test the current `main` without building it:**
+### Testing a change, fastest first
+
+**1. Refresh a browser tab.** Every push to `main` redeploys
+[the live build](https://skystrikerr.github.io/project_MKstickfight/). Nothing
+to install, nothing to download, and controllers work — plug one in and press a
+button. About a minute behind a push.
+
+**2. Run it locally with hot reload.** Double-click **`play.bat`** on Windows,
+or:
+
+```bash
+npm run play      # pulls nothing, just serves with hot reload
+```
+
+`play.bat` pulls, installs anything new, and opens the game in your browser.
+Edits appear without a rebuild. This is the one to use while iterating.
+
+**3. Download the built `.exe`.** Slowest — 104 MB a time — but it is the real
+desktop app:
 
 ```bash
 npm run get:exe        # newest dev build -> ./release
 npm run get:exe v0.2.0 # a specific tagged release instead
 ```
 
-Every push to `main` rebuilds the game on a Windows runner and replaces the
-files on the [`dev`](https://github.com/skystrikerr/project_MKstickfight/releases/tag/dev)
+Every push to `main` also rebuilds on a Windows runner and replaces the files
+on the [`dev`](https://github.com/skystrikerr/project_MKstickfight/releases/tag/dev)
 release, so this always fetches whatever is on `main` right now. It prints the
 commit it came from, and skips the download if you already have that build.
+
+> Browsers ignore a gamepad until it sends something, so **press a button on the
+> pad** after plugging it in. The menus are mouse-only; the pad drives the fight.
 
 **To build locally**, on the platform you are targeting:
 
