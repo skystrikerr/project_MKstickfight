@@ -195,6 +195,11 @@ export class GameSession {
         this.acc -= stepTime;
         steps++;
       }
+      // If the machine cannot keep up, throw the backlog away instead of
+      // banking it. Carrying it means every later frame spends its whole
+      // budget replaying the past, so the game falls further behind for as
+      // long as it runs - which reads as freezing rather than as slowness.
+      if (this.acc > stepTime * 2) this.acc = stepTime * 2;
     }
 
     this.renderer?.render(this.match);
@@ -208,17 +213,24 @@ export class GameSession {
    */
   private watchPerformance(delta: number) {
     if (this.qualityLocked || !this.renderer || this.renderer.currentQuality !== "high") return;
-    this.frameSamples.push(delta);
-    if (this.frameSamples.length < 90) return;
-    const avg = this.frameSamples.reduce((a, b) => a + b, 0) / this.frameSamples.length;
-    this.frameSamples.length = 0;
-    if (avg > 0.028) {
+
+    // No GPU at all: decide immediately, there is nothing to measure.
+    if (this.renderer.softwareRendered) {
       this.renderer.setQuality("low");
       this.qualityLocked = true;
-    } else {
-      // Fast enough - stop sampling.
-      this.qualityLocked = true;
+      return;
     }
+
+    this.frameSamples.push(delta);
+    // Judge on elapsed time rather than a frame count. Ninety frames is under
+    // two seconds at 60fps but over twenty at 4fps - so the machines that most
+    // need the effects turned off were the ones that waited longest for it.
+    const elapsed = this.frameSamples.reduce((a, b) => a + b, 0);
+    if (elapsed < 0.6 || this.frameSamples.length < 4) return;
+    const avg = elapsed / this.frameSamples.length;
+    this.frameSamples.length = 0;
+    if (avg > 0.028) this.renderer.setQuality("low");
+    this.qualityLocked = true;
   }
 
   private stepOnce() {

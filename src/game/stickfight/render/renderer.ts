@@ -124,6 +124,24 @@ export class GameRenderer {
     return this.quality;
   }
 
+  /**
+   * True when this context has no GPU behind it - a browser falling back to
+   * SwiftShader or llvmpipe, or a machine with acceleration switched off.
+   *
+   * Worth asking up front rather than measuring: the effects chain runs a
+   * bloom pass over the whole frame, which software rendering cannot do at
+   * any playable rate. Waiting to find that out costs the player the first
+   * few seconds of a round.
+   */
+  get softwareRendered(): boolean {
+    const gl = this.renderer.getContext();
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const name = String(
+      (info && gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) || gl.getParameter(gl.RENDERER) || "",
+    );
+    return /swiftshader|llvmpipe|software|basic render|microsoft basic/i.test(name);
+  }
+
   private updateCamera(viewWidth: number, x: number, shake: number) {
     const halfW = viewWidth / 2;
     const halfH = halfW / this.aspect;
