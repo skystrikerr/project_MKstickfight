@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { getFighter, ROSTER } from "../fighters";
-import type { MoveDef } from "../types";
+import type { FighterDef, MoveDef } from "../types";
 
 const has = (m: MoveDef, tag: string) => !!m.tags?.includes(tag as never);
 
@@ -36,6 +36,45 @@ function frameData(m: MoveDef): string | null {
   return `${startup} / ${active} / ${recovery}`;
 }
 
+/** Input label for one step of a string: 5A -> "A", 6A -> "→ + A". */
+function stamp(m: MoveDef): string {
+  const arrow =
+    m.input.dir === "f" ? "→" : m.input.dir === "b" ? "←" : m.input.dir === "d" ? "↓" : m.input.dir === "df" ? "↘" : "";
+  const btn = m.input.button ?? "";
+  return arrow ? `${arrow} + ${btn}` : btn;
+}
+
+/**
+ * Rebuilds each named string from the follow-up links scattered across the
+ * moves. A link knows only what continues it, so the chain is reassembled by
+ * finding the move nothing else leads into and walking forward from there.
+ */
+function stringsFor(def: FighterDef): { name: string; moves: MoveDef[] }[] {
+  const byId = new Map(def.moves.map((m) => [m.id, m]));
+  const groups = new Map<string, { from: string; to: string }[]>();
+  for (const m of def.moves) {
+    for (const f of m.followUps ?? []) {
+      if (!f.string) continue;
+      groups.set(f.string, [...(groups.get(f.string) ?? []), { from: m.id, to: f.move }]);
+    }
+  }
+  const out: { name: string; moves: MoveDef[] }[] = [];
+  for (const [name, links] of groups) {
+    const targets = new Set(links.map((l) => l.to));
+    const head = links.find((l) => !targets.has(l.from));
+    if (!head) continue;
+    const seq = [head.from];
+    for (let i = 0; i < links.length; i++) {
+      const next = links.find((l) => l.from === seq[seq.length - 1]);
+      if (!next || seq.includes(next.to)) break;
+      seq.push(next.to);
+    }
+    const moves = seq.map((id) => byId.get(id)).filter((m): m is MoveDef => !!m);
+    if (moves.length > 1) out.push({ name, moves });
+  }
+  return out;
+}
+
 export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: () => void }) {
   const [id, setId] = useState(fighterId);
   const def = getFighter(id);
@@ -49,6 +88,8 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
       variants: visible.filter((m) => !!m.variant),
     })).filter((g) => g.moves.length > 0);
   }, [def]);
+
+  const strings = useMemo(() => stringsFor(def), [def]);
 
   const specialCount = def.moves.filter(
     (m) => m.tags?.includes("special") && !m.tags?.includes("ex") && !m.variant && !m.internal,
@@ -105,6 +146,31 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
             ))}
           </div>
         </div>
+
+        {strings.length > 0 && (
+          <section className="mb-4">
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-300">Strings</h3>
+            <div className="grid gap-1.5 sm:grid-cols-2">
+              {strings.map((st) => (
+                <div key={st.name} className="rounded-md border border-white/10 bg-white/[0.02] p-2.5">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-sm font-bold text-white">{st.name}</span>
+                    <span className="font-mono text-xs text-amber-300">
+                      {st.moves.map(stamp).join(", ")}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-snug text-white/55">
+                    {st.moves.map((m) => m.name).join(" · ")}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] leading-snug text-white/40">
+              Press the next button while the previous one is still swinging. A string continues whether it hit or
+              was blocked, so committing to the whole thing is the risk.
+            </p>
+          </section>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           {grouped.map((g) => (

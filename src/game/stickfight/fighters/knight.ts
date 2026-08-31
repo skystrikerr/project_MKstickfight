@@ -253,6 +253,10 @@ export const KNIGHT: FighterDef = {
       duration: 15,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 14],
+      // Shield Work string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 5, to: 12, string: "Shield Work" },
+      ],
       hits: [hit(5, 7, bx(18, 52, 42, 22), 36, { blockstun: 11, hitstun: 15, fx: "blunt", pushX: 3.2 })],
       desc: "A steel fist to the face. Slower than most jabs, but it hurts and it chains into everything.",
       notation: "A",
@@ -272,6 +276,10 @@ export const KNIGHT: FighterDef = {
       duration: 26,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [10, 24],
+      // Longsword Kata string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 10, to: 23, string: "Longsword Kata" },
+      ],
       hits: [hit(10, 13, bx(26, 40, 74, 48), 70, { fx: "slash", pushX: 5.4, hitstun: 19 })],
       desc: "A cut from above, shoulder to hip. Good reach and it cancels straight into a special.",
       notation: "B",
@@ -292,6 +300,10 @@ export const KNIGHT: FighterDef = {
       duration: 38,
       cancelInto: ["special", "super"],
       cancelWindow: [18, 34],
+      // Longsword Kata string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 18, to: 35, string: "Longsword Kata" },
+      ],
       hits: [
         hit(18, 22, bx(20, 26, 82, 80), 106, {
           guard: "overhead",
@@ -449,6 +461,10 @@ export const KNIGHT: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Shield Work string continues into 6B.
+      followUps: [
+        { button: "B", move: "6B", from: 7, to: 17, string: "Shield Work" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Grips the blade and drives the point in short. Fast, and it starts everything.",
       notation: "\u2192 + A",
@@ -474,6 +490,10 @@ export const KNIGHT: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
+      // Half-Sword string continues into 4A.
+      followUps: [
+        { button: "A", move: "4A", from: 16, to: 37, string: "Half-Sword" },
+      ],
       hits: [hit(16, 20, bx(18, 22, 64, 68), 94, { guard: "mid", fx: "blunt", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Takes the blade in both hands and swings the pommel like a hammer. Walks through a hit.",
       notation: "\u2192 + C",

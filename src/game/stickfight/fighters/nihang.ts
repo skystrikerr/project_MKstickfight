@@ -211,6 +211,10 @@ export const NIHANG: FighterDef = {
       duration: 13,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 12],
+      // Chakram Work string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 4, to: 10, string: "Chakram Work" },
+      ],
       hits: [hit(4, 6, bx(18, 52, 44, 22), 30, { blockstun: 10, hitstun: 14, fx: "slash", pushX: 2.8 })],
       desc: "Rakes the held quoit across their face without letting go of it. Fast, and it chains.",
       notation: "A",
@@ -229,6 +233,10 @@ export const NIHANG: FighterDef = {
       duration: 22,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 20],
+      // Tulwar Kata string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 8, to: 19, string: "Tulwar Kata" },
+      ],
       hits: [hit(8, 11, bx(24, 42, 68, 40), 58, { fx: "slash", pushX: 4.6, hitstun: 18 })],
       desc: "A drawing cut with the curve of the blade. His most honest button.",
       notation: "B",
@@ -248,6 +256,10 @@ export const NIHANG: FighterDef = {
       duration: 32,
       cancelInto: ["special", "super"],
       cancelWindow: [15, 28],
+      // Tulwar Kata string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 14, to: 29, string: "Tulwar Kata" },
+      ],
       hits: [
         hit(14, 18, bx(20, 30, 78, 64), 88, {
           fx: "slash",
@@ -400,6 +412,10 @@ export const NIHANG: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Chakram Work string continues into 6B.
+      followUps: [
+        { button: "B", move: "6B", from: 7, to: 17, string: "Chakram Work" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "slash", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Steps in and snaps the chakram edge across. Fast, and it keeps them honest.",
       notation: "\u2192 + A",
@@ -468,6 +484,10 @@ export const NIHANG: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
+      // Draw Cut string continues into 3C.
+      followUps: [
+        { button: "C", move: "3C", from: 12, to: 27, string: "Draw Cut" },
+      ],
       hits: [hit(12, 15, bx(34, 52, 88, 24), 56, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Retreats and lets the curve of the blade do the work on the way out.",
       notation: "\u2190 + B",

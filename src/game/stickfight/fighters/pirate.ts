@@ -201,6 +201,10 @@ export const PIRATE: FighterDef = {
       duration: 12,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 11],
+      // Cutlass Rush string continues into 5B.
+      followUps: [
+        { button: "B", move: "5B", from: 3, to: 9, string: "Cutlass Rush" },
+      ],
       hits: [hit(3, 5, bx(18, 54, 46, 20), 30, { fx: "slash", hitstun: 14, blockstun: 10, pushX: 2.8 })],
       desc: "Three-frame-fast cutlass flick. Chains into itself twice.",
       notation: "A",
@@ -219,6 +223,10 @@ export const PIRATE: FighterDef = {
       duration: 20,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Cutlass Rush string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 7, to: 17, string: "Cutlass Rush" },
+      ],
       hits: [hit(7, 10, bx(22, 44, 66, 40), 54, { fx: "slash", pushX: 4.4, hitstun: 17 })],
       desc: "Diagonal slash across the chest. Solid confirm into rekkas.",
       notation: "B",
@@ -238,6 +246,10 @@ export const PIRATE: FighterDef = {
       duration: 30,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 26],
+      // Boarding Steel string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 12, to: 27, string: "Boarding Steel" },
+      ],
       hits: [
         hit(12, 16, bx(16, 26, 76, 74), 86, {
           fx: "slash",
@@ -384,6 +396,10 @@ export const PIRATE: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [6, 18],
+      // Boarding Steel string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 6, to: 17, string: "Boarding Steel" },
+      ],
       hits: [hit(6, 8, bx(20, 60, 44, 26), 30, { guard: "high", fx: "slash", pushX: 3, hitstun: 13, hitstop: 5 })],
       desc: "Steps in and flicks the point at the face. Quickest thing she has.",
       notation: "\u2192 + A",
@@ -430,6 +446,10 @@ export const PIRATE: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
+      // Powder Burn string continues into 5A.
+      followUps: [
+        { button: "A", move: "5A", from: 8, to: 19, string: "Powder Burn" },
+      ],
       hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Backs off and clubs them with the pistol butt. Cheap, fast, effective.",
       notation: "\u2190 + A",

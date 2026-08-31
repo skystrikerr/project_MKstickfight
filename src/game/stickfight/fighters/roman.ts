@@ -212,6 +212,10 @@ export const ROMAN: FighterDef = {
       duration: 14,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 13],
+      // Testudo string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 4, to: 11, string: "Testudo" },
+      ],
       hits: [hit(4, 6, bx(20, 52, 46, 22), 34, { blockstun: 11, hitstun: 15, fx: "blunt", pushX: 3.4 })],
       desc: "Fast shield punch. Your best button up close and it chains into everything.",
       notation: "A",
@@ -231,6 +235,10 @@ export const ROMAN: FighterDef = {
       duration: 24,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 22],
+      // Pilum Drill string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 8, to: 21, string: "Pilum Drill" },
+      ],
       hits: [hit(8, 11, bx(34, 54, 84, 20), 62, { fx: "pierce", pushX: 5, hitstun: 18 })],
       desc: "Straight thrust with huge reach. The backbone of his zoning game.",
       notation: "B",
@@ -255,6 +263,10 @@ export const ROMAN: FighterDef = {
       duration: 34,
       cancelInto: ["special", "super"],
       cancelWindow: [14, 30],
+      // Pilum Drill string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 16, to: 31, string: "Pilum Drill" },
+      ],
       hits: [
         hit(16, 19, bx(24, 30, 78, 76), 92, {
           guard: "overhead",
@@ -351,6 +363,10 @@ export const ROMAN: FighterDef = {
       friction: 0.86,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 26],
+      // Shield Wall string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 10, to: 27, string: "Shield Wall" },
+      ],
       hits: [
         hit(10, 14, bx(24, 34, 56, 52), 70, {
           fx: "blunt",
@@ -411,6 +427,10 @@ export const ROMAN: FighterDef = {
       cancelWindow: [7, 18],
       vel: [{ at: 2, x: 2.2 }],
       friction: 0.88,
+      // Testudo string continues into 6B.
+      followUps: [
+        { button: "B", move: "6B", from: 7, to: 17, string: "Testudo" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { fx: "blunt", guard: "high", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Punches with the iron boss of the scutum. His fastest button and where pressure starts.",
       notation: "\u2192 + A",

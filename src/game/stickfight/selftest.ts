@@ -942,6 +942,70 @@ function scriptFor(move: MoveDef): RawInput[] {
 }
 
 // ---------------------------------------------------------------------------
+// Strings
+// ---------------------------------------------------------------------------
+//
+// A string is a route through the normals: each link names the move that
+// continues it and the button that does the continuing, and it continues
+// whether the hit landed or was blocked. That is what separates a string from
+// a cancel - you are committed to the rest of it either way.
+
+{
+  for (const def of ROSTER) {
+    const byId = new Map(def.moves.map((m) => [m.id, m]));
+
+    // The route has to exist and the window has to be inside the move.
+    for (const move of def.moves) {
+      for (const f of move.followUps ?? []) {
+        const next = byId.get(f.move);
+        check(`${def.id}.${move.id}: follow-up ${f.move} exists`, !!next, f.move);
+        check(
+          `${def.id}.${move.id}: follow-up window sits inside the move`,
+          f.from <= f.to && f.to < move.duration,
+          `${f.from}-${f.to} of ${move.duration}`,
+        );
+      }
+    }
+
+    // And it has to actually chain when you press the button.
+    for (const move of def.moves) {
+      if (!move.followUps?.length) continue;
+      if (move.tags?.includes("super") || move.internal) continue;
+      for (const f of move.followUps) {
+        const next = byId.get(f.move);
+        if (!next) continue;
+        const m = newMatch(def.id, "roman");
+        const me = m.fighters[0];
+        // Far apart, so nothing connects: a string must continue off a whiff.
+        me.x = -300;
+        m.fighters[1].x = 300;
+        if (def.resource) me.resource = def.resource.max;
+
+        const script = scriptFor(move);
+        let started = -1;
+        let chained = false;
+        for (let i = 0; i < 160 && !chained; i++) {
+          let step = script[i] ?? inp();
+          if (started >= 0 && me.move?.id === move.id && me.moveFrame >= f.from && me.moveFrame <= f.to) {
+            step = inp({ [f.button]: true });
+          }
+          m.step([step, inp()]);
+          if (started < 0 && me.move?.id === move.id) started = i;
+          // Only counts while the lead move could still be running - after
+          // that a buffered press just starts the move on its own.
+          if (started >= 0 && i - started <= move.duration && me.move?.id === next.id) chained = true;
+        }
+        check(
+          `${def.id}: ${move.id} strings into ${f.move} on ${f.button}`,
+          chained,
+          started < 0 ? `${move.id} never came out` : me.move?.id ?? "nothing",
+        );
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);

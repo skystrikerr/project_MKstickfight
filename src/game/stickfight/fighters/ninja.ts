@@ -197,6 +197,10 @@ export const NINJA: FighterDef = {
       duration: 12,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 11],
+      // Kunai Flurry string continues into 4A.
+      followUps: [
+        { button: "A", move: "4A", from: 4, to: 9, string: "Kunai Flurry" },
+      ],
       hits: [hit(4, 6, bx(16, 56, 44, 20), 26, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 2.4 })],
       desc: "Open hand off the front shoulder. Four frames and it cancels into everything.",
       notation: "A",
@@ -215,6 +219,10 @@ export const NINJA: FighterDef = {
       duration: 19,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [7, 17],
+      // Tanto Work string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 6, to: 16, string: "Tanto Work" },
+      ],
       hits: [hit(6, 9, bx(18, 46, 58, 34), 50, { fx: "slash", pushX: 4, hitstun: 18 })],
       desc: "Short blade across the middle. Fast for a weapon button.",
       notation: "B",
@@ -234,6 +242,10 @@ export const NINJA: FighterDef = {
       duration: 29,
       cancelInto: ["special", "super"],
       cancelWindow: [13, 25],
+      // Shadow Kicks string continues into 4B.
+      followUps: [
+        { button: "B", move: "4B", from: 12, to: 26, string: "Shadow Kicks" },
+      ],
       hits: [
         hit(12, 16, bx(20, 44, 76, 40), 82, {
           fx: "blunt",
@@ -366,6 +378,10 @@ export const NINJA: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [6, 18],
+      // Kunai Flurry string continues into 5A.
+      followUps: [
+        { button: "A", move: "5A", from: 6, to: 17, string: "Kunai Flurry" },
+      ],
       hits: [hit(6, 8, bx(20, 60, 44, 26), 28, { guard: "high", fx: "slash", pushX: 3, hitstun: 13, hitstop: 5 })],
       desc: "Steps in and flicks the kunai across. Her fastest button by a wide margin.",
       notation: "\u2192 + A",
@@ -389,6 +405,10 @@ export const NINJA: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
+      // Tanto Work string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 16, to: 37, string: "Tanto Work" },
+      ],
       hits: [hit(16, 20, bx(18, 22, 64, 68), 88, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Closes and drags the blade through on the way past. Puts them in the wall.",
       notation: "\u2192 + C",

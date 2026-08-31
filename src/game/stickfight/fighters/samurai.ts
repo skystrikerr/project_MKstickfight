@@ -191,6 +191,10 @@ export const SAMURAI: FighterDef = {
       duration: 13,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 12],
+      // Kenjutsu Kata string continues into 5B.
+      followUps: [
+        { button: "B", move: "5B", from: 4, to: 10, string: "Kenjutsu Kata" },
+      ],
       hits: [hit(4, 6, bx(18, 52, 44, 22), 32, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 3 })],
       desc: "Jab with the sword hilt - the blade never leaves the scabbard. Fast and cancellable.",
       notation: "A",
@@ -209,6 +213,11 @@ export const SAMURAI: FighterDef = {
       duration: 22,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 20],
+      // Kenjutsu Kata string continues into 6C, Two Cuts string continues into 4B.
+      followUps: [
+        { button: "C", move: "6C", from: 8, to: 19, string: "Kenjutsu Kata" },
+        { button: "B", move: "4B", from: 8, to: 19, string: "Two Cuts" },
+      ],
       hits: [hit(8, 11, bx(24, 44, 78, 42), 56, { fx: "slash", pushX: 4.6, hitstun: 18 })],
       desc: "Diagonal shoulder-to-hip cut with real reach. Her main poke.",
       notation: "B",
@@ -360,6 +369,10 @@ export const SAMURAI: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Rising Cut string continues into 3C.
+      followUps: [
+        { button: "C", move: "3C", from: 7, to: 17, string: "Rising Cut" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "pierce", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "A short step and a straight thrust off the hip. Her quickest opening.",
       notation: "\u2192 + A",
@@ -430,6 +443,10 @@ export const SAMURAI: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
+      // Two Cuts string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 12, to: 27, string: "Two Cuts" },
+      ],
       hits: [hit(12, 15, bx(26, 44, 82, 46), 56, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Draws back and cuts upward from low guard. Her counter to anything reaching in.",
       notation: "\u2190 + B",

@@ -211,6 +211,10 @@ export const MONGOL: FighterDef = {
       duration: 12,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 11],
+      // Stave Work string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 4, to: 9, string: "Stave Work" },
+      ],
       hits: [hit(4, 6, bx(18, 54, 46, 20), 26, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 2.4 })],
       desc: "Pokes the bow tip into their face. Her only fast button, and she needs it.",
       notation: "A",
@@ -229,6 +233,10 @@ export const MONGOL: FighterDef = {
       duration: 22,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 20],
+      // Bow Sweep string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 8, to: 19, string: "Bow Sweep" },
+      ],
       hits: [hit(8, 12, bx(20, 44, 62, 34), 50, { fx: "blunt", pushX: 4.6, hitstun: 18 })],
       desc: "Swings the horn limb across at chest height to make room.",
       notation: "B",
@@ -394,6 +402,10 @@ export const MONGOL: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Stave Work string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 7, to: 17, string: "Stave Work" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Steps in and jabs with the tip of the bow. Buys him the room to draw again.",
       notation: "\u2192 + A",
@@ -440,6 +452,10 @@ export const MONGOL: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
+      // Loose At Range string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 8, to: 19, string: "Loose At Range" },
+      ],
       hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Steps off and whips the string hand back across their face.",
       notation: "\u2190 + A",

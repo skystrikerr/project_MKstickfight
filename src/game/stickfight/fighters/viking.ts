@@ -207,6 +207,10 @@ export const VIKING: FighterDef = {
       duration: 14,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 13],
+      // Buckler Bind string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 4, to: 11, string: "Buckler Bind" },
+      ],
       hits: [hit(4, 6, bx(18, 52, 46, 22), 36, { fx: "blunt", hitstun: 15, blockstun: 11, pushX: 3.4 })],
       desc: "Short shield smash. Her fastest button and it chains into everything.",
       notation: "A",
@@ -225,6 +229,10 @@ export const VIKING: FighterDef = {
       duration: 24,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [9, 22],
+      // Axe Work string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 9, to: 21, string: "Axe Work" },
+      ],
       hits: [hit(9, 12, bx(22, 40, 74, 46), 62, { fx: "slash", pushX: 5, hitstun: 18 })],
       desc: "Horizontal chop across the ribs. Her bread-and-butter poke.",
       notation: "B",
@@ -245,6 +253,10 @@ export const VIKING: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [15, 30],
       armor: [{ from: 3, to: 14, hits: 1, damageScale: 0.4 }],
+      // Axe Work string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 15, to: 31, string: "Axe Work" },
+      ],
       hits: [
         hit(15, 19, bx(18, 22, 76, 80), 98, {
           fx: "slash",
@@ -377,6 +389,10 @@ export const VIKING: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Buckler Bind string continues into 6B.
+      followUps: [
+        { button: "B", move: "6B", from: 7, to: 17, string: "Buckler Bind" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Punches in with the iron boss of the shield. Her fastest way in.",
       notation: "\u2192 + A",
@@ -400,6 +416,10 @@ export const VIKING: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
+      // Cleaving Blow string continues into 3C.
+      followUps: [
+        { button: "C", move: "3C", from: 16, to: 37, string: "Cleaving Blow" },
+      ],
       hits: [hit(16, 20, bx(18, 22, 64, 68), 96, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
       desc: "Steps in and buries the axe. No guard on the way in and none on the way out.",
       notation: "\u2192 + C",

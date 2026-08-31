@@ -191,6 +191,11 @@ export const MUAYTHAI: FighterDef = {
       duration: 11,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 10],
+      // Hands string continues into 5A, Hands string continues into 5B.
+      followUps: [
+        { button: "A", move: "5A", from: 3, to: 8, string: "Hands" },
+        { button: "B", move: "5B", from: 3, to: 8, string: "Hands" },
+      ],
       hits: [hit(3, 5, bx(16, 56, 42, 20), 28, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 2.6 })],
       desc: "The fastest button in the game. Three frames, cancels into everything.",
       notation: "A",
@@ -209,6 +214,10 @@ export const MUAYTHAI: FighterDef = {
       duration: 20,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Elbow Chain string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 7, to: 17, string: "Elbow Chain" },
+      ],
       hits: [hit(7, 10, bx(18, 52, 50, 30), 54, { fx: "blunt", pushX: 4.4, hitstun: 18 })],
       desc: "Turns the hips over and drives the elbow through. Short, and it hurts.",
       notation: "B",
@@ -360,6 +369,10 @@ export const MUAYTHAI: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [6, 18],
+      // Long Legs string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 6, to: 17, string: "Long Legs" },
+      ],
       hits: [hit(6, 8, bx(24, 44, 56, 26), 28, { guard: "high", fx: "blunt", pushX: 14, hitstun: 13, hitstop: 6 })],
       desc: "Push kick to the belly. Not damage - it stops them walking in and resets the round.",
       notation: "\u2192 + A",
@@ -408,6 +421,10 @@ export const MUAYTHAI: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
+      // Elbow Chain string continues into 5B.
+      followUps: [
+        { button: "B", move: "5B", from: 8, to: 19, string: "Elbow Chain" },
+      ],
       hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "slash", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Steps out and cuts back with the point of the elbow. Short and it opens skin.",
       notation: "\u2190 + A",

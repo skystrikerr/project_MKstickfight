@@ -723,6 +723,7 @@ export class Fighter {
         const next = this.findMove(f.move);
         if (!next) continue;
         if (next.resourceMin !== undefined && this.resource < next.resourceMin) continue;
+        if (next.resourceCost !== undefined && this.resource < next.resourceCost) continue;
         this.input.consume(f.button);
         this.startMove(next, true);
         return;

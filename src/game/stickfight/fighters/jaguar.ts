@@ -228,6 +228,10 @@ export const JAGUAR: FighterDef = {
       duration: 12,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 11],
+      // Obsidian Teeth string continues into 5B.
+      followUps: [
+        { button: "B", move: "5B", from: 3, to: 9, string: "Obsidian Teeth" },
+      ],
       hits: [hit(3, 5, bx(18, 54, 40, 20), 28, { blockstun: 9, hitstun: 13, fx: "slash", pushX: 2.6 })],
       desc: "A three-frame rake across the face. The fastest button in the game and it chains into itself.",
       notation: "A",
@@ -246,6 +250,10 @@ export const JAGUAR: FighterDef = {
       duration: 21,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [7, 19],
+      // Obsidian Teeth string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 7, to: 18, string: "Obsidian Teeth" },
+      ],
       hits: [hit(7, 10, bx(24, 44, 70, 34), 56, { fx: "slash", pushX: 4.4, hitstun: 17 })],
       desc: "A flat swing at chest height. His main poke - fast, long, and it cancels.",
       notation: "B",
@@ -267,6 +275,10 @@ export const JAGUAR: FighterDef = {
       resourceMin: 1,
       cancelInto: ["special", "super"],
       cancelWindow: [13, 26],
+      // Rend string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 13, to: 27, string: "Rend" },
+      ],
       hits: [
         hit(13, 17, bx(20, 30, 76, 62), 92, {
           fx: "slash",
@@ -359,6 +371,10 @@ export const JAGUAR: FighterDef = {
       duration: 28,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 25],
+      // Capture Rush string continues into 3C.
+      followUps: [
+        { button: "C", move: "3C", from: 16, to: 25, string: "Capture Rush" },
+      ],
       hits: [
         hit(16, 19, bx(18, 40, 56, 62), 64, {
           guard: "overhead",
@@ -420,6 +436,10 @@ export const JAGUAR: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [6, 18],
+      // Capture Rush string continues into 6B.
+      followUps: [
+        { button: "B", move: "6B", from: 6, to: 17, string: "Capture Rush" },
+      ],
       hits: [hit(6, 8, bx(20, 60, 44, 26), 30, { guard: "high", fx: "slash", pushX: 3, hitstun: 13, hitstop: 5 })],
       desc: "Steps in and drags the obsidian across. Fast enough to start anything.",
       notation: "\u2192 + A",

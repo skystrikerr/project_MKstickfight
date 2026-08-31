@@ -208,6 +208,10 @@ export const ZULU: FighterDef = {
       duration: 13,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 12],
+      // Shield Hook string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 4, to: 10, string: "Shield Hook" },
+      ],
       hits: [hit(4, 6, bx(18, 52, 42, 24), 32, { blockstun: 10, hitstun: 14, fx: "blunt", pushX: 3 })],
       desc: "Snaps the rim of the shield into their face. Fast, and it opens every string he has.",
       notation: "A",
@@ -226,6 +230,10 @@ export const ZULU: FighterDef = {
       duration: 20,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Iklwa Work string continues into 4B.
+      followUps: [
+        { button: "B", move: "4B", from: 7, to: 17, string: "Iklwa Work" },
+      ],
       hits: [hit(7, 9, bx(24, 48, 60, 22), 58, { fx: "pierce", pushX: 4.2, hitstun: 18 })],
       desc: "Straight underarm thrust from behind the shield. Short, quick, and hard to see coming.",
       notation: "B",
@@ -336,6 +344,10 @@ export const ZULU: FighterDef = {
       duration: 27,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 24],
+      // Rim Strike string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 16, to: 24, string: "Rim Strike" },
+      ],
       hits: [
         hit(16, 19, bx(16, 42, 52, 58), 62, {
           guard: "overhead",
@@ -397,6 +409,10 @@ export const ZULU: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Shield Hook string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 7, to: 17, string: "Shield Hook" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Drives the shield edge in to hook theirs aside. Opens them up for everything else.",
       notation: "\u2192 + A",
@@ -465,6 +481,10 @@ export const ZULU: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
+      // Iklwa Work string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 12, to: 27, string: "Iklwa Work" },
+      ],
       hits: [hit(12, 15, bx(30, 46, 76, 22), 56, { guard: "mid", fx: "pierce", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Gives ground and stabs out low from behind the shield. Exactly what the iklwa was made for.",
       notation: "\u2190 + B",

@@ -195,6 +195,10 @@ export const WESTERN: FighterDef = {
       duration: 13,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 12],
+      // Fanning string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 4, to: 10, string: "Fanning" },
+      ],
       hits: [hit(4, 6, bx(18, 54, 46, 22), 32, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 3 })],
       desc: "Backhand with the revolver. Quick, cancellable, gets him out of trouble.",
       notation: "A",
@@ -213,6 +217,10 @@ export const WESTERN: FighterDef = {
       duration: 20,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Bare Knuckle string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 7, to: 17, string: "Bare Knuckle" },
+      ],
       hits: [hit(7, 10, bx(22, 50, 58, 26), 52, { fx: "blunt", pushX: 4.4, hitstun: 17 })],
       desc: "Honest straight punch. Confirms into the quickdraw.",
       notation: "B",
@@ -232,6 +240,10 @@ export const WESTERN: FighterDef = {
       duration: 30,
       cancelInto: ["special", "super"],
       cancelWindow: [13, 26],
+      // Bare Knuckle string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 13, to: 27, string: "Bare Knuckle" },
+      ],
       hits: [
         hit(13, 17, bx(20, 40, 66, 46), 88, {
           fx: "blunt",
@@ -364,6 +376,10 @@ export const WESTERN: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Fanning string continues into 4A.
+      followUps: [
+        { button: "A", move: "4A", from: 7, to: 17, string: "Fanning" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Steps in and jabs the barrel into their face. Quick and mean.",
       notation: "\u2192 + A",
@@ -387,6 +403,10 @@ export const WESTERN: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
+      // Bull Rush string continues into 3C.
+      followUps: [
+        { button: "C", move: "3C", from: 16, to: 37, string: "Bull Rush" },
+      ],
       hits: [hit(16, 20, bx(18, 22, 64, 68), 92, { guard: "mid", fx: "blunt", pushX: 18, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
       desc: "Walks in and throws everything behind one hand. Ends the exchange or ends him.",
       notation: "\u2192 + C",

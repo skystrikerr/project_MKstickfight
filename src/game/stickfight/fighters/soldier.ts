@@ -193,8 +193,12 @@ export const SOLDIER: FighterDef = {
       showProps: ["knife"],
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 11],
+      // Knife Work string continues into 4A.
+      followUps: [
+        { button: "A", move: "4A", from: 3, to: 9, string: "Knife Work" },
+      ],
       hits: [hit(3, 5, bx(16, 52, 44, 22), 30, { fx: "slash", hitstun: 14, blockstun: 10, pushX: 2.8 })],
-      desc: "Three-frame knife jab. His fastest button, and it chains into itself and into the rifle.",
+      desc: "Three-frame knife jab. His fastest button, and the head of the knife string.",
       notation: "A",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -211,6 +215,10 @@ export const SOLDIER: FighterDef = {
       duration: 21,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 19],
+      // Butt-Strokes string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 8, to: 18, string: "Butt-Strokes" },
+      ],
       hits: [hit(8, 11, bx(20, 46, 58, 34), 54, { fx: "blunt", pushX: 4.6, hitstun: 17 })],
       desc: "Swings the stock into their jaw. Solid confirm into a shot.",
       notation: "B",
@@ -400,6 +408,10 @@ export const SOLDIER: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Muzzle To Shot string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 7, to: 17, string: "Muzzle To Shot" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Steps in and jabs the muzzle into them. Short, fast, buys space to shoot.",
       notation: "\u2192 + A",
@@ -424,6 +436,10 @@ export const SOLDIER: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
+      // Butt-Strokes string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 16, to: 37, string: "Butt-Strokes" },
+      ],
       hits: [hit(16, 20, bx(18, 22, 64, 68), 90, { guard: "mid", fx: "blunt", pushX: 16, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Steps through and drives the stock up under the jaw. Standard close-quarters drill.",
       notation: "\u2192 + C",
@@ -448,6 +464,10 @@ export const SOLDIER: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
+      // Knife Work string continues into 2A.
+      followUps: [
+        { button: "A", move: "2A", from: 8, to: 19, string: "Knife Work" },
+      ],
       hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "slash", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Steps back and cuts across with the knife. Keeps hands off him.",
       notation: "\u2190 + A",

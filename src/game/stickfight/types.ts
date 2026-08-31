@@ -378,7 +378,12 @@ export interface MoveDef {
   /** Can be cancelled even on block. */
   cancelOnBlock?: boolean;
   /** Follow-up move ids reachable by pressing a button during this move. */
-  followUps?: { button: Button; move: string; from: number; to: number }[];
+  /**
+   * Routes into another move when the button is pressed in the window,
+   * whether the hit landed or was blocked. `string` names the sequence it
+   * belongs to, which is how the move list groups it.
+   */
+  followUps?: { button: Button; move: string; from: number; to: number; string?: string }[];
   /** Loops back to this frame while the button is held (stances, charges). */
   holdLoop?: { from: number; to: number; button: Button; maxFrames?: number };
   /** Move to run when the hold ends (for stances). */

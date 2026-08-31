@@ -187,6 +187,10 @@ export const SHAOLIN: FighterDef = {
       duration: 13,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 12],
+      // Staff Form string continues into 5B.
+      followUps: [
+        { button: "B", move: "5B", from: 4, to: 10, string: "Staff Form" },
+      ],
       hits: [hit(4, 6, bx(18, 52, 44, 22), 30, { blockstun: 10, hitstun: 14, fx: "blunt", pushX: 3 })],
       desc: "Snaps the near end of the staff into their face. His only genuinely fast button.",
       notation: "A",
@@ -205,6 +209,10 @@ export const SHAOLIN: FighterDef = {
       duration: 24,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [9, 22],
+      // Staff Form string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 9, to: 21, string: "Staff Form" },
+      ],
       hits: [hit(9, 12, bx(34, 50, 92, 20), 56, { fx: "blunt", pushX: 5, hitstun: 18 })],
       desc: "Runs the staff out to full length. The longest normal in the game - he lives at this distance.",
       notation: "B",
@@ -377,6 +385,10 @@ export const SHAOLIN: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
+      // Rising Pole string continues into 3C.
+      followUps: [
+        { button: "C", move: "3C", from: 7, to: 17, string: "Rising Pole" },
+      ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Slides the hands and drives the tip out. The staff's fastest answer.",
       notation: "\u2192 + A",
@@ -447,6 +459,10 @@ export const SHAOLIN: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
+      // Pole Sweep string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 12, to: 27, string: "Pole Sweep" },
+      ],
       hits: [hit(12, 15, bx(48, 50, 112, 22), 56, { guard: "mid", fx: "blunt", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Gives ground and holds the far end out. Nothing on the roster reaches past this.",
       notation: "\u2190 + B",

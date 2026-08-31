@@ -219,6 +219,10 @@ export const SPARTAN: FighterDef = {
       duration: 14,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 13],
+      // Aspis Work string continues into 6A.
+      followUps: [
+        { button: "A", move: "6A", from: 4, to: 11, string: "Aspis Work" },
+      ],
       hits: [hit(4, 6, bx(20, 50, 48, 24), 36, { fx: "blunt", hitstun: 15, blockstun: 11, pushX: 3.6 })],
       desc: "Short punch with the rim of the aspis. His fastest button.",
       notation: "A",
@@ -237,6 +241,10 @@ export const SPARTAN: FighterDef = {
       duration: 24,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [9, 22],
+      // Dory Drill string continues into 4B.
+      followUps: [
+        { button: "B", move: "4B", from: 9, to: 21, string: "Dory Drill" },
+      ],
       hits: [hit(9, 12, bx(30, 56, 88, 22), 62, { fx: "pierce", pushX: 5, hitstun: 18 })],
       desc: "Spear thrust over the shield wall - long, and safe behind the aspis.",
       notation: "B",
@@ -350,6 +358,10 @@ export const SPARTAN: FighterDef = {
       friction: 0.86,
       cancelInto: ["special", "super"],
       cancelWindow: [13, 28],
+      // Othismos string continues into 6C.
+      followUps: [
+        { button: "C", move: "6C", from: 11, to: 29, string: "Othismos" },
+      ],
       hits: [
         hit(11, 15, bx(24, 30, 58, 58), 72, {
           fx: "blunt",
@@ -406,6 +418,10 @@ export const SPARTAN: FighterDef = {
       cancelWindow: [7, 18],
       vel: [{ at: 2, x: 2.2 }],
       friction: 0.88,
+      // Aspis Work string continues into 5C.
+      followUps: [
+        { button: "C", move: "5C", from: 7, to: 17, string: "Aspis Work" },
+      ],
       hits: [hit(7, 9, bx(22, 62, 46, 26), 34, { fx: "blunt", guard: "high", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Steps in behind the rim. His fastest button and the way most of his pressure starts.",
       notation: "\u2192 + A",
@@ -489,6 +505,10 @@ export const SPARTAN: FighterDef = {
       vel: [{ at: 1, x: -3.4 }],
       friction: 0.88,
       // The whole point: he leaves, the point stays. Longest poke he has.
+      // Dory Drill string continues into 4C.
+      followUps: [
+        { button: "C", move: "4C", from: 12, to: 27, string: "Dory Drill" },
+      ],
       hits: [hit(12, 15, bx(44, 54, 104, 22), 58, { fx: "pierce", guard: "mid", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Steps off the line and reaches. His longest button - beats anything that has to walk in.",
       notation: "\u2190 + B",
