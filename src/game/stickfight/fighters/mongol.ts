@@ -81,10 +81,12 @@ export const MONGOL: FighterDef = {
   }),
   resource: {
     name: "Quiver",
-    max: 6,
-    start: 6,
-    // About one arrow per second of not shooting.
-    regen: 0.018,
+    // A hundred arrows - a campaign quiver rather than a handful. He is a
+    // horse archer; running dry mid-round is not the thing that beats him.
+    max: 100,
+    start: 100,
+    // Spent shafts get picked up between exchanges, slowly.
+    regen: 0.02,
     regenIdleOnly: true,
     color: SHAFT,
     pips: true,
@@ -880,7 +882,7 @@ export const MONGOL: FighterDef = {
       tags: ["skill"],
       priority: 18,
       duration: 46,
-      resourceGain: 3,
+      resourceGain: 25,
       meterGain: 12,
       friction: 0.9,
       desc: "SKILL. Pulls three arrows from the quiver and holds them in the bow hand. Long, and completely defenceless - do it from across the screen.",

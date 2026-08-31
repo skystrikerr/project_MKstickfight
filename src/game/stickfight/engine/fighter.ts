@@ -95,6 +95,8 @@ export class Fighter {
   meter = 0;
   guard = COMBAT.maxGuard;
   resource: number;
+  /** Refills left. Only meaningful when the fighter carries spare magazines. */
+  spares: number;
 
   state: StateName = "idle";
   stateFrame = 0;
@@ -161,6 +163,7 @@ export class Fighter {
     this.index = index;
     this.health = def.stats.health;
     this.resource = def.resource?.start ?? 0;
+    this.spares = def.resource?.spares ?? 0;
   }
 
   // -------------------------------------------------------------------------
@@ -677,7 +680,14 @@ export class Fighter {
     const landed = move.landCancel && this.grounded && this.moveFrame > 2;
     if (this.moveFrame >= move.duration || landed) {
       if (move.resourceGain) {
-        this.resource = Math.min(this.def.resource?.max ?? 0, this.resource + move.resourceGain);
+        // A reload draws on a spare when the fighter carries them. Running out
+        // of magazines is the real ammunition limit; what is in the weapon is
+        // only the part of it you can see.
+        const spent = this.def.resource?.spares !== undefined;
+        if (!spent || this.spares > 0) {
+          if (spent) this.spares--;
+          this.resource = Math.min(this.def.resource?.max ?? 0, this.resource + move.resourceGain);
+        }
       }
       if (move.meterGain) this.addMeter(move.meterGain);
       else if (move.hits?.length && !this.moveHasHit && !this.moveHasBlocked) {
@@ -924,6 +934,8 @@ export class Fighter {
       if (move.meterCost && this.meter < move.meterCost) continue;
       if (move.resourceMin !== undefined && this.resource < move.resourceMin) continue;
       if (move.resourceCost && this.resource < move.resourceCost) continue;
+      // Out of magazines: there is nothing to reload with.
+      if (move.resourceGain && this.def.resource?.spares !== undefined && this.spares <= 0) continue;
       if (!this.inputMatches(move)) continue;
 
       const score = this.moveScore(move);

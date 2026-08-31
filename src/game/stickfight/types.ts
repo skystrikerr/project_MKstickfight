@@ -499,6 +499,17 @@ export interface ResourceDef {
   color: string;
   /** Rendered as discrete pips (bullets) instead of a bar. */
   pips?: boolean;
+  /**
+   * Spare magazines. When set, what a reload refills is finite: the fighter
+   * carries this many refills and no more, so the ammunition that matters is
+   * the total across the round rather than what is in the weapon now.
+   *
+   * Left unset, reloads are unlimited - a revolver and a handful of loose
+   * cartridges, rather than a rifleman's three magazines.
+   */
+  spares?: number;
+  /** What one spare is called, for the HUD. */
+  spareName?: string;
 }
 
 export interface FighterStats {

@@ -46,7 +46,16 @@ export interface PlayerHud {
   maxMeter: number;
   guard: number;
   wins: number;
-  resource?: { name: string; value: number; max: number; color: string; pips: boolean };
+  resource?: {
+    name: string;
+    value: number;
+    max: number;
+    color: string;
+    pips: boolean;
+    /** Refills left, for fighters who carry a finite number of them. */
+    spares?: number;
+    spareName?: string;
+  };
   combo: number;
   comboDamage: number;
   accent: string;
@@ -318,7 +327,15 @@ export class GameSession {
         guard: f.guard,
         wins: f.wins,
         resource: res
-          ? { name: res.name, value: f.resource, max: res.max, color: res.color, pips: !!res.pips }
+          ? {
+              name: res.name,
+              value: f.resource,
+              max: res.max,
+              color: res.color,
+              pips: !!res.pips,
+              spares: res.spares === undefined ? undefined : f.spares,
+              spareName: res.spareName,
+            }
           : undefined,
         combo: m.combo[i as 0 | 1]?.hits ?? 0,
         comboDamage: m.combo[i as 0 | 1]?.damage ?? 0,

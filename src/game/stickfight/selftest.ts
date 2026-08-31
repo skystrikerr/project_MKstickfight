@@ -744,6 +744,71 @@ function scriptFor(move: MoveDef): RawInput[] {
 }
 
 // ---------------------------------------------------------------------------
+// Ammunition
+// ---------------------------------------------------------------------------
+{
+  // A ranged fighter has to be able to run out, and has to be able to do
+  // something about it. Both halves matter: infinite ammunition makes a zoner
+  // unbeatable, and ammunition with no way back makes them useless.
+  for (const def of ROSTER) {
+    const res = def.resource;
+    if (!res) continue;
+    const shooters = def.moves.filter((mv) => (mv.projectiles?.length ?? 0) > 0 && (mv.resourceCost ?? 0) > 0);
+    if (!shooters.length) continue;
+
+    // The reload is the skill on A+C where there is one; some fighters also
+    // gain resource off a special, which is not the same thing.
+    const reload =
+      def.moves.find((mv) => (mv.resourceGain ?? 0) > 0 && mv.input.buttons?.length === 2) ??
+      def.moves.find((mv) => (mv.resourceGain ?? 0) > 0);
+    // Either a move that puts ammunition back, or it comes back on its own.
+    check(
+      `${def.id}: can put ammunition back`,
+      !!reload || (res.regen ?? 0) > 0,
+      reload?.id ?? (res.regen ? `regen ${res.regen}` : "no way to rearm"),
+    );
+
+    const m = newMatch(def.id, "roman");
+    const f = m.fighters[0];
+    f.x = -200;
+    m.fighters[1].x = 200;
+
+    // Empty, and the shot must stop coming out.
+    f.resource = 0;
+    run(m, 4, () => inp());
+    const shot = shooters[0];
+    m.step([inp({ [shot.input.button ?? "C"]: true }), inp()]);
+    check(`${def.id}: cannot shoot on an empty ${res.name.toLowerCase()}`, f.move?.id !== shot.id, f.move?.id ?? "none");
+
+    if (!reload) continue;
+    // Reloading refills it, and only as often as they have spares for.
+    let reloads = 0;
+    for (let i = 0; i < 8; i++) {
+      // Let whatever the last press started finish - pressing the shot button
+      // on an empty magazine still gives you the normal on that button.
+      run(m, 60, () => inp());
+      f.resource = 0;
+      m.step([inp({ A: true, C: true }), inp()]);
+      if (f.move?.id !== reload.id) break;
+      run(m, reload.duration + 4, () => inp());
+      reloads++;
+    }
+    if (res.spares === undefined) {
+      check(`${def.id}: can keep reloading`, reloads >= 8, `${reloads}`);
+    } else {
+      check(`${def.id}: carries exactly ${res.spares} spare`, reloads === res.spares, `${reloads} reloads`);
+      check(`${def.id}: is out once the spares are gone`, f.spares === 0, `${f.spares} left`);
+    }
+  }
+
+  // The numbers the roster is meant to carry.
+  const trooper = getFighter("soldier").resource!;
+  check("trooper: three thirty-round magazines", trooper.max === 30 && trooper.spares === 2, `${trooper.max}x${(trooper.spares ?? 0) + 1}`);
+  check("Earp: a six-round cylinder he can keep refilling", getFighter("western").resource!.max === 6 && getFighter("western").resource!.spares === undefined);
+  check("Subutai: a hundred arrows", getFighter("mongol").resource!.max === 100);
+}
+
+// ---------------------------------------------------------------------------
 
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);

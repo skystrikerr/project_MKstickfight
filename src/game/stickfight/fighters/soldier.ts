@@ -76,8 +76,13 @@ export const SOLDIER: FighterDef = {
   }),
   resource: {
     name: "Rounds",
-    max: 20,
-    start: 20,
+    // Three magazines of thirty. One in the rifle, two on the belt - when
+    // those are gone the rifle is a club, which is what the butt-strokes and
+    // the knife are for.
+    max: 30,
+    start: 30,
+    spares: 2,
+    spareName: "Mags",
     color: BRASS,
   },
   props: [
@@ -793,7 +798,7 @@ export const SOLDIER: FighterDef = {
       tags: ["skill"],
       priority: 18,
       duration: 54,
-      resourceGain: 20,
+      resourceGain: 30,
       meterGain: 10,
       friction: 0.9,
       desc: "SKILL. Drops the magazine and seats a fresh one - all twenty rounds. Long enough that they will make you pay if they are close.",

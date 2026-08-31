@@ -82,6 +82,17 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
             <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/55">
               {player.resource.name}
             </span>
+            {/* Spare magazines. Knowing the belt is empty matters more than
+                knowing the magazine is, so it sits next to the name. */}
+            {player.resource.spares !== undefined && (
+              <span
+                className="text-[9px] font-bold uppercase tracking-[0.15em] tabular-nums"
+                style={{ color: player.resource.spares > 0 ? player.resource.color : "#ff6b6b" }}
+                title={player.resource.spareName ?? "spare reloads"}
+              >
+                {player.resource.spareName ?? "Spare"} &times;{player.resource.spares}
+              </span>
+            )}
             {player.resource.pips ? (
               <div className={`flex gap-1 ${flip ? "flex-row-reverse" : ""}`}>
                 {Array.from({ length: player.resource.max }).map((_, i) => (
