@@ -200,6 +200,39 @@ for (const def of ROSTER) contract(def);
 }
 
 {
+  // ...and it has to cover that ground honestly. A foot resting on the floor
+  // while the body slides is skating, and it was the first thing that went
+  // wrong once the dodge was made to travel: 119 units of foot slide over 59
+  // units of movement, feet crossing the floor faster than the fighter moved.
+  // The travel happens in the air now, so almost nothing is planted while
+  // anything is moving.
+  for (const def of ROSTER) {
+    const m = newMatch(def.id, "roman");
+    const f = m.fighters[0];
+    m.step([inp({ right: true, S: true }), inp()]);
+
+    let skate = 0;
+    let prev: { footF: number; footB: number; x: number } | null = null;
+    while (f.move?.tags?.includes("dodge")) {
+      const { pose, grounded } = f.pose();
+      const sk = buildSkeleton(pose, grounded, def.stats.scale);
+      const cur = { footF: f.x + sk.footF.x * f.facing, footB: f.x + sk.footB.x * f.facing, x: f.x };
+      const onFloor = Math.min(sk.footF.y, sk.footB.y, sk.toeF.y, sk.toeB.y) <= 1.5 && !pose.free;
+      // Only a planted foot under a *moving* body counts. A foot travelling
+      // under a stationary body is the leg being picked up.
+      if (prev && onFloor && Math.abs(cur.x - prev.x) > 0.1) {
+        skate += sk.footF.y <= sk.footB.y
+          ? Math.abs(cur.footF - prev.footF)
+          : Math.abs(cur.footB - prev.footB);
+      }
+      prev = cur;
+      m.step([inp(), inp()]);
+    }
+    check(`${def.id}: the dodge does not skate`, skate < 20, `${skate.toFixed(1)} units of foot slide`);
+  }
+}
+
+{
   // Every fighter's five specials can actually be performed from their input.
   for (const def of ROSTER) {
     for (const move of def.moves.filter(isSpecial)) {

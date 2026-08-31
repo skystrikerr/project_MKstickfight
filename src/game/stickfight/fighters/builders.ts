@@ -69,9 +69,11 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
   const throwDamage = opts.throwDamage ?? 120;
   const backThrowDamage = opts.backThrowDamage ?? 130;
   const range = opts.throwRange ?? 62;
-  // Per-fighter dodge distance. `rollSpeed` kept its name from the roll
-  // this replaced so no fighter file has to change.
-  const stepSpeed = opts.rollSpeed ?? 7.5;
+  // Per-fighter dodge distance. `rollSpeed` kept its name from the roll this
+  // replaced so no fighter file has to change. The push now fires on frame 3
+  // rather than frame 1 - he has to get off the ground first - so the same
+  // authored number is given back the two frames of travel that cost it.
+  const stepSpeed = (opts.rollSpeed ?? 7.5) * 1.18;
   const w = opts.weaponIdle ?? {};
 
   return [
@@ -195,41 +197,45 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       priority: 55,
       duration: 20,
       invuln: [{ from: 3, to: 13, kind: "strike" }],
-      // Front-loaded: one hard push off the back foot, carried almost flat,
-      // then planted. A decaying glide reads as sliding, not stepping.
+      // The push happens on the ground; the travel happens in the air. Moving
+      // this fast with a foot planted is what made it skate.
       vel: [
-        { at: 1, x: stepSpeed },
+        { at: 3, x: stepSpeed },
         { at: 13, x: 0 },
       ],
       friction: 0.95,
       desc: "A hard step past the attack, staying on your feet and facing them the whole way.",
       notation: "\u2192 + S",
       /**
-       * A step, not a tumble.
+       * A step, not a tumble - and not a skate either.
        *
        * The roll this replaced turned 360 degrees while covering less ground
-       * than simply walking for the same thirty frames, which is exactly why
-       * it looked like spinning on the spot - all rotation, no travel. This
-       * goes further, in two thirds of the time, staying upright and facing
-       * the opponent so you can see what you stepped past.
+       * than simply walking for the same thirty frames, which is why it looked
+       * like spinning on the spot. Replacing it with a grounded step fixed the
+       * distance and introduced a different lie: 119 units of foot slide over
+       * 59 units of travel, because a planted foot cannot carry a body that
+       * fast. Feet slid across the floor faster than he moved.
        *
-       * The guard stays up throughout, which also keeps a long spear or staff
-       * out of the way without folding it into the body.
+       * So the weight goes onto the back leg, that leg drives, and he is off
+       * the ground for the whole fast part - which is what a real sidestep
+       * does. Nothing is planted while he is moving, so nothing can slide.
        */
       frames: [
-        // Gather: weight drops onto the back leg, the whole body loads.
+        // Gather: weight drops onto the back leg. Feet planted, body still.
         kf(0, { ...w, torso: 10, crouch: 0.34, hipF: 10, kneeF: 40, hipB: -30, kneeB: 58, offX: -3 }, "out"),
-        // Push: the back leg drives out behind, the lead knee lifts and
-        // reaches, and the body leans out over the step.
-        kf(4, { ...w, torso: 18, crouch: 0.22, hipF: 52, kneeF: 52, hipB: -44, kneeB: 26, offY: 4, head: -5 }, "out"),
-        // Carried: full stride, but standing tall enough to still be a step -
-        // sinking into it turns the whole thing into a slide.
-        kf(9, { ...w, torso: 14, crouch: 0.26, hipF: 60, kneeF: 34, hipB: -50, kneeB: 20, offY: 2, head: -3 }, "linear"),
-        // Plant: the lead foot catches the weight and the trailing leg swings
-        // through under the body.
-        kf(14, { ...w, torso: 12, crouch: 0.34, hipF: 30, kneeF: 58, hipB: -14, kneeB: 46, head: -2 }, "inOut"),
-        // Back to a fighting stance, feet under him.
-        kf(17, { ...w, torso: 8, crouch: 0.2, hipF: 20, kneeF: 34, hipB: -22, kneeB: 38 }, "inOut"),
+        // Drive: the back leg extends hard against the floor, the lead knee
+        // picks up. Last frame with anything on the ground.
+        kf(3, { ...w, torso: 18, crouch: 0.16, hipF: 44, kneeF: 74, hipB: -46, kneeB: 20, offX: -1, head: -4 }, "out"),
+        // Off the ground, opening into the stride.
+        kf(6, { ...w, free: 1, torso: 16, hipF: 62, kneeF: 44, hipB: -54, kneeB: 18, offY: 9, head: -4 }, "linear"),
+        // Full extension, still square to the opponent.
+        kf(10, { ...w, free: 1, torso: 13, hipF: 68, kneeF: 26, hipB: -50, kneeB: 22, offY: 7, head: -3 }, "in"),
+        // Reaching for the floor with the lead foot.
+        kf(12, { ...w, free: 1, torso: 12, hipF: 50, kneeF: 30, hipB: -34, kneeB: 34, offY: 2, head: -2 }, "in"),
+        // Land: the lead foot takes the weight and the knee absorbs it.
+        kf(14, { ...w, torso: 14, crouch: 0.38, hipF: 28, kneeF: 60, hipB: -18, kneeB: 50, head: -2 }, "out"),
+        // Trailing leg swings through underneath and he stands up into stance.
+        kf(17, { ...w, torso: 9, crouch: 0.16, hipF: 20, kneeF: 34, hipB: -22, kneeB: 38 }, "inOut"),
         kf(20, { ...w }),
       ],
     },
