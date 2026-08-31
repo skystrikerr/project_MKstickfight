@@ -645,6 +645,11 @@ export class Fighter {
         if (held && !maxed) {
           this.moveFrame = h.from;
         } else if (move.holdRelease) {
+          // Releasing is how this move ends, so it has ended - anything it
+          // was going to give back on completion is owed now. Without this a
+          // stance that reloads never pays out, because it always leaves by
+          // this path rather than by running out of frames.
+          this.applyResourceGain(move);
           this.startMove(move.holdRelease, true);
           return;
         }
@@ -679,16 +684,7 @@ export class Fighter {
 
     const landed = move.landCancel && this.grounded && this.moveFrame > 2;
     if (this.moveFrame >= move.duration || landed) {
-      if (move.resourceGain) {
-        // A reload draws on a spare when the fighter carries them. Running out
-        // of magazines is the real ammunition limit; what is in the weapon is
-        // only the part of it you can see.
-        const spent = this.def.resource?.spares !== undefined;
-        if (!spent || this.spares > 0) {
-          if (spent) this.spares--;
-          this.resource = Math.min(this.def.resource?.max ?? 0, this.resource + move.resourceGain);
-        }
-      }
+      this.applyResourceGain(move);
       if (move.meterGain) this.addMeter(move.meterGain);
       else if (move.hits?.length && !this.moveHasHit && !this.moveHasBlocked) {
         // A whiffed swing still builds a trickle of meter.
@@ -904,6 +900,19 @@ export class Fighter {
 
   addMeter(amount: number) {
     this.meter = Math.min(COMBAT.maxMeter, this.meter + amount);
+  }
+
+  /**
+   * Pays out a move's `resourceGain`, spending a spare magazine if the fighter
+   * carries them. Running out of magazines is the real ammunition limit; what
+   * is in the weapon is only the part of it you can see.
+   */
+  private applyResourceGain(move: MoveDef) {
+    if (!move.resourceGain) return;
+    const spares = this.def.resource?.spares !== undefined;
+    if (spares && this.spares <= 0) return;
+    if (spares) this.spares--;
+    this.resource = Math.min(this.def.resource?.max ?? 0, this.resource + move.resourceGain);
   }
 
   /**

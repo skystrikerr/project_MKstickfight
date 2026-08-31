@@ -857,7 +857,13 @@ export const ROMAN: FighterDef = {
       friction: 0.9,
       holdLoop: { from: 10, to: 20, button: "S", maxFrames: 90 },
       holdRelease: "testudoBash",
-      desc: "SKILL. Shield stance - absorbs up to two hits while you hold Guard, then releases into a counter bash.",
+      // Bracing is where he re-arms: a Roman line passed fresh pila forward to
+      // the front rank, and behind the scutum is the only moment he has both
+      // hands free. Only the brace gives them back - hold Guard and release
+      // into the bash and you have spent the moment attacking instead, which
+      // is the choice the stance is for.
+      resourceGain: 2,
+      desc: "SKILL. Shield stance - absorbs two hits and comes up with fresh pila, then bashes out of it. Hold Guard to stay in the shell longer.",
       notation: "A + C, hold S",
       frames: [
         kf(0, { ...STANCE }, "out"),

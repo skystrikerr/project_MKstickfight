@@ -761,12 +761,9 @@ function scriptFor(move: MoveDef): RawInput[] {
     const reload =
       def.moves.find((mv) => (mv.resourceGain ?? 0) > 0 && mv.input.buttons?.length === 2) ??
       def.moves.find((mv) => (mv.resourceGain ?? 0) > 0);
-    // Either a move that puts ammunition back, or it comes back on its own.
-    check(
-      `${def.id}: can put ammunition back`,
-      !!reload || (res.regen ?? 0) > 0,
-      reload?.id ?? (res.regen ? `regen ${res.regen}` : "no way to rearm"),
-    );
+    // Every shooter needs a move that rearms, not just passive regeneration -
+    // without one, firing on empty has nothing to fall back to.
+    check(`${def.id}: has a move that puts ammunition back`, !!reload, reload?.id ?? "regen only");
 
     const m = newMatch(def.id, "roman");
     const f = m.fighters[0];
