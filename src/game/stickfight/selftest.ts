@@ -60,6 +60,18 @@ function contract(def: FighterDef) {
   const moves = def.moves;
   const countTag = (tag: string) => moves.filter((m) => m.tags?.includes(tag as never)).length;
 
+  // The attack grid: every button has a neutral, a forward and a back, and
+  // crouching covers the lows. A hole here means part of the stick does
+  // nothing, which is what this looked like before the sets were filled in.
+  for (const slot of ["5A", "5B", "5C", "6A", "6B", "6C", "4A", "4B", "4C", "2A", "2B", "2C"]) {
+    check(`${def.id}: has ${slot}`, moves.some((m) => m.id === slot));
+  }
+  // ...and at least one of them must be an overhead, or crouch-blocking beats
+  // everything he has.
+  const levels = new Set(moves.flatMap((m) => (m.hits ?? []).map((h) => h.guard ?? "mid")));
+  check(`${def.id}: has an overhead`, levels.has("overhead"), [...levels].join("/"));
+  check(`${def.id}: has a low`, levels.has("low"), [...levels].join("/"));
+
   check(`${def.id}: exactly five specials`, moves.filter(isSpecial).length === 5, `${moves.filter(isSpecial).length}`);
   check(`${def.id}: has a light attack`, countTag("light") >= 1);
   check(`${def.id}: has a heavy attack`, countTag("heavy") >= 1);
