@@ -136,12 +136,7 @@ repository they can live, which is why there is no `releases/` folder.
 
 ### Testing a change, fastest first
 
-**1. Refresh a browser tab.** Every push to `main` redeploys
-[the live build](https://skystrikerr.github.io/project_MKstickfight/). Nothing
-to install, nothing to download, and controllers work — plug one in and press a
-button. About a minute behind a push.
-
-**2. Run it locally with hot reload.** Double-click **`play.bat`** on Windows,
+**1. Run it locally with hot reload.** Double-click **`play.bat`** on Windows,
 or:
 
 ```bash
@@ -151,7 +146,7 @@ npm run play      # pulls nothing, just serves with hot reload
 `play.bat` pulls, installs anything new, and opens the game in your browser.
 Edits appear without a rebuild. This is the one to use while iterating.
 
-**3. Download the built `.exe`.** Slowest — 104 MB a time — but it is the real
+**2. Download the built `.exe`.** Slowest — 104 MB a time — but it is the real
 desktop app:
 
 ```bash
@@ -166,6 +161,11 @@ commit it came from, and skips the download if you already have that build.
 
 > Browsers ignore a gamepad until it sends something, so **press a button on the
 > pad** after plugging it in. The menus are mouse-only; the pad drives the fight.
+
+**3. Refresh a browser tab** — once Pages is switched on. Every push already
+builds and tests the bundle, but the deploy step fails until someone enables
+Pages under **Settings → Pages → Source: GitHub Actions**. That has to be a
+person with admin on the repository: the workflow token cannot create the site.
 
 **To build locally**, on the platform you are targeting:
 

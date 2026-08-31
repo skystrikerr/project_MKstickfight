@@ -31,12 +31,13 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      # Turn Pages on from here rather than needing someone to click it in
-      # Settings. Without this the whole workflow fails at this step with
-      # "Get Pages site failed", which is why the site was never up.
+      # This step fails with "Get Pages site failed" until Pages is switched on
+      # for the repository: Settings -> Pages -> Source: GitHub Actions. That
+      # is a one-time click and it has to be a person - `enablement: true` was
+      # tried and cannot work, because creating a Pages site needs admin
+      # permission and the workflow's GITHUB_TOKEN only ever gets write.
+      # Everything before this step passes; the bundle is built and tested.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
