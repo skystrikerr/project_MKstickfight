@@ -69,11 +69,15 @@ if (withMusic) {
   }
 }
 
-const page = `<title>Stick Fighter</title>
+// Without the charset the roster's own names come out as mojibake: a browser
+// opening this off disk has no HTTP header to go on, and "Hattori Hanzo" is
+// spelled with a macron.
+const page = `<meta charset="utf-8">
+<title>Stick Fighter</title>
 <style>
 /* The game paints its own full-bleed world; this only clears the way for it. */
-html, body { margin: 0; padding: 0; height: 100%; background: #0b0b10; }
-body { overflow: hidden; color: #fff; }
+html, body { margin: 0; padding: 0; height: 100%; background: #0c0d0c; }
+body { overflow: hidden; color: #e6e1d3; }
 #root { height: 100%; }
 ${cssSrc}
 </style>

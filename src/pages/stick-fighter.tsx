@@ -75,97 +75,96 @@ export default function StickFighter() {
   }, [screen]);
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-[#0b0b10] text-white">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-[var(--ink)] text-[var(--bone)]">
       {screen === "title" && (
-        <div className="relative flex h-full flex-col items-center justify-center gap-8 overflow-y-auto px-6 py-10">
+        <div className="grain relative flex h-full flex-col items-center overflow-y-auto px-6 py-10">
+          {/*
+            One low, warm pool of light from the floor - a lit stage, not a
+            gradient wash. Nothing else paints the background.
+          */}
           <div
-            className="pointer-events-none absolute inset-0 opacity-40"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 20%, rgba(251,191,36,0.25), transparent 55%), radial-gradient(circle at 20% 80%, rgba(56,189,248,0.18), transparent 50%)",
-            }}
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
+            style={{ background: "radial-gradient(80% 100% at 50% 100%, rgba(200,149,47,0.12), transparent 70%)" }}
           />
 
-          <div className="relative text-center">
-            <h1 className="text-5xl font-black uppercase italic tracking-tighter text-white drop-shadow-[4px_4px_0_rgba(0,0,0,0.6)] sm:text-7xl">
-              Stick<span className="text-amber-400">Fighter</span>
+          <header className="relative flex w-full max-w-6xl flex-col items-center">
+            <div className="flex w-full items-center gap-4">
+              <span className="h-px flex-1 bg-[var(--rule)]" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--bone-dim)]">
+                {ROSTER.length} fighters · 500 BC – 1965
+              </span>
+              <span className="h-px flex-1 bg-[var(--rule)]" />
+            </div>
+            <h1 className="mt-3 font-display text-6xl font-bold uppercase leading-[0.85] tracking-[0.02em] sm:text-8xl">
+              Stick <span className="text-[var(--brass)]">Fighter</span>
             </h1>
-            <p className="mt-2 text-sm uppercase tracking-[0.35em] text-white/50">
-              Warriors from every era, one arena
+            <p className="mt-1 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
+              Every one of them was real
             </p>
-          </div>
+          </header>
 
-          <div className="relative flex flex-wrap items-end justify-center gap-6">
+          <div className="relative mt-8 flex flex-wrap items-end justify-center gap-x-5 gap-y-6">
             {ROSTER.map((def, i) => (
-              <div key={def.id} className="flex flex-col items-center">
+              <div key={def.id} className="flex w-32 flex-col items-center sm:w-40">
                 <FighterPortrait def={def} className="h-40 w-32 sm:h-52 sm:w-40" facing={i % 2 === 0 ? 1 : -1} />
-                <span className="text-xs font-bold uppercase tracking-widest text-white/70">{def.name}</span>
-                <span className="text-[10px] uppercase tracking-widest" style={{ color: def.palette.accent }}>
+                <span className="mt-1 h-px w-8" style={{ background: def.palette.accent }} />
+                <span className="mt-1.5 text-center font-display text-lg font-bold uppercase leading-none tracking-wide">
+                  {def.name}
+                </span>
+                <span className="mt-0.5 text-center font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
                   {def.era}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="relative flex flex-col items-center gap-3">
+          <div className="relative mt-10 flex flex-col items-center gap-3">
             <button
               type="button"
               onClick={() => setScreen("select")}
-              className="rounded-md bg-amber-400 px-10 py-4 text-2xl font-black uppercase italic tracking-wide text-black transition hover:bg-amber-300"
+              className="cut bg-[var(--brass)] px-14 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[#e0ab3c]"
             >
               Press Start
             </button>
             <button
               type="button"
               onClick={() => setMoveListFor(ROSTER[0].id)}
-              className="text-xs font-bold uppercase tracking-widest text-white/50 underline-offset-4 hover:text-white hover:underline"
+              className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
             >
-              Move lists
+              [ Move lists ]
             </button>
           </div>
 
-          <div className="relative grid max-w-5xl gap-4 text-xs sm:grid-cols-3">
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-              <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-300">Player 1</div>
-              <ul className="space-y-1">
-                {CONTROLS.map((c) => (
-                  <li key={c.keys} className="flex justify-between gap-4">
-                    <span className="font-mono text-white/80">{c.keys}</span>
-                    <span className="text-white/50">{c.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-              <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-sky-300">Player 2</div>
-              <ul className="space-y-1">
-                {P2_CONTROLS.map((c) => (
-                  <li key={c.keys} className="flex justify-between gap-4">
-                    <span className="font-mono text-white/80">{c.keys}</span>
-                    <span className="text-white/50">{c.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-              <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-300">
-                Gamepad (plug in and press a button)
-              </div>
-              <ul className="space-y-1">
-                {PAD_CONTROLS.map((c) => (
-                  <li key={c.keys} className="flex justify-between gap-4">
-                    <span className="font-mono text-white/80">{c.keys}</span>
-                    <span className="text-white/50">{c.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="relative mt-10 grid w-full max-w-5xl gap-px bg-[var(--rule)] sm:grid-cols-3">
+            {[
+              { label: "Player 1", accent: "var(--brass)", rows: CONTROLS },
+              { label: "Player 2", accent: "var(--steel)", rows: P2_CONTROLS },
+              { label: "Gamepad — plug in, press a button", accent: "#7f9c6b", rows: PAD_CONTROLS },
+            ].map((col) => (
+              <section key={col.label} className="bg-[var(--ink-2)] p-4">
+                <div
+                  className="mb-2 border-b pb-1.5 font-display text-base font-bold uppercase tracking-[0.15em]"
+                  style={{ color: col.accent, borderColor: "var(--rule)" }}
+                >
+                  {col.label}
+                </div>
+                <ul className="space-y-1 text-xs">
+                  {col.rows.map((c) => (
+                    <li key={c.keys} className="flex justify-between gap-4">
+                      <span className="font-mono text-[11px] text-[var(--bone)]">{c.keys}</span>
+                      <span className="text-right text-[var(--bone-dim)]">{c.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
           </div>
 
-          <p className="relative max-w-3xl text-center text-[11px] leading-relaxed text-white/40">
-            Every fighter has <span className="text-white/70">five specials</span>, a light and a heavy attack, a block,
-            a sidestep and a jump — plus their own skill and super. Specials use motion inputs: ↓↘→ + button for
-            quarter circles, →↓↘ for dragon punches. Meter pays for EX specials (50) and supers (100).
+          <p className="relative mt-6 max-w-3xl pb-4 text-center text-xs leading-relaxed text-[var(--bone-dim)]">
+            Every fighter has <span className="text-[var(--bone)]">five specials</span>, a light and a heavy attack, a
+            block, a sidestep and a jump — plus their own skill, super, and three strings built out of their own
+            weapons. Specials use motion inputs: ↓↘→ + button for quarter circles, →↓↘ for dragon punches. Meter pays
+            for EX specials (50) and supers (100).
           </p>
         </div>
       )}

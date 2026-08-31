@@ -32,33 +32,34 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
   return (
     <div className={`flex flex-1 flex-col gap-1 ${flip ? "items-end" : "items-start"}`}>
       <div className={`flex w-full items-baseline gap-2 ${flip ? "flex-row-reverse" : ""}`}>
-        <span className="text-sm font-black uppercase italic tracking-wide text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
+        <span className="font-display text-2xl font-bold uppercase leading-none tracking-wide text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
           {player.name}
         </span>
-        <span className="hidden text-[10px] uppercase tracking-[0.2em] text-white/45 sm:inline">{player.title}</span>
+        <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone-dim)] sm:inline">
+          {player.title}
+        </span>
       </div>
 
       <div
-        className="relative h-6 w-full overflow-hidden border-y-2 border-black/70 bg-black/70 shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
+        className="relative h-6 w-full overflow-hidden border border-black/80 bg-black/75 shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
         style={{ transform: SKEW }}
       >
         <div className={`absolute inset-0 ${flip ? "rotate-180" : ""}`}>
           {/* Damage taken, draining a beat later. */}
           <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-b from-rose-400 to-rose-700 transition-[width] duration-500"
+            className="absolute inset-y-0 left-0 bg-[#6d2418] transition-[width] duration-500"
             style={{ width: `${ghost}%` }}
           />
           {/* Current health. */}
           <div
             className={`absolute inset-y-0 left-0 transition-[width] duration-100 ${
-              low
-                ? "animate-pulse bg-gradient-to-b from-red-300 via-red-500 to-red-700"
-                : "bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600"
+              low ? "animate-pulse bg-[#c33a22]" : "bg-[var(--brass)]"
             }`}
             style={{ width: `${pct}%` }}
           />
-          {/* Gloss. */}
-          <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/35 to-transparent" />
+          {/* One hard highlight line along the top. A full gloss gradient makes
+              the bar look like a glass pill from a web dashboard. */}
+          <div className="absolute inset-x-0 top-0 h-px bg-white/35" />
           {/* Tick marks every 25%. */}
           {[25, 50, 75].map((t) => (
             <div key={t} className="absolute inset-y-0 w-px bg-black/40" style={{ left: `${t}%` }} />
@@ -71,7 +72,7 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
         <div className="h-1.5 w-24 overflow-hidden bg-black/60 sm:w-32" style={{ transform: SKEW }}>
           <div
             className={`h-full transition-[width] duration-200 ${
-              player.guard < 30 ? "bg-rose-400" : "bg-sky-400/90"
+              player.guard < 30 ? "bg-[#c33a22]" : "bg-[var(--steel)]"
             } ${flip ? "ml-auto" : ""}`}
             style={{ width: `${Math.max(0, player.guard)}%` }}
           />
@@ -79,14 +80,14 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
 
         {player.resource && (
           <div className={`flex items-center gap-1.5 ${flip ? "flex-row-reverse" : ""}`}>
-            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/55">
+            <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
               {player.resource.name}
             </span>
             {/* Spare magazines. Knowing the belt is empty matters more than
                 knowing the magazine is, so it sits next to the name. */}
             {player.resource.spares !== undefined && (
               <span
-                className="text-[9px] font-bold uppercase tracking-[0.15em] tabular-nums"
+                className="font-mono text-[9px] uppercase tracking-[0.15em] tabular-nums"
                 style={{ color: player.resource.spares > 0 ? player.resource.color : "#ff6b6b" }}
                 title={player.resource.spareName ?? "spare reloads"}
               >
@@ -136,8 +137,8 @@ function MeterBar({ player, side }: { player: PlayerHud; side: "left" | "right" 
   return (
     <div className={`flex items-center gap-1.5 ${flip ? "flex-row-reverse" : ""}`}>
       <span
-        className={`text-[10px] font-black uppercase italic tracking-widest ${
-          stocks > 0 ? "text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]" : "text-white/40"
+        className={`font-display text-base font-bold uppercase tracking-[0.15em] ${
+          stocks > 0 ? "text-[#9fd0e6]" : "text-[var(--bone-dim)]"
         }`}
       >
         {stocks > 0 ? "Super" : "Meter"}
@@ -151,9 +152,7 @@ function MeterBar({ player, side }: { player: PlayerHud; side: "left" | "right" 
           >
             <div
               className={`h-full transition-[width] duration-150 ${
-                i < stocks
-                  ? "bg-gradient-to-b from-cyan-200 via-cyan-400 to-sky-600 shadow-[0_0_12px_rgba(34,211,238,0.8)]"
-                  : "bg-gradient-to-b from-sky-400/80 to-sky-700/80"
+                i < stocks ? "bg-[#9fd0e6] shadow-[0_0_10px_rgba(159,208,230,0.5)]" : "bg-[var(--steel)]"
               } ${flip ? "ml-auto" : ""}`}
               style={{ width: i < stocks ? "100%" : i === stocks ? `${partial * 100}%` : "0%" }}
             />
@@ -171,7 +170,7 @@ function RoundPips({ wins, roundsToWin, side }: { wins: number; roundsToWin: num
         <span
           key={i}
           className={`h-3 w-3 rotate-45 border-2 border-black/70 transition ${
-            i < wins ? "bg-amber-400 shadow-[0_0_10px_3px_rgba(251,191,36,0.7)]" : "bg-white/10"
+            i < wins ? "bg-[var(--brass)] shadow-[0_0_10px_2px_rgba(200,149,47,0.55)]" : "bg-white/10"
           }`}
         />
       ))}
@@ -215,8 +214,8 @@ export function Hud({
 
         <div className="flex min-w-[84px] flex-col items-center gap-1.5">
           <div
-            className={`border-2 border-black/70 bg-black/70 px-3 py-0.5 font-mono text-3xl font-black tabular-nums sm:text-4xl ${
-              state.timer <= 10 ? "animate-pulse text-red-400" : "text-amber-300"
+            className={`border-2 border-black/70 bg-black/70 px-3 py-0.5 font-mono text-3xl font-medium tabular-nums sm:text-4xl ${
+              state.timer <= 10 ? "animate-pulse text-[#e2553a]" : "text-[var(--brass)]"
             }`}
             style={{ transform: SKEW }}
           >
@@ -226,7 +225,7 @@ export function Hud({
           </div>
           <div className="flex items-center gap-2.5">
             <RoundPips wins={p1.wins} roundsToWin={roundsToWin} side="left" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/45">R{state.round}</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone-dim)]">R{state.round}</span>
             <RoundPips wins={p2.wins} roundsToWin={roundsToWin} side="right" />
           </div>
         </div>
@@ -261,17 +260,17 @@ function ComboCounter({ hits, damage, side }: { hits: number; damage: number; si
     >
       <div className="flex items-baseline gap-1.5" style={{ flexDirection: side === "right" ? "row-reverse" : "row" }}>
         <span
-          className={`font-black italic tabular-nums drop-shadow-[3px_3px_0_rgba(0,0,0,0.85)] ${
-            big ? "text-5xl text-amber-200" : "text-4xl text-amber-300"
+          className={`font-display font-bold tabular-nums drop-shadow-[3px_3px_0_rgba(0,0,0,0.85)] ${
+            big ? "text-6xl text-[#e8c775]" : "text-5xl text-[var(--brass)]"
           }`}
         >
           {hits}
         </span>
-        <span className="text-lg font-black uppercase italic text-white/85 drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
+        <span className="font-display text-2xl font-bold uppercase tracking-wide text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
           Hits
         </span>
       </div>
-      <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/55">
+      <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--bone)] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]">
         {Math.round(damage)} damage
       </div>
     </div>
@@ -285,10 +284,10 @@ export function Announcement({ state }: { state: HudState }) {
     <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
       <div
         key={state.announcement}
-        className={`animate-in zoom-in-50 fade-in duration-200 text-center font-black uppercase italic tracking-tighter ${
+        className={`animate-in zoom-in-50 fade-in duration-200 text-center font-display font-bold uppercase tracking-[0.04em] ${
           ko
-            ? "text-7xl text-red-500 drop-shadow-[0_0_30px_rgba(239,68,68,0.7)] sm:text-9xl"
-            : "text-5xl text-amber-300 drop-shadow-[0_0_24px_rgba(251,191,36,0.6)] sm:text-7xl"
+            ? "text-8xl text-[#d13a22] drop-shadow-[0_0_30px_rgba(209,58,34,0.6)] sm:text-[10rem]"
+            : "text-6xl text-[var(--brass)] drop-shadow-[0_0_24px_rgba(200,149,47,0.5)] sm:text-8xl"
         }`}
         style={{ WebkitTextStroke: "2px rgba(0,0,0,0.85)" }}
       >

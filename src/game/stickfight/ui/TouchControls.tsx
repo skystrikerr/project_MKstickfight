@@ -48,7 +48,7 @@ export function TouchControls({ keyboard, player = "p1" }: { keyboard: Keyboard;
       onPointerUp={() => keyboard.setVirtual(`${player}:${code}`, false)}
       onPointerLeave={() => keyboard.setVirtual(`${player}:${code}`, false)}
       onPointerCancel={() => keyboard.setVirtual(`${player}:${code}`, false)}
-      className={`flex h-14 w-14 select-none items-center justify-center rounded-full border-2 text-sm font-black uppercase text-white/90 active:scale-95 ${className}`}
+      className={`flex h-14 w-14 select-none items-center justify-center rounded-full border font-display text-xl font-bold uppercase text-[var(--bone)] active:scale-95 ${className}`}
     >
       {label}
     </button>
@@ -73,19 +73,19 @@ export function TouchControls({ keyboard, player = "p1" }: { keyboard: Keyboard;
           pointerId.current = null;
           clearDir();
         }}
-        className="pointer-events-auto relative h-32 w-32 touch-none rounded-full border-2 border-white/20 bg-black/40"
+        className="pointer-events-auto relative h-32 w-32 touch-none rounded-full border border-[var(--rule)] bg-black/50"
       >
         <div
-          className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/25"
+          className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--bone)]/25"
           style={{ transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))` }}
         />
       </div>
 
       <div className="pointer-events-auto grid touch-none grid-cols-2 gap-3">
-        {button("A", "A", "border-sky-300/60 bg-sky-500/30")}
-        {button("B", "B", "border-emerald-300/60 bg-emerald-500/30")}
-        {button("C", "C", "border-rose-300/60 bg-rose-500/30")}
-        {button("S", "S", "border-amber-300/60 bg-amber-500/30")}
+        {button("A", "A", "border-[#9fd0e6]/60 bg-[#9fd0e6]/20")}
+        {button("B", "B", "border-[#8aa87a]/60 bg-[#8aa87a]/20")}
+        {button("C", "C", "border-[#c2705c]/60 bg-[#c2705c]/20")}
+        {button("S", "S", "border-[var(--brass)]/60 bg-[var(--brass)]/20")}
       </div>
     </div>
   );

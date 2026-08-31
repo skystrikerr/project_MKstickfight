@@ -96,16 +96,18 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
   ).length;
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col bg-black/90 backdrop-blur">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
+    <div className="grain absolute inset-0 z-30 flex flex-col bg-[var(--ink)]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--rule)] p-4">
         <div className="flex flex-wrap items-center gap-2">
           {ROSTER.map((f) => (
             <button
               key={f.id}
               type="button"
               onClick={() => setId(f.id)}
-              className={`rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
-                f.id === id ? "bg-amber-400 text-black" : "border border-white/15 text-white/70 hover:bg-white/10"
+              className={`px-3 py-1.5 font-display text-lg font-bold uppercase leading-none tracking-wide transition ${
+                f.id === id
+                  ? "bg-[var(--brass)] text-[var(--ink)]"
+                  : "border border-[var(--rule)] text-[var(--bone-dim)] hover:border-[var(--bone-dim)] hover:text-[var(--bone)]"
               }`}
             >
               {f.name}
@@ -115,7 +117,7 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md border border-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-white/10"
+          className="cut-sm border border-[var(--rule)] px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)] hover:border-[var(--brass)]"
         >
           Close
         </button>
@@ -123,12 +125,12 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
 
       <div className="flex-1 overflow-y-auto p-4">
         <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-white/60">
-            <span className="font-bold uppercase tracking-wider text-white/80">Notation</span> — → is towards the
+          <div className="cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-3 text-xs text-[var(--bone-dim)]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--bone)]">Notation</span> — → is towards the
             opponent, ↓↘→ is a quarter circle forward. A = Light, B = Medium, C = Heavy, S = Guard (hold to block). Frame data is
             shown as startup / active / recovery.
           </div>
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-[10px] font-bold uppercase tracking-wider">
+          <div className="cut-sm flex flex-wrap items-center gap-2 border border-[var(--rule)] bg-[var(--ink-2)] p-3 font-mono text-[10px] uppercase tracking-[0.12em]">
             {[
               { label: `${specialCount} specials`, ok: specialCount === 5 },
               { label: "Light", ok: true },
@@ -139,7 +141,7 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
             ].map((chip) => (
               <span
                 key={chip.label}
-                className={`rounded px-2 py-1 ${chip.ok ? "bg-amber-400/15 text-amber-300" : "bg-rose-500/15 text-rose-300"}`}
+                className={`px-2 py-1 ${chip.ok ? "bg-[var(--brass)]/15 text-[var(--brass)]" : "bg-[#a8341f]/20 text-[#e2755c]"}`}
               >
                 {chip.label}
               </span>
@@ -149,23 +151,25 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
 
         {strings.length > 0 && (
           <section className="mb-4">
-            <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-300">Strings</h3>
+            <h3 className="mb-2 border-b border-[var(--rule)] pb-1 font-display text-xl font-bold uppercase tracking-[0.12em] text-[var(--brass)]">Strings</h3>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {strings.map((st) => (
-                <div key={st.name} className="rounded-md border border-white/10 bg-white/[0.02] p-2.5">
+                <div key={st.name} className="cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-2.5">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-bold text-white">{st.name}</span>
-                    <span className="font-mono text-xs text-amber-300">
+                    <span className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+                      {st.name}
+                    </span>
+                    <span className="font-mono text-[11px] text-[var(--brass)]">
                       {st.moves.map(stamp).join(", ")}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[11px] leading-snug text-white/55">
+                  <p className="mt-0.5 text-xs leading-snug text-[var(--bone-dim)]">
                     {st.moves.map((m) => m.name).join(" · ")}
                   </p>
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[11px] leading-snug text-white/40">
+            <p className="mt-2 text-xs leading-snug text-[var(--bone-dim)]">
               Press the next button while the previous one is still swinging. A string continues whether it hit or
               was blocked, so committing to the whole thing is the risk.
             </p>
@@ -175,31 +179,33 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
         <div className="grid gap-4 md:grid-cols-2">
           {grouped.map((g) => (
             <section key={g.key}>
-              <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-300">{g.label}</h3>
+              <h3 className="mb-2 border-b border-[var(--rule)] pb-1 font-display text-xl font-bold uppercase tracking-[0.12em] text-[var(--brass)]">{g.label}</h3>
               <div className="space-y-1.5">
                 {g.moves.flatMap((parent) => [parent, ...g.variants.filter((v) => v.variant === parent.id)]).map((m) => (
                   <div
                     key={m.id}
-                    className={`rounded-md border border-white/10 bg-white/[0.02] p-2.5 ${m.variant ? "ml-4 border-l-2 border-l-amber-400/40" : ""}`}
+                    className={`cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-2.5 ${m.variant ? "ml-4 border-l-2 border-l-[var(--brass)]/50" : ""}`}
                   >
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-sm font-bold text-white">{m.name}</span>
-                      <span className="font-mono text-xs text-amber-300">{m.notation ?? ""}</span>
+                      <span className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+                        {m.name}
+                      </span>
+                      <span className="shrink-0 font-mono text-[11px] text-[var(--brass)]">{m.notation ?? ""}</span>
                     </div>
-                    <p className="mt-0.5 text-[11px] leading-snug text-white/55">{m.desc}</p>
-                    <div className="mt-1 flex flex-wrap gap-2 text-[10px] uppercase tracking-wider text-white/35">
+                    <p className="mt-0.5 text-xs leading-snug text-[var(--bone-dim)]">{m.desc}</p>
+                    <div className="mt-1 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.1em] text-[#6f6c64]">
                       {frameData(m) && <span>Frames {frameData(m)}</span>}
                       {m.hits?.[0] && <span>{m.hits.reduce((sum, h) => sum + h.damage, 0)} dmg</span>}
-                      {m.meterCost ? <span className="text-sky-300">{m.meterCost} meter</span> : null}
+                      {m.meterCost ? <span className="text-[var(--steel)]">{m.meterCost} meter</span> : null}
                       {m.resourceCost ? (
                         <span style={{ color: def.resource?.color }}>
                           {m.resourceCost} {def.resource?.name.toLowerCase()}
                         </span>
                       ) : null}
-                      {m.tags?.includes("overhead") && <span className="text-rose-300">Overhead</span>}
-                      {m.tags?.includes("low") && <span className="text-emerald-300">Low</span>}
-                      {m.invuln?.length ? <span className="text-purple-300">Invincible</span> : null}
-                      {m.armor?.length ? <span className="text-orange-300">Armour</span> : null}
+                      {m.tags?.includes("overhead") && <span className="text-[#e2755c]">Overhead</span>}
+                      {m.tags?.includes("low") && <span className="text-[#8aa87a]">Low</span>}
+                      {m.invuln?.length ? <span className="text-[#a795c4]">Invincible</span> : null}
+                      {m.armor?.length ? <span className="text-[#d19a5c]">Armour</span> : null}
                     </div>
                   </div>
                 ))}

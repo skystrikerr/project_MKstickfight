@@ -39,8 +39,10 @@ function StageChip({
       type="button"
       onClick={onPick}
       title={def?.blurb ?? "Roll a different stage every match"}
-      className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-md border-2 text-left transition ${
-        selected ? "border-amber-400 shadow-[0_0_16px_-4px_rgba(251,191,36,0.7)]" : "border-white/10 hover:border-white/40"
+      className={`relative h-16 w-24 shrink-0 overflow-hidden border text-left transition ${
+        selected
+          ? "border-[var(--brass)] outline outline-1 outline-offset-1 outline-[var(--brass)]"
+          : "border-[var(--rule)] hover:border-[var(--bone-dim)]"
       }`}
     >
       {def ? (
@@ -56,9 +58,9 @@ function StageChip({
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900" />
+        <div className="absolute inset-0 bg-[var(--ink-2)]" />
       )}
-      <span className="absolute inset-x-0 bottom-0 bg-black/60 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+      <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-0.5 font-mono text-[9px] uppercase tracking-wider text-[var(--bone)]">
         {def ? def.name : "Random"}
       </span>
     </button>
@@ -83,8 +85,8 @@ function SkinChip({
       title={`${skin.name} — ${skin.blurb}`}
       aria-label={skin.name}
       aria-pressed={selected}
-      className={`h-5 w-5 shrink-0 overflow-hidden rounded-full border-2 transition ${
-        selected ? "border-amber-400 shadow-[0_0_10px_-2px_rgba(251,191,36,0.9)]" : "border-white/20 hover:border-white/60"
+      className={`h-5 w-5 shrink-0 overflow-hidden border transition ${
+        selected ? "border-[var(--brass)] outline outline-1 outline-[var(--brass)]" : "border-[var(--rule)] hover:border-[var(--bone-dim)]"
       }`}
       style={{ background: `linear-gradient(135deg, ${skin.swatch[0]} 50%, ${skin.swatch[1]} 50%)` }}
     />
@@ -93,13 +95,20 @@ function SkinChip({
 
 function StatBar({ label, value, max = 5 }: { label: string; value: number; max?: number }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="w-20 text-[10px] uppercase tracking-widest text-white/50">{label}</span>
-      <div className="flex gap-0.5">
+    <div className="flex items-center gap-3">
+      <span className="w-[74px] font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">{label}</span>
+      <div className="flex gap-px">
         {Array.from({ length: max }).map((_, i) => (
-          <span key={i} className={`h-1.5 w-4 rounded-sm ${i < value ? "bg-amber-400" : "bg-white/15"}`} />
+          <span
+            key={i}
+            className="h-2.5 w-5"
+            style={{ background: i < value ? "var(--brass)" : "#242724" }}
+          />
         ))}
       </div>
+      <span className="font-mono text-[10px] text-[var(--bone-dim)]">
+        {value}/{max}
+      </span>
     </div>
   );
 }
@@ -116,12 +125,14 @@ function ratingFor(def: FighterDef) {
 
 function Card({
   def,
+  index,
   selected,
   dim,
   onPick,
   onHover,
 }: {
   def: FighterDef;
+  index: string;
   selected: "p1" | "p2" | "both" | null;
   dim: boolean;
   onPick: () => void;
@@ -133,23 +144,28 @@ function Card({
       onClick={onPick}
       onMouseEnter={onHover}
       onFocus={onHover}
-      className={`group relative overflow-hidden rounded-lg border-2 p-3 text-left transition ${
+      className={`cut-sm group relative overflow-hidden border p-3 text-left transition ${
         selected
-          ? "border-amber-400 bg-amber-400/10 shadow-[0_0_24px_-4px_rgba(251,191,36,0.6)]"
-          : "border-white/10 bg-white/[0.03] hover:border-white/40"
+          ? "border-[var(--brass)] bg-[#1a1710]"
+          : "border-[var(--rule)] bg-[var(--ink-2)] hover:border-[var(--bone-dim)]"
       } ${dim ? "opacity-60" : ""}`}
     >
-      <div
-        className="absolute inset-0 opacity-25"
-        style={{ background: `radial-gradient(circle at 50% 25%, ${def.palette.accent}, transparent 65%)` }}
-      />
+      {/* The fighter's own colour, as a strip under their feet rather than a
+          glow behind them - it reads as a file tab, and it does not wash the
+          portrait out. */}
+      <span className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: def.palette.accent }} />
+      <span className="absolute left-2 top-1.5 font-mono text-[10px] text-[var(--bone-dim)]">{index}</span>
       <FighterPortrait def={def} className="relative h-32 w-full" />
       <div className="relative mt-1">
-        <div className="text-sm font-bold uppercase tracking-wide text-white">{def.name}</div>
-        <div className="text-[10px] uppercase tracking-widest text-white/50">{def.archetype}</div>
+        <div className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+          {def.name}
+        </div>
+        <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
+          {def.archetype}
+        </div>
       </div>
       {selected && (
-        <span className="absolute right-2 top-2 rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-black">
+        <span className="absolute right-0 top-0 bg-[var(--brass)] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[var(--ink)]">
           {selected === "both" ? "P1 · P2" : selected.toUpperCase()}
         </span>
       )}
@@ -192,27 +208,30 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
   };
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+    <div className="grain relative flex h-full flex-col gap-4 overflow-y-auto p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-black uppercase italic tracking-tight text-white sm:text-3xl">
+          <h2 className="font-display text-4xl font-bold uppercase leading-none tracking-wide text-[var(--bone)] sm:text-5xl">
             Choose your fighter
           </h2>
-          <p className="text-xs text-white/50">
-            Selecting for <span className="font-bold text-amber-300">{picking.toUpperCase()}</span> · click a fighter to
-            lock in
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
+            Selecting for{" "}
+            <span style={{ color: picking === "p1" ? "var(--brass)" : "var(--steel)" }}>{picking.toUpperCase()}</span> ·
+            click a fighter to lock in
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex overflow-hidden rounded-md border border-white/15">
+          <div className="flex border border-[var(--rule)]">
             {(["cpu", "versus", "training"] as GameMode[]).map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setMode(m)}
-                className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
-                  mode === m ? "bg-amber-400 text-black" : "text-white/70 hover:bg-white/10"
+                className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition ${
+                  mode === m
+                    ? "bg-[var(--brass)] text-[var(--ink)]"
+                    : "text-[var(--bone-dim)] hover:bg-white/5 hover:text-[var(--bone)]"
                 }`}
               >
                 {m === "cpu" ? "1P vs CPU" : m === "versus" ? "2 Players" : "Training"}
@@ -224,7 +243,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             <select
               value={aiLevel}
               onChange={(e) => setAiLevel(e.target.value as AiLevel)}
-              className="rounded-md border border-white/15 bg-black/40 px-2 py-1.5 text-xs font-bold uppercase tracking-wider text-white"
+              className="field border border-[var(--rule)] bg-[var(--ink-2)] px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)]"
             >
               {AI_LEVELS.map((l) => (
                 <option key={l} value={l}>
@@ -238,7 +257,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
           <select
             value={rounds}
             onChange={(e) => setRounds(Number(e.target.value))}
-            className="rounded-md border border-white/15 bg-black/40 px-2 py-1.5 text-xs font-bold uppercase tracking-wider text-white"
+            className="field border border-[var(--rule)] bg-[var(--ink-2)] px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)]"
           >
             <option value={1}>1 round</option>
             <option value={2}>Best of 3</option>
@@ -250,30 +269,38 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {ROSTER.map((def) => (
+          {ROSTER.map((def, i) => (
             <Card
               key={def.id}
               def={def}
+              index={String(i + 1).padStart(2, "0")}
               selected={p1 === def.id && p2 === def.id ? "both" : p1 === def.id ? "p1" : p2 === def.id ? "p2" : null}
               dim={false}
               onPick={() => pick(def.id)}
               onHover={() => setHover(def.id)}
             />
           ))}
-          <div className="flex min-h-[180px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 p-3 text-center">
-            <span className="text-3xl text-white/20">+</span>
-            <span className="mt-1 text-[10px] uppercase tracking-widest text-white/30">More fighters soon</span>
+          <div className="cut-sm flex min-h-[180px] flex-col items-center justify-center border border-dashed border-[var(--rule)] p-3 text-center">
+            <span className="font-display text-4xl text-[#2f322e]">+</span>
+            <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#4a4d47]">
+              More fighters soon
+            </span>
           </div>
         </div>
 
-        <aside className="flex flex-col gap-3 rounded-lg border border-white/10 bg-black/30 p-4">
+        <aside className="cut flex flex-col gap-3 border border-[var(--rule)] bg-[var(--ink-2)] p-4">
           <div>
-            <div className="text-xl font-black uppercase italic tracking-tight text-white">{preview.name}</div>
-            <div className="text-[11px] uppercase tracking-widest" style={{ color: preview.palette.accent }}>
+            <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--bone-dim)]">Dossier</div>
+            <div className="font-display text-3xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+              {preview.name}
+            </div>
+            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em]" style={{ color: preview.palette.accent }}>
               {preview.title} · {preview.era}
             </div>
           </div>
-          <p className="text-xs leading-relaxed text-white/60">{preview.bio}</p>
+          <p className="border-l-2 border-[var(--rule)] pl-2.5 text-[13px] leading-snug text-[var(--bone-dim)]">
+            {preview.bio}
+          </p>
 
           <div className="flex flex-col gap-1.5">
             <StatBar label="Power" value={ratings.power} />
@@ -284,18 +311,22 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div>
-              <div className="mb-1 font-bold uppercase tracking-wider text-emerald-400">Strengths</div>
-              <ul className="space-y-0.5 text-white/60">
+              <div className="mb-1 border-b border-[var(--rule)] pb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#8aa87a]">
+                Strengths
+              </div>
+              <ul className="space-y-0.5 text-[var(--bone-dim)]">
                 {preview.strengths.map((s) => (
-                  <li key={s}>· {s}</li>
+                  <li key={s}>{s}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <div className="mb-1 font-bold uppercase tracking-wider text-rose-400">Weaknesses</div>
-              <ul className="space-y-0.5 text-white/60">
+              <div className="mb-1 border-b border-[var(--rule)] pb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#c2705c]">
+                Weaknesses
+              </div>
+              <ul className="space-y-0.5 text-[var(--bone-dim)]">
                 {preview.weaknesses.map((s) => (
-                  <li key={s}>· {s}</li>
+                  <li key={s}>{s}</li>
                 ))}
               </ul>
             </div>
@@ -304,17 +335,17 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
           <button
             type="button"
             onClick={() => onShowMoves(preview.id)}
-            className="rounded-md border border-white/15 px-3 py-2 text-xs font-bold uppercase tracking-wider text-white/80 transition hover:bg-white/10"
+            className="cut-sm border border-[var(--rule)] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
           >
             View move list ({preview.moves.filter((m) => !m.internal).length} moves)
           </button>
         </aside>
       </div>
 
-      <div className="rounded-lg border border-white/10 bg-black/30 p-3">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-xs font-bold uppercase tracking-widest text-white/70">Stage</span>
-          <span className="text-[11px] text-white/40">
+      <div className="cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-3">
+        <div className="mb-2 flex items-baseline justify-between border-b border-[var(--rule)] pb-1.5">
+          <span className="font-display text-xl font-bold uppercase tracking-[0.1em] text-[var(--bone)]">Stage</span>
+          <span className="text-xs text-[var(--bone-dim)]">
             {stage === "random" ? "A different arena every match" : STAGE_THEMES[stage].blurb}
           </span>
         </div>
@@ -326,14 +357,21 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 p-3">
+      <div className="cut-sm flex flex-wrap items-center justify-between gap-3 border border-[var(--rule)] bg-[var(--ink-2)] p-3">
         <div className="flex flex-wrap items-center gap-5">
           {picked.map((def, i) => (
             <div key={i} className="flex items-center gap-2">
               <FighterPortrait def={def} className="h-14 w-14" facing={i === 0 ? 1 : -1} />
               <div>
-                <div className="text-[10px] uppercase tracking-widest text-white/40">P{i + 1}</div>
-                <div className="text-sm font-bold text-white">{def.name}</div>
+                <div
+                  className="font-mono text-[10px] uppercase tracking-[0.2em]"
+                  style={{ color: i === 0 ? "var(--brass)" : "var(--steel)" }}
+                >
+                  P{i + 1}
+                </div>
+                <div className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+                  {def.name}
+                </div>
                 <div className="mt-1 flex gap-1">
                   {SKINS.map((s) => (
                     <SkinChip
@@ -358,7 +396,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
         <button
           type="button"
           onClick={() => onStart({ p1, p2, mode, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] })}
-          className="rounded-md bg-amber-400 px-8 py-3 text-lg font-black uppercase italic tracking-wide text-black transition hover:bg-amber-300"
+          className="cut bg-[var(--brass)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[#e0ab3c]"
         >
           {mode === "training" ? "Train" : "Fight"}
         </button>

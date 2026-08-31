@@ -145,39 +145,39 @@ export function GameCanvas({
 
       {hud && hud.phase === "intro" && sessionRef.current && (
         <div className="pointer-events-none absolute bottom-10 left-1/2 z-20 -translate-x-1/2 text-center">
-          <div className="text-xs font-bold uppercase tracking-[0.3em] text-white/50">
+          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--bone-dim)]">
             {STAGE_THEMES[sessionRef.current.theme].name}
           </div>
-          <div className="text-[11px] italic text-white/35">
+          <div className="text-xs text-[#6f6c64]">
             {STAGE_THEMES[sessionRef.current.theme].blurb}
           </div>
         </div>
       )}
 
       {pads > 0 && (
-        <div className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-md border border-white/15 bg-black/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+        <div className="cut-sm pointer-events-none absolute bottom-3 left-3 z-20 border border-[var(--rule)] bg-black/60 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#8aa87a]">
           {pads === 1 ? "Gamepad connected" : `${pads} gamepads connected`}
         </div>
       )}
 
 
       {hud?.training && sessionRef.current?.training && (
-        <div className="absolute left-3 top-36 z-20 w-56 rounded-lg border border-white/15 bg-black/70 p-3 text-white backdrop-blur-sm sm:left-4 sm:top-40">
+        <div className="cut absolute left-3 top-36 z-20 w-56 border border-[var(--rule)] bg-black/80 p-3 text-[var(--bone)] backdrop-blur-sm sm:left-4 sm:top-40">
           <div className="mb-2 flex items-baseline justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">Training</span>
+            <span className="font-display text-lg font-bold uppercase tracking-[0.15em] text-[var(--brass)]">Training</span>
             <button
               type="button"
               onClick={() => {
                 const s = sessionRef.current;
                 if (s?.training) s.training.reset(s.match);
               }}
-              className="text-[10px] font-bold uppercase tracking-wider text-white/50 hover:text-white"
+              className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--bone-dim)] hover:text-[var(--bone)]"
             >
               Reset (R)
             </button>
           </div>
 
-          <div className="mb-1 text-[10px] uppercase tracking-widest text-white/40">Dummy</div>
+          <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone-dim)]">Dummy</div>
           <div className="mb-3 grid grid-cols-2 gap-1">
             {DUMMY_ACTIONS.map((a) => (
               <button
@@ -190,8 +190,10 @@ export function GameCanvas({
                   s.training.options.dummy = a.id;
                   setDummy(a.id);
                 }}
-                className={`rounded px-1.5 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
-                  dummy === a.id ? "bg-amber-400 text-black" : "bg-white/10 text-white/70 hover:bg-white/20"
+                className={`px-1.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] transition ${
+                  dummy === a.id
+                    ? "bg-[var(--brass)] text-[var(--ink)]"
+                    : "bg-white/5 text-[var(--bone-dim)] hover:bg-white/10 hover:text-[var(--bone)]"
                 }`}
               >
                 {a.label}
@@ -199,12 +201,12 @@ export function GameCanvas({
             ))}
           </div>
 
-          <div className="mb-1 text-[10px] uppercase tracking-widest text-white/40">Last move</div>
+          <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone-dim)]">Last move</div>
           {hud.training.last ? (
             <>
               <div className="text-sm font-bold leading-tight">{hud.training.last.name}</div>
               {hud.training.last.notation && (
-                <div className="mb-1.5 font-mono text-[11px] text-amber-300">{hud.training.last.notation}</div>
+                <div className="mb-1.5 font-mono text-[11px] text-[var(--brass)]">{hud.training.last.notation}</div>
               )}
               <div className="grid grid-cols-3 gap-1 text-center">
                 {[
@@ -212,25 +214,25 @@ export function GameCanvas({
                   ["Active", hud.training.last.active],
                   ["Recovery", hud.training.last.recovery],
                 ].map(([label, value]) => (
-                  <div key={String(label)} className="rounded bg-white/5 py-1">
-                    <div className="text-[9px] uppercase tracking-wider text-white/40">{label}</div>
+                  <div key={String(label)} className="bg-white/5 py-1">
+                    <div className="font-mono text-[9px] uppercase tracking-[0.1em] text-[var(--bone-dim)]">{label}</div>
                     <div className="font-mono text-sm font-bold">{value ?? "—"}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-1.5 flex justify-between text-[10px] text-white/50">
+              <div className="mt-1.5 flex justify-between font-mono text-[10px] text-[var(--bone-dim)]">
                 <span>{hud.training.last.duration}f total</span>
                 {hud.training.last.damage > 0 && <span>{hud.training.last.damage} dmg</span>}
               </div>
             </>
           ) : (
-            <div className="text-[11px] leading-snug text-white/40">
+            <div className="text-xs leading-snug text-[var(--bone-dim)]">
               Throw something. Frame data appears here.
             </div>
           )}
 
           {hud.training.comboHits > 1 && (
-            <div className="mt-2 rounded bg-amber-400/15 px-2 py-1 text-[11px] font-bold text-amber-200">
+            <div className="mt-2 border-l-2 border-[var(--brass)] bg-[var(--brass)]/10 px-2 py-1 text-xs text-[#e8c775]">
               {hud.training.comboHits} hits · {hud.training.comboDamage} damage
             </div>
           )}
@@ -241,7 +243,7 @@ export function GameCanvas({
         <button
           type="button"
           onClick={togglePause}
-          className="rounded-md border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/80 hover:bg-black/70"
+          className="cut-sm border border-[var(--rule)] bg-black/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
         >
           {paused ? "Resume" : "Pause"}
         </button>
@@ -252,7 +254,7 @@ export function GameCanvas({
             if (!s) return;
             setQuality(s.toggleQuality());
           }}
-          className="rounded-md border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/80 hover:bg-black/70"
+          className="cut-sm border border-[var(--rule)] bg-black/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
         >
           FX {quality === "high" ? "High" : "Low"}
         </button>
@@ -266,21 +268,21 @@ export function GameCanvas({
             music.setMuted(s.sfx.muted);
             setMuted(s.sfx.muted);
           }}
-          className="rounded-md border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/80 hover:bg-black/70"
+          className="cut-sm border border-[var(--rule)] bg-black/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
         >
           {muted ? "Sound off" : "Sound on"}
         </button>
         <button
           type="button"
           onClick={onShowMoves}
-          className="rounded-md border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/80 hover:bg-black/70"
+          className="cut-sm border border-[var(--rule)] bg-black/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
         >
           Moves
         </button>
         <button
           type="button"
           onClick={onQuit}
-          className="rounded-md border border-white/20 bg-black/50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/80 hover:bg-black/70"
+          className="cut-sm border border-[var(--rule)] bg-black/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
         >
           Quit
         </button>
@@ -288,19 +290,19 @@ export function GameCanvas({
 
       {paused && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/70">
-          <div className="text-5xl font-black uppercase italic tracking-tight text-white">Paused</div>
+          <div className="font-display text-7xl font-bold uppercase tracking-wide text-[var(--bone)]">Paused</div>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={togglePause}
-              className="rounded-md bg-amber-400 px-6 py-2 font-bold uppercase tracking-wider text-black"
+              className="cut-sm bg-[var(--brass)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--ink)]"
             >
               Resume
             </button>
             <button
               type="button"
               onClick={onQuit}
-              className="rounded-md border border-white/20 px-6 py-2 font-bold uppercase tracking-wider text-white"
+              className="cut-sm border border-[var(--rule)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--bone)]"
             >
               Quit
             </button>
@@ -310,23 +312,27 @@ export function GameCanvas({
 
       {hud?.phase === "matchEnd" && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/75">
-          <div className="text-sm font-bold uppercase tracking-[0.3em] text-amber-300">Winner</div>
-          <div className="text-5xl font-black uppercase italic tracking-tight text-white sm:text-6xl">
+          <div className="font-mono text-[11px] uppercase tracking-[0.4em] text-[var(--brass)]">Winner</div>
+          <div className="font-display text-7xl font-bold uppercase tracking-wide text-[var(--bone)] sm:text-8xl">
             {hud.winnerName}
           </div>
-          {hud.winQuote && <p className="max-w-md text-center text-sm italic text-white/60">“{hud.winQuote}”</p>}
+          {hud.winQuote && (
+            <p className="max-w-md border-l-2 border-[var(--rule)] pl-3 text-left text-sm text-[var(--bone-dim)]">
+              “{hud.winQuote}”
+            </p>
+          )}
           <div className="mt-2 flex gap-2">
             <button
               type="button"
               onClick={rematch}
-              className="rounded-md bg-amber-400 px-6 py-2 font-bold uppercase tracking-wider text-black hover:bg-amber-300"
+              className="cut-sm bg-[var(--brass)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--ink)] hover:bg-[#e0ab3c]"
             >
               Rematch
             </button>
             <button
               type="button"
               onClick={onQuit}
-              className="rounded-md border border-white/20 px-6 py-2 font-bold uppercase tracking-wider text-white hover:bg-white/10"
+              className="cut-sm border border-[var(--rule)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--bone)] hover:bg-white/10"
             >
               Character select
             </button>

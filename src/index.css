@@ -3,17 +3,113 @@
 @tailwind utilities;
 
 /*
- * The game paints its own background and owns the whole viewport. Everything
- * else it needs is plain Tailwind utilities, so there is no theme layer here.
+ * The look is a field dossier, not a web page: the roster is fifteen
+ * documented people, so the shell around them reads like the record they came
+ * out of. Squared corners, hairline rules, printed type, and one hot accent -
+ * no soft gradients, no rounded cards, nothing that glows for its own sake.
+ *
+ * Fonts ship with the build (src/fonts, SIL Open Font License) rather than
+ * loading from a CDN, because the desktop build runs off disk with no network.
  */
+
+/* --- Big Shoulders Display 700: headings, fighter names -------------------- */
+@font-face {
+  font-family: "Big Shoulders Display";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("./fonts/bigshoulders-700-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Big Shoulders Display";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("./fonts/bigshoulders-700-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* --- Barlow Semi Condensed 400/600: everything you read -------------------- */
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./fonts/barlowsc-400-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./fonts/barlowsc-400-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url("./fonts/barlowsc-600-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url("./fonts/barlowsc-600-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* --- IBM Plex Mono 500: notation, frame data, anything that lines up ------- */
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url("./fonts/plexmono-500-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url("./fonts/plexmono-500-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* --- Palette --------------------------------------------------------------- */
+:root {
+  --ink: #0c0d0c;        /* the ground everything sits on */
+  --ink-2: #131513;      /* a panel lifted off it */
+  --rule: #2c2f2b;       /* hairline between things */
+  --bone: #e6e1d3;       /* body text: paper, not white */
+  --bone-dim: #9a968a;   /* secondary text */
+  --brass: #c8952f;      /* the one hot accent, and player one */
+  --steel: #6f97ad;      /* player two */
+  --blood: #a8341f;      /* damage, danger, KO */
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
-  background: #0b0b10;
-  color: #ffffff;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: "Barlow Semi Condensed", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -28,4 +124,48 @@ body {
 canvas {
   display: block;
   touch-action: none;
+}
+
+/*
+ * Grain. A flat dark field reads as a smooth digital gradient no matter what
+ * is drawn on it; a little static gives the panels a printed surface instead.
+ * It is one inline SVG turbulence tile, so it costs nothing and never loads.
+ */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Corner cuts. Fighting game panels are chamfered, not rounded - it is the
+ * cheapest way to stop a box looking like a web card.
+ */
+.cut {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.cut-sm {
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+/* A hairline rule that fades out, for section headers. */
+.rule-out {
+  background: linear-gradient(90deg, var(--rule), transparent);
+}
+
+/* Native selects look like a browser; these look like the rest of the panel. */
+select.field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23c8952f'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 26px;
+}
+select.field option {
+  background: #131513;
+  color: #e6e1d3;
 }
