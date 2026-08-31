@@ -49,7 +49,7 @@ export interface UniversalOptions {
   backThrowDamage?: number;
   /** Reach of the grab in units. */
   throwRange?: number;
-  /** Roll distance multiplier. */
+  /** Sidestep distance multiplier. */
   rollSpeed?: number;
   /** Weapon-holding fighters keep the arm angled during universal moves. */
   weaponIdle?: Pose;
@@ -62,14 +62,16 @@ export interface UniversalOptions {
  * sides of the screen.
  *
  * Control scheme:
- *   S (hold)  Block        ← + S  Parry       → + S  Dodge roll
+ *   S (hold)  Block        ← + S  Parry       → + S  Sidestep
  *   ↓ + S     Character skill     A + B  Throw       ← + A + B  Back throw
  */
 export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
   const throwDamage = opts.throwDamage ?? 120;
   const backThrowDamage = opts.backThrowDamage ?? 130;
   const range = opts.throwRange ?? 62;
-  const rollSpeed = opts.rollSpeed ?? 7.5;
+  // Per-fighter dodge distance. `rollSpeed` kept its name from the roll
+  // this replaced so no fighter file has to change.
+  const stepSpeed = opts.rollSpeed ?? 7.5;
   const w = opts.weaponIdle ?? {};
 
   return [
@@ -186,65 +188,49 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       ],
     },
     {
-      id: "roll",
-      name: "Dodge Roll",
+      id: "sidestep",
+      name: "Sidestep",
       input: { button: "S", dir: "f", stance: ["stand", "crouch"] },
       tags: ["dodge"],
       priority: 55,
-      duration: 30,
-      invuln: [{ from: 4, to: 20, kind: "strike" }],
+      duration: 20,
+      invuln: [{ from: 3, to: 13, kind: "strike" }],
+      // Front-loaded: one hard push off the back foot, carried almost flat,
+      // then planted. A decaying glide reads as sliding, not stepping.
       vel: [
-        { at: 1, x: rollSpeed },
-        { at: 22, x: 0 },
+        { at: 1, x: stepSpeed },
+        { at: 13, x: 0 },
       ],
-      friction: 0.86,
-      desc: "Dives into a shoulder roll, passing through attacks and out the other side. Vulnerable on the way up.",
-      notation: "→ + S",
+      friction: 0.95,
+      desc: "A hard step past the attack, staying on your feet and facing them the whole way.",
+      notation: "\u2192 + S",
       /**
-       * A forward shoulder roll, not a figure spinning on the spot.
+       * A step, not a tumble.
        *
-       * Three things make it read: the body tucks into a ball before it turns
-       * (knees to chest, arms wrapped in, spine curled over), the turn happens
-       * about the middle of that ball via `spinPivot` rather than about the
-       * feet, and the ball squashes down so its silhouette is compact. Without
-       * the tuck it is a stick figure cartwheeling; without the pivot it
-       * swings around its own ankles.
+       * The roll this replaced turned 360 degrees while covering less ground
+       * than simply walking for the same thirty frames, which is exactly why
+       * it looked like spinning on the spot - all rotation, no travel. This
+       * goes further, in two thirds of the time, staying upright and facing
+       * the opponent so you can see what you stepped past.
+       *
+       * The guard stays up throughout, which also keeps a long spear or staff
+       * out of the way without folding it into the body.
        */
       frames: [
-        // Drop and commit - the lead shoulder goes down first.
-        kf(0, { ...w, torso: 26, crouch: 0.55, hipF: 34, kneeF: 56, hipB: -16, kneeB: 44, shoulderF: 44, elbowF: 66, weapon: -46 }, "out"),
-        kf(3, {
-          free: 1, spin: -38, spinPivot: 30, squash: 0.82, offY: 12,
-          torso: 64, crouch: 1, hipF: 116, kneeF: 146, hipB: 92, kneeB: 150,
-          shoulderF: 150, elbowF: 138, shoulderB: 142, elbowB: 140,
-          head: 34, weapon: -96,
-        }, "in"),
-        // Tucked: knees to chest, arms wrapped, weapon folded in along the
-        // body. A long spear or staff left sticking out turns the whole roll
-        // into a windmill, so it comes in with everything else.
-        kf(8, {
-          free: 1, spin: -128, spinPivot: 32, squash: 0.76, offY: 10,
-          torso: 74, crouch: 1, hipF: 134, kneeF: 158, hipB: 118, kneeB: 160,
-          shoulderF: 162, elbowF: 148, shoulderB: 156, elbowB: 150,
-          head: 40, weapon: -112,
-        }, "linear"),
-        kf(14, {
-          free: 1, spin: -224, spinPivot: 32, squash: 0.76, offY: 10,
-          torso: 76, crouch: 1, hipF: 138, kneeF: 160, hipB: 124, kneeB: 162,
-          shoulderF: 164, elbowF: 150, shoulderB: 158, elbowB: 152,
-          head: 40, weapon: -112,
-        }, "linear"),
-        // Round onto the feet and start to open out.
-        kf(19, {
-          free: 1, spin: -312, spinPivot: 28, squash: 0.82, offY: 12,
-          torso: 60, crouch: 1, hipF: 118, kneeF: 144, hipB: 96, kneeB: 148,
-          shoulderF: 148, elbowF: 134, shoulderB: 140, elbowB: 138,
-          head: 32, weapon: -92,
-        }, "out"),
-        // Feet under him, low and still carrying the momentum forward.
-        kf(24, { ...w, spin: -360, torso: 32, crouch: 0.78, hipF: 48, kneeF: 78, hipB: -24, kneeB: 70, shoulderF: 56, elbowF: 64, shoulderB: 48, elbowB: 60, weapon: -58 }, "out"),
-        kf(27, { ...w, torso: 18, crouch: 0.4, hipF: 38, kneeF: 60, shoulderF: 50, elbowF: 62, weapon: -20 }, "inOut"),
-        kf(30, { ...w }),
+        // Gather: weight drops onto the back leg, the whole body loads.
+        kf(0, { ...w, torso: 10, crouch: 0.34, hipF: 10, kneeF: 40, hipB: -30, kneeB: 58, offX: -3 }, "out"),
+        // Push: the back leg drives out behind, the lead knee lifts and
+        // reaches, and the body leans out over the step.
+        kf(4, { ...w, torso: 18, crouch: 0.22, hipF: 52, kneeF: 52, hipB: -44, kneeB: 26, offY: 4, head: -5 }, "out"),
+        // Carried: full stride, but standing tall enough to still be a step -
+        // sinking into it turns the whole thing into a slide.
+        kf(9, { ...w, torso: 14, crouch: 0.26, hipF: 60, kneeF: 34, hipB: -50, kneeB: 20, offY: 2, head: -3 }, "linear"),
+        // Plant: the lead foot catches the weight and the trailing leg swings
+        // through under the body.
+        kf(14, { ...w, torso: 12, crouch: 0.34, hipF: 30, kneeF: 58, hipB: -14, kneeB: 46, head: -2 }, "inOut"),
+        // Back to a fighting stance, feet under him.
+        kf(17, { ...w, torso: 8, crouch: 0.2, hipF: 20, kneeF: 34, hipB: -22, kneeB: 38 }, "inOut"),
+        kf(20, { ...w }),
       ],
     },
   ];

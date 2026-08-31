@@ -6,7 +6,7 @@
  * move's keyframes exactly the way the engine does, and lays the frames out
  * side by side so a roll can be judged on its own.
  *
- *   /animlab.html?fighter=roman&move=roll&from=0&to=30&step=2
+ *   /animlab.html?fighter=roman&move=sidestep&from=0&to=20&step=2
  *   /animlab.html?fighter=spartan&clip=blockHigh&to=10&step=1&w=110
  *
  * `w` widens the framed area, for poses that put a spear outside the default.
@@ -25,7 +25,7 @@ const def = getFighter(q.get("fighter") ?? "roman");
 // Either a move's own keyframes, or one of the shared/overridden clips - the
 // guards, walks and reactions only exist as clips.
 const clipName = q.get("clip") as ClipName | null;
-const move = clipName ? null : def.moves.find((m) => m.id === (q.get("move") ?? "roll"));
+const move = clipName ? null : def.moves.find((m) => m.id === (q.get("move") ?? "sidestep"));
 if (!clipName && !move) throw new Error(`no move ${q.get("move")}`);
 const clip = clipName ? clipFor(clipName, def.clips) : null;
 const at = (t: number): Pose =>

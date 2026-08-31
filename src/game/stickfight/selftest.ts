@@ -149,13 +149,54 @@ for (const def of ROSTER) contract(def);
 }
 
 {
-  // Dodge roll passes through an attack.
-  const m = newMatch("western", "roman");
-  m.fighters[0].x = -30;
-  m.fighters[1].x = 40;
-  const hp = m.fighters[0].health;
-  run(m, 34, (f) => inp({ right: true, S: f < 3 }), (f) => inp({ B: f === 6 }));
-  check("dodge roll avoids an attack", m.fighters[0].health === hp);
+  // The sidestep passes through an attack.
+  //
+  // Run the same exchange twice - once stepping, once standing still - and
+  // compare. Asserting only that the dodger takes no damage passes just as
+  // well when the attack was never going to reach, which is how a timing
+  // change can quietly turn this into a test of nothing.
+  const exchange = (dodge: boolean) => {
+    const m = newMatch("western", "roman");
+    m.fighters[0].x = -30;
+    m.fighters[1].x = 40;
+    const hp = m.fighters[0].health;
+    run(m, 34, (f) => inp({ right: true, S: dodge && f < 3 }), (f) => inp({ B: f === 2 }));
+    return hp - m.fighters[0].health;
+  };
+  const standing = exchange(false);
+  const stepping = exchange(true);
+  check("sidestep: the attack would otherwise land", standing > 0, `lost=${standing}`);
+  check("sidestep avoids an attack", stepping === 0, `lost=${stepping}`);
+}
+
+{
+  // A dodge has to cover ground. The roll this replaced turned a full circle
+  // while travelling less far than simply walking for the same number of
+  // frames, which is exactly why it looked like spinning on the spot.
+  for (const def of ROSTER) {
+    const m = newMatch(def.id, "roman");
+    const f = m.fighters[0];
+    const move = def.moves.find((mv) => mv.tags?.includes("dodge"))!;
+    const x0 = f.x;
+    m.step([inp({ right: true, S: true }), inp()]);
+    let frames = 1;
+    while (f.move?.id === move.id) {
+      m.step([inp(), inp()]);
+      frames++;
+    }
+    const travelled = f.x - x0;
+    const walked = def.stats.walkF * frames;
+    check(
+      `${def.id}: the dodge outruns a walk`,
+      travelled > walked,
+      `${travelled.toFixed(1)} vs ${walked.toFixed(1)} in ${frames}f`,
+    );
+    check(
+      `${def.id}: the dodge clears its own width`,
+      travelled > def.stats.width * 2,
+      `${(travelled / def.stats.width).toFixed(2)} body-widths`,
+    );
+  }
 }
 
 {

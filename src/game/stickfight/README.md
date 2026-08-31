@@ -231,7 +231,7 @@ so density is independent of how far the fighters travel.
 | WASD / arrows / d-pad | move, jump, crouch |
 | J / K / L | light, medium, heavy |
 | hold U or `;` | block (add ↓ to block low) |
-| ← + S / → + S | parry / dodge roll |
+| ← + S / → + S | parry / sidestep |
 | J + L | character skill |
 | J + K | throw |
 | ↓↘→ + button | quarter-circle specials |
