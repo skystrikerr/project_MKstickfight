@@ -193,7 +193,7 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
                       <span className="shrink-0 font-mono text-[11px] text-[var(--accent)]">{m.notation ?? ""}</span>
                     </div>
                     <p className="mt-0.5 text-xs leading-snug text-[var(--bone-dim)]">{m.desc}</p>
-                    <div className="mt-1 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.1em] text-[#6f6c64]">
+                    <div className="mt-1 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.1em] text-[#8a7c63]">
                       {frameData(m) && <span>Frames {frameData(m)}</span>}
                       {m.hits?.[0] && <span>{m.hits.reduce((sum, h) => sum + h.damage, 0)} dmg</span>}
                       {m.meterCost ? <span className="text-[var(--p2)]">{m.meterCost} meter</span> : null}

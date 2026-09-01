@@ -3,10 +3,11 @@
 @tailwind utilities;
 
 /*
- * Cold and cinematic. The shell is nearly black with a lot of empty space in
- * it, the type is angular and widely tracked, and one steel accent carries
- * everything that matters - the register modern fighting game menus work in,
- * where the screen is quiet and the fighters are the only warm thing on it.
+ * Warm and archival. The shell is nearly black with a lot of empty space in
+ * it, the type is angular and widely tracked, and one leather-bronze accent
+ * carries everything that matters - the register a museum case or an old
+ * ledger sits in, not a control-room screen. Fifteen documented people out
+ * of the historical record belong on parchment, not steel.
  *
  * Squared corners and hairline rules throughout: no soft gradients, no
  * rounded cards, nothing that glows for its own sake.
@@ -89,34 +90,34 @@
 }
 
 /* --- Palette --------------------------------------------------------------- */
+/*
+ * Warm and archival: leather, bronze plaque, aged parchment - the register a
+ * roster of fifteen documented people out of the historical record should
+ * sit in, rather than the cold steel-and-blue a menu reaches for by default.
+ */
 :root {
-  --ink: #070a0c;        /* the ground everything sits on: near black, cold */
-  --ink-2: #0e1418;      /* a panel lifted off it */
-  --rule: #1d272d;       /* hairline between things */
-  --bone: #dde7ed;       /* body text: cold white */
-  --bone-dim: #677986;   /* secondary text */
-  --accent: #4aa8c9;     /* the one accent, and player one */
-  --accent-hot: #6ec6e4; /* the same accent, lit - hovers and highlights */
-  --p2: #d98a3a;         /* player two, warm so the two sides never blur */
-  --blood: #c9452f;      /* damage, danger, KO */
-  --health: #cfe3ee;     /* life left: bright and cold, never the accent */
-  --guard: #8a94a0;      /* guard meter, deliberately duller than either */
-
-  /* Old names, kept pointing at the new palette so nothing goes black if a
-     stray reference survives a sweep. */
-  --brass: var(--accent);
-  --steel: var(--p2);
+  --ink: #120d09;        /* the ground everything sits on: near black, burnt umber */
+  --ink-2: #1d150e;      /* a panel lifted off it */
+  --rule: #3a2c1e;       /* hairline between things */
+  --bone: #ecdfc7;       /* body text: aged parchment, not stark white */
+  --bone-dim: #9c8a6e;   /* secondary text */
+  --accent: #a8672f;     /* the one accent, and player one: leather-bronze brown */
+  --accent-hot: #d69a52; /* the same accent, lit - hovers and highlights */
+  --p2: #cdb07a;         /* player two: pale sand, well clear of the brown */
+  --blood: #b8432a;      /* damage, danger, KO */
+  --health: #e8dcc0;     /* life left: bright and warm, never the accent */
+  --guard: #8f7f61;      /* guard meter, deliberately duller than either */
 }
 
 /*
  * High contrast. The dim text and hairline rules that make the interface
- * read as quiet and cinematic are exactly what gets lost first for low
+ * read as quiet and archival are exactly what gets lost first for low
  * vision - so this brightens the two tokens everything else is already
  * built from, rather than adding a second set of components to maintain.
  */
 :root[data-contrast="high"] {
-  --bone-dim: #a7b8c4;
-  --rule: #4a5760;
+  --bone-dim: #c2ac86;
+  --rule: #6b5438;
 }
 
 html,
@@ -185,12 +186,12 @@ canvas {
 /* Native selects look like a browser; these look like the rest of the panel. */
 select.field {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%234aa8c9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23a8672f'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 26px;
 }
 select.field option {
-  background: #0e1418;
-  color: #dde7ed;
+  background: #1d150e;
+  color: #ecdfc7;
 }

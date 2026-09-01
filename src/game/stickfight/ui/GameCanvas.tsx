@@ -181,7 +181,7 @@ export function GameCanvas({
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--bone-dim)]">
             {STAGE_THEMES[sessionRef.current.theme].name}
           </div>
-          <div className="text-xs text-[#6f6c64]">
+          <div className="text-xs text-[#8a7c63]">
             {STAGE_THEMES[sessionRef.current.theme].blurb}
           </div>
         </div>
