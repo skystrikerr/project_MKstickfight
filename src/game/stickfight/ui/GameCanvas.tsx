@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { AiLevel } from "../constants";
 import { music } from "../engine/music";
+import { loadSave, patchSave } from "../save";
 import { GameSession, type GameMode, type HudState } from "../engine/game";
 import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
@@ -25,11 +26,19 @@ export function GameCanvas({
   config,
   onQuit,
   onShowMoves,
+  onMatchEnd,
   touch,
 }: {
   config: MatchConfig;
   onQuit: () => void;
   onShowMoves: () => void;
+  /**
+   * Handed the winning player index once the match is decided. Passing it
+   * means somebody else owns what happens next - the arcade ladder, say - so
+   * the built-in winner card stands down rather than offering a rematch on
+   * top of theirs.
+   */
+  onMatchEnd?: (winner: number) => void;
   touch: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,7 +48,7 @@ export function GameCanvas({
   const [paused, setPaused] = useState(false);
   const [ready, setReady] = useState(false);
   const [pads, setPads] = useState(0);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(() => loadSave().muted);
   const [quality, setQuality] = useState<"high" | "low">("high");
   const [dummy, setDummy] = useState<DummyAction>("stand");
 
@@ -59,6 +68,11 @@ export function GameCanvas({
       p2Skin: config.p2Skin,
     });
     sessionRef.current = session;
+    // The button already reflects the saved setting; the audio has to be told.
+    if (muted) {
+      session.sfx.setMuted(true);
+      music.setMuted(true);
+    }
     session.onHud = setHud;
     session.attach(canvas);
     session.start();
@@ -97,6 +111,7 @@ export function GameCanvas({
         session.sfx.setMuted(next);
         music.setMuted(next);
         setMuted(next);
+        patchSave({ muted: next });
       }
       if (e.code === "Escape") {
         session.paused = !session.paused;
@@ -117,6 +132,18 @@ export function GameCanvas({
       sessionRef.current = null;
     };
   }, [config.p1, config.p2, config.mode, config.aiLevel, config.rounds, config.stage]);
+
+  // The match-end phase persists for many frames, so the report is latched.
+  const reported = useRef(false);
+  useEffect(() => {
+    if (hud?.phase !== "matchEnd" || hud.matchWinner === null) {
+      if (hud?.phase !== "matchEnd") reported.current = false;
+      return;
+    }
+    if (reported.current) return;
+    reported.current = true;
+    onMatchEnd?.(hud.matchWinner);
+  }, [hud?.phase, hud?.matchWinner, onMatchEnd]);
 
   const togglePause = () => {
     const s = sessionRef.current;
@@ -267,6 +294,7 @@ export function GameCanvas({
             s.sfx.setMuted(!s.sfx.muted);
             music.setMuted(s.sfx.muted);
             setMuted(s.sfx.muted);
+            patchSave({ muted: s.sfx.muted });
           }}
           className="cut-sm border border-[var(--rule)] bg-black/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
         >
@@ -310,7 +338,7 @@ export function GameCanvas({
         </div>
       )}
 
-      {hud?.phase === "matchEnd" && (
+      {hud?.phase === "matchEnd" && !onMatchEnd && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/75">
           <div className="font-mono text-[11px] uppercase tracking-[0.4em] text-[var(--brass)]">Winner</div>
           <div className="font-display text-7xl font-bold uppercase tracking-wide text-[var(--bone)] sm:text-8xl">

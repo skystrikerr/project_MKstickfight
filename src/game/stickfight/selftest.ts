@@ -17,7 +17,8 @@ import { Music, TRACKS, type MusicCue } from "./engine/music";
 import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
-import { buildLadder, ENDINGS, LADDER_LENGTH, shiftLevel } from "./ladder";
+import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun } from "./ladder";
+import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./save";
 import { STAGE_THEMES } from "./render/stage";
 import { attachTransform } from "./render/rig";
 import { buildSkeleton, sampleClip } from "./skeleton";
@@ -1054,6 +1055,42 @@ function scriptFor(move: MoveDef): RawInput[] {
     check("ladder: different fighters get different runs", new Set(runs).size === runs.length, `${new Set(runs).size}/${runs.length}`);
   }
 
+  // A full run, won end to end.
+  {
+    let run = startRun("roman", "Veteran");
+    let fights = 0;
+    while (run.phase !== "cleared" && fights < 40) {
+      run = advanceRun({ ...run, phase: "fight" }, true);
+      fights++;
+    }
+    check("run: eight wins clears the ladder", run.phase === "cleared" && fights === LADDER_LENGTH, `${run.phase} after ${fights}`);
+    check("run: a cleared run used no continues", run.continues === 0, String(run.continues));
+  }
+
+  // A loss holds the rung, and continuing costs a continue rather than a place.
+  {
+    let run = startRun("pirate", "Veteran");
+    run = advanceRun({ ...run, phase: "fight" }, true);
+    const rung = run.at;
+    run = advanceRun({ ...run, phase: "fight" }, false);
+    check("run: a loss stops the run", run.phase === "lost", run.phase);
+    check("run: a loss does not advance", run.at === rung, `${rung} -> ${run.at}`);
+    run = continueRun(run);
+    check("run: continuing returns to the same fight", run.phase === "versus" && run.at === rung, `${run.phase}@${run.at}`);
+    check("run: continuing is counted", run.continues === 1, String(run.continues));
+  }
+
+  // The match-end phase lasts many frames, so a second report must not skip a
+  // rung - this is the bug that would quietly let someone win seven fights.
+  {
+    let run = startRun("zulu", "Veteran");
+    run = { ...run, phase: "fight" };
+    const once = advanceRun(run, true);
+    const twice = advanceRun(once, true);
+    check("run: a repeated result is ignored", twice.at === once.at, `${once.at} -> ${twice.at}`);
+    check("run: continuing a run that is not lost does nothing", continueRun(once).continues === 0);
+  }
+
   // The player's difficulty is the middle of the run, and the ends clamp.
   {
     const low = buildLadder("roman", "Rookie");
@@ -1062,6 +1099,89 @@ function scriptFor(move: MoveDef): RawInput[] {
     check("ladder: Legend cannot ramp past the ceiling", high[7].level === "Legend", high[7].level);
     check("ladder: shiftLevel clamps both ways", shiftLevel("Rookie", -3) === "Rookie" && shiftLevel("Legend", 3) === "Legend");
   }
+}
+
+// ---------------------------------------------------------------------------
+// Saved settings
+// ---------------------------------------------------------------------------
+//
+// The save layer's whole job is to never be the reason the game breaks, so
+// what is tested is mostly how it behaves when storage misbehaves.
+
+{
+  // Node has no localStorage; a small stand-in lets the same code be driven.
+  const store = new Map<string, string>();
+  let throwOnAccess = false;
+  (globalThis as { window?: unknown }).window = {
+    localStorage: {
+      getItem: (k: string) => {
+        if (throwOnAccess) throw new Error("blocked");
+        return store.get(k) ?? null;
+      },
+      setItem: (k: string, v: string) => {
+        if (throwOnAccess) throw new Error("blocked");
+        store.set(k, v);
+      },
+      removeItem: (k: string) => void store.delete(k),
+    },
+  };
+
+  const KEY = "stickfighter.save";
+
+  // Nothing stored yet.
+  clearSave();
+  check("save: first run returns the defaults", loadSave().p1 === DEFAULT_SAVE.p1, loadSave().p1);
+
+  // A round trip.
+  patchSave({ aiLevel: "Legend", rounds: 3 });
+  check("save: a patch round-trips", loadSave().aiLevel === "Legend" && loadSave().rounds === 3);
+
+  // A patch must not drop the fields it did not mention.
+  patchSave({ muted: true });
+  check("save: a patch keeps what it did not touch", loadSave().aiLevel === "Legend", loadSave().aiLevel);
+
+  // Garbage in the slot.
+  store.set(KEY, "{ this is not json");
+  check("save: unparseable storage falls back", loadSave().p1 === DEFAULT_SAVE.p1);
+  store.set(KEY, "null");
+  check("save: a null blob falls back", loadSave().rounds === DEFAULT_SAVE.rounds);
+
+  // A blob naming things this build no longer has. Only the bad fields should
+  // fall back - one renamed fighter must not wipe somebody's whole record.
+  store.set(
+    KEY,
+    JSON.stringify({ v: 1, p1: "wizard", p2: "pirate", rounds: 99, aiLevel: "Godlike", stage: "moon", cleared: { pirate: "Legend", wizard: "Legend" } }),
+  );
+  const salvaged = loadSave();
+  check("save: an unknown fighter falls back alone", salvaged.p1 === DEFAULT_SAVE.p1 && salvaged.p2 === "pirate", `${salvaged.p1}/${salvaged.p2}`);
+  check("save: an out-of-range round count falls back", salvaged.rounds === DEFAULT_SAVE.rounds, String(salvaged.rounds));
+  check("save: an unknown difficulty falls back", salvaged.aiLevel === DEFAULT_SAVE.aiLevel, salvaged.aiLevel);
+  check("save: an unknown stage falls back", salvaged.stage === DEFAULT_SAVE.stage, String(salvaged.stage));
+  check("save: unknown fighters are dropped from the record", !("wizard" in salvaged.cleared) && salvaged.cleared.pirate === "Legend", Object.keys(salvaged.cleared).join(","));
+
+  // Clears keep the hardest difficulty, whatever order they arrive in.
+  clearSave();
+  recordClear("roman", "Champion");
+  recordClear("roman", "Rookie");
+  check("save: a clear cannot be demoted", loadSave().cleared.roman === "Champion", loadSave().cleared.roman);
+  recordClear("roman", "Legend");
+  check("save: a harder clear is promoted", loadSave().cleared.roman === "Legend", loadSave().cleared.roman);
+
+  // Storage that throws on every access - private mode, blocked site data.
+  throwOnAccess = true;
+  let threw = false;
+  try {
+    patchSave({ rounds: 1 });
+    loadSave();
+  } catch {
+    threw = true;
+  }
+  check("save: blocked storage never throws at the caller", !threw);
+  check("save: blocked storage still returns usable defaults", loadSave().p1 === DEFAULT_SAVE.p1);
+  throwOnAccess = false;
+
+  clearSave();
+  delete (globalThis as { window?: unknown }).window;
 }
 
 // ---------------------------------------------------------------------------

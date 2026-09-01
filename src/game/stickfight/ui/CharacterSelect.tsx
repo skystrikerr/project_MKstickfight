@@ -7,6 +7,7 @@ import type { FighterDef } from "../types";
 import type { GameMode } from "../engine/game";
 import { STAGE_LIST, STAGE_THEMES, type StageTheme } from "../render/stage";
 import { applySkin, getSkin, SKINS } from "../skins";
+import { loadSave, patchSave } from "../save";
 import { FighterPortrait } from "./Portrait";
 
 interface Props {
@@ -127,6 +128,7 @@ function Card({
   def,
   index,
   selected,
+  clearedAt,
   dim,
   onPick,
   onHover,
@@ -134,6 +136,8 @@ function Card({
   def: FighterDef;
   index: string;
   selected: "p1" | "p2" | "both" | null;
+  /** Hardest difficulty this fighter's ladder has been cleared on, if any. */
+  clearedAt?: string;
   dim: boolean;
   onPick: () => void;
   onHover: () => void;
@@ -155,6 +159,14 @@ function Card({
           portrait out. */}
       <span className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: def.palette.accent }} />
       <span className="absolute left-2 top-1.5 font-mono text-[10px] text-[var(--bone-dim)]">{index}</span>
+      {clearedAt && (
+        <span
+          className="absolute left-2 bottom-2.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[var(--brass)]"
+          title={`Arcade ladder cleared on ${clearedAt}`}
+        >
+          ★ {clearedAt}
+        </span>
+      )}
       <FighterPortrait def={def} className="relative h-32 w-full" />
       <div className="relative mt-1">
         <div className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
@@ -174,15 +186,19 @@ function Card({
 }
 
 export function CharacterSelect({ onStart, onShowMoves }: Props) {
-  const [p1, setP1] = useState(ROSTER[0].id);
-  const [p2, setP2] = useState(ROSTER[1].id);
+  // Read once. Everything below starts where the last session left it, and
+  // writes back as it changes, so the screen never opens cold twice.
+  const [saved] = useState(loadSave);
+  const [p1, setP1] = useState(saved.p1);
+  const [p2, setP2] = useState(saved.p2);
   const [picking, setPicking] = useState<"p1" | "p2">("p1");
-  const [hover, setHover] = useState(ROSTER[0].id);
-  const [mode, setMode] = useState<GameMode>("cpu");
-  const [aiLevel, setAiLevel] = useState<AiLevel>("Veteran");
-  const [rounds, setRounds] = useState(2);
-  const [stage, setStage] = useState<StageTheme | "random">("random");
-  const [skins, setSkins] = useState<[string, string]>(["classic", "twilight"]);
+  const [hover, setHover] = useState(saved.p1);
+  const [mode, setMode] = useState<GameMode>("arcade");
+  const [aiLevel, setAiLevel] = useState<AiLevel>(saved.aiLevel);
+  const [rounds, setRounds] = useState(saved.rounds);
+  const [stage, setStage] = useState<StageTheme | "random">(saved.stage);
+  const [skins, setSkins] = useState<[string, string]>([saved.p1Skin, saved.p2Skin]);
+  const cleared = saved.cleared;
 
   const preview = ROSTER.find((f) => f.id === hover) ?? ROSTER[0];
   const ratings = ratingFor(preview);
@@ -198,6 +214,12 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
   );
 
   const pick = (id: string) => {
+    // An arcade run has one player, so every click sets P1 rather than
+    // alternating - otherwise the second click hands your pick to the CPU.
+    if (mode === "arcade") {
+      setP1(id);
+      return;
+    }
     if (picking === "p1") {
       setP1(id);
       setPicking("p2");
@@ -215,15 +237,23 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             Choose your fighter
           </h2>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
-            Selecting for{" "}
-            <span style={{ color: picking === "p1" ? "var(--brass)" : "var(--steel)" }}>{picking.toUpperCase()}</span> ·
-            click a fighter to lock in
+            {mode === "arcade" ? (
+              <>Eight fights · pick who climbs</>
+            ) : (
+              <>
+                Selecting for{" "}
+                <span style={{ color: picking === "p1" ? "var(--brass)" : "var(--steel)" }}>
+                  {picking.toUpperCase()}
+                </span>{" "}
+                · click a fighter to lock in
+              </>
+            )}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex border border-[var(--rule)]">
-            {(["cpu", "versus", "training"] as GameMode[]).map((m) => (
+            {(["arcade", "cpu", "versus", "training"] as GameMode[]).map((m) => (
               <button
                 key={m}
                 type="button"
@@ -234,12 +264,12 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
                     : "text-[var(--bone-dim)] hover:bg-white/5 hover:text-[var(--bone)]"
                 }`}
               >
-                {m === "cpu" ? "1P vs CPU" : m === "versus" ? "2 Players" : "Training"}
+                {m === "arcade" ? "Arcade" : m === "cpu" ? "1P vs CPU" : m === "versus" ? "2 Players" : "Training"}
               </button>
             ))}
           </div>
 
-          {(mode === "cpu" || mode === "training") && (
+          {(mode === "cpu" || mode === "arcade" || mode === "training") && (
             <select
               value={aiLevel}
               onChange={(e) => setAiLevel(e.target.value as AiLevel)}
@@ -274,7 +304,20 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
               key={def.id}
               def={def}
               index={String(i + 1).padStart(2, "0")}
-              selected={p1 === def.id && p2 === def.id ? "both" : p1 === def.id ? "p1" : p2 === def.id ? "p2" : null}
+              clearedAt={cleared[def.id]}
+              selected={
+                mode === "arcade"
+                  ? p1 === def.id
+                    ? "p1"
+                    : null
+                  : p1 === def.id && p2 === def.id
+                    ? "both"
+                    : p1 === def.id
+                      ? "p1"
+                      : p2 === def.id
+                        ? "p2"
+                        : null
+              }
               dim={false}
               onPick={() => pick(def.id)}
               onHover={() => setHover(def.id)}
@@ -359,7 +402,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
       <div className="cut-sm flex flex-wrap items-center justify-between gap-3 border border-[var(--rule)] bg-[var(--ink-2)] p-3">
         <div className="flex flex-wrap items-center gap-5">
-          {picked.map((def, i) => (
+          {(mode === "arcade" ? picked.slice(0, 1) : picked).map((def, i) => (
             <div key={i} className="flex items-center gap-2">
               <FighterPortrait def={def} className="h-14 w-14" facing={i === 0 ? 1 : -1} />
               <div>
@@ -395,10 +438,13 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
         <button
           type="button"
-          onClick={() => onStart({ p1, p2, mode, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] })}
+          onClick={() => {
+            patchSave({ p1, p2, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] });
+            onStart({ p1, p2, mode, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] });
+          }}
           className="cut bg-[var(--brass)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[#e0ab3c]"
         >
-          {mode === "training" ? "Train" : "Fight"}
+          {mode === "training" ? "Train" : mode === "arcade" ? "Begin" : "Fight"}
         </button>
       </div>
     </div>

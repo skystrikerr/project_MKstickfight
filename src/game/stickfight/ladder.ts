@@ -165,3 +165,44 @@ export const ENDINGS: Record<string, string> = {
 export function endingFor(id: string): string {
   return ENDINGS[id] ?? "";
 }
+
+// ---------------------------------------------------------------------------
+// Run state
+// ---------------------------------------------------------------------------
+
+/**
+ * One arcade run. The tower is rebuilt from the fighter and difficulty rather
+ * than stored, so this is only the position within it.
+ */
+export interface Run {
+  fighter: string;
+  level: AiLevel;
+  steps: LadderStep[];
+  at: number;
+  continues: number;
+  /** "versus" before a fight, "fight" during it, then how it ended. */
+  phase: "versus" | "fight" | "lost" | "cleared";
+}
+
+export function startRun(fighter: string, level: AiLevel): Run {
+  return { fighter, level, steps: buildLadder(fighter, level), at: 0, continues: 0, phase: "versus" };
+}
+
+/**
+ * Applies the result of one fight.
+ *
+ * Only a run that is actually fighting can be advanced: the match-end phase
+ * lasts many frames and a stray second report must not skip a rung.
+ */
+export function advanceRun(run: Run, playerWon: boolean): Run {
+  if (run.phase !== "fight") return run;
+  if (!playerWon) return { ...run, phase: "lost" };
+  if (run.at + 1 >= run.steps.length) return { ...run, phase: "cleared" };
+  return { ...run, at: run.at + 1, phase: "versus" };
+}
+
+/** Retrying costs a continue and puts you back on the same rung. */
+export function continueRun(run: Run): Run {
+  if (run.phase !== "lost") return run;
+  return { ...run, continues: run.continues + 1, phase: "versus" };
+}

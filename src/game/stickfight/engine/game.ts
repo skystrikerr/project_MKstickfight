@@ -18,7 +18,11 @@ import { GamepadReader, Keyboard, mergeInputs, P1_KEYS, P2_KEYS, type RawInput }
 import { Match, type Phase } from "./match";
 import { DEFAULT_TRAINING, TrainingRoom, type TrainingOptions, type TrainingReadout } from "./training";
 
-export type GameMode = "cpu" | "versus" | "training";
+/**
+ * "arcade" is a run of "cpu" matches with a tower around it; the session
+ * itself cannot tell them apart, and should not try to.
+ */
+export type GameMode = "cpu" | "arcade" | "versus" | "training";
 
 export interface GameOptions {
   p1: string;
@@ -117,7 +121,7 @@ export class GameSession {
     );
     // Training keeps an AI around too, because "fight back" is one of the
     // dummy settings.
-    if (options.mode === "cpu" || options.mode === "training") {
+    if (options.mode === "cpu" || options.mode === "arcade" || options.mode === "training") {
       this.ai = new AiController(options.aiLevel);
     }
     this.training = options.mode === "training" ? new TrainingRoom(options.training ?? DEFAULT_TRAINING) : null;

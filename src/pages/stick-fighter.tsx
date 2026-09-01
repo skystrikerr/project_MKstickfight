@@ -12,6 +12,10 @@ import { MoveList } from "@/game/stickfight/ui/MoveList";
 import { FighterPortrait } from "@/game/stickfight/ui/Portrait";
 import { ROSTER } from "@/game/stickfight/fighters";
 import { music } from "@/game/stickfight/engine/music";
+import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
+import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
+import { recordClear } from "@/game/stickfight/save";
+import { SKINS } from "@/game/stickfight/skins";
 
 type Screen = "title" | "select" | "fight";
 
@@ -47,11 +51,21 @@ const PAD_CONTROLS: { keys: string; label: string }[] = [
   { keys: "Start", label: "Pause" },
 ];
 
+/**
+ * Keeps the two sides of a mirror match visibly different. Everywhere else the
+ * chosen colours stand, because they were chosen.
+ */
+function mirrorSafeSkin(step: LadderStep, p1Skin?: string, p2Skin?: string): string | undefined {
+  if (step.stage !== "mirror" || p2Skin !== p1Skin) return p2Skin;
+  return SKINS.find((s) => s.id !== p1Skin)?.id ?? p2Skin;
+}
+
 export default function StickFighter() {
   const [screen, setScreen] = useState<Screen>("title");
   const [config, setConfig] = useState<MatchConfig | null>(null);
   const [moveListFor, setMoveListFor] = useState<string | null>(null);
   const [touch, setTouch] = useState(false);
+  const [run, setRun] = useState<Run | null>(null);
 
   useEffect(() => {
     setTouch(typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
@@ -173,19 +187,92 @@ export default function StickFighter() {
         <CharacterSelect
           onStart={(opts) => {
             setConfig(opts);
+            setRun(opts.mode === "arcade" ? startRun(opts.p1, opts.aiLevel) : null);
             setScreen("fight");
           }}
           onShowMoves={(id) => setMoveListFor(id)}
         />
       )}
 
-      {screen === "fight" && config && (
+      {screen === "fight" && config && !run && (
         <GameCanvas
           config={config}
           touch={touch}
           onQuit={() => setScreen("select")}
           onShowMoves={() => setMoveListFor(config.p1)}
         />
+      )}
+
+      {screen === "fight" && config && run && (
+        <>
+          {/*
+            The canvas stays mounted through the versus card so the next fight
+            is already warm behind it - remounting between every bout is what
+            makes an arcade ladder feel like eight separate loading screens.
+          */}
+          <GameCanvas
+            config={{
+              ...config,
+              mode: "cpu",
+              p2: run.steps[run.at].opponent,
+              aiLevel: run.steps[run.at].level,
+              // A mirror match needs two different colours or you cannot tell
+              // which stick figure is yours.
+              p2Skin: mirrorSafeSkin(run.steps[run.at], config.p1Skin, config.p2Skin),
+            }}
+            touch={touch}
+            onQuit={() => {
+              setRun(null);
+              setScreen("select");
+            }}
+            onShowMoves={() => setMoveListFor(config.p1)}
+            onMatchEnd={(winner) => {
+              setRun((r) => {
+                if (!r) return r;
+                const next = advanceRun(r, winner === 0);
+                if (next.phase === "cleared" && r.phase !== "cleared") recordClear(next.fighter, next.level);
+                return next;
+              });
+            }}
+          />
+
+          {run.phase === "versus" && (
+            <VersusCard
+              playerId={config.p1}
+              step={run.steps[run.at]}
+              onFight={() => setRun({ ...run, phase: "fight" })}
+              onQuit={() => {
+                setRun(null);
+                setScreen("select");
+              }}
+            />
+          )}
+
+          {run.phase === "lost" && (
+            <ContinuePrompt
+              step={run.steps[run.at]}
+              continues={run.continues}
+              onRetry={() => setRun(continueRun(run))}
+              onQuit={() => {
+                setRun(null);
+                setScreen("select");
+              }}
+            />
+          )}
+
+          {run.phase === "cleared" && (
+            <EndingCard
+              playerId={config.p1}
+              ending={endingFor(config.p1)}
+              level={config.aiLevel}
+              continues={run.continues}
+              onDone={() => {
+                setRun(null);
+                setScreen("select");
+              }}
+            />
+          )}
+        </>
       )}
 
       {moveListFor && <MoveList fighterId={moveListFor} onClose={() => setMoveListFor(null)} />}
