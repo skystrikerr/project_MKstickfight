@@ -407,7 +407,7 @@ export const WESTERN: FighterDef = {
       followUps: [
         { button: "C", move: "3C", from: 16, to: 37, string: "Bull Rush" },
       ],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 92, { guard: "mid", fx: "blunt", pushX: 18, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
+      hits: [hit(16, 20, bx(16, 22, 52, 68), 92, { guard: "mid", fx: "blunt", pushX: 18, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
       desc: "Walks in and throws everything behind one hand. Ends the exchange or ends him.",
       notation: "\u2192 + C",
       frames: [
@@ -473,7 +473,7 @@ export const WESTERN: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 100, { guard: "overhead", fx: "blunt", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(12, 20, 58, 86), 100, { guard: "overhead", fx: "blunt", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Loads it up and drops it over the top of their guard. Blocked standing only.",
       notation: "\u2190 + C",
       frames: [

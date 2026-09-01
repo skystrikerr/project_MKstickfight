@@ -423,6 +423,10 @@ function scriptFor(move: MoveDef): RawInput[] {
       ];
     case "dd":
       return [inp({ down: true }), inp({ down: true }), inp(), inp({ down: true }), press({ down: true }), press({ down: true })];
+    case "ff":
+      return [inp({ right: true }), inp(), press({ right: true }), press({ right: true })];
+    case "bb":
+      return [inp({ left: true }), inp(), press({ left: true }), press({ left: true })];
     case "chargeB": {
       // Hold back past COMBAT.chargeFrames, then let go forward with the button.
       const script: RawInput[] = [];

@@ -110,6 +110,8 @@ export const STYLES: Record<string, Style> = {
   shaolin: { aggression: 0.7, special: 1.25, throw: 0.8, poke: 1.1, patience: 1.2, range: "far" },
   // Zoner / Resource: the chakram is thrown from a distance it can be thrown from again.
   nihang: { aggression: 0.65, special: 1.25, throw: 0.7, poke: 1.0, patience: 1.25, range: "far" },
+  // Mix-up / Wildcard: no single range is home, so every tool gets used.
+  shade: { aggression: 1.1, special: 1.35, throw: 1.0, poke: 0.95, patience: 1.0, range: "mid" },
 };
 
 const MOTION_DIRS: Record<Motion, number[]> = {

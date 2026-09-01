@@ -494,7 +494,7 @@ export const KNIGHT: FighterDef = {
       followUps: [
         { button: "A", move: "4A", from: 16, to: 37, string: "Half-Sword" },
       ],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 94, { guard: "mid", fx: "blunt", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(20, 22, 84, 68), 94, { guard: "mid", fx: "blunt", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Takes the blade in both hands and swings the pommel like a hammer. Walks through a hit.",
       notation: "\u2192 + C",
       frames: [
@@ -562,7 +562,7 @@ export const KNIGHT: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 106, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(16, 20, 92, 86), 106, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Full overhead cut from the roof guard. Slow, enormous, and blocked standing only.",
       notation: "\u2190 + C",
       frames: [

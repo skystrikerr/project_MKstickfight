@@ -423,7 +423,7 @@ export const PIRATE: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 90, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(16, 22, 52, 68), 90, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Runs onto them swinging. Ends against the wall more often than not.",
       notation: "\u2192 + C",
       frames: [

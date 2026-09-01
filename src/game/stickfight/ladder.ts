@@ -64,6 +64,8 @@ const RIVALS: Record<string, string> = {
   shaolin: "nihang",
   // Ia Drang was an ambush war fought by a conventional force. So was Iga.
   soldier: "ninja",
+  // The documented shinobi against the one no record can pin down.
+  shade: "ninja",
 };
 
 /** The last one standing. Tomoe is the only difficulty five on the roster. */
@@ -159,6 +161,8 @@ export const ENDINGS: Record<string, string> = {
     "In the 1550s the coast was being taken apart by pirates and the empire sent monks. Zheng Ruoceng wrote down what happened at Wengjiagang: forty-odd Shaolin men against a raiding party, and the raiding party did not leave. The monks are named only in fragments now. He is one of the fragments.",
   nihang:
     "He led the Nihang, and he once summoned Ranjit Singh himself to the Akal Takht to be flogged for a moral offence - and Ranjit Singh came, and bared his back. He died in 1823 at Nowshera, going forward, which was the only direction anyone ever recorded him going.",
+  shade:
+    "There is no register that carries his name, because he was never written down in the first place - only repeated, in enough places and enough centuries that somebody eventually started calling all of them the same man. Ask who he really was and the honest answer is that the question does not have the kind of ending the other fourteen do.",
 };
 
 /** Everything the run needs to show a completed ladder. */

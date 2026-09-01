@@ -21,6 +21,7 @@ const ALIASES: Record<string, string[]> = {
   rifle: ["rifle", "muzzle", "stock", "butt-stroke", "bayonet", "shot", "burst", "auto"],
   knife: ["knife", "blade"],
   revolver: ["pistol", "revolver", "barrel", "shot", "draw", "hammer", "chamber"],
+  pistol: ["pistol", "flintlock", "powder", "shot", "barrel"],
   dynamite: ["dynamite", "stick", "fuse"],
   bow: ["bow", "arrow", "stave", "limb", "string", "nock", "draw", "quiver"],
   macuahuitl: ["macuahuitl", "obsidian", "edge", "blade", "rend", "swing"],
@@ -41,9 +42,19 @@ const ALIASES: Record<string, string[]> = {
   sword: ["sword", "hau", "half-sword", "mordhau", "pommel", "cut", "blade"],
   shield: ["shield", "rim", "boss", "heater", "ram"],
   spear: ["spear", "pilum", "thrust", "point", "haft"],
+  handwrapF: ["wrap", "wrapped", "taped", "elbow"],
+  handwrapB: ["wrap", "wrapped", "taped", "elbow"],
+  prajioudF: ["prajioud", "armband", "cord"],
+  prajioudB: ["prajioud", "armband", "cord"],
+  kunaiF: ["kunai", "flick", "jab", "cut", "gouge", "slash", "stab", "blade", "point"],
+  kunaiB: ["kunai", "flick", "jab", "cut", "gouge", "slash", "stab", "blade", "point"],
 };
 
 function usesTool(move: MoveDef, tool: string): boolean {
+  // showProps is the authoritative signal for a conditional prop (one that is
+  // normally hidden and only appears for moves that name it) - a move can
+  // wire one in without ever spelling its name out in flavor text.
+  if (move.showProps?.includes(tool)) return true;
   const hay = `${move.name} ${move.desc ?? ""}`.toLowerCase();
   const words = ALIASES[tool] ?? [tool];
   return words.some((w) => hay.includes(w));

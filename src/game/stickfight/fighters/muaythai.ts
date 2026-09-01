@@ -1,10 +1,10 @@
 /**
- * Kanya Sirichai - Muay Thai fighter.
+ * Nai Khanom Tom - Muay Boran fighter.
  *
- * The only one in the roster with nothing in her hands, and she does not need
- * anything: elbows, knees and shins, thrown from a stance that never stops
- * bouncing. Her Rhythm bar fills as she lands, and her best tools only open up
- * once she is already winning the exchange.
+ * Nothing in her hands but the wraps and cords already on them: elbows,
+ * knees and shins, thrown from a stance that never stops bouncing. Her
+ * Rhythm bar fills as she lands, and her best tools only open up once she
+ * is already winning the exchange.
  */
 
 import type { FighterDef } from "../types";
@@ -219,7 +219,7 @@ export const MUAYTHAI: FighterDef = {
         { button: "C", move: "4C", from: 7, to: 17, string: "Elbow Chain" },
       ],
       hits: [hit(7, 10, bx(18, 52, 50, 30), 54, { fx: "blunt", pushX: 4.4, hitstun: 18 })],
-      desc: "Turns the hips over and drives the elbow through. Short, and it hurts.",
+      desc: "Turns the hips over and drives the taped elbow through. Short, and it hurts.",
       notation: "B",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -397,7 +397,7 @@ export const MUAYTHAI: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 94, { guard: "mid", fx: "blunt", pushX: 18, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
+      hits: [hit(16, 20, bx(16, 22, 52, 68), 94, { guard: "mid", fx: "blunt", pushX: 18, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
       desc: "Switches the feet and turns the shin all the way through them.",
       notation: "\u2192 + C",
       frames: [
@@ -426,7 +426,7 @@ export const MUAYTHAI: FighterDef = {
         { button: "B", move: "5B", from: 8, to: 19, string: "Elbow Chain" },
       ],
       hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "slash", pushX: 6, hitstun: 15, hitstop: 6 })],
-      desc: "Steps out and cuts back with the point of the elbow. Short and it opens skin.",
+      desc: "Steps out and cuts back with the taped point of the elbow. Short and it opens skin.",
       notation: "\u2190 + A",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -470,8 +470,8 @@ export const MUAYTHAI: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 98, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
-      desc: "Steps back, then drops the elbow through the top of their guard. Blocked standing only.",
+      hits: [hit(20, 23, bx(12, 20, 58, 86), 98, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      desc: "Steps back, then drops the wrapped elbow through the top of their guard. Blocked standing only.",
       notation: "\u2190 + C",
       frames: [
         kf(0, { ...STANCE }, "out"),

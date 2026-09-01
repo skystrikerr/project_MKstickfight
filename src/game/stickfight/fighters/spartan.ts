@@ -449,7 +449,7 @@ export const SPARTAN: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
       hits: [
-        hit(16, 20, bx(20, 24, 66, 66), 92, {
+        hit(16, 20, bx(19, 22, 70, 68), 92, {
           fx: "blunt",
           guard: "mid",
           pushX: 18,
@@ -534,7 +534,7 @@ export const SPARTAN: FighterDef = {
       // the end of the spear meant for finishing a man on the ground. Slow
       // enough to react to, and it has to be blocked standing.
       hits: [
-        hit(20, 23, bx(16, 18, 72, 88), 104, {
+        hit(20, 23, bx(16, 20, 92, 86), 104, {
           fx: "pierce",
           guard: "overhead",
           pushX: 9,
@@ -592,9 +592,9 @@ export const SPARTAN: FighterDef = {
       notation: "(air) B",
       frames: [
         kf(0, { ...STANCE, free: 1, hipF: 30, kneeF: 40, hipB: -22, kneeB: 38 }, "out"),
-        kf(4, { ...STANCE, free: 1, shoulderB: 156, elbowB: -56, weaponBack: 48, torso: -8 }),
-        kf(7, { ...STANCE, free: 1, shoulderB: 84, elbowB: -4, weaponBack: -28, torso: 24, hipF: 40, kneeF: 34 }, "out"),
-        kf(17, { ...STANCE, free: 1, shoulderB: 92, elbowB: -10, weaponBack: -34, torso: 20 }),
+        kf(4, { ...STANCE, free: 1, shoulderB: 110, elbowB: -22, weaponBack: 14, torso: -8 }),
+        kf(7, { ...STANCE, free: 1, shoulderB: 84, elbowB: -4, weaponBack: -8, torso: 24, hipF: 40, kneeF: 34 }, "out"),
+        kf(17, { ...STANCE, free: 1, shoulderB: 88, elbowB: -6, weaponBack: -12, torso: 20 }),
         kf(26, { ...STANCE, free: 1 }),
       ],
     },
@@ -828,7 +828,7 @@ export const SPARTAN: FighterDef = {
         kf(0, { ...STANCE }, "out"),
         kf(5, { ...STANCE, crouch: 0.8, torso: 16, shoulderB: 46, elbowB: 14, weaponBack: -54, hipF: 34, kneeF: 66 }),
         kf(9, { ...STANCE, crouch: 0.9, torso: 26, shoulderB: 70, elbowB: -4, weaponBack: -34, hipF: 42, kneeF: 74, offX: 8 }, "out"),
-        kf(15, { ...STANCE, crouch: 0.4, torso: 6, shoulderB: 140, elbowB: -50, weaponBack: 40, offX: 2 }, "inOut"),
+        kf(15, { ...STANCE, crouch: 0.4, torso: 6, shoulderB: 100, elbowB: -20, weaponBack: 4, offX: 2 }, "inOut"),
         kf(18, { ...STANCE, torso: 20, shoulderB: 100, elbowB: -14, weaponBack: 8, hipF: 34, kneeF: 22, offX: 9 }, "out"),
         kf(28, { ...STANCE, torso: 12, shoulderB: 118, elbowB: -26, weaponBack: 20, offX: 4 }, "inOut"),
         kf(40, { ...STANCE }),
@@ -1003,6 +1003,7 @@ export const SPARTAN: FighterDef = {
         kf(12, { ...STANCE, torso: 26, shoulderF: 96, elbowF: 4, hipF: 38, kneeF: 22, offX: 7 }, "out"),
         kf(20, { ...STANCE, torso: 16, shoulderB: 150, elbowB: -52, weaponBack: 44, hipF: 20, kneeF: 30 }, "inOut"),
         kf(26, { ...STANCE, torso: 24, shoulderB: 98, elbowB: -12, weaponBack: 10, hipF: 36, kneeF: 22, offX: 8 }, "out"),
+        kf(30, { ...STANCE, torso: 24, shoulderB: 98, elbowB: -12, weaponBack: 10, hipF: 36, kneeF: 22, offX: 8 }),
         kf(34, { ...STANCE, torso: 14, shoulderB: 154, elbowB: -56, weaponBack: 48 }, "inOut"),
         kf(38, { ...STANCE, torso: 26, shoulderB: 100, elbowB: -14, weaponBack: 8, offX: 8 }, "out"),
         kf(46, { ...STANCE, torso: -8, shoulderF: 150, elbowF: 16, offX: 2 }, "inOut"),

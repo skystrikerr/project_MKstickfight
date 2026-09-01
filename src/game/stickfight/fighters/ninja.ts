@@ -409,7 +409,7 @@ export const NINJA: FighterDef = {
       followUps: [
         { button: "C", move: "4C", from: 16, to: 37, string: "Tanto Work" },
       ],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 88, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(16, 22, 52, 68), 88, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Closes and drags the blade through on the way past. Puts them in the wall.",
       notation: "\u2192 + C",
       frames: [
@@ -477,7 +477,7 @@ export const NINJA: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 96, { guard: "overhead", fx: "pierce", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(12, 20, 58, 86), 96, { guard: "overhead", fx: "pierce", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Jumps the blade up and drives it straight down, point first. Blocked standing only.",
       notation: "\u2190 + C",
       frames: [

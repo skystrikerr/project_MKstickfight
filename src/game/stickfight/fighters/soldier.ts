@@ -440,7 +440,7 @@ export const SOLDIER: FighterDef = {
       followUps: [
         { button: "C", move: "4C", from: 16, to: 37, string: "Butt-Strokes" },
       ],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 90, { guard: "mid", fx: "blunt", pushX: 16, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(20, 22, 84, 68), 90, { guard: "mid", fx: "blunt", pushX: 16, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Steps through and drives the stock up under the jaw. Standard close-quarters drill.",
       notation: "\u2192 + C",
       frames: [
@@ -511,7 +511,7 @@ export const SOLDIER: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 98, { guard: "overhead", fx: "blunt", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(16, 20, 92, 86), 98, { guard: "overhead", fx: "blunt", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Rifle over the shoulder and the stock brought down. Blocked standing only.",
       notation: "\u2190 + C",
       frames: [

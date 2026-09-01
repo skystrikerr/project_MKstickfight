@@ -6,8 +6,9 @@
 
 <p align="center">
   A 2D fighting game in the browser, built on three.js.<br>
-  Fifteen fighters, every one of them a person the historical record actually names,
-  drawn as inked stick figures and armed with the weapon the sources give them.
+  Sixteen fighters - fifteen of them a person the historical record actually names, one a
+  legend with no record at all - drawn as inked stick figures and armed with the weapon
+  the sources (or the story) give them.
 </p>
 
 <p align="center">
@@ -204,10 +205,14 @@ comes up black with nothing but `ERR_FAILED` in the console.
 | Mgobozi ovela Ntla | Gqokli Hill, 1818 | Pressure / Footsies |
 | Wyatt Earp | Tombstone, 1881 | Zoner / Punisher |
 | The Ia Drang Trooper | Ia Drang Valley, 1965 | Zoner / Resource |
+| Kuro | No fixed year | Mix-up / Wildcard |
 
-The last of these is the one deliberate exception: the unit, the valley and
-every piece of the kit are real, but the man is a composite rather than a named
-individual.
+The Ia Drang Trooper is the deliberate exception among the fifteen historical
+fighters: the unit, the valley and every piece of the kit are real, but the man
+is a composite rather than a named individual. Kuro is a different kind of
+exception entirely - not a documented person at all, but the shinobi legend
+that gets attached to whichever unexplained disappearance a given century
+needs one for.
 
 ## How it is put together
 

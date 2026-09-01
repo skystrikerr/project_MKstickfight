@@ -26,6 +26,7 @@ import { NINJA } from "./ninja";
 import { PIRATE } from "./pirate";
 import { ROMAN } from "./roman";
 import { SAMURAI } from "./samurai";
+import { SHADE } from "./shade";
 import { SHAOLIN } from "./shaolin";
 import { SOLDIER } from "./soldier";
 import { SPARTAN } from "./spartan";
@@ -49,6 +50,7 @@ export const ROSTER: FighterDef[] = [
   ZULU,
   SHAOLIN,
   NIHANG,
+  SHADE,
 ];
 
 export const ROSTER_BY_ID: Record<string, FighterDef> = Object.fromEntries(
@@ -59,4 +61,4 @@ export function getFighter(id: string): FighterDef {
   return ROSTER_BY_ID[id] ?? ROSTER[0];
 }
 
-export { ROMAN, SPARTAN, VIKING, PIRATE, SAMURAI, MUAYTHAI, NINJA, MONGOL, WESTERN, SOLDIER, KNIGHT, JAGUAR, ZULU, SHAOLIN, NIHANG };
+export { ROMAN, SPARTAN, VIKING, PIRATE, SAMURAI, MUAYTHAI, NINJA, MONGOL, WESTERN, SOLDIER, KNIGHT, JAGUAR, ZULU, SHAOLIN, NIHANG, SHADE };
