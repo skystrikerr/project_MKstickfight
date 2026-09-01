@@ -19,7 +19,7 @@ import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
 import { TUTORIAL_STEPS, TutorialRunner } from "./engine/tutorial";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
-import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun } from "./ladder";
+import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun, type Run } from "./ladder";
 import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./save";
 import { BINDABLE_ACTIONS, codeLabel, defaultKeyMap, isKeyCode, toKeyBindings } from "./keybinds";
 import { STAGE_THEMES } from "./render/stage";
@@ -1515,6 +1515,65 @@ function scriptFor(move: MoveDef): RawInput[] {
 
   check("tutorial: every lesson is reachable", seen.length === TUTORIAL_STEPS.length, seen.join(","));
   check("tutorial: the whole thing can be completed", runner.complete, `stuck on ${runner.step?.kind} at frame ${frame}`);
+}
+
+// ---------------------------------------------------------------------------
+// KO recap - what actually finished the match
+// ---------------------------------------------------------------------------
+
+{
+  // A direct strike names itself correctly.
+  {
+    const m = newMatch("roman", "roman");
+    m.fighters[1].health = 1;
+    m.fighters[0].x = -30;
+    m.fighters[1].x = 20;
+    run(m, 30, (f) => inp({ A: f === 2 }));
+    check("KO recap: names the finishing move", m.lastResult?.finishingMove === "Shield Jab", m.lastResult?.finishingMove);
+    check("KO recap: the reason is actually a KO", m.lastResult?.reason === "ko", m.lastResult?.reason);
+    check("KO recap: carries the damage it actually did", (m.lastResult?.finishingDamage ?? 0) > 0, String(m.lastResult?.finishingDamage));
+  }
+
+  // A projectile has to say so too - by the time it lands, the attacker who
+  // threw it is very likely doing something else entirely, so this is the
+  // one case `attacker.move` alone would have named the wrong thing.
+  {
+    const m = newMatch("soldier", "roman");
+    m.fighters[1].health = 1;
+    m.fighters[0].x = -200;
+    m.fighters[1].x = 20;
+    // Soldier's 5C: Aimed Shot, a rifle round fired as a projectile.
+    run(m, 60, (f) => inp({ C: f === 2 }));
+    run(m, 60, () => inp());
+    check("KO recap: a projectile names its own source move", m.lastResult?.finishingMove === "Aimed Shot", m.lastResult?.finishingMove);
+  }
+
+  // A timeout is not a KO - nothing "finished" the match, so nothing should
+  // claim to have.
+  {
+    const m = newMatch("roman", "roman");
+    m.fighters[0].x = -200;
+    m.fighters[1].x = 200;
+    m.fighters[1].health = 50; // strictly less than fighter 0's, so this is a clean "time" win, not a double.
+    m.timer = 1;
+    run(m, 3, () => inp());
+    check("KO recap: a timeout names nothing", m.lastResult?.reason === "time" && m.lastResult?.finishingMove === undefined, JSON.stringify(m.lastResult));
+  }
+}
+
+{
+  // The arcade run carries the recap onto the continue prompt, and only
+  // while there is actually a loss to show one for.
+  const withRecap = { move: "Overhead Chop", damage: 92 };
+  let run1: Run = { ...startRun("roman", "Veteran"), phase: "fight" };
+  run1 = advanceRun(run1, false, withRecap);
+  check("run: a loss carries the recap", run1.lastRecap?.move === "Overhead Chop", JSON.stringify(run1.lastRecap));
+
+  let run2: Run = { ...startRun("roman", "Veteran"), phase: "fight" };
+  run2 = advanceRun(run2, true, withRecap);
+  check("run: a win does not carry a recap forward", run2.lastRecap === null, JSON.stringify(run2.lastRecap));
+
+  check("run: a fresh run starts with no recap", startRun("roman", "Veteran").lastRecap === null);
 }
 
 // ---------------------------------------------------------------------------

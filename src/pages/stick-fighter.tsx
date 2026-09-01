@@ -256,10 +256,10 @@ export default function StickFighter() {
               setScreen("select");
             }}
             onShowMoves={() => setMoveListFor(config.p1)}
-            onMatchEnd={(winner) => {
+            onMatchEnd={(winner, finishing) => {
               setRun((r) => {
                 if (!r) return r;
-                const next = advanceRun(r, winner === 0);
+                const next = advanceRun(r, winner === 0, finishing);
                 if (next.phase === "cleared" && r.phase !== "cleared") recordClear(next.fighter, next.level);
                 return next;
               });
@@ -282,6 +282,7 @@ export default function StickFighter() {
             <ContinuePrompt
               step={run.steps[run.at]}
               continues={run.continues}
+              recap={run.lastRecap}
               onRetry={() => setRun(continueRun(run))}
               onQuit={() => {
                 setRun(null);

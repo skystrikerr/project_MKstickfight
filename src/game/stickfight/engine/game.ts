@@ -86,6 +86,9 @@ export interface HudState {
   matchWinner: 0 | 1 | null;
   winnerName: string | null;
   winQuote: string | null;
+  /** What actually finished the match, when it ended in a KO. */
+  finishingMove: string | null;
+  finishingDamage: number | null;
   paused: boolean;
   /** Present only in training mode, for the practice panel. */
   training?: TrainingReadout;
@@ -400,6 +403,8 @@ export class GameSession {
       matchWinner: winner,
       winnerName: winner !== null ? m.fighters[winner].def.name : null,
       winQuote: winner !== null ? m.fighters[winner].def.winQuote : null,
+      finishingMove: m.lastResult?.finishingMove ?? null,
+      finishingDamage: m.lastResult?.finishingDamage ?? null,
       paused: this.paused,
       training: this.training?.readout,
       tutorial: this.tutorial

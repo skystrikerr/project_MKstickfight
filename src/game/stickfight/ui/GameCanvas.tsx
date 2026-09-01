@@ -39,7 +39,7 @@ export function GameCanvas({
    * the built-in winner card stands down rather than offering a rematch on
    * top of theirs.
    */
-  onMatchEnd?: (winner: number) => void;
+  onMatchEnd?: (winner: number, finishing: { move: string; damage: number } | null) => void;
   touch: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -147,7 +147,7 @@ export function GameCanvas({
     }
     if (reported.current) return;
     reported.current = true;
-    onMatchEnd?.(hud.matchWinner);
+    onMatchEnd?.(hud.matchWinner, hud.finishingMove ? { move: hud.finishingMove, damage: hud.finishingDamage ?? 0 } : null);
   }, [hud?.phase, hud?.matchWinner, onMatchEnd]);
 
   const togglePause = () => {
@@ -360,6 +360,12 @@ export function GameCanvas({
           <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--bone)] sm:text-8xl">
             {hud.winnerName}
           </div>
+          {hud.finishingMove && (
+            <div className="font-mono text-xs uppercase tracking-[0.15em] text-[var(--bone-dim)]">
+              Finished with <span className="text-[var(--accent)]">{hud.finishingMove}</span>
+              {hud.finishingDamage ? ` · ${hud.finishingDamage} dmg` : ""}
+            </div>
+          )}
           {hud.winQuote && (
             <p className="max-w-md border-l-2 border-[var(--rule)] pl-3 text-left text-sm text-[var(--bone-dim)]">
               “{hud.winQuote}”

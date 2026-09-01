@@ -113,11 +113,14 @@ export function VersusCard({
 export function ContinuePrompt({
   step,
   continues,
+  recap,
   onRetry,
   onQuit,
 }: {
   step: LadderStep;
   continues: number;
+  /** What actually beat you, when the loss was a real KO rather than a timeout. */
+  recap: { move: string; damage: number } | null;
   onRetry: () => void;
   onQuit: () => void;
 }) {
@@ -131,6 +134,12 @@ export function ContinuePrompt({
         {them.name} · fight {step.index} of {LADDER_LENGTH}
         {continues > 0 && ` · ${continues} continue${continues === 1 ? "" : "s"} used`}
       </p>
+      {recap && (
+        <p className="font-mono text-xs uppercase tracking-[0.15em] text-[var(--bone-dim)]">
+          Caught by <span className="text-[var(--accent)]">{recap.move}</span>
+          {recap.damage ? ` · ${recap.damage} dmg` : ""}
+        </p>
+      )}
       <div className="flex gap-2">
         <button
           type="button"

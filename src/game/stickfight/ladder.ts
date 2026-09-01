@@ -182,10 +182,13 @@ export interface Run {
   continues: number;
   /** "versus" before a fight, "fight" during it, then how it ended. */
   phase: "versus" | "fight" | "lost" | "cleared";
+  /** What actually beat you, shown on the continue prompt. Only meaningful
+   *  right after a loss - a fresh run or a fight in progress carries none. */
+  lastRecap: { move: string; damage: number } | null;
 }
 
 export function startRun(fighter: string, level: AiLevel): Run {
-  return { fighter, level, steps: buildLadder(fighter, level), at: 0, continues: 0, phase: "versus" };
+  return { fighter, level, steps: buildLadder(fighter, level), at: 0, continues: 0, phase: "versus", lastRecap: null };
 }
 
 /**
@@ -194,11 +197,11 @@ export function startRun(fighter: string, level: AiLevel): Run {
  * Only a run that is actually fighting can be advanced: the match-end phase
  * lasts many frames and a stray second report must not skip a rung.
  */
-export function advanceRun(run: Run, playerWon: boolean): Run {
+export function advanceRun(run: Run, playerWon: boolean, recap: { move: string; damage: number } | null = null): Run {
   if (run.phase !== "fight") return run;
-  if (!playerWon) return { ...run, phase: "lost" };
-  if (run.at + 1 >= run.steps.length) return { ...run, phase: "cleared" };
-  return { ...run, at: run.at + 1, phase: "versus" };
+  if (!playerWon) return { ...run, phase: "lost", lastRecap: recap };
+  if (run.at + 1 >= run.steps.length) return { ...run, phase: "cleared", lastRecap: null };
+  return { ...run, at: run.at + 1, phase: "versus", lastRecap: null };
 }
 
 /** Retrying costs a continue and puts you back on the same rung. */

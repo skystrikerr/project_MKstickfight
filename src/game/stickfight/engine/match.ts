@@ -45,11 +45,17 @@ export interface Projectile {
   facing: 1 | -1;
   spin: number;
   dead: boolean;
+  /** The move that spawned it, for attributing a hit back to a move name. */
+  sourceMove: string;
 }
 
 export interface RoundResult {
   winner: 0 | 1 | null;
   reason: "ko" | "time" | "double";
+  /** What actually landed the last real hit on the fighter who lost - only
+   *  meaningful for a "ko", so a timeout never claims a move finished it. */
+  finishingMove?: string;
+  finishingDamage?: number;
 }
 
 let projId = 0;
@@ -70,6 +76,8 @@ export class Match {
   slowmo = 0;
   combo: [ComboBanner | null, ComboBanner | null] = [null, null];
   lastResult: RoundResult | null = null;
+  /** The most recent real hit each fighter has taken, for the KO recap. */
+  private lastHitTaken: [{ move: string; damage: number } | null, { move: string; damage: number } | null] = [null, null];
   matchWinner: 0 | 1 | null = null;
   roundsToWin: number;
 
@@ -247,7 +255,14 @@ export class Match {
       else reason = "double";
     }
 
-    this.lastResult = { winner, reason };
+    const loser = winner === 0 ? 1 : winner === 1 ? 0 : null;
+    const finishing = reason === "ko" && loser !== null ? this.lastHitTaken[loser] : null;
+    this.lastResult = {
+      winner,
+      reason,
+      finishingMove: finishing?.move,
+      finishingDamage: finishing?.damage,
+    };
     if (winner !== null) this.fighters[winner].wins++;
     this.phase = "roundEnd";
     this.phaseFrame = 0;
@@ -349,7 +364,7 @@ export class Match {
         x: (Math.max(box.left, hurt[0].left) + Math.min(box.right, hurt[0].right)) / 2,
         y: (Math.max(box.bottom, hurt[0].bottom) + Math.min(box.top, hurt[0].top)) / 2,
       };
-      this.applyHit(attacker, defender, hit, contact);
+      this.applyHit(attacker, defender, hit, contact, false, attacker.move?.name);
       break;
     }
   }
@@ -411,7 +426,12 @@ export class Match {
     hit: HitDef,
     contact: { x: number; y: number },
     fromProjectile = false,
+    moveName?: string,
   ) {
+    // A direct strike names itself from the attacker's own active move; a
+    // projectile has to say so explicitly, because by the time it lands the
+    // attacker is very likely doing something else entirely.
+    const name = moveName ?? attacker.move?.name ?? "an attack";
     const guard = hit.guard ?? "mid";
 
     // Parry beats everything blockable.
@@ -487,6 +507,7 @@ export class Match {
     const damage = Math.max(1, Math.round(hit.damage * scale * (counter ? COMBAT.counterDamageScale : 1)));
 
     defender.health = Math.max(0, defender.health - damage);
+    this.lastHitTaken[defender.index] = { move: name, damage };
     defender.flash = 8;
     defender.releaseHold();
     defender.scaling = Math.max(COMBAT.minScale, defender.scaling * COMBAT.scaleStep);
@@ -635,6 +656,7 @@ export class Match {
         facing: f.facing,
         spin: spec.spin ?? 0,
         dead: false,
+        sourceMove: f.move.name,
       });
       this.pushFx({ kind: "spawn", x: f.x + f.facing * spec.x, y: f.y + spec.y, scale: spec.scale ?? 1 });
     }
@@ -690,7 +712,7 @@ export class Match {
               meterGain: p.spec.meterGain,
             };
             const owner = this.fighters[p.owner];
-            this.applyHit(owner, target, hitDef, { x: p.x, y: p.y }, true);
+            this.applyHit(owner, target, hitDef, { x: p.x, y: p.y }, true, p.sourceMove);
             p.hitsLeft--;
             if (p.hitsLeft <= 0) this.killProjectile(p, false);
           }
@@ -751,7 +773,7 @@ export class Match {
       const dir = target.x >= p.x ? 1 : -1;
       const saved = owner.x;
       owner.x = p.x - dir * 10;
-      this.applyHit(owner, target, hitDef, { x: target.x, y: target.y + 40 }, true);
+      this.applyHit(owner, target, hitDef, { x: target.x, y: target.y + 40 }, true, p.sourceMove);
       owner.x = saved;
     }
   }
