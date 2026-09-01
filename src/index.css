@@ -108,6 +108,17 @@
   --steel: var(--p2);
 }
 
+/*
+ * High contrast. The dim text and hairline rules that make the interface
+ * read as quiet and cinematic are exactly what gets lost first for low
+ * vision - so this brightens the two tokens everything else is already
+ * built from, rather than adding a second set of components to maintain.
+ */
+:root[data-contrast="high"] {
+  --bone-dim: #a7b8c4;
+  --rule: #4a5760;
+}
+
 html,
 body,
 #root {

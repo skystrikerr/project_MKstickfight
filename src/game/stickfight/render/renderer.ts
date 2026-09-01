@@ -13,6 +13,15 @@ import { StickRig } from "./rig";
 import { defaultQuality, PostFx } from "./post";
 import { Stage, type StageTheme } from "./stage";
 
+/**
+ * "Reduced" still lets an impact read, just not as a full camera shake -
+ * "off" removes the camera motion entirely for anyone sensitive to it, while
+ * everything else (flash, hitstop, sparks) is untouched.
+ */
+function motionScale(motion: "full" | "reduced" | "off"): number {
+  return motion === "off" ? 0 : motion === "reduced" ? 0.4 : 1;
+}
+
 function disposeTree(root: THREE.Object3D) {
   root.traverse((o: THREE.Object3D) => {
     const m = o as THREE.Mesh;
@@ -51,10 +60,19 @@ export class GameRenderer {
   /** Extra zoom applied by impacts, eased back out over a few frames. */
   private punch = 0;
   private lastShake = 0;
+  /** How much of the simulation's own shake value actually reaches the camera. */
+  private shakeScale: number;
   showBoxes = false;
 
-  constructor(canvas: HTMLCanvasElement, match: Match, theme: StageTheme, quality?: "high" | "low") {
+  constructor(
+    canvas: HTMLCanvasElement,
+    match: Match,
+    theme: StageTheme,
+    quality?: "high" | "low",
+    motion: "full" | "reduced" | "off" = "full",
+  ) {
     this.quality = quality ?? defaultQuality();
+    this.shakeScale = motionScale(motion);
     this.renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
@@ -106,6 +124,10 @@ export class GameRenderer {
       }
     }
     this.updateCamera(this.viewWidth, this.camX, 0);
+  }
+
+  setMotion(motion: "full" | "reduced" | "off") {
+    this.shakeScale = motionScale(motion);
   }
 
   setQuality(quality: "high" | "low") {
@@ -166,8 +188,9 @@ export class GameRenderer {
 
     // A spike in screen shake means something heavy landed: punch the camera
     // in for a few frames, then let it breathe back out.
-    const spike = match.shake - this.lastShake;
-    this.lastShake = match.shake;
+    const shake = match.shake * this.shakeScale;
+    const spike = shake - this.lastShake;
+    this.lastShake = shake;
     if (spike > 1.5) this.punch = Math.min(0.1, this.punch + spike * 0.012);
     this.punch *= 0.9;
     if (this.punch < 0.001) this.punch = 0;
@@ -185,7 +208,7 @@ export class GameRenderer {
     const halfView = framed / 2;
     const clampX = Math.max(-STAGE_HALF_WIDTH + halfView - 60, Math.min(STAGE_HALF_WIDTH - halfView + 60, focusX));
     this.camX += (clampX - this.camX) * CAMERA.lerp;
-    this.updateCamera(framed, this.camX, match.shake);
+    this.updateCamera(framed, this.camX, shake);
     this.stage.update(this.camX, 0);
 
     // Fighters.
@@ -256,7 +279,7 @@ export class GameRenderer {
     if (this.showBoxes) this.drawBoxes(match);
     else if (this.debugGroup.children.length) this.clearDebug();
 
-    if (this.post) this.post.render(match.shake);
+    if (this.post) this.post.render(match.shake * this.shakeScale);
     else this.renderer.render(this.scene, this.camera);
   }
 

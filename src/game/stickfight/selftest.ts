@@ -1433,6 +1433,15 @@ function scriptFor(move: MoveDef): RawInput[] {
   patchSave({ musicVolume: 4, sfxVolume: -1 } as never);
   check("save: an out-of-range volume falls back", loadSave().musicVolume === DEFAULT_SAVE.musicVolume && loadSave().sfxVolume === DEFAULT_SAVE.sfxVolume);
 
+  // Accessibility settings round-trip and fall back the same way.
+  check("save: motion defaults to full", loadSave().motion === "full");
+  check("save: high contrast defaults off", loadSave().highContrast === false);
+  patchSave({ motion: "reduced", highContrast: true });
+  check("save: motion round-trips", loadSave().motion === "reduced", loadSave().motion);
+  check("save: high contrast round-trips", loadSave().highContrast === true);
+  patchSave({ motion: "wandering" as never });
+  check("save: a garbled motion value falls back", loadSave().motion === DEFAULT_SAVE.motion, loadSave().motion);
+
   clearSave();
   delete (globalThis as { window?: unknown }).window;
 }

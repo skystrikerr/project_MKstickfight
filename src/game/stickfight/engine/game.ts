@@ -38,6 +38,8 @@ export interface GameOptions {
   stage?: StageTheme | "random";
   /** "high" adds bloom, grade and vignette; "low" is a plain render. */
   quality?: "high" | "low";
+  /** Camera shake intensity - "off" removes it entirely for anyone sensitive to it. */
+  motion?: "full" | "reduced" | "off";
   /** Player 1's rebound keys, if they have changed them. Defaults to WASD/JKL. */
   p1Keys?: KeyBindings;
   /** Only read when `mode` is "training". */
@@ -152,7 +154,7 @@ export class GameSession {
 
   attach(canvas: HTMLCanvasElement) {
     const theme = this.theme;
-    this.renderer = new GameRenderer(canvas, this.match, theme, this.options.quality);
+    this.renderer = new GameRenderer(canvas, this.match, theme, this.options.quality, this.options.motion);
     this.detachKeys = this.keyboard.attach(window);
     this.resize(canvas.clientWidth, canvas.clientHeight);
     // Handy for poking at a live match from the console (F2 toggles hitboxes).

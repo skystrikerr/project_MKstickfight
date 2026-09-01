@@ -10,7 +10,13 @@
 import { useEffect, useRef, useState } from "react";
 import { music } from "../engine/music";
 import { ACTION_LABELS, BINDABLE_ACTIONS, codeLabel, defaultKeyMap, type BindableAction, type KeyMap } from "../keybinds";
-import { loadSave, patchSave } from "../save";
+import { loadSave, patchSave, type SaveData } from "../save";
+
+const MOTION_OPTIONS: { value: SaveData["motion"]; label: string; hint: string }[] = [
+  { value: "full", label: "Full", hint: "Every impact punches the camera in." },
+  { value: "reduced", label: "Reduced", hint: "A hit still lands, the camera barely moves." },
+  { value: "off", label: "Off", hint: "No camera shake at all." },
+];
 
 export function Settings({ onClose }: { onClose: () => void }) {
   const [save, setSave] = useState(loadSave);
@@ -47,6 +53,12 @@ export function Settings({ onClose }: { onClose: () => void }) {
 
   const resetKeys = () => setSave(patchSave({ p1Keys: defaultKeyMap() }));
 
+  const setMotion = (motion: SaveData["motion"]) => setSave(patchSave({ motion }));
+  const setHighContrast = (on: boolean) => {
+    document.documentElement.dataset.contrast = on ? "high" : "";
+    setSave(patchSave({ highContrast: on }));
+  };
+
   return (
     <div className="grain absolute inset-0 z-40 flex flex-col bg-[var(--ink)]">
       <div className="flex items-center justify-between gap-3 border-b border-[var(--rule)] p-4">
@@ -71,6 +83,51 @@ export function Settings({ onClose }: { onClose: () => void }) {
             <div className="flex flex-col gap-3">
               <VolumeRow label="Music" value={save.musicVolume} onChange={setMusicVolume} />
               <VolumeRow label="Sound effects" value={save.sfxVolume} onChange={setSfxVolume} />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="mb-2 border-b border-[var(--rule)] pb-1 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
+              Accessibility
+            </h3>
+            <div className="flex flex-col gap-4">
+              <div>
+                <div className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)]">
+                  Camera shake
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {MOTION_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      title={opt.hint}
+                      onClick={() => setMotion(opt.value)}
+                      className={`cut-sm border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.1em] transition ${
+                        save.motion === opt.value
+                          ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--bone)]"
+                          : "border-[var(--rule)] bg-[var(--ink-2)] text-[var(--bone-dim)] hover:border-[var(--bone-dim)]"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className="flex cursor-pointer items-center justify-between gap-3">
+                <span>
+                  <span className="block font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)]">
+                    High contrast
+                  </span>
+                  <span className="block text-xs text-[var(--bone-dim)]">Brightens secondary text and borders.</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={save.highContrast}
+                  onChange={(e) => setHighContrast(e.target.checked)}
+                  className="h-5 w-5 accent-[var(--accent)]"
+                />
+              </label>
             </div>
           </section>
 

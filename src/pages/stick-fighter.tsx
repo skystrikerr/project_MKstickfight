@@ -16,7 +16,7 @@ import { Settings } from "@/game/stickfight/ui/Settings";
 import { music } from "@/game/stickfight/engine/music";
 import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
-import { recordClear } from "@/game/stickfight/save";
+import { loadSave, recordClear } from "@/game/stickfight/save";
 import { SKINS } from "@/game/stickfight/skins";
 
 type Screen = "title" | "select" | "fight";
@@ -73,6 +73,7 @@ export default function StickFighter() {
 
   useEffect(() => {
     setTouch(typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
+    if (loadSave().highContrast) document.documentElement.dataset.contrast = "high";
   }, []);
 
   // Music needs a gesture before a browser will start it, same as the sound

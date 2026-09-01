@@ -32,6 +32,10 @@ export interface SaveData {
   muted: boolean;
   musicVolume: number;
   sfxVolume: number;
+  /** Camera shake intensity - "off" removes it entirely. */
+  motion: "full" | "reduced" | "off";
+  /** Brightens secondary text and hairline rules throughout the interface. */
+  highContrast: boolean;
   /** Player 1's key map. Player 2 stays on the fixed arrow-key layout. */
   p1Keys: KeyMap;
   /** Fighter id -> the hardest difficulty their ladder has been cleared on. */
@@ -50,6 +54,8 @@ export const DEFAULT_SAVE: SaveData = {
   muted: false,
   musicVolume: 0.4,
   sfxVolume: 0.5,
+  motion: "full",
+  highContrast: false,
   p1Keys: defaultKeyMap(),
   cleared: {},
 };
@@ -68,6 +74,7 @@ const isStage = (v: unknown): v is StageTheme | "random" =>
  * character does not wipe somebody's whole record.
  */
 const isVolume = (v: unknown): v is number => typeof v === "number" && v >= 0 && v <= 1;
+const isMotion = (v: unknown): v is SaveData["motion"] => v === "full" || v === "reduced" || v === "off";
 
 /**
  * A key map is rebuilt action by action, same as `cleared` is rebuilt fighter
@@ -105,6 +112,8 @@ function coerce(raw: unknown): SaveData {
     muted: typeof o.muted === "boolean" ? o.muted : DEFAULT_SAVE.muted,
     musicVolume: isVolume(o.musicVolume) ? o.musicVolume : DEFAULT_SAVE.musicVolume,
     sfxVolume: isVolume(o.sfxVolume) ? o.sfxVolume : DEFAULT_SAVE.sfxVolume,
+    motion: isMotion(o.motion) ? o.motion : DEFAULT_SAVE.motion,
+    highContrast: typeof o.highContrast === "boolean" ? o.highContrast : DEFAULT_SAVE.highContrast,
     p1Keys: coerceKeyMap(o.p1Keys),
     cleared,
   };

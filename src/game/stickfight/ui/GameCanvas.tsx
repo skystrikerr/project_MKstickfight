@@ -69,6 +69,7 @@ export function GameCanvas({
       p1Skin: config.p1Skin,
       p2Skin: config.p2Skin,
       p1Keys: toKeyBindings(saved.p1Keys),
+      motion: saved.motion,
     });
     sessionRef.current = session;
     // The button already reflects the saved setting; the audio has to be told.
