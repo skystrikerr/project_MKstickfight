@@ -11,6 +11,7 @@
  */
 
 import { AiController, STYLES } from "./engine/ai";
+import { HURTBOX } from "./constants";
 import { EMPTY_INPUT, GamepadReader, Keyboard, P1_KEYS, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
 import { Music, TRACKS, type MusicCue } from "./engine/music";
@@ -247,6 +248,108 @@ for (const def of ROSTER) contract(def);
     }
     check(`${def.id}: the dodge does not skate`, skate < 20, `${skate.toFixed(1)} units of foot slide`);
   }
+}
+
+{
+  // Both dodges exist, and they are not the same move wearing two names.
+  for (const def of ROSTER) {
+    const dodges = def.moves.filter((m) => m.tags?.includes("dodge"));
+    check(`${def.id}: has both dodges`, dodges.length === 2, `${dodges.length} found: ${dodges.map((m) => m.id).join(",")}`);
+    check(
+      `${def.id}: one is the forward sidestep, one is the motion backstep`,
+      dodges.some((m) => m.input.dir === "f") && dodges.some((m) => m.input.motion === "bb"),
+      dodges.map((m) => `${m.id}:${m.input.dir ?? m.input.motion}`).join(","),
+    );
+  }
+}
+
+{
+  // A dodge that barely outruns a walk does not feel like an escape, so both
+  // directions have to clear a real perceptual distance - not the narrow
+  // internal collision width, but roughly what a player watching the screen
+  // would call "a character's worth of space". Two or three of those is the
+  // actual bar; this pins the floor at two so neither dodge can quietly
+  // shrink back toward "basically walking" without a test noticing.
+  const bb: RawInput[] = [inp({ left: true }), inp(), inp({ left: true })];
+  for (const def of ROSTER) {
+    const forward = (() => {
+      const m = newMatch(def.id, "roman");
+      const f = m.fighters[0];
+      const x0 = f.x;
+      m.step([inp({ right: true, S: true }), inp()]);
+      while (f.move?.tags?.includes("dodge")) m.step([inp(), inp()]);
+      return f.x - x0;
+    })();
+    const backward = (() => {
+      const m = newMatch(def.id, "roman");
+      const f = m.fighters[0];
+      const x0 = f.x;
+      for (const step of bb) m.step([step, inp()]);
+      while (f.move?.tags?.includes("dodge")) m.step([inp(), inp()]);
+      return f.x - x0;
+    })();
+    check(`${def.id}: sidestep clears two character-widths`, forward > HURTBOX.stand.w * 2, `${(forward / HURTBOX.stand.w).toFixed(2)}w`);
+    check(`${def.id}: backstep clears two character-widths`, -backward > HURTBOX.stand.w * 2, `${(-backward / HURTBOX.stand.w).toFixed(2)}w`);
+    check(`${def.id}: backstep actually goes backward`, backward < 0, backward.toFixed(1));
+  }
+}
+
+{
+  // The backstep has to cover ground honestly too - the same skating check
+  // the sidestep gets, just triggered by the motion instead of the button.
+  //
+  // A motion needs two real taps before it is recognised, and holding back
+  // for those taps - as fast as a real press-release-press can go, one
+  // frame each - still hands the move a sliver of genuine walk momentum
+  // before its own choreography starts. The forward sidestep never carries
+  // this, because a button fires clean on the first frame it is held with
+  // nothing walking beforehand. So this counts skate only from the frame the
+  // move's own `vel` keyframe actually fires (frame 3, "last frame with
+  // anything on the ground" per the move's own comment) - before that is
+  // motion-recognition bleed, not the choreography being graded.
+  const bb: RawInput[] = [inp({ left: true }), inp(), inp({ left: true })];
+  for (const def of ROSTER) {
+    const m = newMatch(def.id, "roman");
+    const f = m.fighters[0];
+    for (const step of bb) m.step([step, inp()]);
+
+    let skate = 0;
+    let prev: { footF: number; footB: number; x: number } | null = null;
+    while (f.move?.tags?.includes("dodge")) {
+      const { pose, grounded } = f.pose();
+      const sk = buildSkeleton(pose, grounded, def.stats.scale);
+      const cur = { footF: f.x + sk.footF.x * f.facing, footB: f.x + sk.footB.x * f.facing, x: f.x };
+      const onFloor = Math.min(sk.footF.y, sk.footB.y, sk.toeF.y, sk.toeB.y) <= 1.5 && !pose.free;
+      if (prev && onFloor && f.moveFrame >= 3 && Math.abs(cur.x - prev.x) > 0.1) {
+        skate += sk.footF.y <= sk.footB.y ? Math.abs(cur.footF - prev.footF) : Math.abs(cur.footB - prev.footB);
+      }
+      prev = cur;
+      m.step([inp(), inp()]);
+    }
+    check(`${def.id}: the backstep does not skate`, skate < 20, `${skate.toFixed(1)} units of foot slide`);
+  }
+}
+
+{
+  // The backstep has to actually dodge something, the same proof the
+  // sidestep gets: run the exchange once retreating, once standing still,
+  // and require the retreat alone to avoid the hit.
+  const exchange = (dodge: boolean) => {
+    const m = newMatch("western", "roman");
+    m.fighters[0].x = -30;
+    m.fighters[1].x = 55;
+    const hp = m.fighters[0].health;
+    const script: RawInput[] = dodge
+      ? [inp({ left: true }), inp(), inp({ left: true })]
+      : [inp(), inp(), inp()];
+    run(m, 3, (f) => script[f], (f) => inp({ B: f === 2 }));
+    run(m, 31, () => inp(), (f) => inp());
+    return hp - m.fighters[0].health;
+  };
+  const standing = exchange(false);
+  const backing = exchange(true);
+  check("backstep: the attack would otherwise land", standing > 0, `lost=${standing}`);
+  check("backstep avoids an attack", backing === 0, `lost=${backing}`);
 }
 
 {

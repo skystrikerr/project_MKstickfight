@@ -56,14 +56,15 @@ export interface UniversalOptions {
 }
 
 /**
- * The universal kit every fighter carries: block, parry, dodge and two throws.
- * Characters differ in their five specials, their skill and their super - the
- * defensive fundamentals are identical so the game reads the same on both
- * sides of the screen.
+ * The universal kit every fighter carries: block, parry, two dodges and two
+ * throws. Characters differ in their five specials, their skill and their
+ * super - the defensive fundamentals are identical so the game reads the
+ * same on both sides of the screen.
  *
  * Control scheme:
- *   S (hold)  Block        ← + S  Parry       → + S  Sidestep
- *   ↓ + S     Character skill     A + B  Throw       ← + A + B  Back throw
+ *   S (hold)      Block          ← + S   Parry
+ *   → + S         Sidestep       ← ← (tap back twice)   Backstep
+ *   ↓ + S         Low guard      A + B  Throw       ← + A + B  Back throw
  */
 export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
   const throwDamage = opts.throwDamage ?? 120;
@@ -73,7 +74,9 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
   // replaced so no fighter file has to change. The push now fires on frame 3
   // rather than frame 1 - he has to get off the ground first - so the same
   // authored number is given back the two frames of travel that cost it.
-  const stepSpeed = (opts.rollSpeed ?? 7.5) * 1.18;
+  // Roughly two and a half character-widths of net travel, not one -
+  // a dodge that barely outruns a walk is not worth committing invuln to.
+  const stepSpeed = (opts.rollSpeed ?? 7.5) * 2.05;
   const w = opts.weaponIdle ?? {};
 
   return [
@@ -236,6 +239,49 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
         kf(14, { ...w, torso: 14, crouch: 0.38, hipF: 28, kneeF: 60, hipB: -18, kneeB: 50, head: -2 }, "out"),
         // Trailing leg swings through underneath and he stands up into stance.
         kf(17, { ...w, torso: 9, crouch: 0.16, hipF: 20, kneeF: 34, hipB: -22, kneeB: 38 }, "inOut"),
+        kf(20, { ...w }),
+      ],
+    },
+    {
+      id: "backstep",
+      name: "Backstep",
+      // Motion rather than a button: tap back-neutral-back, same shape as a
+      // forward or back dash everywhere else in the genre. It costs nothing
+      // to bind - `bb` has been recognised by the input buffer since the
+      // motion system was built, and nothing on the roster has ever claimed
+      // it, so this could not collide with an existing special.
+      input: { motion: "bb", stance: ["stand", "crouch"] },
+      tags: ["dodge"],
+      priority: 55,
+      duration: 20,
+      invuln: [{ from: 3, to: 13, kind: "strike" }],
+      // Same drive, same air time, same everything as the sidestep - only the
+      // sign flips. A hurried retreat and a hurried step past someone look
+      // like the same push off the same leg; the difference is which way you
+      // committed to go, not the motion your body makes doing it.
+      vel: [
+        { at: 3, x: -stepSpeed },
+        { at: 13, x: 0 },
+      ],
+      friction: 0.95,
+      desc: "Tap back twice to snap out of range instead of past them. Same invulnerability, opposite direction.",
+      notation: "← ←",
+      // A mirror of the sidestep's leg work, not just its numbers run
+      // backward. Moving away means the *front* leg is the one that has to
+      // drive - pushing off toward the opponent to launch the body away from
+      // them - while the back leg lifts and reaches out behind to catch the
+      // landing. Reusing the forward step's pose with the roles left alone
+      // would have the drive leg pushing the wrong way while the body moves
+      // backward underneath it: skating, the exact fault the forward step
+      // was already rebuilt once to get rid of.
+      frames: [
+        kf(0, { ...w, torso: 10, crouch: 0.34, hipF: -30, kneeF: 58, hipB: 10, kneeB: 40, offX: 3 }, "out"),
+        kf(3, { ...w, torso: 18, crouch: 0.16, hipF: -46, kneeF: 20, hipB: 44, kneeB: 74, offX: 1, head: -4 }, "out"),
+        kf(6, { ...w, free: 1, torso: 16, hipF: -54, kneeF: 18, hipB: 62, kneeB: 44, offY: 9, head: -4 }, "linear"),
+        kf(10, { ...w, free: 1, torso: 13, hipF: -50, kneeF: 22, hipB: 68, kneeB: 26, offY: 7, head: -3 }, "in"),
+        kf(12, { ...w, free: 1, torso: 12, hipF: -34, kneeF: 34, hipB: 50, kneeB: 30, offY: 2, head: -2 }, "in"),
+        kf(14, { ...w, torso: 14, crouch: 0.38, hipF: -18, kneeF: 50, hipB: 28, kneeB: 60, head: -2 }, "out"),
+        kf(17, { ...w, torso: 9, crouch: 0.16, hipF: -22, kneeF: 38, hipB: 20, kneeB: 34 }, "inOut"),
         kf(20, { ...w }),
       ],
     },
