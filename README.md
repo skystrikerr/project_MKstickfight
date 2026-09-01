@@ -121,7 +121,7 @@ shell.
 **To get a Windows `.exe`:** push a tag and let CI build it.
 
 ```bash
-git tag v0.2.0 && git push origin v0.2.0
+git tag v0.3.0 && git push origin v0.3.0
 ```
 
 `.github/workflows/release.yml` builds on a real Windows runner and attaches
@@ -151,7 +151,7 @@ desktop app:
 
 ```bash
 npm run get:exe        # newest dev build -> ./release
-npm run get:exe v0.2.0 # a specific tagged release instead
+npm run get:exe v0.3.0 # a specific tagged release instead
 ```
 
 Every push to `main` also rebuilds on a Windows runner and replaces the files
@@ -171,9 +171,9 @@ person with admin on the repository: the workflow token cannot create the site.
 
 ```bash
 npm run electron:dev   # run the shell against the Vite dev server
-npm run dist:win       # -> release/Stick Fighter-0.2.0-x64.exe   (needs Windows)
-npm run dist:linux     # -> release/Stick Fighter-0.2.0-x64.AppImage
-npm run dist:mac       # -> release/Stick Fighter-0.2.0-x64.dmg   (needs macOS)
+npm run dist:win       # -> release/Stick Fighter-0.3.0-x64.exe   (needs Windows)
+npm run dist:linux     # -> release/Stick Fighter-0.3.0-x64.AppImage
+npm run dist:mac       # -> release/Stick Fighter-0.3.0-x64.dmg   (needs macOS)
 ```
 
 Cross-building Windows from Linux needs Wine and is not worth the trouble — the
