@@ -42,7 +42,7 @@ function StageChip({
       title={def?.blurb ?? "Roll a different stage every match"}
       className={`relative h-16 w-24 shrink-0 overflow-hidden border text-left transition ${
         selected
-          ? "border-[var(--brass)] outline outline-1 outline-offset-1 outline-[var(--brass)]"
+          ? "border-[var(--accent)] outline outline-1 outline-offset-1 outline-[var(--accent)]"
           : "border-[var(--rule)] hover:border-[var(--bone-dim)]"
       }`}
     >
@@ -87,7 +87,7 @@ function SkinChip({
       aria-label={skin.name}
       aria-pressed={selected}
       className={`h-5 w-5 shrink-0 overflow-hidden border transition ${
-        selected ? "border-[var(--brass)] outline outline-1 outline-[var(--brass)]" : "border-[var(--rule)] hover:border-[var(--bone-dim)]"
+        selected ? "border-[var(--accent)] outline outline-1 outline-[var(--accent)]" : "border-[var(--rule)] hover:border-[var(--bone-dim)]"
       }`}
       style={{ background: `linear-gradient(135deg, ${skin.swatch[0]} 50%, ${skin.swatch[1]} 50%)` }}
     />
@@ -103,7 +103,7 @@ function StatBar({ label, value, max = 5 }: { label: string; value: number; max?
           <span
             key={i}
             className="h-2.5 w-5"
-            style={{ background: i < value ? "var(--brass)" : "#242724" }}
+            style={{ background: i < value ? "var(--accent)" : "#242724" }}
           />
         ))}
       </div>
@@ -150,7 +150,7 @@ function Card({
       onFocus={onHover}
       className={`cut-sm group relative overflow-hidden border p-3 text-left transition ${
         selected
-          ? "border-[var(--brass)] bg-[#1a1710]"
+          ? "border-[var(--accent)] bg-[#1a1710]"
           : "border-[var(--rule)] bg-[var(--ink-2)] hover:border-[var(--bone-dim)]"
       } ${dim ? "opacity-60" : ""}`}
     >
@@ -161,7 +161,7 @@ function Card({
       <span className="absolute left-2 top-1.5 font-mono text-[10px] text-[var(--bone-dim)]">{index}</span>
       {clearedAt && (
         <span
-          className="absolute left-2 bottom-2.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[var(--brass)]"
+          className="absolute left-2 bottom-2.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[var(--accent)]"
           title={`Arcade ladder cleared on ${clearedAt}`}
         >
           ★ {clearedAt}
@@ -169,7 +169,7 @@ function Card({
       )}
       <FighterPortrait def={def} className="relative h-32 w-full" />
       <div className="relative mt-1">
-        <div className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+        <div className="font-display text-base font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)]">
           {def.name}
         </div>
         <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
@@ -177,7 +177,7 @@ function Card({
         </div>
       </div>
       {selected && (
-        <span className="absolute right-0 top-0 bg-[var(--brass)] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[var(--ink)]">
+        <span className="absolute right-0 top-0 bg-[var(--accent)] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[var(--ink)]">
           {selected === "both" ? "P1 · P2" : selected.toUpperCase()}
         </span>
       )}
@@ -233,7 +233,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
     <div className="grain relative flex h-full flex-col gap-4 overflow-y-auto p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-4xl font-bold uppercase leading-none tracking-wide text-[var(--bone)] sm:text-5xl">
+          <h2 className="font-display text-3xl font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)] sm:text-4xl">
             Choose your fighter
           </h2>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
@@ -242,7 +242,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             ) : (
               <>
                 Selecting for{" "}
-                <span style={{ color: picking === "p1" ? "var(--brass)" : "var(--steel)" }}>
+                <span style={{ color: picking === "p1" ? "var(--accent)" : "var(--p2)" }}>
                   {picking.toUpperCase()}
                 </span>{" "}
                 · click a fighter to lock in
@@ -260,7 +260,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
                 onClick={() => setMode(m)}
                 className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition ${
                   mode === m
-                    ? "bg-[var(--brass)] text-[var(--ink)]"
+                    ? "bg-[var(--accent)] text-[var(--ink)]"
                     : "text-[var(--bone-dim)] hover:bg-white/5 hover:text-[var(--bone)]"
                 }`}
               >
@@ -324,7 +324,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             />
           ))}
           <div className="cut-sm flex min-h-[180px] flex-col items-center justify-center border border-dashed border-[var(--rule)] p-3 text-center">
-            <span className="font-display text-4xl text-[#2f322e]">+</span>
+            <span className="font-display text-3xl text-[#2f322e]">+</span>
             <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#4a4d47]">
               More fighters soon
             </span>
@@ -334,7 +334,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
         <aside className="cut flex flex-col gap-3 border border-[var(--rule)] bg-[var(--ink-2)] p-4">
           <div>
             <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--bone-dim)]">Dossier</div>
-            <div className="font-display text-3xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+            <div className="font-display text-2xl font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)]">
               {preview.name}
             </div>
             <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em]" style={{ color: preview.palette.accent }}>
@@ -378,7 +378,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
           <button
             type="button"
             onClick={() => onShowMoves(preview.id)}
-            className="cut-sm border border-[var(--rule)] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
+            className="cut-sm border border-[var(--rule)] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--accent)] hover:text-[var(--bone)]"
           >
             View move list ({preview.moves.filter((m) => !m.internal).length} moves)
           </button>
@@ -387,7 +387,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
       <div className="cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-3">
         <div className="mb-2 flex items-baseline justify-between border-b border-[var(--rule)] pb-1.5">
-          <span className="font-display text-xl font-bold uppercase tracking-[0.1em] text-[var(--bone)]">Stage</span>
+          <span className="font-display text-base font-bold uppercase tracking-[0.1em] text-[var(--bone)]">Stage</span>
           <span className="text-xs text-[var(--bone-dim)]">
             {stage === "random" ? "A different arena every match" : STAGE_THEMES[stage].blurb}
           </span>
@@ -408,11 +408,11 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
               <div>
                 <div
                   className="font-mono text-[10px] uppercase tracking-[0.2em]"
-                  style={{ color: i === 0 ? "var(--brass)" : "var(--steel)" }}
+                  style={{ color: i === 0 ? "var(--accent)" : "var(--p2)" }}
                 >
                   P{i + 1}
                 </div>
-                <div className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+                <div className="font-display text-base font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)]">
                   {def.name}
                 </div>
                 <div className="mt-1 flex gap-1">
@@ -442,7 +442,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             patchSave({ p1, p2, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] });
             onStart({ p1, p2, mode, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] });
           }}
-          className="cut bg-[var(--brass)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[#e0ab3c]"
+          className="cut bg-[var(--accent)] px-12 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
           {mode === "training" ? "Train" : mode === "arcade" ? "Begin" : "Fight"}
         </button>

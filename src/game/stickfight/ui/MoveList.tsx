@@ -104,9 +104,9 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
               key={f.id}
               type="button"
               onClick={() => setId(f.id)}
-              className={`px-3 py-1.5 font-display text-lg font-bold uppercase leading-none tracking-wide transition ${
+              className={`px-3 py-1.5 font-display text-sm font-bold uppercase leading-none tracking-[0.08em] transition ${
                 f.id === id
-                  ? "bg-[var(--brass)] text-[var(--ink)]"
+                  ? "bg-[var(--accent)] text-[var(--ink)]"
                   : "border border-[var(--rule)] text-[var(--bone-dim)] hover:border-[var(--bone-dim)] hover:text-[var(--bone)]"
               }`}
             >
@@ -117,7 +117,7 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
         <button
           type="button"
           onClick={onClose}
-          className="cut-sm border border-[var(--rule)] px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)] hover:border-[var(--brass)]"
+          className="cut-sm border border-[var(--rule)] px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)] hover:border-[var(--accent)]"
         >
           Close
         </button>
@@ -141,7 +141,7 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
             ].map((chip) => (
               <span
                 key={chip.label}
-                className={`px-2 py-1 ${chip.ok ? "bg-[var(--brass)]/15 text-[var(--brass)]" : "bg-[#a8341f]/20 text-[#e2755c]"}`}
+                className={`px-2 py-1 ${chip.ok ? "bg-[var(--accent)]/15 text-[var(--accent)]" : "bg-[#a8341f]/20 text-[#e2755c]"}`}
               >
                 {chip.label}
               </span>
@@ -151,15 +151,15 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
 
         {strings.length > 0 && (
           <section className="mb-4">
-            <h3 className="mb-2 border-b border-[var(--rule)] pb-1 font-display text-xl font-bold uppercase tracking-[0.12em] text-[var(--brass)]">Strings</h3>
+            <h3 className="mb-2 border-b border-[var(--rule)] pb-1 font-display text-base font-bold uppercase tracking-[0.12em] text-[var(--accent)]">Strings</h3>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {strings.map((st) => (
                 <div key={st.name} className="cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-2.5">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+                    <span className="font-display text-base font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)]">
                       {st.name}
                     </span>
-                    <span className="font-mono text-[11px] text-[var(--brass)]">
+                    <span className="font-mono text-[11px] text-[var(--accent)]">
                       {st.moves.map(stamp).join(", ")}
                     </span>
                   </div>
@@ -179,24 +179,24 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
         <div className="grid gap-4 md:grid-cols-2">
           {grouped.map((g) => (
             <section key={g.key}>
-              <h3 className="mb-2 border-b border-[var(--rule)] pb-1 font-display text-xl font-bold uppercase tracking-[0.12em] text-[var(--brass)]">{g.label}</h3>
+              <h3 className="mb-2 border-b border-[var(--rule)] pb-1 font-display text-base font-bold uppercase tracking-[0.12em] text-[var(--accent)]">{g.label}</h3>
               <div className="space-y-1.5">
                 {g.moves.flatMap((parent) => [parent, ...g.variants.filter((v) => v.variant === parent.id)]).map((m) => (
                   <div
                     key={m.id}
-                    className={`cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-2.5 ${m.variant ? "ml-4 border-l-2 border-l-[var(--brass)]/50" : ""}`}
+                    className={`cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-2.5 ${m.variant ? "ml-4 border-l-2 border-l-[var(--accent)]/50" : ""}`}
                   >
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="font-display text-xl font-bold uppercase leading-none tracking-wide text-[var(--bone)]">
+                      <span className="font-display text-base font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)]">
                         {m.name}
                       </span>
-                      <span className="shrink-0 font-mono text-[11px] text-[var(--brass)]">{m.notation ?? ""}</span>
+                      <span className="shrink-0 font-mono text-[11px] text-[var(--accent)]">{m.notation ?? ""}</span>
                     </div>
                     <p className="mt-0.5 text-xs leading-snug text-[var(--bone-dim)]">{m.desc}</p>
                     <div className="mt-1 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.1em] text-[#6f6c64]">
                       {frameData(m) && <span>Frames {frameData(m)}</span>}
                       {m.hits?.[0] && <span>{m.hits.reduce((sum, h) => sum + h.damage, 0)} dmg</span>}
-                      {m.meterCost ? <span className="text-[var(--steel)]">{m.meterCost} meter</span> : null}
+                      {m.meterCost ? <span className="text-[var(--p2)]">{m.meterCost} meter</span> : null}
                       {m.resourceCost ? (
                         <span style={{ color: def.resource?.color }}>
                           {m.resourceCost} {def.resource?.name.toLowerCase()}

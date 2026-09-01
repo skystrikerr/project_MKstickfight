@@ -3,31 +3,52 @@
 @tailwind utilities;
 
 /*
- * The look is a field dossier, not a web page: the roster is fifteen
- * documented people, so the shell around them reads like the record they came
- * out of. Squared corners, hairline rules, printed type, and one hot accent -
- * no soft gradients, no rounded cards, nothing that glows for its own sake.
+ * Cold and cinematic. The shell is nearly black with a lot of empty space in
+ * it, the type is angular and widely tracked, and one steel accent carries
+ * everything that matters - the register modern fighting game menus work in,
+ * where the screen is quiet and the fighters are the only warm thing on it.
+ *
+ * Squared corners and hairline rules throughout: no soft gradients, no
+ * rounded cards, nothing that glows for its own sake.
  *
  * Fonts ship with the build (src/fonts, SIL Open Font License) rather than
  * loading from a CDN, because the desktop build runs off disk with no network.
  */
 
-/* --- Big Shoulders Display 700: headings, fighter names -------------------- */
+/* --- Chakra Petch 400/700: headings, labels, anything shouted ------------- */
 @font-face {
-  font-family: "Big Shoulders Display";
+  font-family: "Chakra Petch";
   font-style: normal;
-  font-weight: 700;
+  font-weight: 400;
   font-display: block;
-  src: url("./fonts/bigshoulders-700-latin.woff2") format("woff2");
+  src: url("./fonts/chakra-400-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
     U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Big Shoulders Display";
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./fonts/chakra-400-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Chakra Petch";
   font-style: normal;
   font-weight: 700;
   font-display: block;
-  src: url("./fonts/bigshoulders-700-latin-ext.woff2") format("woff2");
+  src: url("./fonts/chakra-700-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("./fonts/chakra-700-latin-ext.woff2") format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
     U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
@@ -92,14 +113,22 @@
 
 /* --- Palette --------------------------------------------------------------- */
 :root {
-  --ink: #0c0d0c;        /* the ground everything sits on */
-  --ink-2: #131513;      /* a panel lifted off it */
-  --rule: #2c2f2b;       /* hairline between things */
-  --bone: #e6e1d3;       /* body text: paper, not white */
-  --bone-dim: #9a968a;   /* secondary text */
-  --brass: #c8952f;      /* the one hot accent, and player one */
-  --steel: #6f97ad;      /* player two */
-  --blood: #a8341f;      /* damage, danger, KO */
+  --ink: #070a0c;        /* the ground everything sits on: near black, cold */
+  --ink-2: #0e1418;      /* a panel lifted off it */
+  --rule: #1d272d;       /* hairline between things */
+  --bone: #dde7ed;       /* body text: cold white */
+  --bone-dim: #677986;   /* secondary text */
+  --accent: #4aa8c9;     /* the one accent, and player one */
+  --accent-hot: #6ec6e4; /* the same accent, lit - hovers and highlights */
+  --p2: #d98a3a;         /* player two, warm so the two sides never blur */
+  --blood: #c9452f;      /* damage, danger, KO */
+  --health: #cfe3ee;     /* life left: bright and cold, never the accent */
+  --guard: #8a94a0;      /* guard meter, deliberately duller than either */
+
+  /* Old names, kept pointing at the new palette so nothing goes black if a
+     stray reference survives a sweep. */
+  --brass: var(--accent);
+  --steel: var(--p2);
 }
 
 html,
@@ -127,16 +156,24 @@ canvas {
 }
 
 /*
- * Grain. A flat dark field reads as a smooth digital gradient no matter what
- * is drawn on it; a little static gives the panels a printed surface instead.
- * It is one inline SVG turbulence tile, so it costs nothing and never loads.
+ * A trace of static, and a vignette. Flat black reads as a smooth digital
+ * gradient no matter what sits on it; a little noise and a darkened edge give
+ * the screen depth without putting anything on it. The noise is one inline
+ * SVG turbulence tile, so it costs nothing and never loads.
  */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 45%, rgba(0, 0, 0, 0.75) 100%);
+}
 .grain::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.035;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -160,12 +197,12 @@ canvas {
 /* Native selects look like a browser; these look like the rest of the panel. */
 select.field {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23c8952f'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%234aa8c9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 26px;
 }
 select.field option {
-  background: #131513;
-  color: #e6e1d3;
+  background: #0e1418;
+  color: #dde7ed;
 }

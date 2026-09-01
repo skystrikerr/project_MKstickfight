@@ -7,14 +7,14 @@ everything into one HTML file.
 
 | File | Family | Used for |
 | --- | --- | --- |
-| `bigshoulders-700-*` | Big Shoulders Display | Headings, fighter names |
+| `chakra-400/700-*` | Chakra Petch | Headings, fighter names, labels |
 | `barlowsc-400/600-*` | Barlow Semi Condensed | Body and labels |
 | `plexmono-500-*` | IBM Plex Mono | Notation, frame data, numbers |
 
 All three are under the SIL Open Font License 1.1, which permits bundling and
 redistribution inside a larger work:
 
-- Big Shoulders Display — Copyright The Big Shoulders Project Authors
+- Chakra Petch — Copyright Cadson Demak
 - Barlow Semi Condensed — Copyright The Barlow Project Authors
 - IBM Plex Mono — Copyright IBM Corp.
 

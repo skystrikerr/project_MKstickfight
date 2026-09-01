@@ -32,10 +32,10 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
   return (
     <div className={`flex flex-1 flex-col gap-1 ${flip ? "items-end" : "items-start"}`}>
       <div className={`flex w-full items-baseline gap-2 ${flip ? "flex-row-reverse" : ""}`}>
-        <span className="font-display text-2xl font-bold uppercase leading-none tracking-wide text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
+        <span className="font-display text-lg font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
           {player.name}
         </span>
-        <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone-dim)] sm:inline">
+        <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone)]/70 drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)] sm:inline">
           {player.title}
         </span>
       </div>
@@ -47,13 +47,13 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
         <div className={`absolute inset-0 ${flip ? "rotate-180" : ""}`}>
           {/* Damage taken, draining a beat later. */}
           <div
-            className="absolute inset-y-0 left-0 bg-[#6d2418] transition-[width] duration-500"
+            className="absolute inset-y-0 left-0 bg-[#5a1f14] transition-[width] duration-500"
             style={{ width: `${ghost}%` }}
           />
           {/* Current health. */}
           <div
             className={`absolute inset-y-0 left-0 transition-[width] duration-100 ${
-              low ? "animate-pulse bg-[#c33a22]" : "bg-[var(--brass)]"
+              low ? "animate-pulse bg-[var(--blood)]" : "bg-[var(--health)]"
             }`}
             style={{ width: `${pct}%` }}
           />
@@ -72,7 +72,7 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
         <div className="h-1.5 w-24 overflow-hidden bg-black/60 sm:w-32" style={{ transform: SKEW }}>
           <div
             className={`h-full transition-[width] duration-200 ${
-              player.guard < 30 ? "bg-[#c33a22]" : "bg-[var(--steel)]"
+              player.guard < 30 ? "bg-[var(--blood)]" : "bg-[var(--guard)]"
             } ${flip ? "ml-auto" : ""}`}
             style={{ width: `${Math.max(0, player.guard)}%` }}
           />
@@ -80,7 +80,7 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
 
         {player.resource && (
           <div className={`flex items-center gap-1.5 ${flip ? "flex-row-reverse" : ""}`}>
-            <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
+            <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone)]/70 drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]">
               {player.resource.name}
             </span>
             {/* Spare magazines. Knowing the belt is empty matters more than
@@ -137,8 +137,8 @@ function MeterBar({ player, side }: { player: PlayerHud; side: "left" | "right" 
   return (
     <div className={`flex items-center gap-1.5 ${flip ? "flex-row-reverse" : ""}`}>
       <span
-        className={`font-display text-base font-bold uppercase tracking-[0.15em] ${
-          stocks > 0 ? "text-[#9fd0e6]" : "text-[var(--bone-dim)]"
+        className={`font-display text-sm font-bold uppercase tracking-[0.15em] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)] ${
+          stocks > 0 ? "text-[var(--accent-hot)]" : "text-[var(--bone)]/60"
         }`}
       >
         {stocks > 0 ? "Super" : "Meter"}
@@ -152,7 +152,7 @@ function MeterBar({ player, side }: { player: PlayerHud; side: "left" | "right" 
           >
             <div
               className={`h-full transition-[width] duration-150 ${
-                i < stocks ? "bg-[#9fd0e6] shadow-[0_0_10px_rgba(159,208,230,0.5)]" : "bg-[var(--steel)]"
+                i < stocks ? "bg-[var(--accent-hot)] shadow-[0_0_10px_rgba(110,198,228,0.55)]" : "bg-[var(--accent)]"
               } ${flip ? "ml-auto" : ""}`}
               style={{ width: i < stocks ? "100%" : i === stocks ? `${partial * 100}%` : "0%" }}
             />
@@ -170,7 +170,7 @@ function RoundPips({ wins, roundsToWin, side }: { wins: number; roundsToWin: num
         <span
           key={i}
           className={`h-3 w-3 rotate-45 border-2 border-black/70 transition ${
-            i < wins ? "bg-[var(--brass)] shadow-[0_0_10px_2px_rgba(200,149,47,0.55)]" : "bg-white/10"
+            i < wins ? "bg-[var(--accent)] shadow-[0_0_10px_2px_rgba(200,149,47,0.55)]" : "bg-white/10"
           }`}
         />
       ))}
@@ -215,7 +215,7 @@ export function Hud({
         <div className="flex min-w-[84px] flex-col items-center gap-1.5">
           <div
             className={`border-2 border-black/70 bg-black/70 px-3 py-0.5 font-mono text-3xl font-medium tabular-nums sm:text-4xl ${
-              state.timer <= 10 ? "animate-pulse text-[#e2553a]" : "text-[var(--brass)]"
+              state.timer <= 10 ? "animate-pulse text-[var(--blood)]" : "text-[var(--accent)]"
             }`}
             style={{ transform: SKEW }}
           >
@@ -261,12 +261,12 @@ function ComboCounter({ hits, damage, side }: { hits: number; damage: number; si
       <div className="flex items-baseline gap-1.5" style={{ flexDirection: side === "right" ? "row-reverse" : "row" }}>
         <span
           className={`font-display font-bold tabular-nums drop-shadow-[3px_3px_0_rgba(0,0,0,0.85)] ${
-            big ? "text-6xl text-[#e8c775]" : "text-5xl text-[var(--brass)]"
+            big ? "text-6xl text-[var(--accent-hot)]" : "text-5xl text-[var(--accent)]"
           }`}
         >
           {hits}
         </span>
-        <span className="font-display text-2xl font-bold uppercase tracking-wide text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
+        <span className="font-display text-lg font-bold uppercase tracking-[0.08em] text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
           Hits
         </span>
       </div>
@@ -286,8 +286,8 @@ export function Announcement({ state }: { state: HudState }) {
         key={state.announcement}
         className={`animate-in zoom-in-50 fade-in duration-200 text-center font-display font-bold uppercase tracking-[0.04em] ${
           ko
-            ? "text-8xl text-[#d13a22] drop-shadow-[0_0_30px_rgba(209,58,34,0.6)] sm:text-[10rem]"
-            : "text-6xl text-[var(--brass)] drop-shadow-[0_0_24px_rgba(200,149,47,0.5)] sm:text-8xl"
+            ? "text-8xl text-[var(--blood)] drop-shadow-[0_0_30px_rgba(209,58,34,0.6)] sm:text-[10rem]"
+            : "text-6xl text-[var(--accent)] drop-shadow-[0_0_24px_rgba(200,149,47,0.5)] sm:text-8xl"
         }`}
         style={{ WebkitTextStroke: "2px rgba(0,0,0,0.85)" }}
       >

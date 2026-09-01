@@ -48,7 +48,7 @@ export function TouchControls({ keyboard, player = "p1" }: { keyboard: Keyboard;
       onPointerUp={() => keyboard.setVirtual(`${player}:${code}`, false)}
       onPointerLeave={() => keyboard.setVirtual(`${player}:${code}`, false)}
       onPointerCancel={() => keyboard.setVirtual(`${player}:${code}`, false)}
-      className={`flex h-14 w-14 select-none items-center justify-center rounded-full border font-display text-xl font-bold uppercase text-[var(--bone)] active:scale-95 ${className}`}
+      className={`flex h-14 w-14 select-none items-center justify-center rounded-full border font-display text-base font-bold uppercase text-[var(--bone)] active:scale-95 ${className}`}
     >
       {label}
     </button>
@@ -82,10 +82,10 @@ export function TouchControls({ keyboard, player = "p1" }: { keyboard: Keyboard;
       </div>
 
       <div className="pointer-events-auto grid touch-none grid-cols-2 gap-3">
-        {button("A", "A", "border-[#9fd0e6]/60 bg-[#9fd0e6]/20")}
+        {button("A", "A", "border-[var(--accent-hot)]/60 bg-[var(--accent-hot)]/20")}
         {button("B", "B", "border-[#8aa87a]/60 bg-[#8aa87a]/20")}
         {button("C", "C", "border-[#c2705c]/60 bg-[#c2705c]/20")}
-        {button("S", "S", "border-[var(--brass)]/60 bg-[var(--brass)]/20")}
+        {button("S", "S", "border-[var(--accent)]/60 bg-[var(--accent)]/20")}
       </div>
     </div>
   );

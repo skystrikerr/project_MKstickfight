@@ -51,20 +51,29 @@ export function VersusCard({
         <span className="h-px flex-1 bg-[var(--rule)]" />
       </div>
 
-      <div className="flex items-center justify-center gap-6 sm:gap-12">
+      <div className="flex items-center justify-center gap-3 sm:gap-6">
         {[me, them].map((def, i) => (
-          <div key={i} className="flex w-40 flex-col items-center sm:w-52">
-            <FighterPortrait def={def} className="h-44 w-40 sm:h-56 sm:w-52" facing={i === 0 ? 1 : -1} />
-            <span
-              className="mt-1 h-px w-10"
-              style={{ background: i === 0 ? (playerSkinAccent ?? def.palette.accent) : def.palette.accent }}
-            />
-            <span className="mt-1.5 text-center font-display text-2xl font-bold uppercase leading-none tracking-wide">
-              {def.name}
-            </span>
-            <span className="mt-0.5 text-center font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
-              {i === 0 ? "You" : def.archetype}
-            </span>
+          <div key={i} className="contents">
+            {i === 1 && (
+              <span className="font-display text-4xl font-bold uppercase tracking-[0.08em] text-[var(--bone-dim)] sm:text-5xl">
+                vs
+              </span>
+            )}
+            <div className="flex w-44 flex-col items-center sm:w-60">
+              <FighterPortrait def={def} className="h-48 w-44 sm:h-64 sm:w-60" facing={i === 0 ? 1 : -1} />
+              <span
+                className="mt-1 h-px w-10"
+                style={{ background: i === 0 ? (playerSkinAccent ?? def.palette.accent) : def.palette.accent }}
+              />
+              {/* Two lines of room, so a long name does not drag its own
+                  subtitle out of line with the other fighter's. */}
+              <span className="mt-2 flex h-11 items-start justify-center text-center font-display text-lg font-bold uppercase leading-tight tracking-[0.08em]">
+                {def.name}
+              </span>
+              <span className="text-center font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
+                {i === 0 ? "You" : def.archetype}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -80,14 +89,14 @@ export function VersusCard({
           type="button"
           autoFocus
           onClick={onFight}
-          className="cut bg-[var(--brass)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[#e0ab3c]"
+          className="cut bg-[var(--accent)] px-12 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
           Fight
         </button>
         <button
           type="button"
           onClick={onQuit}
-          className="cut-sm border border-[var(--rule)] px-6 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
+          className="cut-sm border border-[var(--rule)] px-6 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--accent)] hover:text-[var(--bone)]"
         >
           Give up
         </button>
@@ -115,7 +124,7 @@ export function ContinuePrompt({
   const them = getFighter(step.opponent);
   return (
     <Shell>
-      <div className="font-display text-7xl font-bold uppercase tracking-wide text-[#d13a22] sm:text-8xl">
+      <div className="font-display text-5xl font-bold uppercase tracking-[0.08em] text-[var(--blood)] sm:text-6xl">
         Defeated
       </div>
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)]">
@@ -127,14 +136,14 @@ export function ContinuePrompt({
           type="button"
           autoFocus
           onClick={onRetry}
-          className="cut bg-[var(--brass)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[#e0ab3c]"
+          className="cut bg-[var(--accent)] px-12 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
           Continue
         </button>
         <button
           type="button"
           onClick={onQuit}
-          className="cut-sm border border-[var(--rule)] px-6 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--brass)] hover:text-[var(--bone)]"
+          className="cut-sm border border-[var(--rule)] px-6 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--accent)] hover:text-[var(--bone)]"
         >
           Character select
         </button>
@@ -163,25 +172,25 @@ export function EndingCard({
       <div className="flex w-full max-w-2xl flex-col items-center gap-4 overflow-y-auto">
         <FighterPortrait def={me} className="h-44 w-40" />
         <div className="text-center">
-          <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--brass)]">
+          <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--accent)]">
             Ladder cleared · {level}
             {continues === 0 ? " · no continues" : ` · ${continues} continue${continues === 1 ? "" : "s"}`}
           </div>
-          <div className="mt-1 font-display text-5xl font-bold uppercase leading-none tracking-wide sm:text-6xl">
+          <div className="mt-1 font-display text-4xl font-bold uppercase leading-none tracking-[0.08em] sm:text-5xl">
             {me.name}
           </div>
           <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em]" style={{ color: me.palette.accent }}>
             {me.title} · {me.era}
           </div>
         </div>
-        <p className="border-l-2 border-[var(--brass)] pl-4 text-left text-[15px] leading-relaxed text-[var(--bone-dim)]">
+        <p className="border-l-2 border-[var(--accent)] pl-4 text-left text-[15px] leading-relaxed text-[var(--bone-dim)]">
           {ending}
         </p>
         <button
           type="button"
           autoFocus
           onClick={onDone}
-          className="cut mt-2 bg-[var(--brass)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[#e0ab3c]"
+          className="cut mt-2 bg-[var(--accent)] px-12 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
           Continue
         </button>

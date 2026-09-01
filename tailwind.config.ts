@@ -7,7 +7,7 @@ export default {
       fontFamily: {
         // display: headings and fighter names. ui: everything you read.
         // mono: notation, frame data, numbers - anything that should line up.
-        display: ['"Big Shoulders Display"', '"Arial Narrow"', "sans-serif"],
+        display: ['"Chakra Petch"', '"Eurostile"', "sans-serif"],
         ui: ['"Barlow Semi Condensed"', '"Helvetica Neue"', "sans-serif"],
         mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"],
       },
