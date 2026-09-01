@@ -30,6 +30,7 @@ const CONTROLS: { keys: string; label: string }[] = [
   { keys: "hold U / ;", label: "Block (S) · + ↓ blocks low" },
   { keys: "← + S", label: "Parry" },
   { keys: "→ + S", label: "Sidestep (dodges through attacks)" },
+  { keys: "← ←", label: "Backstep (retreats out of range)" },
   { keys: "J + L", label: "Character skill" },
   { keys: "J + K", label: "Throw" },
   { keys: "Esc", label: "Pause" },
@@ -205,7 +206,7 @@ export default function StickFighter() {
 
           <p className="relative mt-6 max-w-3xl pb-4 text-center text-xs leading-relaxed text-[var(--bone-dim)]">
             Every fighter has <span className="text-[var(--bone)]">five specials</span>, a light and a heavy attack, a
-            block, a sidestep and a jump — plus their own skill, super, and three strings built out of their own
+            block, two dodges and a jump — plus their own skill, super, and three strings built out of their own
             weapons. Specials use motion inputs: ↓↘→ + button for quarter circles, →↓↘ for dragon punches. Meter pays
             for EX specials (50) and supers (100).
           </p>

@@ -255,10 +255,8 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       priority: 55,
       duration: 20,
       invuln: [{ from: 3, to: 13, kind: "strike" }],
-      // Same drive, same air time, same everything as the sidestep - only the
-      // sign flips. A hurried retreat and a hurried step past someone look
-      // like the same push off the same leg; the difference is which way you
-      // committed to go, not the motion your body makes doing it.
+      // Same speed and timing as the sidestep, opposite sign - the leg work
+      // that makes this direction honest lives in the frames below, not here.
       vel: [
         { at: 3, x: -stepSpeed },
         { at: 13, x: 0 },
