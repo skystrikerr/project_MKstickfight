@@ -48,7 +48,7 @@ export function TouchControls({ keyboard, player = "p1" }: { keyboard: Keyboard;
       onPointerUp={() => keyboard.setVirtual(`${player}:${code}`, false)}
       onPointerLeave={() => keyboard.setVirtual(`${player}:${code}`, false)}
       onPointerCancel={() => keyboard.setVirtual(`${player}:${code}`, false)}
-      className={`flex h-14 w-14 select-none items-center justify-center rounded-full border font-display text-base font-bold uppercase text-[var(--bone)] active:scale-95 ${className}`}
+      className={`flex h-14 w-14 select-none items-center justify-center rounded-full border font-display text-xl font-bold uppercase text-[var(--bone)] active:scale-95 ${className}`}
     >
       {label}
     </button>

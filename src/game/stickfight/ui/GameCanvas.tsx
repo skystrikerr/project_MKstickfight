@@ -191,7 +191,7 @@ export function GameCanvas({
       {hud?.training && sessionRef.current?.training && (
         <div className="cut absolute left-3 top-36 z-20 w-56 border border-[var(--rule)] bg-black/80 p-3 text-[var(--bone)] backdrop-blur-sm sm:left-4 sm:top-40">
           <div className="mb-2 flex items-baseline justify-between">
-            <span className="font-display text-sm font-bold uppercase tracking-[0.15em] text-[var(--accent)]">Training</span>
+            <span className="font-display text-lg font-bold uppercase tracking-[0.15em] text-[var(--accent)]">Training</span>
             <button
               type="button"
               onClick={() => {
@@ -318,19 +318,19 @@ export function GameCanvas({
 
       {paused && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/70">
-          <div className="font-display text-5xl font-bold uppercase tracking-[0.08em] text-[var(--bone)]">Paused</div>
+          <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--bone)]">Paused</div>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={togglePause}
-              className="cut-sm bg-[var(--accent)] px-8 py-2 font-display text-lg font-bold uppercase tracking-[0.1em] text-[var(--ink)]"
+              className="cut-sm bg-[var(--accent)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--ink)]"
             >
               Resume
             </button>
             <button
               type="button"
               onClick={onQuit}
-              className="cut-sm border border-[var(--rule)] px-8 py-2 font-display text-lg font-bold uppercase tracking-[0.1em] text-[var(--bone)]"
+              className="cut-sm border border-[var(--rule)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--bone)]"
             >
               Quit
             </button>
@@ -341,7 +341,7 @@ export function GameCanvas({
       {hud?.phase === "matchEnd" && !onMatchEnd && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/75">
           <div className="font-mono text-[11px] uppercase tracking-[0.4em] text-[var(--accent)]">Winner</div>
-          <div className="font-display text-5xl font-bold uppercase tracking-[0.08em] text-[var(--bone)] sm:text-6xl">
+          <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--bone)] sm:text-8xl">
             {hud.winnerName}
           </div>
           {hud.winQuote && (
@@ -353,14 +353,14 @@ export function GameCanvas({
             <button
               type="button"
               onClick={rematch}
-              className="cut-sm bg-[var(--accent)] px-8 py-2 font-display text-lg font-bold uppercase tracking-[0.1em] text-[var(--ink)] hover:bg-[var(--accent-hot)]"
+              className="cut-sm bg-[var(--accent)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--ink)] hover:bg-[var(--accent-hot)]"
             >
               Rematch
             </button>
             <button
               type="button"
               onClick={onQuit}
-              className="cut-sm border border-[var(--rule)] px-8 py-2 font-display text-lg font-bold uppercase tracking-[0.1em] text-[var(--bone)] hover:bg-white/10"
+              className="cut-sm border border-[var(--rule)] px-8 py-2 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--bone)] hover:bg-white/10"
             >
               Character select
             </button>

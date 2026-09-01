@@ -32,7 +32,7 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
   return (
     <div className={`flex flex-1 flex-col gap-1 ${flip ? "items-end" : "items-start"}`}>
       <div className={`flex w-full items-baseline gap-2 ${flip ? "flex-row-reverse" : ""}`}>
-        <span className="font-display text-lg font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
+        <span className="font-display text-2xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
           {player.name}
         </span>
         <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone)]/70 drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)] sm:inline">
@@ -137,7 +137,7 @@ function MeterBar({ player, side }: { player: PlayerHud; side: "left" | "right" 
   return (
     <div className={`flex items-center gap-1.5 ${flip ? "flex-row-reverse" : ""}`}>
       <span
-        className={`font-display text-sm font-bold uppercase tracking-[0.15em] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)] ${
+        className={`font-display text-lg font-bold uppercase tracking-[0.15em] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)] ${
           stocks > 0 ? "text-[var(--accent-hot)]" : "text-[var(--bone)]/60"
         }`}
       >
@@ -266,7 +266,7 @@ function ComboCounter({ hits, damage, side }: { hits: number; damage: number; si
         >
           {hits}
         </span>
-        <span className="font-display text-lg font-bold uppercase tracking-[0.08em] text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
+        <span className="font-display text-2xl font-bold uppercase tracking-[0.02em] text-[var(--bone)] drop-shadow-[2px_2px_0_rgba(0,0,0,0.85)]">
           Hits
         </span>
       </div>

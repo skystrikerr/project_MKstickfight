@@ -55,7 +55,7 @@ export function VersusCard({
         {[me, them].map((def, i) => (
           <div key={i} className="contents">
             {i === 1 && (
-              <span className="font-display text-4xl font-bold uppercase tracking-[0.08em] text-[var(--bone-dim)] sm:text-5xl">
+              <span className="font-display text-5xl font-bold uppercase tracking-[0.02em] text-[var(--bone-dim)] sm:text-7xl">
                 vs
               </span>
             )}
@@ -67,7 +67,7 @@ export function VersusCard({
               />
               {/* Two lines of room, so a long name does not drag its own
                   subtitle out of line with the other fighter's. */}
-              <span className="mt-2 flex h-11 items-start justify-center text-center font-display text-lg font-bold uppercase leading-tight tracking-[0.08em]">
+              <span className="mt-2 flex h-11 items-start justify-center text-center font-display text-2xl font-bold uppercase leading-tight tracking-[0.02em]">
                 {def.name}
               </span>
               <span className="text-center font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
@@ -89,7 +89,7 @@ export function VersusCard({
           type="button"
           autoFocus
           onClick={onFight}
-          className="cut bg-[var(--accent)] px-12 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
+          className="cut bg-[var(--accent)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
           Fight
         </button>
@@ -124,7 +124,7 @@ export function ContinuePrompt({
   const them = getFighter(step.opponent);
   return (
     <Shell>
-      <div className="font-display text-5xl font-bold uppercase tracking-[0.08em] text-[var(--blood)] sm:text-6xl">
+      <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--blood)] sm:text-8xl">
         Defeated
       </div>
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)]">
@@ -136,7 +136,7 @@ export function ContinuePrompt({
           type="button"
           autoFocus
           onClick={onRetry}
-          className="cut bg-[var(--accent)] px-12 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
+          className="cut bg-[var(--accent)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
           Continue
         </button>
@@ -176,7 +176,7 @@ export function EndingCard({
             Ladder cleared · {level}
             {continues === 0 ? " · no continues" : ` · ${continues} continue${continues === 1 ? "" : "s"}`}
           </div>
-          <div className="mt-1 font-display text-4xl font-bold uppercase leading-none tracking-[0.08em] sm:text-5xl">
+          <div className="mt-1 font-display text-5xl font-bold uppercase leading-none tracking-[0.02em] sm:text-7xl">
             {me.name}
           </div>
           <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em]" style={{ color: me.palette.accent }}>
@@ -190,7 +190,7 @@ export function EndingCard({
           type="button"
           autoFocus
           onClick={onDone}
-          className="cut mt-2 bg-[var(--accent)] px-12 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
+          className="cut mt-2 bg-[var(--accent)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
           Continue
         </button>

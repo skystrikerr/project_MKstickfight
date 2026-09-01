@@ -11,6 +11,7 @@ import { GameCanvas, type MatchConfig } from "@/game/stickfight/ui/GameCanvas";
 import { MoveList } from "@/game/stickfight/ui/MoveList";
 import { FighterPortrait } from "@/game/stickfight/ui/Portrait";
 import { ROSTER } from "@/game/stickfight/fighters";
+import { Wordmark } from "@/game/stickfight/ui/Wordmark";
 import { music } from "@/game/stickfight/engine/music";
 import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
@@ -109,10 +110,8 @@ export default function StickFighter() {
               </span>
               <span className="h-px flex-1 bg-[var(--rule)]" />
             </div>
-            <h1 className="mt-4 font-display text-5xl font-bold uppercase leading-[0.9] tracking-[0.14em] sm:text-7xl">
-              Stick <span className="text-[var(--accent)]">Fighter</span>
-            </h1>
-            <p className="mt-1 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
+            <Wordmark className="mt-5" />
+            <p className="mt-3 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
               Every one of them was real
             </p>
           </header>
@@ -122,7 +121,7 @@ export default function StickFighter() {
               <div key={def.id} className="flex w-32 flex-col items-center sm:w-40">
                 <FighterPortrait def={def} className="h-40 w-32 sm:h-52 sm:w-40" facing={i % 2 === 0 ? 1 : -1} />
                 <span className="mt-1 h-px w-8" style={{ background: def.palette.accent }} />
-                <span className="mt-1.5 text-center font-display text-sm font-bold uppercase leading-none tracking-[0.08em]">
+                <span className="mt-1.5 text-center font-display text-lg font-bold uppercase leading-none tracking-[0.02em]">
                   {def.name}
                 </span>
                 <span className="mt-0.5 text-center font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
@@ -136,7 +135,7 @@ export default function StickFighter() {
             <button
               type="button"
               onClick={() => setScreen("select")}
-              className="cut bg-[var(--accent)] px-14 py-3 font-display text-2xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
+              className="cut bg-[var(--accent)] px-14 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
             >
               Press Start
             </button>
@@ -157,7 +156,7 @@ export default function StickFighter() {
             ].map((col) => (
               <section key={col.label} className="bg-[var(--ink-2)] p-4">
                 <div
-                  className="mb-2 border-b pb-1.5 font-display text-sm font-bold uppercase tracking-[0.15em]"
+                  className="mb-2 border-b pb-1.5 font-display text-lg font-bold uppercase tracking-[0.15em]"
                   style={{ color: col.accent, borderColor: "var(--rule)" }}
                 >
                   {col.label}
