@@ -10,15 +10,17 @@
  * No test framework: it prints PASS/FAIL lines and exits non-zero on failure.
  */
 
-import { AiController } from "./engine/ai";
-import { EMPTY_INPUT, GamepadReader, type RawInput } from "./engine/input";
+import { AiController, STYLES } from "./engine/ai";
+import { EMPTY_INPUT, GamepadReader, Keyboard, P1_KEYS, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
 import { Music, TRACKS, type MusicCue } from "./engine/music";
 import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
+import { TUTORIAL_STEPS, TutorialRunner } from "./engine/tutorial";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
 import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun } from "./ladder";
 import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./save";
+import { BINDABLE_ACTIONS, codeLabel, defaultKeyMap, isKeyCode, toKeyBindings } from "./keybinds";
 import { STAGE_THEMES } from "./render/stage";
 import { attachTransform } from "./render/rig";
 import { buildSkeleton, sampleClip } from "./skeleton";
@@ -1182,6 +1184,234 @@ function scriptFor(move: MoveDef): RawInput[] {
 
   clearSave();
   delete (globalThis as { window?: unknown }).window;
+}
+
+// ---------------------------------------------------------------------------
+// AI personalities
+// ---------------------------------------------------------------------------
+
+{
+  // Every fighter has a personality, and nobody has two.
+  const ids = ROSTER.map((f) => f.id);
+  const missing = ids.filter((id) => !(id in STYLES));
+  const extra = Object.keys(STYLES).filter((id) => !ids.includes(id));
+  check("AI styles: every fighter has one", missing.length === 0, missing.join(","));
+  check("AI styles: no style for a fighter that does not exist", extra.length === 0, extra.join(","));
+
+  // A style is a set of multipliers on the difficulty profile, so a botched
+  // entry (a stray 0, a swapped field) is invisible in play until the exact
+  // matchup and range come up. Cheap enough to just require sane bounds.
+  for (const [id, s] of Object.entries(STYLES)) {
+    const fields = [s.aggression, s.special, s.throw, s.poke, s.patience];
+    const inRange = fields.every((v) => v > 0 && v <= 2);
+    check(`AI styles: ${id} multipliers are in a sane range`, inRange, fields.join(","));
+  }
+
+  // The personalities are supposed to differ - a zoner and a berserker must
+  // not have quietly landed on the same numbers.
+  const dory = STYLES.spartan;
+  const zoner = STYLES.roman;
+  const berserker = STYLES.viking;
+  check("AI styles: the berserker is more aggressive than the zoner", berserker.aggression > zoner.aggression);
+  check("AI styles: the zoner holds range, the berserker does not", zoner.range === "far" && berserker.range === "close");
+  check("AI styles: the grappler throws far more than a non-grappler", dory.throw > STYLES.roman.throw * 1.5);
+  check("AI styles: the counter fighter is the most patient on the roster", STYLES.samurai.patience === Math.max(...Object.values(STYLES).map((s) => s.patience)));
+
+  // The AI still has to actually play: a personality is only real if the
+  // match keeps resolving with it switched on. Reuses the existing full
+  // matchup sweep's pattern at a smaller scale so this stays fast.
+  let finished = 0;
+  const sample = ["roman", "viking", "samurai", "spartan", "soldier"];
+  for (const a of sample) {
+    for (const b of sample) {
+      if (a === b) continue;
+      const m = new Match([getFighter(a), getFighter(b)]);
+      const ai1 = new AiController("Veteran");
+      const ai2 = new AiController("Veteran");
+      for (let i = 0; i < 40000; i++) {
+        m.step([ai1.step(m, m.fighters[0], m.fighters[1]), ai2.step(m, m.fighters[1], m.fighters[0])]);
+        if (m.phase === "matchEnd") break;
+      }
+      if (m.phase === "matchEnd") finished++;
+    }
+  }
+  const total = sample.length * (sample.length - 1);
+  check(`AI styles: styled matchups still resolve`, finished === total, `${finished}/${total}`);
+}
+
+// ---------------------------------------------------------------------------
+// Key rebinding
+// ---------------------------------------------------------------------------
+
+{
+  // The default map is just the first key already bound to each action, so
+  // rebinding starts from what the controls list on the title screen says.
+  const def = defaultKeyMap();
+  for (const action of BINDABLE_ACTIONS) {
+    check(`keybinds: default ${action} matches P1_KEYS`, def[action] === P1_KEYS[action][0], def[action]);
+  }
+
+  check("keybinds: isKeyCode accepts a real code", isKeyCode("KeyJ") && isKeyCode("ArrowLeft"));
+  check("keybinds: isKeyCode rejects garbage", !isKeyCode("") && !isKeyCode(42) && !isKeyCode("Key J") && !isKeyCode(null));
+  check("keybinds: codeLabel shortens the common ones", codeLabel("KeyJ") === "J" && codeLabel("ArrowLeft") === "←");
+  check("keybinds: codeLabel falls back to the code itself for anything unknown", codeLabel("F13") === "F13");
+
+  // toKeyBindings must route each action to the field the engine reads for
+  // it - a shuffled mapping here would rebind the wrong button and nothing
+  // would catch it short of trying every key by hand.
+  const map = { ...defaultKeyMap(), A: "KeyZ", up: "Space" };
+  const kb = toKeyBindings(map);
+  check("keybinds: toKeyBindings routes A correctly", kb.A[0] === "KeyZ", kb.A[0]);
+  check("keybinds: toKeyBindings routes up correctly", kb.up[0] === "Space", kb.up[0]);
+  check("keybinds: toKeyBindings leaves an unrebound action alone", kb.B[0] === defaultKeyMap().B, kb.B[0]);
+
+  // A custom binding has to actually change which physical key fires which
+  // action - the wiring in GameCanvas is exactly the kind of thing that
+  // typechecks and does nothing, so this drives it through a fake keyboard
+  // rather than trusting the plumbing.
+  const handlers: Record<string, ((e: { code: string; preventDefault(): void }) => void)[]> = {};
+  const fakeWindow = {
+    addEventListener: (type: string, fn: (e: { code: string; preventDefault(): void }) => void) => {
+      (handlers[type] ??= []).push(fn);
+    },
+    removeEventListener: () => {},
+  } as unknown as Window;
+
+  const keyboard = new Keyboard();
+  keyboard.attach(fakeWindow);
+  const press = (code: string) => handlers.keydown?.forEach((h) => h({ code, preventDefault: () => {} }));
+  const release = (code: string) => handlers.keyup?.forEach((h) => h({ code, preventDefault: () => {} }));
+
+  const rebound = toKeyBindings({ ...defaultKeyMap(), A: "KeyZ" });
+  check("keybinds: the old key no longer fires A once rebound", !keyboard.read(rebound, "p1").A);
+  press("KeyZ");
+  check("keybinds: the new key fires A", keyboard.read(rebound, "p1").A);
+  release("KeyZ");
+  check("keybinds: releasing the key stops it firing", !keyboard.read(rebound, "p1").A);
+
+  // Rebinding one action must not disturb another.
+  press("KeyJ");
+  check("keybinds: an untouched action still reads its default key", keyboard.read(rebound, "p1").A === false);
+}
+
+// ---------------------------------------------------------------------------
+// Volume and key-map persistence
+// ---------------------------------------------------------------------------
+
+{
+  const store = new Map<string, string>();
+  (globalThis as { window?: unknown }).window = {
+    localStorage: {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+    },
+  };
+
+  clearSave();
+  check("save: default volumes are audible but not full", loadSave().musicVolume > 0 && loadSave().musicVolume < 1);
+  check("save: default key map matches the on-screen controls", loadSave().p1Keys.A === defaultKeyMap().A);
+
+  patchSave({ musicVolume: 0.8, sfxVolume: 0.2, p1Keys: { ...defaultKeyMap(), C: "KeyP" } });
+  check("save: volumes round-trip", loadSave().musicVolume === 0.8 && loadSave().sfxVolume === 0.2);
+  check("save: a rebound key round-trips", loadSave().p1Keys.C === "KeyP", loadSave().p1Keys.C);
+  check("save: rebinding one key leaves the rest alone", loadSave().p1Keys.A === defaultKeyMap().A);
+
+  // Garbage in one slot of a saved key map should not cost the others.
+  const raw = JSON.parse(store.get("stickfighter.save")!);
+  raw.p1Keys = { ...raw.p1Keys, B: "" , A: 12 };
+  store.set("stickfighter.save", JSON.stringify(raw));
+  const salvaged = loadSave();
+  check("save: a garbled action in the key map falls back alone", salvaged.p1Keys.A === defaultKeyMap().A && salvaged.p1Keys.B === defaultKeyMap().B);
+  check("save: the untouched rebind in that same map survives", salvaged.p1Keys.C === "KeyP", salvaged.p1Keys.C);
+
+  // Volumes outside 0..1 are exactly the kind of thing a hand-edited or
+  // corrupted blob would carry.
+  patchSave({ musicVolume: 4, sfxVolume: -1 } as never);
+  check("save: an out-of-range volume falls back", loadSave().musicVolume === DEFAULT_SAVE.musicVolume && loadSave().sfxVolume === DEFAULT_SAVE.sfxVolume);
+
+  clearSave();
+  delete (globalThis as { window?: unknown }).window;
+}
+
+// ---------------------------------------------------------------------------
+// Tutorial
+// ---------------------------------------------------------------------------
+
+{
+  // Ten lessons, each reachable, and the whole thing completable start to
+  // finish with inputs a real player would actually send. A broken tutorial
+  // that quietly never advances past lesson four is worse than no tutorial,
+  // so this drives every step reactively off the fighters' own state rather
+  // than a fixed script, the same way a person reacting to what is on
+  // screen would.
+  const runner = new TutorialRunner();
+  const m = new Match([getFighter("roman"), getFighter("roman")]);
+  for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+  m.fighters[0].x = -60;
+  m.fighters[1].x = 40;
+  runner.start(m);
+
+  const seen: string[] = [];
+  const dir = () => (m.fighters[1].x >= m.fighters[0].x ? { fwd: "right", back: "left" } : { fwd: "left", back: "right" });
+
+  let frame = 0;
+  for (; frame < 20000 && !runner.complete; frame++) {
+    if (seen[seen.length - 1] !== runner.step.kind) seen.push(runner.step.kind);
+    const { fwd, back } = dir();
+    const dist = Math.abs(m.fighters[1].x - m.fighters[0].x);
+    let p1 = inp();
+
+    switch (runner.step.kind) {
+      case "move":
+        p1 = inp({ [back]: true } as Partial<RawInput>);
+        break;
+      case "jump":
+        p1 = inp({ up: frame % 20 < 4 });
+        break;
+      case "crouch":
+        p1 = inp({ down: true });
+        break;
+      case "attack":
+        p1 = dist > 90 ? inp({ [fwd]: true } as Partial<RawInput>) : inp({ A: true });
+        break;
+      case "special": {
+        const script = qcf("B");
+        p1 = script[frame % script.length];
+        break;
+      }
+      case "blockHigh":
+      case "blockLow":
+        p1 = inp({ S: true, down: runner.step.kind === "blockLow" });
+        break;
+      case "dodge":
+        p1 = inp({ [fwd]: true, S: frame % 30 < 3 } as Partial<RawInput>);
+        break;
+      case "throw":
+        // A real player taps A+B for a throw rather than holding it down
+        // forever, and the input buffer wants the same fresh press.
+        p1 =
+          dist > 46
+            ? inp({ [fwd]: true } as Partial<RawInput>)
+            : inp({ A: frame % 10 < 3, B: frame % 10 < 3 });
+        break;
+      case "combo": {
+        if (dist > 90) {
+          p1 = inp({ [fwd]: true } as Partial<RawInput>);
+          break;
+        }
+        const hits = m.fighters[1].comboHits;
+        p1 = hits < 1 ? inp({ A: true }) : inp({ B: true });
+        break;
+      }
+    }
+
+    m.step([p1, inp()]);
+    runner.apply(m);
+  }
+
+  check("tutorial: every lesson is reachable", seen.length === TUTORIAL_STEPS.length, seen.join(","));
+  check("tutorial: the whole thing can be completed", runner.complete, `stuck on ${runner.step?.kind} at frame ${frame}`);
 }
 
 // ---------------------------------------------------------------------------

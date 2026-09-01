@@ -5,6 +5,7 @@ import type { AiLevel } from "../constants";
 import { music } from "../engine/music";
 import { loadSave, patchSave } from "../save";
 import { GameSession, type GameMode, type HudState } from "../engine/game";
+import { toKeyBindings } from "../keybinds";
 import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
 import { Announcement, Hud } from "./Hud";
@@ -57,6 +58,7 @@ export function GameCanvas({
     const wrap = wrapRef.current;
     if (!canvas || !wrap) return;
 
+    const saved = loadSave();
     const session = new GameSession({
       p1: config.p1,
       p2: config.p2,
@@ -66,9 +68,12 @@ export function GameCanvas({
       stage: config.stage,
       p1Skin: config.p1Skin,
       p2Skin: config.p2Skin,
+      p1Keys: toKeyBindings(saved.p1Keys),
     });
     sessionRef.current = session;
     // The button already reflects the saved setting; the audio has to be told.
+    session.sfx.setVolume(saved.sfxVolume);
+    music.setVolume(saved.musicVolume);
     if (muted) {
       session.sfx.setMuted(true);
       music.setMuted(true);
@@ -184,6 +189,17 @@ export function GameCanvas({
       {pads > 0 && (
         <div className="cut-sm pointer-events-none absolute bottom-3 left-3 z-20 border border-[var(--rule)] bg-black/60 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#8aa87a]">
           {pads === 1 ? "Gamepad connected" : `${pads} gamepads connected`}
+        </div>
+      )}
+
+      {hud?.tutorial && !hud.tutorial.complete && (
+        <div className="pointer-events-none absolute inset-x-0 top-28 z-20 flex justify-center px-4 sm:top-32">
+          <div className="cut-sm max-w-lg border border-[var(--rule)] bg-black/80 px-4 py-2.5 text-center backdrop-blur-sm">
+            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--accent)]">
+              Lesson {hud.tutorial.index + 1} of {hud.tutorial.total} · {hud.tutorial.title}
+            </div>
+            <div className="mt-1 text-sm text-[var(--bone)]">{hud.tutorial.prompt}</div>
+          </div>
         </div>
       )}
 
@@ -365,6 +381,25 @@ export function GameCanvas({
               Character select
             </button>
           </div>
+        </div>
+      )}
+
+      {hud?.tutorial?.complete && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/75">
+          <div className="font-mono text-[11px] uppercase tracking-[0.4em] text-[var(--accent)]">Tutorial</div>
+          <div className="font-display text-6xl font-bold uppercase tracking-[0.02em] text-[var(--bone)] sm:text-7xl">
+            All done
+          </div>
+          <p className="max-w-md border-l-2 border-[var(--rule)] pl-3 text-left text-sm text-[var(--bone-dim)]">
+            That is every basic. The move list has everything else - every fighter's own specials, strings and skill.
+          </p>
+          <button
+            type="button"
+            onClick={onQuit}
+            className="cut mt-2 bg-[var(--accent)] px-10 py-2.5 font-display text-2xl font-bold uppercase tracking-[0.1em] text-[var(--ink)] hover:bg-[var(--accent-hot)]"
+          >
+            Done
+          </button>
         </div>
       )}
     </div>

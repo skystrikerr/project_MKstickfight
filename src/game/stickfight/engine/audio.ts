@@ -33,6 +33,11 @@ export class Sfx {
     if (this.master) this.master.gain.value = muted ? 0 : this.volume;
   }
 
+  setVolume(v: number) {
+    this.volume = Math.max(0, Math.min(1, v));
+    if (this.master && !this.muted) this.master.gain.value = this.volume;
+  }
+
   private makeNoise(ctx: AudioContext): AudioBuffer {
     const length = Math.floor(ctx.sampleRate * 0.6);
     const buffer = ctx.createBuffer(1, length, ctx.sampleRate);

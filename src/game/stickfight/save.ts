@@ -14,6 +14,7 @@ import { AI_LEVELS, type AiLevel } from "./constants";
 import { ROSTER } from "./fighters";
 import { STAGE_LIST, type StageTheme } from "./render/stage";
 import { SKINS } from "./skins";
+import { BINDABLE_ACTIONS, defaultKeyMap, isKeyCode, type KeyMap } from "./keybinds";
 
 const KEY = "stickfighter.save";
 const VERSION = 1;
@@ -29,6 +30,10 @@ export interface SaveData {
   rounds: number;
   stage: StageTheme | "random";
   muted: boolean;
+  musicVolume: number;
+  sfxVolume: number;
+  /** Player 1's key map. Player 2 stays on the fixed arrow-key layout. */
+  p1Keys: KeyMap;
   /** Fighter id -> the hardest difficulty their ladder has been cleared on. */
   cleared: Record<string, AiLevel>;
 }
@@ -43,6 +48,9 @@ export const DEFAULT_SAVE: SaveData = {
   rounds: 2,
   stage: "random",
   muted: false,
+  musicVolume: 0.4,
+  sfxVolume: 0.5,
+  p1Keys: defaultKeyMap(),
   cleared: {},
 };
 
@@ -59,6 +67,23 @@ const isStage = (v: unknown): v is StageTheme | "random" =>
  * longer has falls back to the default for that field alone - so renaming one
  * character does not wipe somebody's whole record.
  */
+const isVolume = (v: unknown): v is number => typeof v === "number" && v >= 0 && v <= 1;
+
+/**
+ * A key map is rebuilt action by action, same as `cleared` is rebuilt fighter
+ * by fighter: one garbled action falls back to its own default key rather
+ * than resetting every button the player has already rebound.
+ */
+function coerceKeyMap(raw: unknown): KeyMap {
+  const o = (raw && typeof raw === "object" ? raw : {}) as Partial<KeyMap>;
+  const fallback = defaultKeyMap();
+  const out = {} as KeyMap;
+  for (const action of BINDABLE_ACTIONS) {
+    out[action] = isKeyCode(o[action]) ? o[action] : fallback[action];
+  }
+  return out;
+}
+
 function coerce(raw: unknown): SaveData {
   if (!raw || typeof raw !== "object") return { ...DEFAULT_SAVE };
   const o = raw as Partial<SaveData>;
@@ -78,6 +103,9 @@ function coerce(raw: unknown): SaveData {
     rounds: o.rounds === 1 || o.rounds === 2 || o.rounds === 3 ? o.rounds : DEFAULT_SAVE.rounds,
     stage: isStage(o.stage) ? o.stage : DEFAULT_SAVE.stage,
     muted: typeof o.muted === "boolean" ? o.muted : DEFAULT_SAVE.muted,
+    musicVolume: isVolume(o.musicVolume) ? o.musicVolume : DEFAULT_SAVE.musicVolume,
+    sfxVolume: isVolume(o.sfxVolume) ? o.sfxVolume : DEFAULT_SAVE.sfxVolume,
+    p1Keys: coerceKeyMap(o.p1Keys),
     cleared,
   };
 }

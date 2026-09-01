@@ -12,6 +12,7 @@ import { MoveList } from "@/game/stickfight/ui/MoveList";
 import { FighterPortrait } from "@/game/stickfight/ui/Portrait";
 import { ROSTER } from "@/game/stickfight/fighters";
 import { Wordmark } from "@/game/stickfight/ui/Wordmark";
+import { Settings } from "@/game/stickfight/ui/Settings";
 import { music } from "@/game/stickfight/engine/music";
 import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
@@ -65,6 +66,7 @@ export default function StickFighter() {
   const [screen, setScreen] = useState<Screen>("title");
   const [config, setConfig] = useState<MatchConfig | null>(null);
   const [moveListFor, setMoveListFor] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [touch, setTouch] = useState(false);
   const [run, setRun] = useState<Run | null>(null);
 
@@ -139,13 +141,41 @@ export default function StickFighter() {
             >
               Press Start
             </button>
-            <button
-              type="button"
-              onClick={() => setMoveListFor(ROSTER[0].id)}
-              className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
-            >
-              [ Move lists ]
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setRun(null);
+                  setConfig({
+                    p1: "roman",
+                    p2: "roman",
+                    mode: "tutorial",
+                    aiLevel: "Rookie",
+                    rounds: 1,
+                    stage: "colosseum",
+                    p2Skin: SKINS.find((s) => s.id !== "classic")?.id,
+                  });
+                  setScreen("fight");
+                }}
+                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
+              >
+                [ Tutorial ]
+              </button>
+              <button
+                type="button"
+                onClick={() => setMoveListFor(ROSTER[0].id)}
+                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
+              >
+                [ Move lists ]
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSettings(true)}
+                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
+              >
+                [ Settings ]
+              </button>
+            </div>
           </div>
 
           <div className="relative mt-10 grid w-full max-w-5xl gap-px bg-[var(--rule)] sm:grid-cols-3">
@@ -275,6 +305,7 @@ export default function StickFighter() {
       )}
 
       {moveListFor && <MoveList fighterId={moveListFor} onClose={() => setMoveListFor(null)} />}
+      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
     </div>
   );
 }

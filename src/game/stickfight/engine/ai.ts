@@ -43,6 +43,75 @@ const PROFILES: Record<AiLevel, Profile> = {
   Legend: { reaction: 4, block: 0.94, antiAir: 0.85, special: 0.75, aggression: 0.9, reversal: 0.45, punish: 0.9, think: 8 },
 };
 
+/**
+ * What a fighter *wants* to do, layered on top of the difficulty profile.
+ * Difficulty controls how well the AI executes and reads the match; style
+ * controls what it is trying to accomplish, so a Legend Dienekes and a
+ * Legend Wyatt Earp play the same match with the same skill and completely
+ * different game plans.
+ *
+ * Every number is a multiplier on the matching profile value (or on a fixed
+ * chance elsewhere in `decide`), so a style can never make an AI stronger -
+ * only more itself. A fighter missing from `STYLES` gets `DEFAULT_STYLE`,
+ * which is neutral in every field, so a new roster addition is never left
+ * without an AI personality by accident.
+ */
+export interface Style {
+  /** How eagerly it closes distance and presses a chain once it is in. */
+  aggression: number;
+  /** How readily it reaches for a special over a normal. */
+  special: number;
+  /** How often it goes for a throw at point-blank range. */
+  throw: number;
+  /** How often it pokes instead of committing, at mid-range. */
+  poke: number;
+  /** Scales block and whiff-punish chance - a patient fighter reads the match rather than pressing through it. */
+  patience: number;
+  /** The range it tries to hold. "far" backs off to keep zoning; "close" does not retreat. */
+  range: "far" | "mid" | "close";
+}
+
+export const DEFAULT_STYLE: Style = { aggression: 1, special: 1, throw: 1, poke: 1, patience: 1, range: "mid" };
+
+/**
+ * One entry per roster id. A structural self-test checks this covers the
+ * whole roster and nothing else, the same way `ladder.ts` checks its rival
+ * table - a fighter silently missing a personality is worse than the test
+ * being annoying to keep in sync.
+ */
+export const STYLES: Record<string, Style> = {
+  // Zoner / Wall: the scutum holds ground, the pilum keeps them off it.
+  roman: { aggression: 0.7, special: 1.15, throw: 0.75, poke: 1.3, patience: 1.2, range: "far" },
+  // Grappler / Wall: aspis holds the line, then the arms do the rest.
+  spartan: { aggression: 0.95, special: 0.9, throw: 1.8, poke: 1.05, patience: 1.15, range: "mid" },
+  // Berserker / Bruiser: axe first, questions never.
+  viking: { aggression: 1.5, special: 0.85, throw: 1.1, poke: 0.6, patience: 0.5, range: "close" },
+  // Rushdown / Mix-up: cutlass and pistol both want her on top of you.
+  pirate: { aggression: 1.4, special: 1.0, throw: 1.2, poke: 0.7, patience: 0.6, range: "close" },
+  // Footsies / Counter: wins by reading, not by rushing.
+  samurai: { aggression: 0.7, special: 0.9, throw: 0.9, poke: 1.6, patience: 1.55, range: "mid" },
+  // Rushdown / Clinch: closes for the clinch and does not let go.
+  muaythai: { aggression: 1.5, special: 0.9, throw: 1.6, poke: 0.6, patience: 0.6, range: "close" },
+  // Mix-up / Mobility: kunai at range, tanto up close, never where you look.
+  ninja: { aggression: 1.15, special: 1.2, throw: 1.1, poke: 0.9, patience: 0.85, range: "mid" },
+  // Zoner / Charge: the bow wants distance and time to draw.
+  mongol: { aggression: 0.6, special: 1.3, throw: 0.7, poke: 1.1, patience: 1.3, range: "far" },
+  // Zoner / Punisher: the six-shooter waits for the opening it needs.
+  western: { aggression: 0.6, special: 1.1, throw: 0.7, poke: 1.0, patience: 1.45, range: "far" },
+  // Zoner / Resource: ammo is finite, so the M16 is fired from range, not up close.
+  soldier: { aggression: 0.65, special: 1.15, throw: 0.7, poke: 1.0, patience: 1.25, range: "far" },
+  // Armoured Bruiser: the armour lets him walk into things others cannot.
+  knight: { aggression: 1.2, special: 0.85, throw: 1.0, poke: 0.85, patience: 0.9, range: "close" },
+  // Rushdown / Mix-up: obsidian rewards being the one attacking.
+  jaguar: { aggression: 1.4, special: 1.0, throw: 1.2, poke: 0.7, patience: 0.6, range: "close" },
+  // Pressure / Footsies: the iklwa was built for exactly this range.
+  zulu: { aggression: 1.15, special: 0.9, throw: 1.0, poke: 1.3, patience: 1.0, range: "mid" },
+  // Zoner / Stance: the staff keeps them out, the stances buy the time to reset it.
+  shaolin: { aggression: 0.7, special: 1.25, throw: 0.8, poke: 1.1, patience: 1.2, range: "far" },
+  // Zoner / Resource: the chakram is thrown from a distance it can be thrown from again.
+  nihang: { aggression: 0.65, special: 1.25, throw: 0.7, poke: 1.0, patience: 1.25, range: "far" },
+};
+
 const MOTION_DIRS: Record<Motion, number[]> = {
   none: [],
   qcf: [2, 3, 6],
@@ -84,6 +153,10 @@ export class AiController {
 
   get profile(): Profile {
     return PROFILES[this.level];
+  }
+
+  private style(self: Fighter): Style {
+    return STYLES[self.def.id] ?? DEFAULT_STYLE;
   }
 
   reset() {
@@ -150,44 +223,57 @@ export class AiController {
     }
 
     // Block when the opponent commits to something close by.
+    const style = this.style(self);
     const threat = opponent.state === "move" && dist < 210;
-    if (threat && Math.random() < p.block) {
+    if (threat && Math.random() < Math.min(0.98, p.block * style.patience)) {
       const low = opponent.move?.hits?.some((h) => h.guard === "low");
       return this.hold({ ...numToRaw(low ? 1 : 4, facing) }, this.profile.reaction + 8);
     }
 
     // Punish a whiffed heavy.
-    if (opponent.state === "move" && opponent.moveHasHit === false && dist < 120 && Math.random() < p.punish) {
+    if (opponent.state === "move" && opponent.moveHasHit === false && dist < 120 && Math.random() < Math.min(0.98, p.punish * style.patience)) {
       const punish = this.pickMove(self, (m) => (m.tags?.includes("heavy") ?? false) && !m.input.motion);
       if (punish) return this.queueMove(self, punish);
     }
 
     // Super when it is available and they are close enough to connect.
-    if (self.meter >= 100 && dist < 260 && Math.random() < p.special * 0.7) {
+    if (self.meter >= 100 && dist < 260 && Math.random() < Math.min(0.95, p.special * style.special * 0.7)) {
       const sup = this.pickMove(self, (m) => m.tags?.includes("super") ?? false);
       if (sup) return this.queueMove(self, sup);
     }
 
     if (dist > 300) {
-      // Far: zone or approach.
+      // Far: zone or approach, depending on what this fighter actually wants.
       const proj = this.pickMove(self, (m) => m.tags?.includes("projectile") ?? false);
-      if (proj && Math.random() < p.special && this.canAfford(self, proj)) return this.queueMove(self, proj);
-      if (Math.random() < p.aggression) return this.hold({ ...numToRaw(6, facing) }, 22);
+      if (proj && Math.random() < Math.min(0.95, p.special * style.special) && this.canAfford(self, proj)) {
+        return this.queueMove(self, proj);
+      }
+      // A "far" fighter would rather keep the gap open than walk into range,
+      // so instead of just standing, it steps back the way a real zoner does.
+      if (style.range === "far" && Math.random() < 0.4) return this.hold({ ...numToRaw(4, facing) }, 16);
+      if (Math.random() < Math.min(0.95, p.aggression * style.aggression)) {
+        return this.hold({ ...numToRaw(6, facing) }, 22);
+      }
       return this.hold({}, 12);
     }
 
     if (dist > 150) {
-      // Mid: pokes, dashes, jump-ins.
+      // Mid: pokes, dashes, jump-ins - weighted by what this fighter is for.
       const r = Math.random();
-      if (r < 0.24) {
+      if (r < 0.24 * style.poke) {
         const poke = this.pickMove(self, (m) => m.id === "5B" || m.id === "2B");
         if (poke) return this.queueMove(self, poke);
       }
-      if (r < 0.4 && p.special > 0.3) {
+      if (r < 0.4 && p.special * style.special > 0.3) {
         const sp = this.pickMove(self, (m) => (m.tags?.includes("special") ?? false) && !m.meterCost);
         if (sp && this.canAfford(self, sp)) return this.queueMove(self, sp);
       }
-      if (r < 0.62 * p.aggression + 0.3) {
+      // A far-style fighter holds the line here rather than closing it -
+      // that is the entire behavioural difference between a zoner and
+      // everyone else, and it has to live here, at the range a zoner cares
+      // about most.
+      const closeLean = style.range === "far" ? 0.55 : style.range === "close" ? 1.25 : 1;
+      if (r < 0.62 * p.aggression * style.aggression * closeLean + 0.3) {
         // Dash in.
         this.queue.push({ input: numToRaw(6, facing), frames: 3 });
         this.queue.push({ input: {}, frames: 2 });
@@ -206,11 +292,11 @@ export class AiController {
 
     // Close range.
     const r = Math.random();
-    if (r < 0.16) {
+    if (r < 0.16 * style.throw) {
       const grab = this.pickMove(self, (m) => m.tags?.includes("throw") ?? false);
       if (grab) return this.queueMove(self, grab);
     }
-    if (r < 0.3 + p.special * 0.3) {
+    if (r < 0.3 + p.special * style.special * 0.3) {
       const sp = this.pickMove(self, (m) => (m.tags?.includes("special") ?? false) && !m.internal && this.canAfford(self, m));
       if (sp) return this.queueMove(self, sp);
     }

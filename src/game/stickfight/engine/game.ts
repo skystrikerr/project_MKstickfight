@@ -14,15 +14,16 @@ import type { FighterDef } from "../types";
 import { AiController } from "./ai";
 import { Sfx } from "./audio";
 import { music } from "./music";
-import { GamepadReader, Keyboard, mergeInputs, P1_KEYS, P2_KEYS, type RawInput } from "./input";
+import { EMPTY_INPUT, GamepadReader, Keyboard, mergeInputs, P1_KEYS, P2_KEYS, type KeyBindings, type RawInput } from "./input";
 import { Match, type Phase } from "./match";
 import { DEFAULT_TRAINING, TrainingRoom, type TrainingOptions, type TrainingReadout } from "./training";
+import { TutorialRunner } from "./tutorial";
 
 /**
  * "arcade" is a run of "cpu" matches with a tower around it; the session
  * itself cannot tell them apart, and should not try to.
  */
-export type GameMode = "cpu" | "arcade" | "versus" | "training";
+export type GameMode = "cpu" | "arcade" | "versus" | "training" | "tutorial";
 
 export interface GameOptions {
   p1: string;
@@ -37,6 +38,8 @@ export interface GameOptions {
   stage?: StageTheme | "random";
   /** "high" adds bloom, grade and vignette; "low" is a plain render. */
   quality?: "high" | "low";
+  /** Player 1's rebound keys, if they have changed them. Defaults to WASD/JKL. */
+  p1Keys?: KeyBindings;
   /** Only read when `mode` is "training". */
   training?: TrainingOptions;
 }
@@ -65,6 +68,15 @@ export interface PlayerHud {
   accent: string;
 }
 
+/** What the tutorial overlay shows about the lesson in progress. */
+export interface TutorialHud {
+  index: number;
+  total: number;
+  title: string;
+  prompt: string;
+  complete: boolean;
+}
+
 export interface HudState {
   phase: Phase;
   timer: number;
@@ -77,6 +89,8 @@ export interface HudState {
   paused: boolean;
   /** Present only in training mode, for the practice panel. */
   training?: TrainingReadout;
+  /** Present only in tutorial mode, for the lesson overlay. */
+  tutorial?: TutorialHud;
 }
 
 export class GameSession {
@@ -87,6 +101,7 @@ export class GameSession {
   readonly sfx = new Sfx();
   private ai: AiController | null = null;
   readonly training: TrainingRoom | null;
+  readonly tutorial: TutorialRunner | null;
   private raf = 0;
   private last = 0;
   private acc = 0;
@@ -125,6 +140,8 @@ export class GameSession {
       this.ai = new AiController(options.aiLevel);
     }
     this.training = options.mode === "training" ? new TrainingRoom(options.training ?? DEFAULT_TRAINING) : null;
+    this.tutorial = options.mode === "tutorial" ? new TutorialRunner() : null;
+    this.tutorial?.start(this.match);
   }
 
   /** The stage actually in use once "random" has been resolved. */
@@ -257,10 +274,14 @@ export class GameSession {
   private stepOnce() {
     // Player 1 is keyboard + first pad; player 2 is keyboard + second pad, or
     // the first pad when nobody is on the keyboard-2 layout.
-    const p1 = mergeInputs(this.keyboard.read(P1_KEYS, "p1"), this.gamepads.read(0));
+    const p1 = mergeInputs(this.keyboard.read(this.options.p1Keys ?? P1_KEYS, "p1"), this.gamepads.read(0));
     let p2: RawInput;
     if (this.options.mode === "versus") {
       p2 = mergeInputs(this.keyboard.read(P2_KEYS, "p2"), this.gamepads.read(1));
+    } else if (this.tutorial) {
+      // The dummy is driven directly by the runner's own `startMove` calls,
+      // not by anything reading input.
+      p2 = { ...EMPTY_INPUT };
     } else if (this.training) {
       // A null dummy input means "let the AI have it" - the fight-back setting.
       p2 = this.training.dummyInput() ?? this.ai!.step(this.match, this.match.fighters[1], this.match.fighters[0]);
@@ -273,6 +294,7 @@ export class GameSession {
     // Training rules run after the step so the hit is already scored: the
     // readout can report what it did before the health is handed back.
     this.training?.apply(this.match);
+    this.tutorial?.apply(this.match);
 
     for (const e of this.match.fx) this.sfx.play(e);
     if (this.match.phase !== phaseBefore) {
@@ -380,6 +402,15 @@ export class GameSession {
       winQuote: winner !== null ? m.fighters[winner].def.winQuote : null,
       paused: this.paused,
       training: this.training?.readout,
+      tutorial: this.tutorial
+        ? {
+            index: this.tutorial.index,
+            total: this.tutorial.total,
+            title: this.tutorial.step.title,
+            prompt: this.tutorial.step.prompt,
+            complete: this.tutorial.complete,
+          }
+        : undefined,
     };
   }
 }
