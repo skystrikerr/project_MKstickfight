@@ -17,6 +17,7 @@ import { Music, TRACKS, type MusicCue } from "./engine/music";
 import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
+import { buildLadder, ENDINGS, LADDER_LENGTH, shiftLevel } from "./ladder";
 import { STAGE_THEMES } from "./render/stage";
 import { attachTransform } from "./render/rig";
 import { buildSkeleton, sampleClip } from "./skeleton";
@@ -1002,6 +1003,64 @@ function scriptFor(move: MoveDef): RawInput[] {
         );
       }
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Arcade ladder
+// ---------------------------------------------------------------------------
+
+{
+  for (const def of ROSTER) {
+    const run = buildLadder(def.id, "Veteran");
+    check(`ladder ${def.id}: eight fights`, run.length === LADDER_LENGTH, String(run.length));
+
+    // Every opponent has to be someone who exists, or the run dead-ends.
+    const unknown = run.filter((s) => !ROSTER.some((f) => f.id === s.opponent));
+    check(`ladder ${def.id}: every opponent is on the roster`, unknown.length === 0, unknown.map((s) => s.opponent).join(","));
+
+    // The climb must not repeat, or the run reads as filler.
+    const climb = run.filter((s) => s.stage === "climb").map((s) => s.opponent);
+    check(`ladder ${def.id}: no repeats before the rival`, new Set(climb).size === climb.length, climb.join(","));
+    check(`ladder ${def.id}: you are not your own warm-up`, !climb.includes(def.id), climb.join(","));
+
+    // The authored fights are where the run gets its shape.
+    const stages = run.map((s) => s.stage).join(",");
+    check(`ladder ${def.id}: climb x5, rival, mirror, final`, stages === "climb,climb,climb,climb,climb,rival,mirror,final", stages);
+    check(`ladder ${def.id}: the mirror is you`, run[6].opponent === def.id, run[6].opponent);
+    check(`ladder ${def.id}: the final is not you`, run[7].opponent !== def.id, run[7].opponent);
+    check(`ladder ${def.id}: the rival is not the final`, run[5].opponent !== run[7].opponent, run[5].opponent);
+
+    // Difficulty only ever climbs.
+    const order = ["Rookie", "Brawler", "Veteran", "Champion", "Legend"];
+    const idx = run.map((s) => order.indexOf(s.level));
+    check(`ladder ${def.id}: difficulty never drops`, idx.every((v, i) => i === 0 || v >= idx[i - 1]), idx.join(","));
+    check(`ladder ${def.id}: it opens below where it ends`, idx[0] < idx[7], `${idx[0]} -> ${idx[7]}`);
+
+    // The run is a pure function of the pick, so a saved step index can rebuild it.
+    const again = buildLadder(def.id, "Veteran");
+    check(
+      `ladder ${def.id}: rebuilds identically`,
+      JSON.stringify(run) === JSON.stringify(again),
+      "",
+    );
+
+    check(`ladder ${def.id}: has an ending`, (ENDINGS[def.id] ?? "").length > 80, String((ENDINGS[def.id] ?? "").length));
+  }
+
+  // Two different picks should not walk the same ladder.
+  {
+    const runs = ROSTER.map((f) => buildLadder(f.id, "Veteran").map((s) => s.opponent).join(">"));
+    check("ladder: different fighters get different runs", new Set(runs).size === runs.length, `${new Set(runs).size}/${runs.length}`);
+  }
+
+  // The player's difficulty is the middle of the run, and the ends clamp.
+  {
+    const low = buildLadder("roman", "Rookie");
+    check("ladder: Rookie cannot ramp below the floor", low[0].level === "Rookie", low[0].level);
+    const high = buildLadder("roman", "Legend");
+    check("ladder: Legend cannot ramp past the ceiling", high[7].level === "Legend", high[7].level);
+    check("ladder: shiftLevel clamps both ways", shiftLevel("Rookie", -3) === "Rookie" && shiftLevel("Legend", 3) === "Legend");
   }
 }
 
