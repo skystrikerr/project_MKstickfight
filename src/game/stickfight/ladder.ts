@@ -66,6 +66,14 @@ const RIVALS: Record<string, string> = {
   soldier: "ninja",
   // The documented shinobi against the one no record can pin down.
   shade: "ninja",
+  // Two men leading their people through the decade the muskets arrived, both
+  // remembered mostly through other people's retellings.
+  maori: "zulu",
+  // The empire's man against the man who stopped an empire's column.
+  ethiopia: "roman",
+  // Two women of the same handful of decades who lived outside what was
+  // permitted, and got written about lavishly for it either way.
+  duelist: "pirate",
 };
 
 /** The last one standing. Tomoe is the only difficulty five on the roster. */
@@ -161,6 +169,12 @@ export const ENDINGS: Record<string, string> = {
     "In the 1550s the coast was being taken apart by pirates and the empire sent monks. Zheng Ruoceng wrote down what happened at Wengjiagang: forty-odd Shaolin men against a raiding party, and the raiding party did not leave. The monks are named only in fragments now. He is one of the fragments.",
   nihang:
     "He led the Nihang, and he once summoned Ranjit Singh himself to the Akal Takht to be flogged for a moral offence - and Ranjit Singh came, and bared his back. He died in 1823 at Nowshera, going forward, which was the only direction anyone ever recorded him going.",
+  maori:
+    "He outlived the wars he started and died at Otaki in 1849, by which point the Crown had already held him for the better part of two years on a ship without charging him with anything. Ka Mate outlived all of it, and is now performed by people who could not name the pit he composed it in.",
+  ethiopia:
+    "At Dogali in 1887 he destroyed an Italian column of roughly five hundred men, which is the defeat that ended Italy's first attempt on Ethiopia and is still marked in Rome by a street name. He died in 1897 of an infected wound taken in a quarrel with another Ethiopian, nine years after the Italians could not manage it.",
+  duelist:
+    "The Opera records her singing until 1705 and then stopping. She is said to have died at about thirty-four, in a convent, having outlived the woman she loved - and every detail of that sentence comes from writers who were entertaining people rather than keeping accounts. The duels are the best documented thing about her, which says something about what got written down.",
   shade:
     "There is no register that carries his name, because he was never written down in the first place - only repeated, in enough places and enough centuries that somebody eventually started calling all of them the same man. Ask who he really was and the honest answer is that the question does not have the kind of ending the other fourteen do.",
 };

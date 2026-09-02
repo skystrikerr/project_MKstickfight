@@ -116,10 +116,11 @@ export default function StickFighter() {
               <span className="h-px flex-1 bg-[var(--rule)]" />
             </div>
             <Wordmark className="mt-5" />
-            {/* Fifteen of them were real. Kuro is the one who was not, and
-                saying "all of them" would now be the only lie on the screen. */}
+            {/* Kuro is still the only one who was not, so this number moves
+                every time a documented fighter is added. Saying "all of them"
+                would be the only lie on the screen. */}
             <p className="mt-3 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
-              Fifteen of them were real
+              Eighteen of them were real
             </p>
           </header>
 

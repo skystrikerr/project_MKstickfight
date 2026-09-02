@@ -4,7 +4,7 @@
 # so what ships is what electron-builder produces natively.
 #
 # Three ways in:
-#   - push a tag like v0.4.0            -> builds and publishes a Release
+#   - push a tag like v0.5.0            -> builds and publishes a Release
 #   - run by hand with "publish" ticked -> same, tagging the current version
 #   - run by hand without it            -> just leaves artifacts on the run
 #

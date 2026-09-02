@@ -6,7 +6,7 @@
 
 <p align="center">
   A 2D fighting game in the browser, built on three.js.<br>
-  Sixteen fighters - fifteen of them a person the historical record actually names, one a
+  Nineteen fighters - eighteen of them a person the historical record actually names, one a
   legend with no record at all - drawn as inked stick figures and armed with the weapon
   the sources (or the story) give them.
 </p>
@@ -122,7 +122,7 @@ shell.
 **To get a Windows `.exe`:** push a tag and let CI build it.
 
 ```bash
-git tag v0.4.0 && git push origin v0.4.0
+git tag v0.5.0 && git push origin v0.5.0
 ```
 
 `.github/workflows/release.yml` builds on a real Windows runner and attaches
@@ -152,7 +152,7 @@ desktop app:
 
 ```bash
 npm run get:exe        # newest dev build -> ./release
-npm run get:exe v0.4.0 # a specific tagged release instead
+npm run get:exe v0.5.0 # a specific tagged release instead
 ```
 
 Every push to `main` also rebuilds on a Windows runner and replaces the files
@@ -172,9 +172,9 @@ person with admin on the repository: the workflow token cannot create the site.
 
 ```bash
 npm run electron:dev   # run the shell against the Vite dev server
-npm run dist:win       # -> release/Stick Fighter-0.4.0-x64.exe   (needs Windows)
-npm run dist:linux     # -> release/Stick Fighter-0.4.0-x64.AppImage
-npm run dist:mac       # -> release/Stick Fighter-0.4.0-x64.dmg   (needs macOS)
+npm run dist:win       # -> release/Stick Fighter-0.5.0-x64.exe   (needs Windows)
+npm run dist:linux     # -> release/Stick Fighter-0.5.0-x64.AppImage
+npm run dist:mac       # -> release/Stick Fighter-0.5.0-x64.dmg   (needs macOS)
 ```
 
 Cross-building Windows from Linux needs Wine and is not worth the trouble — the
@@ -203,6 +203,9 @@ comes up black with nothing but `ERR_FAILED` in the console.
 | Nai Khanom Tom | Ava, 1774 | Rushdown / Clinch |
 | Akali Phula Singh | Punjab, 1807 | Zoner / Resource |
 | Mgobozi ovela Ntla | Gqokli Hill, 1818 | Pressure / Footsies |
+| Julie d'Aubigny | Paris and the provinces, 1690s | Counter / Footsies |
+| Te Rauparaha | Kapiti Coast, 1820s | Footsies / Stance |
+| Ras Alula Engida | Dogali, 1887 | Punisher / Guard Break |
 | Wyatt Earp | Tombstone, 1881 | Zoner / Punisher |
 | The Ia Drang Trooper | Ia Drang Valley, 1965 | Zoner / Resource |
 | Kuro | No fixed year | Mix-up / Wildcard |

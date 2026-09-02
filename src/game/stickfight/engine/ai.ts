@@ -112,6 +112,13 @@ export const STYLES: Record<string, Style> = {
   nihang: { aggression: 0.65, special: 1.25, throw: 0.7, poke: 1.0, patience: 1.25, range: "far" },
   // Mix-up / Wildcard: no single range is home, so every tool gets used.
   shade: { aggression: 1.1, special: 1.35, throw: 1.0, poke: 0.95, patience: 1.0, range: "mid" },
+  // Footsies / Stance: the taiaha owns a band of space, so he pokes and holds
+  // it rather than chasing anybody into their own range.
+  maori: { aggression: 0.85, special: 1.0, throw: 1.05, poke: 1.5, patience: 1.2, range: "mid" },
+  // Punisher / Guard Break: waits for the block, then goes round it.
+  ethiopia: { aggression: 0.9, special: 1.3, throw: 0.85, poke: 1.0, patience: 1.35, range: "mid" },
+  // Counter / Footsies: measures, and only commits to what she has read.
+  duelist: { aggression: 0.7, special: 1.15, throw: 0.75, poke: 1.65, patience: 1.55, range: "mid" },
 };
 
 const MOTION_DIRS: Record<Motion, number[]> = {

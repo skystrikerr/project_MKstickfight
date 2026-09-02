@@ -17,8 +17,11 @@
  */
 
 import type { FighterDef } from "../types";
+import { DUELIST } from "./duelist";
+import { ETHIOPIA } from "./ethiopia";
 import { JAGUAR } from "./jaguar";
 import { KNIGHT } from "./knight";
+import { MAORI } from "./maori";
 import { MONGOL } from "./mongol";
 import { NIHANG } from "./nihang";
 import { MUAYTHAI } from "./muaythai";
@@ -51,6 +54,9 @@ export const ROSTER: FighterDef[] = [
   SHAOLIN,
   NIHANG,
   SHADE,
+  MAORI,
+  ETHIOPIA,
+  DUELIST,
 ];
 
 export const ROSTER_BY_ID: Record<string, FighterDef> = Object.fromEntries(
@@ -61,4 +67,4 @@ export function getFighter(id: string): FighterDef {
   return ROSTER_BY_ID[id] ?? ROSTER[0];
 }
 
-export { ROMAN, SPARTAN, VIKING, PIRATE, SAMURAI, MUAYTHAI, NINJA, MONGOL, WESTERN, SOLDIER, KNIGHT, JAGUAR, ZULU, SHAOLIN, NIHANG, SHADE };
+export { ROMAN, SPARTAN, VIKING, PIRATE, SAMURAI, MUAYTHAI, NINJA, MONGOL, WESTERN, SOLDIER, KNIGHT, JAGUAR, ZULU, SHAOLIN, NIHANG, SHADE, MAORI, ETHIOPIA, DUELIST };
