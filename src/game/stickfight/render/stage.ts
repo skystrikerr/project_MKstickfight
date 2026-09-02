@@ -22,8 +22,10 @@ export type StageTheme =
   | "forge"
   | "skyward"
   | "delta"
-  // Painted backdrop rather than built shapes.
+  // Painted backdrops rather than built shapes.
   | "postroad"
+  | "dryclaim"
+  | "swallowed"
   // Stages with ledges to fight on as well as a floor.
   | "aqueduct"
   | "terraces"
@@ -44,6 +46,31 @@ export interface AmbientDef {
   opacity: number;
 }
 
+/**
+ * A painted backdrop: one bitmap on one quad, in place of built shapes.
+ *
+ * Sizing is the whole job, and it is a squeeze between two limits. Too large
+ * and the camera only frames a patch of the picture, with whatever the
+ * painting was actually about sitting off the top of the screen. Too small
+ * and the edge of the quad walks into shot at the corners. The camera tops
+ * out at 980 units wide and a 0.25-parallax layer slides about 68 either way,
+ * so anything from ~1120 up clears the edge.
+ */
+export interface BackdropDef {
+  /** File name inside src/assets. */
+  file: string;
+  /** The source image's own aspect. The quad is never letterboxed. */
+  aspect: number;
+  /** Quad width in world units. */
+  width: number;
+  /**
+   * How far the bottom edge sits below the floor. Sinking it buries the
+   * painted foreground - the part that would otherwise argue with the arena -
+   * and lifts the subject to head height behind the fighters.
+   */
+  sink: number;
+}
+
 export interface StageDef {
   name: string;
   blurb: string;
@@ -53,6 +80,8 @@ export interface StageDef {
   ambient: AmbientDef;
   /** Ledges to stand on. Absent means a flat stage, which most of them are. */
   platforms?: Platform[];
+  /** Painted rather than built. Skips the built-stage haze - see the Stage ctor. */
+  backdrop?: BackdropDef;
 }
 
 /** Use for a stage with clear skies. */
@@ -178,11 +207,12 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   postroad: {
     name: "The Post Road",
     blurb: "A staging post on the mountain highway: inn, teahouse, and the pass beyond.",
-    // Sampled off the painting so the haze, ground and select-screen swatch
-    // all sit in the same light as the backdrop they are standing in front of.
+    // Sampled off the painting so the ground and the select-screen swatch sit
+    // in the same light as the backdrop they are standing in front of.
     sky: ["#8fb2d0", "#deded6"],
     ground: "#c9a771",
     accent: "#a65f41",
+    backdrop: { file: "post-road.jpg", aspect: 2.1358, width: 1150, sink: 150 },
     ambient: {
       kind: "petal",
       count: 34,
@@ -194,6 +224,30 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       size: [5, 8],
       opacity: 0.85,
     },
+  },
+
+  dryclaim: {
+    name: "The Dry Claim",
+    blurb: "Someone dug here, put up a water tower, and left. The desert took the rest.",
+    sky: ["#9dc5d8", "#e8d3b0"],
+    // Foreground sand, straight off the painting - the floor is the desert
+    // the fighters are already standing in, not a strip laid over it.
+    ground: "#b57040",
+    accent: "#a8552e",
+    ambient: { kind: "dust", count: 30, colors: ["#e0bd8c", "#c58f5a"], speed: -0.07, wind: 1.1, size: [2, 5], opacity: 0.4 },
+    backdrop: { file: "dry-claim.jpg", aspect: 1.7917, width: 1180, sink: 285 },
+  },
+
+  swallowed: {
+    name: "The Swallowed Temple",
+    blurb: "Cut stone, then a thousand years of roots. The roots won.",
+    sky: ["#6d97b5", "#cfe2e6"],
+    // The trail through the ruin rather than the black undergrowth at the
+    // painting's edge, which would have read as a hole under their feet.
+    ground: "#565833",
+    accent: "#8fb45c",
+    ambient: { kind: "petal", count: 26, colors: ["#6f8f47", "#89a95a", "#c9d9a0"], speed: 0.75, wind: 0.5, size: [5, 9], opacity: 0.7 },
+    backdrop: { file: "swallowed-temple.jpg", aspect: 1.7902, width: 1180, sink: 265 },
   },
 
   skyward: {
@@ -449,15 +503,14 @@ export class Stage {
       case "delta":
         this.buildDelta();
         break;
-      case "postroad":
-        this.buildPostRoad();
-        break;
     }
 
-    // A painted backdrop brings its own aerial perspective - the mountains in
-    // it are already fading on their own. Veiling it again in flat horizon
+    if (cfg.backdrop) this.buildPainted(cfg.backdrop);
+
+    // A painted backdrop brings its own aerial perspective - the distance in
+    // it is already fading on its own. Veiling it again in flat horizon
     // colour only makes it muddy, so the haze is for built stages.
-    if (theme !== "postroad") this.buildHaze(cfg.sky[1]);
+    if (!cfg.backdrop) this.buildHaze(cfg.sky[1]);
     this.buildGround(cfg.ground, theme);
     if (cfg.platforms?.length) this.buildPlatforms(cfg.platforms, cfg.ground, cfg.accent);
 
@@ -927,40 +980,37 @@ export class Stage {
   }
 
   /**
-   * The one painted stage. Every other backdrop here is assembled out of flat
-   * shapes; this one is a single texture on a single quad.
+   * A painted stage: one texture on one quad, in place of built shapes.
    *
-   * It is deliberately hung far back and left alone. The temptation with a
-   * painting is to build shapes in front of it to "tie it in", which only
-   * ever produces two art styles arguing in the same frame - so the only
-   * things drawn over it are the floor every stage needs and the falling
-   * leaves, both of which the painting already contains and so agrees with.
-   *
-   * Sizing is the whole job here, and it is a squeeze between two limits.
-   * Too large and the camera only ever frames a patch of village: the pagoda
-   * and the mountain, which are the reason to use this picture at all, sit
-   * off the top of the screen. Too small and the edge of the quad walks into
-   * shot at the corners. The camera tops out at 980 units wide and this layer
-   * slides about 68 either way, so 1150 clears the edge with room spare, and
-   * the height that falls out of the painting's own aspect happens to land
-   * the mountain just under the ceiling of a zoomed-out shot.
+   * The picture is hung far back and otherwise left alone. The temptation
+   * with a painting is to build shapes in front of it to "tie it in", which
+   * only ever produces two art styles arguing in the same frame - so the only
+   * things drawn over it are the floor every stage needs and the ambient
+   * weather, both of which each painting already contains and so agrees with.
    */
-  private buildPostRoad() {
+  private buildPainted(def: BackdropDef) {
     const g = new THREE.Group();
-    const W = 1150;
-    const H = W / 2.1358; // the painting's own aspect - never letterbox it
-    const geo = new THREE.PlaneGeometry(W, H);
+    const H = def.width / def.aspect; // the painting's own aspect - never letterbox it
+    const geo = new THREE.PlaneGeometry(def.width, H);
     const material = new THREE.MeshBasicMaterial({ toneMapped: false });
     // Held blank until the bitmap arrives rather than flashing white: the
     // texture decode is async even when the file is inlined as a data URI.
     material.transparent = true;
     material.opacity = 0;
 
-    // Imported here rather than at the top of the file on purpose. The
-    // self-tests import this module under Node to read STAGE_THEMES, and Node
-    // cannot parse a .jpg import - but it never builds a Stage, so keeping the
-    // asset behind the one method that needs it keeps the tests running.
-    void import("../../../assets/post-road.jpg").then(({ default: url }) => {
+    // Resolved through a glob rather than a plain import on purpose. The
+    // self-tests load this module under Node to read STAGE_THEMES, and Node
+    // cannot parse a .jpg import - but it never builds a Stage, so keeping
+    // every asset reference inside this method keeps the tests running.
+    // Vite still sees the pattern statically and bundles all of them.
+    const files = import.meta.glob("../../../assets/*.jpg", {
+      import: "default",
+      query: "?url",
+    }) as Record<string, () => Promise<string>>;
+    const load = files[`../../../assets/${def.file}`];
+    if (!load) return;
+
+    void load().then((url) => {
       new THREE.TextureLoader().load(url, (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         // The quad is bigger than the source and the art is pixel work, so it
@@ -977,11 +1027,7 @@ export class Stage {
     });
 
     const m = new THREE.Mesh(geo, material);
-    // Sunk 150 so the painted foreground - rocks, stream, the near verge -
-    // runs under the floor the fighters stand on. That buries the part of the
-    // picture that would otherwise argue with the arena, and lands the village
-    // itself at head height behind them rather than under their feet.
-    m.position.set(0, H / 2 - 150, layerZ(1));
+    m.position.set(0, H / 2 - def.sink, layerZ(1));
     m.renderOrder = 1;
     g.add(m);
     this.addLayer(g, 0.25);
