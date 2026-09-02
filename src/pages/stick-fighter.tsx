@@ -18,6 +18,7 @@ import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arc
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
 import { loadSave, recordClear } from "@/game/stickfight/save";
 import { SKINS } from "@/game/stickfight/skins";
+import menuMap from "@/assets/menu-map.jpg";
 
 type Screen = "title" | "select" | "fight";
 
@@ -96,17 +97,45 @@ export default function StickFighter() {
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-[var(--ink)] text-[var(--bone)]">
       {screen === "title" && (
-        <div className="grain relative flex h-full flex-col items-center overflow-y-auto px-6 py-10">
+        <>
           {/*
-            Nothing paints the background, and that is the whole decision.
-            There was a radial pool of warm light bloomed up from the bottom
-            edge here - the exact soft wash behind a hero heading that marks a
-            page as generated, still mixing an accent colour two palettes out
-            of date. Replacing it with a flat floor band was no better: pinned
-            to the viewport on a page that scrolls, it drew a line straight
-            through the middle of the roster. The ground is the ground.
-          */}
+            The campaign map, sitting still while the roster scrolls over it.
 
+            It is a sibling of the scroller rather than a child on purpose. An
+            absolute layer inside a scrolling box is positioned against the
+            scrolled content and slides away on the second row of fighters;
+            out here it is anchored to the viewport-height wrapper instead.
+            `background-attachment: fixed` would be the other way to do it and
+            is ignored or juddered by half the mobile browsers there are.
+
+            The scrim over it is the load-bearing part. The map is warm light
+            parchment and every word on this screen is bone on near-black, so
+            without it the type sits on pale paper and cannot be read. It is
+            one flat colour at a fixed opacity, not a gradient: the job is to
+            hold the whole image down evenly to a texture the type can live
+            on, not to bloom a pool of light behind the heading.
+          */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+            {/* Flattened before the scrim goes over it. The map carries its
+                own hand-lettered place names in hard dark ink, and a flat
+                scrim dims those exactly as much as it dims the parchment, so
+                they stay just legible enough to compete with the roster names
+                sitting on top of them. Pulling the contrast down first is what
+                drops the lettering back to texture while the coastlines and
+                the buildings survive. */}
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${menuMap})`, filter: "contrast(0.62) saturate(0.85)" }}
+            />
+            {/* An explicit rgba, not `bg-[var(--ink)]/82`. Tailwind's opacity
+                modifier cannot be applied to a bare CSS variable - it needs a
+                colour it can decompose - so that class silently renders no
+                scrim at all and the map comes through at full strength with
+                every word on the screen sitting unreadable on top of it. */}
+            <div className="absolute inset-0" style={{ background: "rgba(12, 17, 15, 0.84)" }} />
+          </div>
+
+        <div className="grain relative z-10 flex h-full flex-col items-center overflow-y-auto px-6 py-10">
           <header className="relative flex w-full max-w-6xl flex-col items-center">
             <div className="flex w-full items-center gap-4">
               <span className="h-px flex-1 bg-[var(--rule)]" />
@@ -216,6 +245,7 @@ export default function StickFighter() {
             for EX specials (50) and supers (100).
           </p>
         </div>
+        </>
       )}
 
       {screen === "select" && (
