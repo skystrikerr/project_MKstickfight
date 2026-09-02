@@ -53,7 +53,7 @@ no network traffic of any kind.
 
 `0.x` means the game has not reached early access yet. `1.0` is reserved for
 the early-access release, and nothing before it should be read as finished.
-The current version is **0.2**.
+The current version is **0.5**.
 
 ## Controls
 
