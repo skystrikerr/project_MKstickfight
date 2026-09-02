@@ -119,6 +119,12 @@ export const STYLES: Record<string, Style> = {
   ethiopia: { aggression: 0.9, special: 1.3, throw: 0.85, poke: 1.0, patience: 1.35, range: "mid" },
   // Counter / Footsies: measures, and only commits to what she has read.
   duelist: { aggression: 0.7, special: 1.15, throw: 0.75, poke: 1.65, patience: 1.55, range: "mid" },
+  // Brawler / Armour: slow and heavy, and happy to eat one to land one.
+  iceman: { aggression: 1.25, special: 0.85, throw: 1.15, poke: 0.7, patience: 0.75, range: "close" },
+  // Momentum / Rushdown: everything he owns works better once he is already in.
+  celt: { aggression: 1.45, special: 1.05, throw: 1.0, poke: 0.75, patience: 0.55, range: "close" },
+  // Zoner / Ranks: shoots while the Ranks refill, and only closes when they do not.
+  persian: { aggression: 0.7, special: 1.25, throw: 0.8, poke: 1.25, patience: 1.3, range: "far" },
 };
 
 const MOTION_DIRS: Record<Motion, number[]> = {

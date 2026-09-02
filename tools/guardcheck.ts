@@ -16,7 +16,7 @@ const DEG = Math.PI / 180;
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
 function shieldOf(def: FighterDef) {
-  return def.props.find((p) => /shield|aspis|buckler|isihlangu|targe/i.test(p.id));
+  return def.props.find((p) => /shield|aspis|buckler|isihlangu|spara|targe/i.test(p.id));
 }
 
 function report(def: FighterDef, clipName: "blockHigh" | "blockLow", frame: number) {

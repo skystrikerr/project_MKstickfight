@@ -111,7 +111,7 @@ export default function StickFighter() {
             <div className="flex w-full items-center gap-4">
               <span className="h-px flex-1 bg-[var(--rule)]" />
               <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--bone-dim)]">
-                {ROSTER.length} fighters · 500 BC – 1965
+                {ROSTER.length} fighters · 3300 BC – 1965
               </span>
               <span className="h-px flex-1 bg-[var(--rule)]" />
             </div>
@@ -120,7 +120,7 @@ export default function StickFighter() {
                 every time a documented fighter is added. Saying "all of them"
                 would be the only lie on the screen. */}
             <p className="mt-3 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
-              Eighteen of them were real
+              Twenty-one of them were real
             </p>
           </header>
 

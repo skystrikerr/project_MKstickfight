@@ -6,9 +6,9 @@
 
 <p align="center">
   A 2D fighting game in the browser, built on three.js.<br>
-  Nineteen fighters - eighteen of them a person the historical record actually names, one a
-  legend with no record at all - drawn as inked stick figures and armed with the weapon
-  the sources (or the story) give them.
+  Twenty-two fighters - twenty-one of them a person the historical record actually
+  names, one a legend with no record at all - drawn as inked stick figures and armed
+  with the weapon the sources (or the story) give them.
 </p>
 
 <p align="center">
@@ -190,6 +190,9 @@ comes up black with nothing but `ERR_FAILED` in the console.
 
 | Fighter | Era | Archetype |
 |---|---|---|
+| Ötzi | Ötztal Alps, c. 3300 BC | Brawler / Armour |
+| Hydarnes | Thermopylae, 480 BC | Zoner / Ranks |
+| Vercingetorix | Alesia, 52 BC | Momentum / Rushdown |
 | Lucius Vorenus | Nervii country, 54 BC | Zoner / Wall |
 | Dienekes | Thermopylae, 480 BC | Grappler / Wall |
 | Freydís Eiríksdóttir | Vinland, c. 1000 | Berserker / Bruiser |
@@ -210,12 +213,14 @@ comes up black with nothing but `ERR_FAILED` in the console.
 | The Ia Drang Trooper | Ia Drang Valley, 1965 | Zoner / Resource |
 | Kuro | No fixed year | Mix-up / Wildcard |
 
-The Ia Drang Trooper is the deliberate exception among the fifteen historical
+The Ia Drang Trooper is the deliberate exception among the historical
 fighters: the unit, the valley and every piece of the kit are real, but the man
 is a composite rather than a named individual. Kuro is a different kind of
 exception entirely - not a documented person at all, but the shinobi legend
 that gets attached to whichever unexplained disappearance a given century
-needs one for.
+needs one for. Ötzi sits at the other end of the same problem: a real
+individual body with real possessions and no name at all, because nobody was
+writing anything down for another two thousand years.
 
 ## How it is put together
 

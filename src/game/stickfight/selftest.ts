@@ -815,7 +815,7 @@ function scriptFor(move: MoveDef): RawInput[] {
 // Guards
 // ---------------------------------------------------------------------------
 {
-  const SHIELDS = /shield|aspis|buckler|isihlangu/i;
+  const SHIELDS = /shield|aspis|buckler|isihlangu|spara/i;
 
   for (const def of ROSTER) {
     check(`${def.id}: guards are authored, not inherited`, !!def.clips?.blockHigh && !!def.clips?.blockLow);
@@ -841,7 +841,7 @@ function scriptFor(move: MoveDef): RawInput[] {
       check(`${def.id}: ${clipName} puts the shield in front of the body`, cx > 8, `shield x=${cx.toFixed(1)}`);
       check(`${def.id}: ${clipName} holds the shield at body height`, cy > 35 && cy < 95, `shield y=${cy.toFixed(1)}`);
       // The tall shields read as shields only while they stand upright.
-      if (/isihlangu|^shield$/i.test(shield.id)) {
+      if (/isihlangu|spara|^shield$/i.test(shield.id)) {
         const tilt = Math.abs((((t.rot % 360) + 540) % 360) - 180);
         check(`${def.id}: ${clipName} keeps the shield upright`, tilt < 30, `tilt=${tilt.toFixed(1)}`);
       }

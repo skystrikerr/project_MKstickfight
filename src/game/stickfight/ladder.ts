@@ -74,6 +74,15 @@ const RIVALS: Record<string, string> = {
   // Two women of the same handful of decades who lived outside what was
   // permitted, and got written about lavishly for it either way.
   duelist: "pirate",
+  // The oldest man here and the newest, five thousand years apart, both put
+  // down by something thrown from somewhere they were not looking.
+  iceman: "soldier",
+  // The Gaul and the centurion who was in Gaul. Same decade, opposite sides,
+  // and only one of them got to write it down.
+  celt: "roman",
+  // He is the reason Thermopylae ended. He took the corps up the goat path in
+  // the dark and came out behind the phalanx.
+  persian: "spartan",
 };
 
 /** The last one standing. Tomoe is the only difficulty five on the roster. */
@@ -175,6 +184,12 @@ export const ENDINGS: Record<string, string> = {
     "At Dogali in 1887 he destroyed an Italian column of roughly five hundred men, which is the defeat that ended Italy's first attempt on Ethiopia and is still marked in Rome by a street name. He died in 1897 of an infected wound taken in a quarrel with another Ethiopian, nine years after the Italians could not manage it.",
   duelist:
     "The Opera records her singing until 1705 and then stopping. She is said to have died at about thirty-four, in a convent, having outlived the woman she loved - and every detail of that sentence comes from writers who were entertaining people rather than keeping accounts. The duels are the best documented thing about her, which says something about what got written down.",
+  iceman:
+    "Two walkers found him coming out of a melting glacier on the Italian-Austrian border in 1991 and assumed he was a lost climber. He is the oldest natural mummy in Europe: his coat, his shoes, his bow, his last meal and his tattoos all came out with him. So did the flint arrowhead in his left shoulder and the defensive cut across his right hand, which is how a man nobody ever named became a five-thousand-year-old murder inquiry.",
+  celt:
+    "He rode out of Alesia and laid his arms at Caesar's feet, which Caesar records without much comment. Then six years in the Tullianum in the dark, one afternoon walking in front of the triumph so Rome could look at him, and a strangling in the cell the same day. Caesar wrote the only full account of him, which is the other thing Rome took.",
+  persian:
+    "Herodotus hands him the ten thousand, hands him the march over the Anopaea path that decided Thermopylae, and then simply stops. There is no death, no later command, no return. The best-known unit of the ancient world and the man who led it, and the record keeps the corps and loses the commander - which is more or less what being an Immortal meant.",
   shade:
     "There is no register that carries his name, because he was never written down in the first place - only repeated, in enough places and enough centuries that somebody eventually started calling all of them the same man. Ask who he really was and the honest answer is that the question does not have the kind of ending the other fourteen do.",
 };

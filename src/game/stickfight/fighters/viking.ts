@@ -116,21 +116,31 @@ export const VIKING: FighterDef = {
     {
       id: "axe",
       attach: "handB",
-      // Bearded axe: a broad blade that hangs well below the haft, with a
-      // langet strapping it on and a leather-wrapped grip.
+      // Bearded axe (skeggox): a one-handed hand axe, not a war axe. Short
+      // haft, and a head small enough that the weight sits in her wrist - the
+      // Dane Axe variant is the two-handed one, and this has to read as
+      // roughly half of it at a glance.
       parts: [
-        { geo: "cyl", size: [2.8, 72], pos: [20, 0], rot: 90, color: LEATHER },
-        { geo: "box", size: [12, 5], pos: [40, 0], color: "#4a3422" },
-        // Bearded axe: a narrow eye at the haft that opens into a thin
-        // crescent, with the beard hooking well below the shaft.
-        { geo: "poly", size: [-3, 7, 4, 7, 12, 1, 16, -10, 12, -22, 4, -28, 0, -20, 3, -10, -1, -3, -3, 0], pos: [48, 1], color: IRON },
-        // The edge itself, catching the light along the whole curve.
-        { geo: "poly", size: [0, 0, 5, -9, 3, -20, -2, -25, -4, -18, -1, -9], pos: [61, -1], color: "#eef2f6" },
-        // Langets strapping the head to the haft.
-        { geo: "box", size: [3.4, 18], pos: [42, -1], color: "#8f979f" },
-        { geo: "box", size: [16, 5], pos: [4, 0], color: "#4a3422" },
-        { geo: "box", size: [16, 1.8], pos: [4, 1.6], color: "#8a6440" },
-        { geo: "poly", size: [-4, 4, 4, 4, 3, -4, -3, -4], pos: [-14, 0], color: "#c9a24a" },
+        { geo: "cyl", size: [2.6, 44], pos: [7, 0], rot: 90, color: LEATHER },
+        // Binding where the haft thickens towards the head.
+        { geo: "box", size: [9, 5], pos: [19, 0], color: "#4a3422" },
+        // Langet: the iron strap that keeps the head from splitting the haft.
+        { geo: "box", size: [8, 3.2], pos: [24, 0], color: "#8f979f" },
+        // The eye, straddling the haft. Drawn as its own block so the blade
+        // has something to grow out of instead of floating off the shaft.
+        { geo: "box", size: [7, 10], pos: [30, 0], color: "#8a9199" },
+        // The head. Narrow at the eye and flaring to the edge - that taper is
+        // the whole reason it reads as an axe rather than a hammer, so the
+        // blade stays about half as thick front-to-back as it is tall. The
+        // rear profile bulges forward under the haft, which is the notch
+        // behind the beard you choke up into.
+        { geo: "poly", size: [-2, 4, 3, 8, 9, 11, 11, 5, 11, -6, 9, -13, 6, -17, 1, -16, -2, -12, 2, -7, 1, -1], pos: [33, 0], color: IRON },
+        // Edge only, horn to beard tip, kept narrow so it separates from the
+        // head rather than merging into one grey mass.
+        { geo: "poly", size: [9, 11, 11, 5, 11, -6, 9, -13, 6, -17, 4.5, -15.5, 7, -12, 8.5, -6, 8.5, 5, 7, 9.5], pos: [33, 0], color: "#eef2f6" },
+        { geo: "box", size: [15, 5], pos: [1, 0], color: "#4a3422" },
+        { geo: "box", size: [15, 1.8], pos: [1, 1.6], color: "#8a6440" },
+        { geo: "poly", size: [-3.5, 4, 3.5, 4, 2.8, -4, -2.8, -4], pos: [-12, 0], color: "#c9a24a" },
       ],
     },
     {

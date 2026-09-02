@@ -31,7 +31,7 @@ const ALIASES: Record<string, string[]> = {
   iklwa: ["iklwa", "stab", "spear"],
   isihlangu: ["isihlangu", "shield", "rim", "hook"],
   buckler: ["buckler", "shield", "boss"],
-  axe: ["axe", "cleave", "hew", "chop", "beard"],
+  axe: ["axe", "cleave", "hew", "chop", "beard", "haft"],
   katana: ["katana", "cut", "giri", "tsuki", "kiriage", "men", "blade", "steel"],
   cutlass: ["cutlass", "cut", "slash", "cleave", "steel", "point"],
   tulwar: ["tulwar", "cut", "draw"],
@@ -48,6 +48,16 @@ const ALIASES: Record<string, string[]> = {
   prajioudB: ["prajioud", "armband", "cord"],
   kunaiF: ["kunai", "flick", "jab", "cut", "gouge", "slash", "stab", "blade", "point"],
   kunaiB: ["kunai", "flick", "jab", "cut", "gouge", "slash", "stab", "blade", "point"],
+  // A Gallic sword has no point and no name in the move list - it is all edge,
+  // so the vocabulary is edges and cuts rather than the weapon.
+  longsword: ["sword", "edge", "cut", "blade", "scythe", "hamstring", "charge", "lift", "overhand"],
+  gaesum: ["gaesum", "javelin"],
+  // The Iceman's kit: a hafted stone axe, a flint blade, and a sling.
+  sling: ["sling", "stone", "shot"],
+  flint: ["flint", "blade", "cut"],
+  // Persian: spear with an apple counterweight, wicker pavise, bow, akinakes.
+  spara: ["spara", "wicker", "pavise"],
+  akinakes: ["akinakes", "blade", "cut"],
 };
 
 function usesTool(move: MoveDef, tool: string): boolean {

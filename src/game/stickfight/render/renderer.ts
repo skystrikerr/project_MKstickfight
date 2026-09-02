@@ -471,6 +471,42 @@ export class GameRenderer {
         add(spark, 57);
         break;
       }
+      case "stone": {
+        // A sling bullet is a river cobble, not a ball. Drawn as an irregular
+        // lump so that at a glance it reads as picked up rather than made.
+        const rock = new THREE.Shape();
+        rock.moveTo(-8, 2);
+        rock.lineTo(-4, 8);
+        rock.lineTo(4, 7);
+        rock.lineTo(9, 1);
+        rock.lineTo(6, -6);
+        rock.lineTo(-3, -8);
+        rock.closePath();
+        add(new THREE.Mesh(new THREE.ShapeGeometry(rock), flat(color)));
+        const lit = new THREE.Mesh(new THREE.CircleGeometry(3, 8), flat("#d4d0c4", 0.7));
+        lit.position.set(-2, 2);
+        add(lit, 56);
+        break;
+      }
+      case "javelin": {
+        // Long shaft, narrow head, no fletching - a gaesum is thrown, not shot.
+        add(new THREE.Mesh(new THREE.PlaneGeometry(62, 2.8), flat("#7a5f3a")));
+        const head = new THREE.Shape();
+        head.moveTo(18, 0);
+        head.lineTo(-2, 3.6);
+        head.lineTo(-2, -3.6);
+        head.closePath();
+        const tip = new THREE.Mesh(new THREE.ShapeGeometry(head), flat(color));
+        tip.position.x = 22;
+        add(tip, 56);
+        const collar = new THREE.Mesh(new THREE.PlaneGeometry(6, 5), flat("#8f979f"));
+        collar.position.x = 14;
+        add(collar, 56);
+        const butt = new THREE.Mesh(new THREE.PlaneGeometry(5, 4.4), flat("#c08a3e"));
+        butt.position.x = -30;
+        add(butt);
+        break;
+      }
       case "cannon": {
         add(new THREE.Mesh(new THREE.CircleGeometry(11, 16), flat("#23262c")));
         const shine = new THREE.Mesh(new THREE.CircleGeometry(3.4, 10), flat("#6b727d"));
