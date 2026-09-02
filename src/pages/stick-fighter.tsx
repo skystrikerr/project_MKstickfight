@@ -98,13 +98,14 @@ export default function StickFighter() {
       {screen === "title" && (
         <div className="grain relative flex h-full flex-col items-center overflow-y-auto px-6 py-10">
           {/*
-            One low, warm pool of light from the floor - a lit stage, not a
-            gradient wash. Nothing else paints the background.
+            Nothing paints the background, and that is the whole decision.
+            There was a radial pool of warm light bloomed up from the bottom
+            edge here - the exact soft wash behind a hero heading that marks a
+            page as generated, still mixing an accent colour two palettes out
+            of date. Replacing it with a flat floor band was no better: pinned
+            to the viewport on a page that scrolls, it drew a line straight
+            through the middle of the roster. The ground is the ground.
           */}
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
-            style={{ background: "radial-gradient(80% 100% at 50% 100%, rgba(200,149,47,0.12), transparent 70%)" }}
-          />
 
           <header className="relative flex w-full max-w-6xl flex-col items-center">
             <div className="flex w-full items-center gap-4">
@@ -115,8 +116,10 @@ export default function StickFighter() {
               <span className="h-px flex-1 bg-[var(--rule)]" />
             </div>
             <Wordmark className="mt-5" />
+            {/* Fifteen of them were real. Kuro is the one who was not, and
+                saying "all of them" would now be the only lie on the screen. */}
             <p className="mt-3 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
-              Every one of them was real
+              Fifteen of them were real
             </p>
           </header>
 

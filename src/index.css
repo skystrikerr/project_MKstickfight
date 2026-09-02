@@ -3,14 +3,31 @@
 @tailwind utilities;
 
 /*
- * Warm and archival. The shell is nearly black with a lot of empty space in
- * it, the type is angular and widely tracked, and one leather-bronze accent
- * carries everything that matters - the register a museum case or an old
- * ledger sits in, not a control-room screen. Fifteen documented people out
- * of the historical record belong on parchment, not steel.
+ * Patina. The shell is nearly black with a lot of empty space in it, the type
+ * is angular and widely tracked, and one oxidised-bronze green carries
+ * everything that matters, with untarnished brass answering it. Every weapon
+ * on this roster that survived to be dug up came out of the ground this
+ * colour - the register of a cast bronze plaque, not a control-room screen.
  *
- * Squared corners and hairline rules throughout: no soft gradients, no
- * rounded cards, nothing that glows for its own sake.
+ * Squared corners and hairline rules throughout, and the flat colour is the
+ * point: no gradient washes, no rounded cards, nothing glowing for its own
+ * sake. Where something needs to sit forward it does it with a hard edge.
+ *
+ * The rules this interface is held to, because the defaults all point the
+ * other way and it has drifted back twice already:
+ *
+ *   - No gradients as decoration. A gradient may only ever be a functional
+ *     mask (a stage sky, a two-colour swatch). Panels, chips and backgrounds
+ *     are one flat colour or they are nothing.
+ *   - No soft shadows and no glows. `blur` on a shadow is banned outright.
+ *     Depth comes from a hard offset (`2px 2px 0`), a rule, or a colour step.
+ *   - No pure black and no neutral grey. Every dark is tinted green here, so
+ *     the screen reads as a material rather than as an absence.
+ *   - Mono carries the interface. Anything structural - labels, numbers,
+ *     notation, buttons - is IBM Plex Mono, tracked out. The proportional
+ *     face is for running prose only, which is bios and move descriptions.
+ *   - Borders are 1px hairlines or 2px hard edges, never a soft outline on a
+ *     floating card. Panels sit on the ground, not above it.
  *
  * Fonts ship with the build (src/fonts, SIL Open Font License) rather than
  * loading from a CDN, because the desktop build runs off disk with no network.
@@ -89,24 +106,24 @@
     U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* --- Palette --------------------------------------------------------------- */
 /*
- * Warm and archival: leather, bronze plaque, aged parchment - the register a
- * roster of fifteen documented people out of the historical record should
- * sit in, rather than the cold steel-and-blue a menu reaches for by default.
+ * Two states of the same metal. The accent is bronze that has been in the
+ * ground for a thousand years; player two is the same alloy still polished.
+ * That pairing is what the roster is actually about, and it is a long way
+ * from the amber-on-black every dark interface reaches for by default.
  */
 :root {
-  --ink: #120d09;        /* the ground everything sits on: near black, burnt umber */
-  --ink-2: #1d150e;      /* a panel lifted off it */
-  --rule: #3a2c1e;       /* hairline between things */
-  --bone: #ecdfc7;       /* body text: aged parchment, not stark white */
-  --bone-dim: #9c8a6e;   /* secondary text */
-  --accent: #a8672f;     /* the one accent, and player one: leather-bronze brown */
-  --accent-hot: #d69a52; /* the same accent, lit - hovers and highlights */
-  --p2: #cdb07a;         /* player two: pale sand, well clear of the brown */
+  --ink: #0c110f;        /* the ground everything sits on: near black, cold and green under it */
+  --ink-2: #141d19;      /* a panel lifted off it */
+  --rule: #2b3a33;       /* hairline between things */
+  --bone: #e7e5d8;       /* body text: unbleached paper, not stark white */
+  --bone-dim: #8b9a90;   /* secondary text */
+  --accent: #4f8a6d;     /* the one accent, and player one: verdigris on old bronze */
+  --accent-hot: #7fc59b; /* the same accent, lit - hovers and highlights */
+  --p2: #c9a94e;         /* player two: the same metal unoxidised, brass against the green */
   --blood: #b8432a;      /* damage, danger, KO */
-  --health: #e8dcc0;     /* life left: bright and warm, never the accent */
-  --guard: #8f7f61;      /* guard meter, deliberately duller than either */
+  --health: #e9e6d4;     /* life left: bright and neutral, never the accent */
+  --guard: #6d7f74;      /* guard meter, deliberately duller than either */
 }
 
 /*
@@ -116,8 +133,8 @@
  * built from, rather than adding a second set of components to maintain.
  */
 :root[data-contrast="high"] {
-  --bone-dim: #c2ac86;
-  --rule: #6b5438;
+  --bone-dim: #b6c4b9;
+  --rule: #4e6a5c;
 }
 
 html,
@@ -127,7 +144,12 @@ body,
   margin: 0;
   background: var(--ink);
   color: var(--bone);
-  font-family: "Barlow Semi Condensed", "Helvetica Neue", sans-serif;
+  /*
+   * Mono is the default, not the exception. A condensed grotesque as the base
+   * face is what makes an interface read as a website; a monospace grid with
+   * everything tracked out reads as equipment, which is what this is.
+   */
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -145,18 +167,12 @@ canvas {
 }
 
 /*
- * A trace of static, and a vignette. Flat black reads as a smooth digital
- * gradient no matter what sits on it; a little noise and a darkened edge give
- * the screen depth without putting anything on it. The noise is one inline
- * SVG turbulence tile, so it costs nothing and never loads.
+ * A trace of static, and nothing else. There used to be a radial vignette
+ * here doing exactly what this file says not to do - a soft dark wash pulled
+ * in from the corners, which is the single most recognisable "generated
+ * interface" tell there is. The noise tile alone gives the ground a material
+ * without shading it: one inline SVG turbulence pattern, no load, no falloff.
  */
-.grain::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(120% 90% at 50% 40%, transparent 45%, rgba(0, 0, 0, 0.75) 100%);
-}
 .grain::after {
   content: "";
   position: absolute;
@@ -178,20 +194,73 @@ canvas {
   clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
 
-/* A hairline rule that fades out, for section headers. */
+/*
+ * Section rule. This used to fade to transparent, which is a gradient doing
+ * decoration. A rule that stops is a decision; a rule that dissolves is a
+ * default. It stops.
+ */
 .rule-out {
-  background: linear-gradient(90deg, var(--rule), transparent);
+  background: var(--rule);
+}
+
+/*
+ * Range thumbs and checkboxes are the last places a browser default shows
+ * through, and both defaults are round. A circular thumb on a flat rule is
+ * the one pill shape left on the screen, so it is squared off and given the
+ * same hard black edge every other control carries.
+ */
+input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 10px;
+  height: 18px;
+  border: 2px solid #000;
+  background: var(--accent-hot);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 10px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 0;
+  background: var(--accent-hot);
+  cursor: pointer;
+}
+
+/* A checkbox that is a filled square, not a rounded browser widget. */
+input[type="checkbox"].box {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 2px solid var(--rule);
+  background: var(--ink);
+  cursor: pointer;
+}
+input[type="checkbox"].box:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  /* The tick is a notch cut out of the block, not a drawn glyph. */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 62%, 38% 62%, 38% 100%, 0 100%);
+}
+input[type="checkbox"].box:focus-visible {
+  outline: 2px solid var(--accent-hot);
+  outline-offset: 2px;
 }
 
 /* Native selects look like a browser; these look like the rest of the panel. */
 select.field {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23a8672f'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%234f8a6d'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 26px;
 }
 select.field option {
-  background: #1d150e;
-  color: #ecdfc7;
+  background: #141d19;
+  color: #e7e5d8;
 }

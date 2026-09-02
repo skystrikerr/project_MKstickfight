@@ -103,7 +103,7 @@ function StatBar({ label, value, max = 5 }: { label: string; value: number; max?
           <span
             key={i}
             className="h-2.5 w-5"
-            style={{ background: i < value ? "var(--accent)" : "#3a3226" }}
+            style={{ background: i < value ? "var(--accent)" : "#2b352f" }}
           />
         ))}
       </div>
@@ -150,7 +150,7 @@ function Card({
       onFocus={onHover}
       className={`cut-sm group relative overflow-hidden border p-3 text-left transition ${
         selected
-          ? "border-[var(--accent)] bg-[#241a10]"
+          ? "border-[var(--accent)] bg-[#15211c]"
           : "border-[var(--rule)] bg-[var(--ink-2)] hover:border-[var(--bone-dim)]"
       } ${dim ? "opacity-60" : ""}`}
     >
@@ -324,8 +324,8 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             />
           ))}
           <div className="cut-sm flex min-h-[180px] flex-col items-center justify-center border border-dashed border-[var(--rule)] p-3 text-center">
-            <span className="font-display text-4xl text-[#3d3527]">+</span>
-            <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#5c5340]">
+            <span className="font-display text-4xl text-[#2f3a34]">+</span>
+            <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#5f7068]">
               More fighters soon
             </span>
           </div>

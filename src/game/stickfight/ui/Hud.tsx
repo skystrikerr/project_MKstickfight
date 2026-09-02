@@ -41,7 +41,7 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
       </div>
 
       <div
-        className="relative h-6 w-full overflow-hidden border border-black/80 bg-black/75 shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
+        className="relative h-6 w-full overflow-hidden border-2 border-black/80 bg-black/75"
         style={{ transform: SKEW }}
       >
         <div className={`absolute inset-0 ${flip ? "rotate-180" : ""}`}>
@@ -101,12 +101,11 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
                     key={i}
                     className="h-2 w-2 rotate-45 border border-black/60"
                     style={{
+                      // Filled or empty, flat either way - a lit pip used to
+                      // carry a 6px glow, which is the tell this interface is
+                      // meant to be free of. The colour step is the signal.
                       background:
                         i < Math.floor(player.resource!.value) ? player.resource!.color : "rgba(0,0,0,0.45)",
-                      boxShadow:
-                        i < Math.floor(player.resource!.value)
-                          ? `0 0 6px ${player.resource!.color}99`
-                          : "none",
                     }}
                   />
                 ))}
@@ -118,7 +117,6 @@ function HealthBar({ player, side }: { player: PlayerHud; side: "left" | "right"
                   style={{
                     width: `${(player.resource.value / player.resource.max) * 100}%`,
                     background: player.resource.color,
-                    boxShadow: `0 0 8px ${player.resource.color}66`,
                   }}
                 />
               </div>
@@ -152,7 +150,7 @@ function MeterBar({ player, side }: { player: PlayerHud; side: "left" | "right" 
           >
             <div
               className={`h-full transition-[width] duration-150 ${
-                i < stocks ? "bg-[var(--accent-hot)] shadow-[0_0_10px_rgba(110,198,228,0.55)]" : "bg-[var(--accent)]"
+                i < stocks ? "bg-[var(--accent-hot)]" : "bg-[var(--accent)]"
               } ${flip ? "ml-auto" : ""}`}
               style={{ width: i < stocks ? "100%" : i === stocks ? `${partial * 100}%` : "0%" }}
             />
@@ -170,7 +168,7 @@ function RoundPips({ wins, roundsToWin, side }: { wins: number; roundsToWin: num
         <span
           key={i}
           className={`h-3 w-3 rotate-45 border-2 border-black/70 transition ${
-            i < wins ? "bg-[var(--accent)] shadow-[0_0_10px_2px_rgba(200,149,47,0.55)]" : "bg-white/10"
+            i < wins ? "bg-[var(--accent-hot)]" : "bg-black/50"
           }`}
         />
       ))}
@@ -178,13 +176,19 @@ function RoundPips({ wins, roundsToWin, side }: { wins: number; roundsToWin: num
   );
 }
 
-/** Portrait chip beside the health bar, tinted by the fighter's accent. */
+/**
+ * Portrait chip beside the health bar, tinted by the fighter's accent.
+ *
+ * Flat fill and a hard accent edge, not the diagonal tint-to-black gradient
+ * this used to carry. The colour identifies the fighter; the gradient was
+ * only ever making the chip look like a card.
+ */
 function PortraitChip({ id, accent, side }: { id: string; accent: string; side: "left" | "right" }) {
   const def = getFighter(id);
   return (
     <div
-      className="relative hidden h-14 w-14 shrink-0 overflow-hidden border-2 border-black/70 sm:block"
-      style={{ transform: SKEW, background: `linear-gradient(160deg, ${accent}44, rgba(0,0,0,0.75))` }}
+      className="relative hidden h-14 w-14 shrink-0 overflow-hidden border-2 sm:block"
+      style={{ transform: SKEW, background: `${accent}26`, borderColor: accent }}
     >
       <div style={{ transform: "skewX(14deg)" }}>
         <FighterPortrait def={def} className="h-full w-full" facing={side === "left" ? 1 : -1} />
@@ -205,8 +209,14 @@ export function Hud({
   const [p1, p2] = state.players;
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-10 select-none p-2 sm:p-4">
-      {/* Soft darkening behind the bars so they stay readable on bright stages. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/55 to-transparent" />
+      {/*
+        A flat band behind the bars so they stay readable on bright stages,
+        ending on a hard rule. The fade-to-transparent scrim this replaces is
+        the same soft wash the rest of the interface has been stripped of -
+        and a band that admits where it ends reads as part of the machine
+        rather than as an attempt to hide that anything is there at all.
+      */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[126px] border-b-2 border-black/70 bg-black/55" />
 
       <div className="relative flex items-start gap-2 sm:gap-3">
         <PortraitChip id={fighterIds[0]} accent={p1.accent} side="left" />
@@ -284,10 +294,11 @@ export function Announcement({ state }: { state: HudState }) {
     <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
       <div
         key={state.announcement}
-        className={`animate-in zoom-in-50 fade-in duration-200 text-center font-display font-bold uppercase tracking-[0.04em] ${
-          ko
-            ? "text-8xl text-[var(--blood)] drop-shadow-[0_0_30px_rgba(209,58,34,0.6)] sm:text-[10rem]"
-            : "text-6xl text-[var(--accent)] drop-shadow-[0_0_24px_rgba(200,149,47,0.5)] sm:text-8xl"
+        // Snaps in at size with no fade, and throws a hard offset shadow
+        // rather than the coloured bloom it used to sit in - a KO should land
+        // like a stamp, not glow like a notification.
+        className={`animate-in zoom-in-95 duration-100 text-center font-display font-bold uppercase tracking-[0.04em] drop-shadow-[6px_6px_0_rgba(0,0,0,0.9)] ${
+          ko ? "text-8xl text-[var(--blood)] sm:text-[10rem]" : "text-6xl text-[var(--accent-hot)] sm:text-8xl"
         }`}
         style={{ WebkitTextStroke: "2px rgba(0,0,0,0.85)" }}
       >

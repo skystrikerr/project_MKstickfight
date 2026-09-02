@@ -37,7 +37,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
       <div
         className={layer}
         aria-hidden
-        style={{ transform: `${SHEAR} translate(0.17em, 0.055em)`, color: "#3d2712" }}
+        style={{ transform: `${SHEAR} translate(0.17em, 0.055em)`, color: "#0f2419" }}
       >
         Stick Fighter
       </div>

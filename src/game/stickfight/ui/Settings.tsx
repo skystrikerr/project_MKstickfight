@@ -125,7 +125,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
                   type="checkbox"
                   checked={save.highContrast}
                   onChange={(e) => setHighContrast(e.target.checked)}
-                  className="h-5 w-5 accent-[var(--accent)]"
+                  className="box shrink-0"
                 />
               </label>
             </div>
