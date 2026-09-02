@@ -7,6 +7,7 @@ import type { FighterDef } from "../types";
 import type { GameMode } from "../engine/game";
 import { STAGE_LIST, STAGE_THEMES, type StageTheme } from "../render/stage";
 import { applySkin, getSkin, SKINS } from "../skins";
+import { applyWeapon, weaponsFor } from "../weapons";
 import { loadSave, patchSave } from "../save";
 import { FighterPortrait } from "./Portrait";
 
@@ -20,6 +21,9 @@ interface Props {
     stage: StageTheme | "random";
     p1Skin: string;
     p2Skin: string;
+    /** Undefined when that fighter is carrying the weapon they were drawn with. */
+    p1Weapon?: string;
+    p2Weapon?: string;
   }) => void;
   onShowMoves: (id: string) => void;
 }
@@ -91,6 +95,59 @@ function SkinChip({
       }`}
       style={{ background: `linear-gradient(135deg, ${skin.swatch[0]} 50%, ${skin.swatch[1]} 50%)` }}
     />
+  );
+}
+
+/**
+ * The weapon a fighter is carrying, when the record offers more than one
+ * answer. Most of the roster has no alternates yet and renders nothing here
+ * rather than an empty row saying so.
+ *
+ * Named rather than swatched, unlike the colours: the whole point of a
+ * variant is which pattern it is, and "Hasta" carries that where a small
+ * picture of a spearhead would not.
+ */
+function WeaponRow({
+  fighterId,
+  chosen,
+  onPick,
+}: {
+  fighterId: string;
+  chosen: string | undefined;
+  onPick: (variantId: string | undefined) => void;
+}) {
+  const variants = weaponsFor(fighterId);
+  if (!variants.length) return null;
+  const chip = (selected: boolean) =>
+    `cut-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] transition ${
+      selected
+        ? "border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--bone)]"
+        : "border-[var(--rule)] text-[var(--bone-dim)] hover:border-[var(--bone-dim)]"
+    }`;
+  return (
+    <div className="mt-1.5 flex flex-wrap items-center gap-1">
+      <button
+        type="button"
+        onClick={() => onPick(undefined)}
+        title="The weapon this fighter was drawn with."
+        aria-pressed={!chosen}
+        className={chip(!chosen)}
+      >
+        As drawn
+      </button>
+      {variants.map((w) => (
+        <button
+          key={w.id}
+          type="button"
+          onClick={() => onPick(w.id)}
+          title={`${w.name} — ${w.blurb}`}
+          aria-pressed={chosen === w.id}
+          className={chip(chosen === w.id)}
+        >
+          {w.name}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -198,6 +255,10 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
   const [rounds, setRounds] = useState(saved.rounds);
   const [stage, setStage] = useState<StageTheme | "random">(saved.stage);
   const [skins, setSkins] = useState<[string, string]>([saved.p1Skin, saved.p2Skin]);
+  // Keyed by fighter rather than by seat: the weapon belongs to the person,
+  // so picking a hasta for Vorenus means Vorenus carries it whichever side of
+  // the screen he comes out on, and in a mirror match on both.
+  const [weapons, setWeapons] = useState<Record<string, string>>(saved.weapons);
   const cleared = saved.cleared;
 
   const preview = ROSTER.find((f) => f.id === hover) ?? ROSTER[0];
@@ -208,9 +269,9 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
     () =>
       [p1, p2].map((id, i) => {
         const base = ROSTER.find((f) => f.id === id) ?? ROSTER[0];
-        return applySkin(base, getSkin(skins[i]));
+        return applySkin(applyWeapon(base, weapons[id]), getSkin(skins[i]));
       }),
-    [p1, p2, skins],
+    [p1, p2, skins, weapons],
   );
 
   const pick = (id: string) => {
@@ -431,6 +492,19 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
                     />
                   ))}
                 </div>
+                <WeaponRow
+                  fighterId={[p1, p2][i]}
+                  chosen={weapons[[p1, p2][i]]}
+                  onPick={(variantId) =>
+                    setWeapons((prev) => {
+                      const next = { ...prev };
+                      const id = [p1, p2][i];
+                      if (variantId) next[id] = variantId;
+                      else delete next[id];
+                      return next;
+                    })
+                  }
+                />
               </div>
             </div>
           ))}
@@ -439,8 +513,19 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
         <button
           type="button"
           onClick={() => {
-            patchSave({ p1, p2, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] });
-            onStart({ p1, p2, mode, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1] });
+            patchSave({ p1, p2, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1], weapons });
+            onStart({
+              p1,
+              p2,
+              mode,
+              aiLevel,
+              rounds,
+              stage,
+              p1Skin: skins[0],
+              p2Skin: skins[1],
+              p1Weapon: weapons[p1],
+              p2Weapon: weapons[p2],
+            });
           }}
           className="cut bg-[var(--accent)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >

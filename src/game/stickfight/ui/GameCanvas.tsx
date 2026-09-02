@@ -21,6 +21,9 @@ export interface MatchConfig {
   /** Alternate colour ids; omitted means "classic". */
   p1Skin?: string;
   p2Skin?: string;
+  /** Weapon variant ids; omitted means the weapon the fighter was drawn with. */
+  p1Weapon?: string;
+  p2Weapon?: string;
 }
 
 export function GameCanvas({
@@ -68,6 +71,8 @@ export function GameCanvas({
       stage: config.stage,
       p1Skin: config.p1Skin,
       p2Skin: config.p2Skin,
+      p1Weapon: config.p1Weapon,
+      p2Weapon: config.p2Weapon,
       p1Keys: toKeyBindings(saved.p1Keys),
       motion: saved.motion,
     });

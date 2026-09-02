@@ -15,6 +15,7 @@ import { ROSTER } from "./fighters";
 import { STAGE_LIST, type StageTheme } from "./render/stage";
 import { SKINS } from "./skins";
 import { BINDABLE_ACTIONS, defaultKeyMap, isKeyCode, type KeyMap } from "./keybinds";
+import { weaponsFor } from "./weapons";
 
 const KEY = "stickfighter.save";
 const VERSION = 1;
@@ -40,6 +41,11 @@ export interface SaveData {
   p1Keys: KeyMap;
   /** Fighter id -> the hardest difficulty their ladder has been cleared on. */
   cleared: Record<string, AiLevel>;
+  /**
+   * Fighter id -> chosen weapon variant. A fighter with no entry is holding
+   * what they were drawn with, which is most of the roster.
+   */
+  weapons: Record<string, string>;
 }
 
 export const DEFAULT_SAVE: SaveData = {
@@ -58,6 +64,7 @@ export const DEFAULT_SAVE: SaveData = {
   highContrast: false,
   p1Keys: defaultKeyMap(),
   cleared: {},
+  weapons: {},
 };
 
 const isFighter = (v: unknown): v is string => ROSTER.some((f) => f.id === v);
@@ -100,6 +107,15 @@ function coerce(raw: unknown): SaveData {
       if (isFighter(id) && isLevel(level)) cleared[id] = level;
     }
   }
+  // Same rule as `cleared`: rebuilt entry by entry, so a variant this build
+  // has dropped costs that one fighter their weapon rather than resetting
+  // everybody's.
+  const weapons: Record<string, string> = {};
+  if (o.weapons && typeof o.weapons === "object") {
+    for (const [id, variant] of Object.entries(o.weapons)) {
+      if (isFighter(id) && weaponsFor(id).some((w) => w.id === variant)) weapons[id] = variant as string;
+    }
+  }
   return {
     v: VERSION,
     p1: isFighter(o.p1) ? o.p1 : DEFAULT_SAVE.p1,
@@ -116,6 +132,7 @@ function coerce(raw: unknown): SaveData {
     highContrast: typeof o.highContrast === "boolean" ? o.highContrast : DEFAULT_SAVE.highContrast,
     p1Keys: coerceKeyMap(o.p1Keys),
     cleared,
+    weapons,
   };
 }
 

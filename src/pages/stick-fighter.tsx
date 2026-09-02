@@ -253,6 +253,10 @@ export default function StickFighter() {
               // A mirror match needs two different colours or you cannot tell
               // which stick figure is yours.
               p2Skin: mirrorSafeSkin(run.steps[run.at], config.p1Skin, config.p2Skin),
+              // A weapon belongs to the fighter, not to the seat. The ladder
+              // swaps the opponent every fight, so carrying the selected P2's
+              // weapon along would hand it to whoever turned up next.
+              p2Weapon: loadSave().weapons[run.steps[run.at].opponent],
             }}
             touch={touch}
             onQuit={() => {

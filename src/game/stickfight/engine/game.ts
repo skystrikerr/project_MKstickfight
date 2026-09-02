@@ -10,6 +10,7 @@ import { getFighter } from "../fighters";
 import { GameRenderer } from "../render/renderer";
 import { randomTheme, STAGE_THEMES, themeForFighter, type StageTheme } from "../render/stage";
 import { applySkin, distinctSkin, getSkin } from "../skins";
+import { applyWeapon } from "../weapons";
 import type { FighterDef } from "../types";
 import { AiController } from "./ai";
 import { Sfx } from "./audio";
@@ -33,6 +34,9 @@ export interface GameOptions {
   /** Alternate colour ids from `skins.ts`; both default to "classic". */
   p1Skin?: string;
   p2Skin?: string;
+  /** Weapon variant ids from `weapons.ts`. Unset means the weapon as drawn. */
+  p1Weapon?: string;
+  p2Weapon?: string;
   roundsToWin?: number;
   /** A specific stage, or "random" to roll one per match. */
   stage?: StageTheme | "random";
@@ -126,9 +130,11 @@ export class GameSession {
     // same colours.
     const p1Skin = options.p1Skin ?? "classic";
     const p2Skin = distinctSkin(options.p1, p1Skin, options.p2, options.p2Skin ?? "classic");
+    // Weapon first, then colour: the skin has to recolour whichever weapon
+    // they actually ended up holding, not the one they were drawn with.
     this.defs = [
-      applySkin(getFighter(options.p1), getSkin(p1Skin)),
-      applySkin(getFighter(options.p2), getSkin(p2Skin)),
+      applySkin(applyWeapon(getFighter(options.p1), options.p1Weapon), getSkin(p1Skin)),
+      applySkin(applyWeapon(getFighter(options.p2), options.p2Weapon), getSkin(p2Skin)),
     ];
     this.theme =
       options.stage === "random"

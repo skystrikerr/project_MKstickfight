@@ -26,6 +26,7 @@ import { STAGE_THEMES } from "./render/stage";
 import { attachTransform } from "./render/rig";
 import { buildSkeleton, sampleClip } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
+import { applyWeapon, WEAPONS, weaponsFor } from "./weapons";
 import type { FighterDef, MoveDef } from "./types";
 
 const results: { name: string; ok: boolean; detail: string }[] = [];
@@ -521,6 +522,67 @@ function scriptFor(move: MoveDef): RawInput[] {
   );
   check("a skin does not touch the numbers", painted.stats === base.stats && painted.moves[0].duration === base.moves[0].duration);
   check("classic is the untouched fighter", applySkin(base, getSkin("classic")) === base);
+}
+
+{
+  // Weapon variants. The contract is that a variant is a different drawing of
+  // the same weapon and nothing else - if that ever stops being true, these
+  // are the tests that should fail first.
+  for (const [fighterId, variants] of Object.entries(WEAPONS)) {
+    check(`weapons: ${fighterId} is a real fighter`, ROSTER.some((f) => f.id === fighterId));
+    const base = getFighter(fighterId);
+    const seen = new Set<string>();
+    for (const v of variants) {
+      check(`weapons: ${fighterId}.${v.id} has a unique id`, !seen.has(v.id));
+      seen.add(v.id);
+      check(`weapons: ${fighterId}.${v.id} says why it is a real pattern`, v.blurb.length > 40, `${v.blurb.length}`);
+      check(`weapons: ${fighterId}.${v.id} re-cuts at least one prop`, Object.keys(v.parts).length > 0);
+      for (const propId of Object.keys(v.parts)) {
+        check(
+          `weapons: ${fighterId}.${v.id} names a prop the fighter has (${propId})`,
+          base.props.some((p) => p.id === propId),
+        );
+        check(`weapons: ${fighterId}.${v.id} draws something for ${propId}`, v.parts[propId].length > 0);
+      }
+      // Cosmetic for now, on purpose. Until the roster is balanced, a weapon
+      // may not change how a fighter plays.
+      check(`weapons: ${fighterId}.${v.id} carries no stats yet`, v.stats === undefined);
+
+      const swapped = applyWeapon(base, v.id);
+      check(`weapons: ${fighterId}.${v.id} keeps the moveset`, swapped.moves === base.moves);
+      check(`weapons: ${fighterId}.${v.id} keeps the numbers`, swapped.stats === base.stats);
+      check(`weapons: ${fighterId}.${v.id} keeps every prop`, swapped.props.length === base.props.length);
+      check(
+        `weapons: ${fighterId}.${v.id} actually changes the drawing`,
+        swapped.props.some((p, i) => p.parts !== base.props[i].parts),
+      );
+      // Props it does not name are shared, not copied.
+      const untouched = base.props.filter((p) => !v.parts[p.id]);
+      check(
+        `weapons: ${fighterId}.${v.id} leaves the rest of the kit alone`,
+        untouched.every((p) => swapped.props.find((q) => q.id === p.id)?.parts === p.parts),
+      );
+    }
+  }
+
+  // An unknown or absent variant gives back the fighter untouched, which is
+  // what a stale save or an arcade opponent with no variants relies on.
+  const roman = getFighter("roman");
+  check("weapons: no choice is the fighter as drawn", applyWeapon(roman, undefined) === roman);
+  check("weapons: an unknown variant is ignored", applyWeapon(roman, "not-a-weapon") === roman);
+  check("weapons: another fighter's variant is ignored", applyWeapon(roman, "tachi") === roman);
+
+  // Weapon then skin: the chosen weapon has to be the thing that gets painted.
+  const hasta = applyWeapon(roman, "hasta");
+  const paintedHasta = applySkin(hasta, getSkin("twilight"));
+  const hastaSpear = hasta.props.find((p) => p.id === "spear")!;
+  const paintedSpear = paintedHasta.props.find((p) => p.id === "spear")!;
+  check("weapons: a skin repaints the chosen weapon", paintedSpear.parts.length === hastaSpear.parts.length);
+  check(
+    "weapons: the painted weapon is still the variant's geometry",
+    paintedSpear.parts.length !== roman.props.find((p) => p.id === "spear")!.parts.length ||
+      paintedSpear.parts.some((part, i) => part.geo !== roman.props.find((p) => p.id === "spear")!.parts[i].geo),
+  );
   check(
     "a mirror match forces different colours",
     distinctSkin("roman", "ember", "roman", "ember") !== "ember",
@@ -1445,6 +1507,20 @@ function scriptFor(move: MoveDef): RawInput[] {
   check("save: high contrast round-trips", loadSave().highContrast === true);
   patchSave({ motion: "wandering" as never });
   check("save: a garbled motion value falls back", loadSave().motion === DEFAULT_SAVE.motion, loadSave().motion);
+
+  // Weapon choices are stored per fighter and rebuilt entry by entry, so one
+  // variant this build no longer ships costs that fighter their weapon rather
+  // than clearing everybody's.
+  check("save: no weapon choices by default", Object.keys(loadSave().weapons).length === 0);
+  patchSave({ weapons: { roman: "hasta", viking: "daneaxe" } });
+  check("save: a weapon choice round-trips", loadSave().weapons.roman === "hasta", loadSave().weapons.roman);
+  patchSave({ weapons: { roman: "hasta", viking: "not-a-real-axe", nobody: "hasta" } });
+  const salvagedWeapons = loadSave().weapons;
+  check("save: a dropped variant is forgotten alone", salvagedWeapons.roman === "hasta" && !("viking" in salvagedWeapons), JSON.stringify(salvagedWeapons));
+  check("save: a weapon for a fighter that does not exist is dropped", !("nobody" in salvagedWeapons));
+  // A variant belonging to a different fighter is not a valid choice either.
+  patchSave({ weapons: { roman: "tachi" } });
+  check("save: another fighter's variant is rejected", !("roman" in loadSave().weapons), JSON.stringify(loadSave().weapons));
 
   clearSave();
   delete (globalThis as { window?: unknown }).window;
