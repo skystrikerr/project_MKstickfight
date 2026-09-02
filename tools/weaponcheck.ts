@@ -46,7 +46,15 @@ function partReach(part: ShapePart): number {
  * measuring the longest thing they own reports the wrong weapon standing still.
  */
 function weaponFor(def: FighterDef, move: MoveDef, hit: { from: number; to: number; box: { x: number; y: number; w: number; h: number } }): PropDef | null {
-  const held = def.props.filter((p) => p.attach === "handF" || p.attach === "handB");
+  // A conditional prop is invisible unless the move names it in showProps, so
+  // it cannot be the weapon for a move that never brings it out. Without this
+  // the Celt's sword cuts were measured against a javelin he is not holding
+  // and the Persian's spear thrusts against a bow still on his back.
+  const shown = new Set(move.showProps ?? []);
+  const hidden = new Set(move.hideProps ?? []);
+  const held = def.props.filter(
+    (p) => (p.attach === "handF" || p.attach === "handB") && !hidden.has(p.id) && (!p.conditional || shown.has(p.id)),
+  );
   if (!held.length) return null;
   let best: PropDef | null = null;
   let bestDist = Infinity;

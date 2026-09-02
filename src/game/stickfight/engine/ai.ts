@@ -8,7 +8,7 @@
 import type { AiLevel } from "../constants";
 import type { Facing, MoveDef, Motion } from "../types";
 import type { Fighter } from "./fighter";
-import type { Match } from "./match";
+import type { Match, Projectile } from "./match";
 import { EMPTY_INPUT, type RawInput } from "./input";
 
 interface Step {
@@ -212,6 +212,36 @@ export class AiController {
 
   // -------------------------------------------------------------------------
 
+  /**
+   * The nearest enemy projectile actually on its way here, and roughly how
+   * many frames until it arrives.
+   *
+   * Nothing in this file used to read `match.projectiles` at all, so every
+   * fighter walked straight into everything thrown at them. That one gap was
+   * worth tens of percentage points in the balance matrix: measured over the
+   * whole roster, every fighter above 65% owned a projectile and every
+   * fighter below 35% did not, and deleting all projectiles pulled the
+   * melee-only fighters back to even on its own. It was never a numbers
+   * problem in the fighter files.
+   */
+  private incoming(match: Match, self: Fighter): { p: Projectile; frames: number } | null {
+    let best: { p: Projectile; frames: number } | null = null;
+    for (const p of match.projectiles) {
+      if (p.dead || p.owner === self.index) continue;
+      const dx = p.x - self.x;
+      // Closing only. Something already past him is somebody else's problem,
+      // and a stationary one (a settled caltrop) is not arriving at all.
+      if (Math.abs(p.vx) < 0.5) continue;
+      if (dx > 0 === p.vx > 0) continue;
+      const frames = (Math.abs(dx) - self.def.stats.width) / Math.abs(p.vx);
+      // Beyond about two-thirds of a second there is nothing to react to yet,
+      // and reacting early just means standing in guard for no reason.
+      if (frames < 0 || frames > 40) continue;
+      if (!best || frames < best.frames) best = { p, frames };
+    }
+    return best;
+  }
+
   private decide(match: Match, self: Fighter, opponent: Fighter) {
     const p = this.profile;
     const dist = Math.abs(opponent.x - self.x);
@@ -228,6 +258,50 @@ export class AiController {
     }
 
     if (!self.actionable && self.state !== "air") return;
+
+    // Answer something already in the air and coming at him. This sits ahead
+    // of every approach branch on purpose: the bug was not that the AI chose
+    // badly under fire, it was that it walked forward as though the screen
+    // were empty.
+    const inbound = this.incoming(match, self);
+    if (inbound && self.grounded) {
+      const st = this.style(self);
+      // Reading a projectile is a skill like any other, so it runs off the
+      // same block chance - a Rookie still eats a lot of them, which is what
+      // makes the difficulty levels mean anything.
+      if (inbound.frames <= p.reaction + 12 && Math.random() < Math.min(0.97, p.block * st.patience)) {
+        const r = Math.random();
+        // How badly this fighter needs to be somewhere else. Simply guarding
+        // a shot keeps the health but loses the round: the zoner is happy to
+        // trade chip for time all day, so anyone whose game is inside has to
+        // answer by closing, not by surviving. Guarding everything is what
+        // turned the first version of this into a draw machine.
+        const wantsIn = st.range === "close" ? 1.6 : st.range === "far" ? 0.35 : 1;
+        // Dodging through beats guarding outright, because the universal
+        // dodges carry strike invulnerability and projectiles honour it, and
+        // it covers ground while it does.
+        if (r < 0.22 * wantsIn * st.aggression) {
+          const dodge = this.pickMove(self, (m) => (m.tags?.includes("dodge") ?? false) && m.input.dir === "f");
+          if (dodge) return this.queueMove(self, dodge);
+        }
+        // Or jump it, carrying the jump forward so getting over it is also
+        // progress rather than just survival.
+        if (r < 0.5 * wantsIn && inbound.frames > 7 && inbound.p.spec.guard !== "overhead") {
+          this.queue.push({ input: numToRaw(9, facing), frames: 4 });
+          this.queue.push({ input: numToRaw(6, facing), frames: 13 });
+          return;
+        }
+        // Otherwise guard it - but only for as long as it takes to arrive,
+        // and then immediately spend the recovery walking in.
+        const low = inbound.p.spec.guard === "low";
+        this.queue.push({
+          input: numToRaw(low ? 1 : 4, facing),
+          frames: Math.max(5, Math.min(15, Math.ceil(inbound.frames) + 4)),
+        });
+        if (st.range !== "far") this.queue.push({ input: numToRaw(6, facing), frames: 14 });
+        return;
+      }
+    }
 
     // Anti-air a jumping opponent.
     if (!opponent.grounded && opponent.y > 30 && dist < 190 && roll < p.antiAir) {
@@ -267,7 +341,16 @@ export class AiController {
       // so instead of just standing, it steps back the way a real zoner does.
       if (style.range === "far" && Math.random() < 0.4) return this.hold({ ...numToRaw(4, facing) }, 16);
       if (Math.random() < Math.min(0.95, p.aggression * style.aggression)) {
-        return this.hold({ ...numToRaw(6, facing) }, 22);
+        // Cross the gap at a run rather than a walk. This used to be a plain
+        // forward hold, which meant a melee fighter closed full screen at
+        // walking pace directly into everything a zoner could throw - and a
+        // zoner backing off at their own walk speed was never actually caught.
+        // Half of what looked like projectiles being overpowered was really
+        // the approach being this slow.
+        this.queue.push({ input: numToRaw(6, facing), frames: 3 });
+        this.queue.push({ input: {}, frames: 2 });
+        this.queue.push({ input: numToRaw(6, facing), frames: 20 });
+        return;
       }
       return this.hold({}, 12);
     }

@@ -564,7 +564,7 @@ export const NINJA: FighterDef = {
     {
       id: "dashAttack",
       name: "Shadow Rush",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 30,

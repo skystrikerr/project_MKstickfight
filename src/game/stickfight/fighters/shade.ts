@@ -549,7 +549,7 @@ export const SHADE: FighterDef = {
     {
       id: "dashAttack",
       name: "Shadow Rush",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 30,
@@ -722,7 +722,7 @@ export const SHADE: FighterDef = {
         },
       ],
       desc: "Throws the hook - on hit it drags them into point-blank range and ends the guessing game.",
-      notation: "→↓↘ + B",
+      notation: "←↙↓↘→ + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(7, { ...STANCE, shoulderB: -68, elbowB: 32, weaponBack: 100, torso: -14, offX: -4 }, "inOut"),
@@ -738,6 +738,10 @@ export const SHADE: FighterDef = {
       tags: ["special", "movement"],
       priority: 55,
       duration: 32,
+      // He is the one fighter with no forward dash - this roll answers the
+      // same double-tap and takes it - so his dash attack has to come out of
+      // the roll or it cannot come out at all.
+      followUps: [{ button: "C", move: "dashAttack", from: 4, to: 22, string: "Shadow Rush" }],
       invuln: [{ from: 3, to: 24, kind: "strike" }],
       // Twice the universal sidestep's travel - a real escape, not a feint.
       vel: [

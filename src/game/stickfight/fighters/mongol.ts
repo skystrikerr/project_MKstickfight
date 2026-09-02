@@ -600,7 +600,7 @@ export const MONGOL: FighterDef = {
     {
       id: "dashAttack",
       name: "Riding Shoulder",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 32,

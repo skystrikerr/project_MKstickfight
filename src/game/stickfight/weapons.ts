@@ -58,6 +58,18 @@ export interface WeaponVariant {
  * their own file, and that is variant zero: selecting nothing gets you the
  * fighter exactly as authored.
  */
+/** Hemp cord wound over the knuckles and up the wrist. Both hands take it. */
+const KAAD_HAND: ShapePart[] = [
+  { geo: "poly", size: [-6, 3, -4, 6, 3, 6.5, 7, 3, 7, -3, 3, -6.5, -4, -6, -6, -3], pos: [1, 0], color: "#c9b489" },
+  // The cord itself: turns across the knuckles, then up the forearm.
+  { geo: "box", size: [2.2, 13], pos: [-2, 0], rot: 14, color: "#8a7048" },
+  { geo: "box", size: [2.2, 13], pos: [2, 0], rot: 14, color: "#a08a58" },
+  { geo: "box", size: [2.2, 12], pos: [6, 0], rot: 14, color: "#8a7048" },
+  { geo: "box", size: [11, 2], pos: [-4, 3], rot: -8, color: "#a08a58" },
+  { geo: "box", size: [11, 2], pos: [-4, -3], rot: -8, color: "#8a7048" },
+  { geo: "poly", size: [-3, 5, 3, 4, 3, -4, -3, -5], pos: [-6, 0], color: "#7a6240" },
+];
+
 export const WEAPONS: Record<string, WeaponVariant[]> = {
   roman: [
     {
@@ -147,6 +159,203 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
           { geo: "box", size: [16, 5], pos: [4, 0], color: "#4a3422" },
           { geo: "box", size: [16, 1.8], pos: [4, 1.6], color: "#8a6440" },
           { geo: "poly", size: [-4, 4, 4, 4, 3, -4, -3, -4], pos: [-16, 0], color: "#c9a24a" },
+        ],
+      },
+    },
+  ],
+
+
+  muaythai: [
+    {
+      id: "kaadchuek",
+      name: "Kaad Chuek",
+      blurb:
+        "Hemp cord wound over the hands and up the forearms, the binding used before gloves and the one in every account of the prize fights he was made to take. Soaked and dried it sets hard, which is the point of it.",
+      parts: {
+        handwrapF: KAAD_HAND,
+        handwrapB: KAAD_HAND,
+      },
+    },
+  ],
+
+  jaguar: [
+    {
+      id: "tepoztopilli",
+      name: "Tepoztopilli",
+      blurb:
+        "The other half of the Mexica armoury: a polearm with obsidian set down both edges of a broad head, used to keep a Spanish sword at a distance the macuahuitl could not. Sahagun's informants describe both in the same breath.",
+      parts: {
+        macuahuitl: [
+          { geo: "cyl", size: [2.8, 76], pos: [26, 0], rot: 90, color: "#8a5a30" },
+          // Broad leaf head, obsidian down both edges rather than a flat paddle.
+          { geo: "poly", size: [-26, 3, -14, 10, 0, 12, 16, 8, 24, 0, 16, -8, 0, -12, -14, -10, -26, -3], pos: [72, 0], color: "#a97445" },
+          { geo: "poly", size: [-20, 2, -10, 6, 0, 7, 12, 5, 18, 0, 12, -5, 0, -7, -10, -6, -20, -2], pos: [72, 0], color: "#c08f5c", z: 0.1 },
+          ...[[-16, 9], [-6, 11.5], [4, 11], [13, 8]].map(([x, y]) => ({
+            geo: "poly" as const, size: [0, 0, -4, 4.5, 4, 4], pos: [72 + x, y] as [number, number], color: "#2f2a3d", z: 0.2,
+          })),
+          ...[[-16, -9], [-6, -11.5], [4, -11], [13, -8]].map(([x, y]) => ({
+            geo: "poly" as const, size: [0, 0, -4, -4.5, 4, -4], pos: [72 + x, y] as [number, number], color: "#2f2a3d", z: 0.2,
+          })),
+          { geo: "box", size: [14, 6], pos: [2, 0], color: "#5c3a1e" },
+          { geo: "box", size: [14, 1.8], pos: [2, 1.8], color: "#3fae8f" },
+          { geo: "box", size: [14, 1.8], pos: [2, -1.8], color: "#a8382b" },
+          { geo: "poly", size: [-4, 4, 4, 4, 3, -4, -3, -4], pos: [-14, 0], color: "#5c3a1e" },
+        ],
+      },
+    },
+  ],
+
+
+  western: [
+    {
+      id: "schofield",
+      name: "Smith & Wesson Model 3",
+      blurb:
+        "The top-break the frontier actually liked: the whole barrel hinges down and every case ejects at once, so it reloads in a fraction of the time a Colt's loading gate allows. Earp is on record with more than one revolver, and the Buntline is the part of the story nobody can source.",
+      parts: {
+        revolver: [
+          // Longer barrel, and the top-break latch and hinge that name it.
+          { geo: "poly", size: [-13, 2.6, 13, 2.2, 13, -2.2, -13, -2.6], pos: [17, 2], color: "#4f545c" },
+          { geo: "box", size: [22, 1.6], pos: [17, 4.2], color: "#9aa2ab" },
+          // The rib along the top, which a Colt does not have.
+          { geo: "box", size: [24, 1.4], pos: [17, 5], color: "#6b7079" },
+          { geo: "poly", size: [-5, 5, 5, 4.5, 5, -4.5, -5, -5], pos: [2, 1], color: "#b8bfc7" },
+          { geo: "box", size: [9, 1.4], pos: [2, 3], color: "#8f979f" },
+          { geo: "box", size: [9, 1.4], pos: [2, -1], color: "#8f979f" },
+          // Barrel latch over the frame.
+          { geo: "box", size: [7, 3], pos: [7, 6], color: "#8f979f", z: 0.2 },
+          { geo: "poly", size: [0, 0, -3, 4, -6, 3, -4, -2], pos: [-4, 3], color: "#3f444b" },
+          { geo: "box", size: [3, 5], pos: [1, -5], rot: 8, color: "#3f444b" },
+          // Birdshead grip rather than the Colt's plough handle.
+          { geo: "poly", size: [4, 4, -2, 2, -7, -6, -3, -10, 3, -4], pos: [-3, -4], color: "#3a2410" },
+          { geo: "disc", size: [1.4], pos: [-4, -6], color: "#c9a24a", z: 0.3 },
+        ],
+      },
+    },
+  ],
+
+  soldier: [
+    {
+      id: "m14",
+      name: "M14",
+      blurb:
+        "What the battalion had been carrying until the month before. The changeover was still running through Vietnam in 1965, so both rifles were in the valley: wood stock, twenty rounds of 7.62, and a great deal more of it going downrange per trigger pull.",
+      parts: {
+        rifle: [
+          // Wood, not plastic, and a straight stock with no carry handle.
+          { geo: "poly", size: [-16, 4.5, 14, 4.5, 14, -4, -16, -4.5], pos: [-4, 2], color: "#6b4a2c" },
+          { geo: "poly", size: [-12, 4, 13, 3.5, 13, -3.5, -12, -4], pos: [22, 2], color: "#7a5636" },
+          { geo: "box", size: [24, 1.5], pos: [22, 4], color: "#8a6440" },
+          // Receiver: bare steel above the wood.
+          { geo: "poly", size: [-12, 0, -10, 5, 10, 5, 12, 0], pos: [-2, 6], color: "#3a3f45" },
+          { geo: "box", size: [5, 4], pos: [-11, 9], color: "#22262a" },
+          // Longer exposed barrel with the flash suppressor on the end.
+          { geo: "cyl", size: [1.7, 30], pos: [48, 2], rot: 90, color: "#22262a" },
+          { geo: "poly", size: [-2.5, 0, -2, 7, 2, 7, 2.5, 0], pos: [37, 4], color: "#3a3f45" },
+          { geo: "poly", size: [-6, 3, 6, 3.6, 6, -3.6, -6, -3], pos: [64, 2], color: "#3f454b" },
+          { geo: "poly", size: [-3.5, 7, 3.5, 6, 4.5, -7, -2.5, -7], pos: [4, -8], rot: -6, color: "#5c3f26" },
+          { geo: "poly", size: [3, 4, -2, 3, -5, -7, 0, -8], pos: [-6, -6], color: "#22262a" },
+          // Twenty-round box, shorter and straighter than the M16 curve.
+          { geo: "poly", size: [-5, 5, 5, 5, 4, -8, -4, -8], pos: [10, -9], color: "#2b3036" },
+          { geo: "poly", size: [-10, 5, 10, 6, 10, -3, -10, -5], pos: [-26, 0], color: "#6b4a2c" },
+          { geo: "box", size: [4, 10], pos: [-36, 0], color: "#3a2a18" },
+        ],
+      },
+    },
+  ],
+
+
+  zulu: [
+    {
+      id: "isijula",
+      name: "Isijula",
+      blurb:
+        "The long throwing spear Shaka is said to have taken off his regiments in favour of the short stabbing one, on the grounds that a man who throws his weapon has then given it away. Mgobozi fought through the change and would have started with this.",
+      parts: {
+        iklwa: [
+          // Long light shaft: thrown, so all the length is behind the head.
+          { geo: "cyl", size: [2.2, 104], pos: [34, 0], rot: 90, color: "#8a6238" },
+          { geo: "box", size: [7, 5], pos: [82, 0], color: "#a8724a" },
+          // Narrow head, a third the width of the iklwa's broad blade.
+          { geo: "poly", size: [0, 0, -18, 4, -24, 3, -24, -3, -18, -4], pos: [96, 0], color: "#dbe3ea" },
+          { geo: "box", size: [20, 1.4], pos: [86, 0], color: "#9aa6b1" },
+          { geo: "box", size: [12, 5.4], pos: [4, 0], color: "#4a3220" },
+          { geo: "poly", size: [0, 3, -6, 4, -9, 0, -6, -4, 0, -3], pos: [-16, 0], color: "#efe8dc" },
+        ],
+      },
+    },
+  ],
+
+  maori: [
+    {
+      id: "tewhatewha",
+      name: "Tewhatewha",
+      blurb:
+        "The quarter-moon club: the broad blade is a flag rather than an edge - it is waved to signal the line - and the killing end is the point on the shaft. A chief's weapon and a chief's instrument at once, which is exactly the job he held.",
+      parts: {
+        taiaha: [
+          { geo: "cyl", size: [3, 92], pos: [8, 0], rot: 90, color: "#4a3526" },
+          // The axe-shaped head: broad, flat, and hung with feathers.
+          { geo: "poly", size: [-4, 6, 10, 26, 26, 30, 30, 22, 18, 2, 6, -6], pos: [50, 0], color: "#6b4a30" },
+          { geo: "box", size: [26, 2], pos: [62, 20], rot: 32, color: "#9a7550" },
+          { geo: "box", size: [3, 11], pos: [70, 30], rot: 10, color: "#efe7d6" },
+          { geo: "box", size: [3, 13], pos: [76, 28], rot: -6, color: "#d8cdb4" },
+          { geo: "box", size: [3, 10], pos: [64, 32], rot: 18, color: "#efe7d6" },
+          // The business end: a spear point on the butt, not on the blade.
+          { geo: "poly", size: [0, 4, -14, 3, -20, 0, -14, -3, 0, -4], pos: [-40, 0], color: "#3a2819" },
+          { geo: "poly", size: [0, 2, -10, 1.4, -14, 0, -10, -1.4, 0, -2], pos: [-42, 0], color: "#8a6a4a" },
+          { geo: "box", size: [7, 10], pos: [-26, 0], color: "#efe7d6" },
+        ],
+      },
+    },
+  ],
+
+  persian: [
+    {
+      id: "pomegranate",
+      name: "Silver Pomegranate",
+      blurb:
+        "Herodotus counts the corps twice over: a thousand with golden apples on the butt of the spear, and nine thousand behind them with silver pomegranates. This is the other nine thousand's spear - the same weapon, one rank down.",
+      parts: {
+        spear: [
+          { geo: "cyl", size: [2.8, 88], pos: [26, 0], rot: 90, color: "#8a6238" },
+          { geo: "poly", size: [0, 0, -15, 3.4, -19, 2.6, -19, -2.6, -15, -3.4], pos: [80, 0], color: "#c3ccd6" },
+          { geo: "poly", size: [0, 0, -13, 1.1, -17, 0.9, -17, -0.9, -13, -1.1], pos: [79, 0], color: "#eef3f8" },
+          { geo: "box", size: [6, 5], pos: [58, 0], color: "#8f979f" },
+          { geo: "box", size: [18, 5], pos: [8, 0], color: "#3f2f1c" },
+          { geo: "box", size: [18, 1.6], pos: [8, 1.8], color: "#8a6a42" },
+          // Silver, and a pomegranate rather than an apple - narrower, with
+          // the little crown of sepals on the end.
+          { geo: "poly", size: [-5, 6, 3, 5, 6, 0, 3, -5, -5, -6], pos: [-20, 0], color: "#b9c0c8" },
+          { geo: "poly", size: [0, 3, 4, 2, 4, -2, 0, -3], pos: [-26, 0], color: "#d8dde3" },
+          { geo: "disc", size: [2], pos: [-19, 1], color: "#e6ebef", z: 0.1 },
+          { geo: "box", size: [3, 5], pos: [-14, 0], color: "#8f979f" },
+        ],
+      },
+    },
+  ],
+
+  iceman: [
+    {
+      id: "flintaxe",
+      name: "Flint Blade",
+      blurb:
+        "The axe he did not carry, and the one everybody assumes he did. Knapped stone was still the ordinary answer in 3300 BC - the copper blade in the ice is the surprise, and the reason the find rewrote a date.",
+      parts: {
+        axe: [
+          { geo: "cyl", size: [3, 34], pos: [6, 0], rot: 90, color: "#6b5334" },
+          { geo: "poly", size: [-5, 3, 4, 8, 7, 7, -5, 0], pos: [23, 0], color: "#5a4429" },
+          { geo: "poly", size: [-5, -3, 4, -8, 7, -7, -5, 0], pos: [23, 0], color: "#4a3722" },
+          { geo: "box", size: [2.6, 15], pos: [22, 0], color: "#3f2f1c" },
+          { geo: "box", size: [2.6, 12], pos: [26, 0], color: "#3f2f1c" },
+          // Ground stone: shorter, blunter and thicker than the cast blade,
+          // because the material will not hold an edge as fine.
+          { geo: "poly", size: [-4, 7, 2, 9, 9, 9, 11, 7, 12, 0, 11, -7, 9, -9, 2, -9, -4, -7], pos: [30, 0], color: "#7d8288" },
+          { geo: "poly", size: [7, 8, 10, 6.5, 11, 0, 10, -6.5, 7, -8, 5.5, -6.5, 5.5, 6.5], pos: [30, 0], color: "#5f666d" },
+          { geo: "poly", size: [9, 9, 11, 7, 12, 0, 11, -7, 9, -9], pos: [30, 0], color: "#c3cad1" },
+          { geo: "box", size: [20, 5], pos: [0, 0], color: "#4f3a22" },
+          { geo: "box", size: [20, 1.6], pos: [0, 1.7], color: "#8a6a42" },
+          { geo: "poly", size: [-3, 4, 3, 4, 2.4, -4, -2.4, -4], pos: [-10, 0], color: "#8a6a42" },
         ],
       },
     },

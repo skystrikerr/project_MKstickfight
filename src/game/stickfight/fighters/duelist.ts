@@ -538,7 +538,7 @@ export const DUELIST: FighterDef = {
     {
       id: "dashAttack",
       name: "Running Thrust",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 29,

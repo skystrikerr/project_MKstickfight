@@ -1116,6 +1116,9 @@ export class Fighter {
     if (move.input.motion && move.input.motion !== "none") score += 100;
     if (move.input.buttons?.length) score += 60;
     if (move.input.dir && move.input.dir !== "n") score += 30;
+    // Enough to outrank the 6C it shares a button with. Only reachable at all
+    // while dashing, so it can never steal that button from a standing start.
+    if (move.input.whileDashing) score += 40;
     if (move.meterCost) score += 5;
     return score;
   }
@@ -1127,6 +1130,9 @@ export class Fighter {
 
   private inputMatches(move: MoveDef): boolean {
     const inp = move.input;
+
+    // A dash attack is only a dash attack while the dash is still running.
+    if (inp.whileDashing && this.state !== "dash") return false;
 
     if (inp.motion && inp.motion !== "none" && !this.input.hasMotion(inp.motion)) return false;
 

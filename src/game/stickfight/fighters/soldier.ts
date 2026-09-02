@@ -597,7 +597,7 @@ export const SOLDIER: FighterDef = {
     {
       id: "dashAttack",
       name: "Bayonet Rush",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 34,

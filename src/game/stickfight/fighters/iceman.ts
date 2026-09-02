@@ -575,7 +575,7 @@ export const ICEMAN: FighterDef = {
     {
       id: "dashAttack",
       name: "Run Through",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 34,

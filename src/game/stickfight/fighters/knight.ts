@@ -648,7 +648,7 @@ export const KNIGHT: FighterDef = {
     {
       id: "dashAttack",
       name: "Couched Charge",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 40,

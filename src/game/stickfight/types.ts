@@ -337,6 +337,15 @@ export interface MoveInput {
   dir?: Dir;
   motion?: Motion;
   stance: Stance | Stance[];
+  /**
+   * Only available while a forward dash is still running.
+   *
+   * Without this a dash attack shares its whole input with 6C - same button,
+   * same direction, same stance, same priority - and the move picker breaks
+   * that tie by declaration order, so 6C won every time and every fighter's
+   * dash attack was unreachable content.
+   */
+  whileDashing?: boolean;
 }
 
 export interface MoveDef {

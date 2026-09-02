@@ -90,6 +90,44 @@ function contract(def: FighterDef) {
   check(`${def.id}: has a super`, countTag("super") === 1);
   check(`${def.id}: can jump`, def.stats.jumpVel > 5 && def.stats.gravity > 0);
 
+  // A dash attack shares its whole input with 6C - same button, same
+  // direction, same stance, same priority - so without something to break
+  // the tie the picker takes whichever is declared first and the other is
+  // unreachable content that still shows up in the move list. It was 6C
+  // winning on all twenty-two of them.
+  // The move list is the only place a player learns an input, so a notation
+  // that disagrees with the motion it documents is a wrong instruction - and
+  // the only way to notice is to keep failing to do the move. Shade's
+  // grappling hook told everyone to dragon-punch a half circle.
+  const GLYPHS: Record<string, RegExp> = {
+    qcf: /↓↘→/, qcb: /↓↙←/, dp: /→↓↘/, rdp: /←↓↙/,
+    hcf: /←↙↓↘→/, hcb: /→↘↓↙←/, dd: /↓\s*↓/, ff: /→\s*→/, bb: /←\s*←/,
+  };
+  for (const m of moves) {
+    if (!m.notation || !m.input.motion || m.input.motion === "none") continue;
+    const re = GLYPHS[m.input.motion];
+    if (!re) continue;
+    check(`${def.id}.${m.id}: notation matches its motion`, re.test(m.notation), `${m.input.motion} vs "${m.notation}"`);
+  }
+
+  const dash = moves.find((m) => m.id === "dashAttack");
+  if (dash) {
+    const clash = moves.find(
+      (m) =>
+        m !== dash &&
+        !m.internal &&
+        m.input.button === dash.input.button &&
+        m.input.dir === dash.input.dir &&
+        !m.input.motion &&
+        !m.input.whileDashing,
+    );
+    check(
+      `${def.id}: the dash attack is reachable`,
+      !!dash.input.whileDashing || !clash,
+      clash ? `${clash.id} shares its input` : "",
+    );
+  }
+
   // Move data integrity - the usual authoring mistakes.
   const ids = new Set(moves.map((m) => m.id));
   for (const m of moves) {

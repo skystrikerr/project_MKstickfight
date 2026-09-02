@@ -586,7 +586,7 @@ export const VIKING: FighterDef = {
     {
       id: "dashAttack",
       name: "Raid Charge",
-      input: { button: "C", dir: "f", stance: "stand" },
+      input: { button: "C", dir: "f", stance: "stand", whileDashing: true },
       tags: ["command"],
       priority: 12,
       duration: 36,
