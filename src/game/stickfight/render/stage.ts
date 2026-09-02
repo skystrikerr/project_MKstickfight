@@ -22,6 +22,8 @@ export type StageTheme =
   | "forge"
   | "skyward"
   | "delta"
+  // Painted backdrop rather than built shapes.
+  | "postroad"
   // Stages with ledges to fight on as well as a floor.
   | "aqueduct"
   | "terraces"
@@ -171,6 +173,27 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: -280, y: 108, w: 175 },
       { x: 140, y: 70, w: 260 },
     ],
+  },
+
+  postroad: {
+    name: "The Post Road",
+    blurb: "A staging post on the mountain highway: inn, teahouse, and the pass beyond.",
+    // Sampled off the painting so the haze, ground and select-screen swatch
+    // all sit in the same light as the backdrop they are standing in front of.
+    sky: ["#8fb2d0", "#deded6"],
+    ground: "#c9a771",
+    accent: "#a65f41",
+    ambient: {
+      kind: "petal",
+      count: 34,
+      // Maple first, blossom last - the painting has both, and it is mostly
+      // autumn, so the leaves should outnumber the petals.
+      colors: ["#a65f41", "#c2542f", "#d8913a", "#f0c0cd"],
+      speed: 1.05,
+      wind: 0.8,
+      size: [5, 8],
+      opacity: 0.85,
+    },
   },
 
   skyward: {
@@ -382,6 +405,8 @@ export class Stage {
   readonly group = new THREE.Group();
   private layers: Layer[] = [];
   private disposables: (THREE.BufferGeometry | THREE.Material)[] = [];
+  /** Backdrop bitmaps, which arrive after construction and free separately. */
+  private textures: THREE.Texture[] = [];
   private ambient: Ambient;
   private frame = 0;
   readonly theme: StageTheme;
@@ -424,9 +449,15 @@ export class Stage {
       case "delta":
         this.buildDelta();
         break;
+      case "postroad":
+        this.buildPostRoad();
+        break;
     }
 
-    this.buildHaze(cfg.sky[1]);
+    // A painted backdrop brings its own aerial perspective - the mountains in
+    // it are already fading on their own. Veiling it again in flat horizon
+    // colour only makes it muddy, so the haze is for built stages.
+    if (theme !== "postroad") this.buildHaze(cfg.sky[1]);
     this.buildGround(cfg.ground, theme);
     if (cfg.platforms?.length) this.buildPlatforms(cfg.platforms, cfg.ground, cfg.accent);
 
@@ -895,6 +926,67 @@ export class Stage {
     this.addLayer(near, 0.9);
   }
 
+  /**
+   * The one painted stage. Every other backdrop here is assembled out of flat
+   * shapes; this one is a single texture on a single quad.
+   *
+   * It is deliberately hung far back and left alone. The temptation with a
+   * painting is to build shapes in front of it to "tie it in", which only
+   * ever produces two art styles arguing in the same frame - so the only
+   * things drawn over it are the floor every stage needs and the falling
+   * leaves, both of which the painting already contains and so agrees with.
+   *
+   * Sizing is the whole job here, and it is a squeeze between two limits.
+   * Too large and the camera only ever frames a patch of village: the pagoda
+   * and the mountain, which are the reason to use this picture at all, sit
+   * off the top of the screen. Too small and the edge of the quad walks into
+   * shot at the corners. The camera tops out at 980 units wide and this layer
+   * slides about 68 either way, so 1150 clears the edge with room spare, and
+   * the height that falls out of the painting's own aspect happens to land
+   * the mountain just under the ceiling of a zoomed-out shot.
+   */
+  private buildPostRoad() {
+    const g = new THREE.Group();
+    const W = 1150;
+    const H = W / 2.1358; // the painting's own aspect - never letterbox it
+    const geo = new THREE.PlaneGeometry(W, H);
+    const material = new THREE.MeshBasicMaterial({ toneMapped: false });
+    // Held blank until the bitmap arrives rather than flashing white: the
+    // texture decode is async even when the file is inlined as a data URI.
+    material.transparent = true;
+    material.opacity = 0;
+
+    // Imported here rather than at the top of the file on purpose. The
+    // self-tests import this module under Node to read STAGE_THEMES, and Node
+    // cannot parse a .jpg import - but it never builds a Stage, so keeping the
+    // asset behind the one method that needs it keeps the tests running.
+    void import("../../../assets/post-road.jpg").then(({ default: url }) => {
+      new THREE.TextureLoader().load(url, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        // The quad is bigger than the source and the art is pixel work, so it
+        // is left crisp rather than smoothed back into mush.
+        tex.magFilter = THREE.NearestFilter;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.generateMipmaps = true;
+        material.map = tex;
+        material.opacity = 1;
+        material.transparent = false;
+        material.needsUpdate = true;
+        this.textures.push(tex);
+      });
+    });
+
+    const m = new THREE.Mesh(geo, material);
+    // Sunk 150 so the painted foreground - rocks, stream, the near verge -
+    // runs under the floor the fighters stand on. That buries the part of the
+    // picture that would otherwise argue with the arena, and lands the village
+    // itself at head height behind them rather than under their feet.
+    m.position.set(0, H / 2 - 150, layerZ(1));
+    m.renderOrder = 1;
+    g.add(m);
+    this.addLayer(g, 0.25);
+  }
+
   // ------------------------------------------------------------------ update
 
   /** Applies parallax and advances ambient weather. */
@@ -909,6 +1001,7 @@ export class Stage {
 
   dispose() {
     for (const d of this.disposables) d.dispose();
+    for (const t of this.textures) t.dispose();
     this.ambient.dispose();
   }
 }
