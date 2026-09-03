@@ -73,7 +73,7 @@ if (withMusic) {
 // opening this off disk has no HTTP header to go on, and "Hattori Hanzo" is
 // spelled with a macron.
 const page = `<meta charset="utf-8">
-<title>Stick Fighter</title>
+<title>Plank Fighter World</title>
 <style>
 /* The game paints its own full-bleed world; this only clears the way for it. */
 html, body { margin: 0; padding: 0; height: 100%; background: #0c0d0c; }

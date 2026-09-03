@@ -1,5 +1,5 @@
 /**
- * Core data types for the Stick Fighter engine.
+ * Core data types for the Plank Fighter World engine.
  *
  * Everything about a character - stats, animation, hitboxes, props - is plain
  * data. Adding a new fighter means adding one file that exports a FighterDef

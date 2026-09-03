@@ -1,4 +1,4 @@
-# Stick Fighter
+# Plank Fighter World
 
 A 2D fighting game rendered with three.js. Two stickmen, side view, orthographic
 camera, 60 Hz fixed-step simulation. Everything about a character is data, so

@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Stick Fighter - live
+title Plank Fighter World - live
 
 REM Double-click this to play the current code in a browser.
 REM Pulls, installs anything new, and starts the dev server with hot reload,

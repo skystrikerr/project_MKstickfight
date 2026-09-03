@@ -1,5 +1,5 @@
 /**
- * Stick Fighter - a 2D three.js fighting game.
+ * Plank Fighter World - a 2D three.js fighting game.
  *
  * Screens: title -> character select -> match, with the move list available
  * from anywhere.

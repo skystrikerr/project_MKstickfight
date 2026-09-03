@@ -42,8 +42,8 @@
   },
   "main": "electron/main.cjs",
   "build": {
-    "appId": "com.stickfighter.app",
-    "productName": "Stick Fighter",
+    "appId": "com.plankfighterworld.app",
+    "productName": "Plank Fighter World",
     "directories": {
       "output": "release",
       "buildResources": "electron"
@@ -75,7 +75,7 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Stick Fighter"
+      "shortcutName": "Plank Fighter World"
     },
     "portable": {
       "artifactName": "${productName}-${version}-portable.${ext}"

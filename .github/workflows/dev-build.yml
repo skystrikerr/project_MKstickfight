@@ -63,7 +63,7 @@ jobs:
             The current state of `main`, rebuilt on every push. Replaced each
             time — this is not a version, it is a test build.
 
-            Run **`Stick Fighter-*-portable.exe`**: one file, double-click, installs
+            Run **`Plank Fighter World-*-portable.exe`**: one file, double-click, installs
             nothing. Windows shows a blue "Windows protected your PC" box because
             the build is not code-signed — **More info → Run anyway**.
 

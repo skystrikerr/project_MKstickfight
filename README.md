@@ -1,8 +1,8 @@
 <p align="center">
-  <img src=".github/social-preview.png" alt="Stick Fighter" width="820">
+  <img src=".github/social-preview.png" alt="Plank Fighter World" width="820">
 </p>
 
-<h1 align="center">Stick Fighter</h1>
+<h1 align="center">Plank Fighter World</h1>
 
 <p align="center">
   A 2D fighting game in the browser, built on three.js.<br>
@@ -32,8 +32,8 @@ the newest one, and pick either:
 
 | File | What it is |
 |---|---|
-| `Stick Fighter-x.y.z-portable.exe` | Single file. Double-click and play, installs nothing. |
-| `Stick Fighter-x.y.z-x64.exe` | Installer. Adds a Start-menu and desktop shortcut. |
+| `Plank Fighter World-x.y.z-portable.exe` | Single file. Double-click and play, installs nothing. |
+| `Plank Fighter World-x.y.z-x64.exe` | Installer. Adds a Start-menu and desktop shortcut. |
 
 Windows will show a blue "Windows protected your PC" box the first time, because
 the build is not code-signed. Click **More info → Run anyway**. Signing needs a
@@ -172,9 +172,9 @@ person with admin on the repository: the workflow token cannot create the site.
 
 ```bash
 npm run electron:dev   # run the shell against the Vite dev server
-npm run dist:win       # -> release/Stick Fighter-0.5.0-x64.exe   (needs Windows)
-npm run dist:linux     # -> release/Stick Fighter-0.5.0-x64.AppImage
-npm run dist:mac       # -> release/Stick Fighter-0.5.0-x64.dmg   (needs macOS)
+npm run dist:win       # -> release/Plank Fighter World-0.5.0-x64.exe   (needs Windows)
+npm run dist:linux     # -> release/Plank Fighter World-0.5.0-x64.AppImage
+npm run dist:mac       # -> release/Plank Fighter World-0.5.0-x64.dmg   (needs macOS)
 ```
 
 Cross-building Windows from Linux needs Wine and is not worth the trouble — the

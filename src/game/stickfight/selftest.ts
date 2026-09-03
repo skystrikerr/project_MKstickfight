@@ -1,5 +1,5 @@
 /**
- * Stick Fighter self-test: `npm run arcade:test`
+ * Plank Fighter World self-test: `npm run arcade:test`
  *
  * Runs the simulation headlessly with scripted inputs. It checks the core
  * mechanics still work and - importantly when adding fighters - that every

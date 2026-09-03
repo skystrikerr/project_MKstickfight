@@ -78,11 +78,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.meta.outputs.tag }}
-          name: Stick Fighter ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.meta.outputs.tag }}
+          name: Plank Fighter World ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.meta.outputs.tag }}
           # Everything below 1.0 is pre-early-access and should say so.
           prerelease: ${{ startsWith(steps.meta.outputs.tag, 'v0.') }}
           body: |
-            Download **`Stick Fighter-*-portable.exe`** to just play — one file,
+            Download **`Plank Fighter World-*-portable.exe`** to just play — one file,
             double-click, installs nothing. Take the `-x64.exe` instead if you
             want a Start-menu shortcut, or the `.AppImage` on Linux.
 
