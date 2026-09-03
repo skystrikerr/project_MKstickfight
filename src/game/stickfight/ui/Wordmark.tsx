@@ -17,13 +17,37 @@
  * any width without a second set of breakpoints.
  */
 
+/**
+ * DROP THE REAL LOGO IN HERE.
+ *
+ * Put the file at `src/assets/logo.png`, add
+ *
+ *     import logo from "@/assets/logo.png";
+ *
+ * at the top, and set `LOGO = logo`. The CSS lockup below falls away and the
+ * artwork renders in its place at the same size, keeping the accessible name.
+ *
+ * It is a constant rather than a prop because there is one logo and every
+ * screen that shows it should show the same one - a prop would let them drift.
+ */
+const LOGO: string | null = null;
+
 const SHEAR = "skewX(-9deg)";
 /** Where the diagonal crosses, left edge to right edge. */
 const CUT_L = 56;
 const CUT_R = 34;
 
 export function Wordmark({ className = "" }: { className?: string }) {
-  const layer = "absolute left-0 top-0 whitespace-nowrap uppercase leading-[0.86]";
+  if (LOGO) {
+    return (
+      <img
+        src={LOGO}
+        alt="Plank Fighter World"
+        className={`block w-[min(88vw,760px)] select-none ${className}`}
+        draggable={false}
+      />
+    );
+  }
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <PlankFighter />
