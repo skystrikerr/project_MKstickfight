@@ -13,6 +13,7 @@ import { FighterPortrait } from "@/game/stickfight/ui/Portrait";
 import { ROSTER } from "@/game/stickfight/fighters";
 import { Wordmark } from "@/game/stickfight/ui/Wordmark";
 import { Settings } from "@/game/stickfight/ui/Settings";
+import { StartButton } from "@/game/stickfight/ui/StartButton";
 import { music } from "@/game/stickfight/engine/music";
 import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
@@ -193,13 +194,7 @@ export default function StickFighter() {
           </div>
 
           <div className="relative mt-10 flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setScreen("select")}
-              className="cut bg-[var(--accent)] px-14 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
-            >
-              Press Start
-            </button>
+            <StartButton onClick={() => setScreen("select")} />
             <div className="flex items-center gap-4">
               <button
                 type="button"
