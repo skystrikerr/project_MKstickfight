@@ -1,14 +1,18 @@
 /**
  * Background music.
  *
- * Sound effects are synthesised (see `Sfx`) because they cost nothing to ship,
- * but music is not something you can fake, so tracks are ordinary audio files
- * dropped into `public/music/` and named in `TRACKS` below.
+ * Two sources, and files win. Drop an audio file into `public/music/`, name it
+ * in `TRACKS`, and that is what plays. A cue with no file falls through to the
+ * procedural score in `score.ts`, which is synthesised from oscillators the
+ * same way the sound effects are.
  *
- * Nothing has to exist for the game to run. A cue with no track, or a file
- * that fails to load, just leaves that screen silent - so the repo stays
- * playable without shipping anyone's copyrighted audio.
+ * That fallback is why the game has music at all. The one thing that cannot be
+ * committed to this repository is somebody else's recording, so for a long
+ * time every screen after the title was silent - not because silence was the
+ * design, but because the design had no way to fill it.
  */
+
+import { score } from "./score";
 
 /** The moments the game asks for music. */
 export type MusicCue = "menu" | "select" | "fight" | "victory";
@@ -29,11 +33,10 @@ export interface TrackDef {
  * See `public/music/README.md` for how to add one.
  */
 export const TRACKS: Partial<Record<MusicCue, TrackDef | TrackDef[]>> = {
-  // One ambient bed, wired to the title only. A cue with no track of its own
-  // leaves whatever is playing alone, so this carries through select and into
-  // the match without ever restarting. Give `fight` its own track and it will
-  // take over there instead.
-  menu: { file: "ambient-1.mp3" },
+  // Empty on purpose. Every cue falls through to the procedural score, which
+  // is the only music this repository is allowed to contain. Name a file here
+  // and it takes that cue over immediately - the fallback is a floor, not a
+  // preference.
 };
 
 // Vite rewrites this at build time; the fallback keeps the module importable
@@ -102,16 +105,24 @@ export class Music {
   play(cue: MusicCue) {
     if (this.cue === cue) return;
     const track = pick(cue);
-    if (!track) {
-      // No track for this cue: let the last one keep going rather than
-      // dropping into silence between screens.
-      return;
-    }
     this.cue = cue;
     if (!this.unlocked) {
       this.pending = cue;
       return;
     }
+    if (!track) {
+      // Nothing shipped for this cue, so the score writes one. The decks fade
+      // out first: a file and the synth playing over each other is worse than
+      // either alone.
+      this.crossfade(-1, 0);
+      this.started = null;
+      score.setMuted(this.muted);
+      score.setVolume(this.volume);
+      score.play(cue);
+      return;
+    }
+    // A real file takes over from the score rather than joining it.
+    score.stop();
 
     const src = `${BASE}music/${track.file}`;
     this.started = src;
@@ -136,17 +147,20 @@ export class Music {
     this.cue = null;
     this.pending = null;
     this.started = null;
+    score.stop();
     this.crossfade(-1, 0);
   }
 
   setMuted(muted: boolean) {
     this.muted = muted;
+    score.setMuted(muted);
     const el = this.active >= 0 ? this.decks[this.active] : null;
     if (el) el.volume = muted ? 0 : this.volume;
   }
 
   setVolume(v: number) {
     this.volume = Math.max(0, Math.min(1, v));
+    score.setVolume(this.volume);
     if (!this.muted) this.setMuted(false);
   }
 

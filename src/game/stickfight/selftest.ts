@@ -30,6 +30,7 @@ import { applyWeapon, WEAPONS, weaponsFor } from "./weapons";
 import type { FighterDef, MoveDef } from "./types";
 import { INPUT_SCHEMES, renderNotation } from "./inputscheme";
 import { applyClear, applyMatch, isUnlocked, unlockLabel, unlockProgress, type ProgressState } from "./progress";
+import { CUES as SCORE_CUES, Score, type ScoreCue } from "./engine/score";
 
 const results: { name: string; ok: boolean; detail: string }[] = [];
 
@@ -211,6 +212,18 @@ function contract(def: FighterDef) {
     const re = GLYPHS[m.input.motion];
     if (!re) continue;
     check(`${def.id}.${m.id}: notation matches its motion`, re.test(m.notation), `${m.input.motion} vs "${m.notation}"`);
+  }
+  // Several notations quote what the move costs. Changing the cost and leaving
+  // the printed number behind is silent, and the only way to find out is to be
+  // told a move needs 70 and watch it come out at 55.
+  for (const m of moves) {
+    const quoted = m.notation?.match(/\((\d+)\s+[A-Za-z]/);
+    if (!quoted || m.resourceCost === undefined) continue;
+    check(
+      `${def.id}.${m.id}: the quoted resource cost is the real one`,
+      Number(quoted[1]) === m.resourceCost,
+      `says ${quoted[1]}, costs ${m.resourceCost}`,
+    );
   }
 
   const dash = moves.find((m) => m.id === "dashAttack");
@@ -1021,6 +1034,41 @@ function scriptFor(move: MoveDef): RawInput[] {
 }
 
 // ---------------------------------------------------------------------------
+// Procedural score
+// ---------------------------------------------------------------------------
+
+{
+  // The score is what actually plays, so its tables get the same treatment as
+  // the move data: a pattern that indexes outside a bar or a bass degree
+  // outside the scale is silent nonsense rather than an error.
+  const cues: ScoreCue[] = ["menu", "select", "fight", "victory"];
+  for (const cue of cues) {
+    const def = SCORE_CUES[cue];
+    check(`score: ${cue} has a definition`, !!def);
+    check(`score: ${cue} tempo is a tempo`, def.bpm >= 40 && def.bpm <= 200, `${def.bpm}`);
+    check(`score: ${cue} root is audible`, def.root >= 60 && def.root <= 400, `${def.root}`);
+    check(`score: ${cue} density is a probability`, def.density >= 0 && def.density <= 1, `${def.density}`);
+    for (const i of [...def.kick, ...def.rattle]) {
+      check(`score: ${cue} pattern step ${i} is inside a bar`, Number.isInteger(i) && i >= 0 && i < 16, `${i}`);
+    }
+    check(`score: ${cue} has a bass line`, def.bass.length > 0);
+    for (const d of def.bass) check(`score: ${cue} bass degree ${d} is in the scale`, d >= 0 && d < 8, `${d}`);
+  }
+  check("score: the victory sting does not loop", SCORE_CUES.victory.loop === false);
+  check("score: the fight cue does loop", SCORE_CUES.fight.loop === true);
+  check("score: a fight is faster than a menu", SCORE_CUES.fight.bpm > SCORE_CUES.menu.bpm);
+
+  // With no AudioContext - which is this process, and also a browser that has
+  // blocked audio - every call has to be a no-op rather than a throw.
+  const sc = new Score();
+  for (const cue of cues) sc.play(cue);
+  sc.setVolume(0.3);
+  sc.setMuted(true);
+  sc.stop();
+  check("score: it survives having no audio at all", sc.cue === null, `${sc.cue}`);
+}
+
+// ---------------------------------------------------------------------------
 // Music
 // ---------------------------------------------------------------------------
 {
@@ -1039,13 +1087,20 @@ function scriptFor(move: MoveDef): RawInput[] {
   // held cue is that cue, so unlocking has to clear it first - getting this
   // wrong means the title music never plays at all, which is what shipped for
   // about ten minutes.
+  // Written against the cue rather than the file, so it keeps testing
+  // something once `TRACKS` is empty and every cue falls through to the
+  // procedural score - which is the shipping configuration.
   const held = new Music();
-  const first = (Object.keys(TRACKS) as MusicCue[])[0];
-  if (first) {
-    held.play(first);
-    check("music: a cue asked for before the gesture is held", held.started === null);
-    held.unlock();
-    check("music: unlocking starts the held cue", held.started !== null, `${held.started}`);
+  held.play("menu");
+  check("music: a cue asked for before the gesture is held", held.started === null && held.cue === "menu");
+  held.unlock();
+  check("music: unlocking leaves the held cue running", held.cue === "menu", `${held.cue}`);
+  const shipped = (Object.keys(TRACKS) as MusicCue[])[0];
+  if (shipped) {
+    const f = new Music();
+    f.play(shipped);
+    f.unlock();
+    check("music: a shipped file starts on unlock", f.started !== null, `${f.started}`);
   }
 
   // The whole point is that the game runs with no music at all. Nothing here

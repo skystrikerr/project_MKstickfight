@@ -87,7 +87,13 @@ export const ZULU: FighterDef = {
     // the moment he stops. Spent on the encirclement.
     gainOnHit: 6,
     gainOnBlocked: 3,
-    gainOnTakeHit: 2,
+    // Being shot at fills it fastest, which is a deadlock fixed rather than a
+    // comeback mechanic invented. Encircle is the answer to being held out at
+    // range, and it cost 70 Impi in a bar that only really filled by landing
+    // hits - so the tool that beats zoning needed him to already be past it,
+    // and it came out 0.15 times a round. An impi crossing open ground under
+    // fire is the exact situation the move is for.
+    gainOnTakeHit: 5,
     color: "#ff8a5c",
   },
   props: [
@@ -803,8 +809,8 @@ export const ZULU: FighterDef = {
       tags: ["special"],
       priority: 24,
       duration: 54,
-      resourceCost: 70,
-      resourceMin: 70,
+      resourceCost: 55,
+      resourceMin: 55,
       vel: [
         { at: 3, x: 12 },
         { at: 14, x: 0 },
@@ -827,7 +833,7 @@ export const ZULU: FighterDef = {
       ],
       vfx: [{ at: 3, kind: "dust", x: 10, y: 4, scale: 1.4 }],
       desc: "Spends 70 Impi to run straight past them, stab, turn and stab again from behind. They cannot block both.",
-      notation: "↓↙← + B  (70 Impi)",
+      notation: "↓↙← + B  (55 Impi)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(3, { ...STANCE, torso: 34, shoulderF: 10, elbowF: 90, weapon: 50, hipF: 46, kneeF: 24, hipB: -34, kneeB: 52, offX: 4 }, "out"),

@@ -50,10 +50,10 @@ export const MUAYTHAI: FighterDef = {
   },
   stats: {
     health: 940,
-    walkF: 3.05,
+    walkF: 3.3,
     walkB: 2.6,
-    dashSpeed: 8.4,
-    dashFrames: 14,
+    dashSpeed: 9.2,
+    dashFrames: 13,
     backdashFrames: 18,
     jumpVel: 12.3,
     jumpFwd: 5,
@@ -640,10 +640,15 @@ export const MUAYTHAI: FighterDef = {
       tags: ["special", "throw"],
       priority: 26,
       duration: 30,
-      vel: [{ at: 2, x: 5 }],
-      friction: 0.88,
-      throwDef: { from: 6, to: 12, range: 64, success: "clinchKnees" },
-      desc: "Steps in and takes the neck. Command grab - it beats blocking entirely.",
+      // The whole character is paid out through this grab - everything else he
+      // owns is bottom-third damage - and it was reaching 64 units when his own
+      // jab reaches 90, so he had to be closer to take the neck than to punch.
+      // Measured under AI control it was thrown 1.8 times a round and connected
+      // 0.2 of them: his win condition happened once every five rounds.
+      vel: [{ at: 2, x: 7.5 }],
+      friction: 0.92,
+      throwDef: { from: 6, to: 16, range: 82, success: "clinchKnees" },
+      desc: "Steps in and takes the neck. Command grab - it beats blocking entirely, and it closes the last of the gap itself.",
       notation: "←↙↓↘→ + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -698,9 +703,13 @@ export const MUAYTHAI: FighterDef = {
       duration: 38,
       resourceCost: 30,
       resourceMin: 30,
-      vel: [{ at: 6, x: 5 }],
-      friction: 0.86,
-      armor: [{ from: 5, to: 13, hits: 1, damageScale: 0.3 }],
+      // The armoured way in. One hit absorbed over eight frames was not enough
+      // to walk through anybody's poke, so this covered no ground it did not
+      // already have. Longer window and further travel makes it the answer to
+      // being held out - which is the only problem he has.
+      vel: [{ at: 6, x: 7.5 }],
+      friction: 0.9,
+      armor: [{ from: 5, to: 20, hits: 1, damageScale: 0.3 }],
       hits: [
         hit(14, 19, bx(16, 44, 62, 40), 96, {
           fx: "blunt",
@@ -731,8 +740,13 @@ export const MUAYTHAI: FighterDef = {
       priority: 20,
       duration: 42,
       airborne: true,
+      // He is upside down and off the ground, so nothing at chest height is
+      // where he is. This is the one tool he has that can cross a gap through
+      // something rather than around it, and without the invulnerability it
+      // was a slow overhead that traded with everything on the way in.
+      invuln: [{ from: 5, to: 18, kind: "strike" }],
       vel: [
-        { at: 4, x: 6.5, y: 9.5 },
+        { at: 4, x: 7.4, y: 9.5 },
         { at: 22, y: -0.8, mode: "add" },
       ],
       hits: [

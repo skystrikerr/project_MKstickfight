@@ -85,6 +85,12 @@ for (const def of ROSTER) {
       if (b !== "S" && !new RegExp(`\\b${b}\\b`).test(m.notation)) tag(m, `notation "${m.notation}" does not name button ${b}`);
     }
 
+    // A quoted resource cost has to be the real one.
+    const quoted = m.notation?.match(/\((\d+)\s+[A-Za-z]/);
+    if (quoted && m.resourceCost !== undefined && Number(quoted[1]) !== m.resourceCost) {
+      tag(m, `notation says ${quoted[1]} resource but the move costs ${m.resourceCost}`);
+    }
+
     // Meter cost without the ex tag (or vice versa) - the move list groups on it.
     const isEx = m.tags?.includes("ex" as never);
     if (m.meterCost && !isEx && !m.tags?.includes("super" as never)) tag(m, `costs ${m.meterCost} meter but is tagged neither ex nor super`);

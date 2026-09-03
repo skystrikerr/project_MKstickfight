@@ -88,6 +88,15 @@ const KAAD_HAND: ShapePart[] = [
   { geo: "poly", size: [-3, 5, 3, 4, 3, -4, -3, -5], pos: [-6, 0], color: "#7a6240" },
 ];
 
+/** A straight throwing spike. Kuro carries one in each hand. */
+const BO_SPIKE: ShapePart[] = [
+  { geo: "poly", size: [-14, 2.2, 10, 1.8, 20, 0, 10, -1.8, -14, -2.2], pos: [6, 0], color: "#aab2be" },
+  { geo: "poly", size: [-10, 0.9, 8, 0.7, 16, 0, 8, -0.7, -10, -0.9], pos: [8, 0], color: "#e2e8f0" },
+  // Bound at the butt so it leaves the hand the same way every time.
+  { geo: "box", size: [9, 3.6], pos: [-9, 0], color: "#141019" },
+  { geo: "box", size: [9, 1.2], pos: [-9, 1], color: "#3a3040" },
+];
+
 export const WEAPONS: Record<string, WeaponVariant[]> = {
   roman: [
     {
@@ -385,6 +394,230 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
           { geo: "box", size: [20, 5], pos: [0, 0], color: "#4f3a22" },
           { geo: "box", size: [20, 1.6], pos: [0, 1.7], color: "#8a6a42" },
           { geo: "poly", size: [-3, 4, 3, 4, 2.4, -4, -2.4, -4], pos: [-10, 0], color: "#8a6a42" },
+        ],
+      },
+    },
+  ],
+
+  pirate: [
+    {
+      id: "hanger",
+      name: "Sailor's Hanger",
+      blurb:
+        "The short curved sword the word 'cutlass' was still settling onto in 1720. Plainer, straighter and cheaper: a working blade off a ship's rack rather than the swept-hilt thing the illustrations gave her a century later.",
+      unlock: { kind: "wins", count: 3 },
+      parts: {
+        cutlass: [
+          { geo: "blade", size: [52, 7, 0.5], pos: [32, 2], rot: 4, color: "#c3cbd4" },
+          { geo: "poly", size: [-24, 1.8, 24, 1, 22, -1.6, -24, -0.8], pos: [32, 3.5], rot: 4, color: "#eaf0f6" },
+          // A plain iron knuckle bow, not a gilded shell.
+          { geo: "poly", size: [0, 8, 6, 5, 7, -6, 1, -9, 0, -5, 4, -3, 3, 3, -1, 5], pos: [1, -1], color: "#8f979f" },
+          { geo: "box", size: [4, 17], pos: [3, 1], color: "#7d858d" },
+          { geo: "cyl", size: [2.6, 14], pos: [-7, -1], rot: 90, color: "#4a3220" },
+          { geo: "box", size: [13, 1.6], pos: [-7, 1], rot: 90, color: "#6b4a2c" },
+          { geo: "disc", size: [3], pos: [-15, -1], color: "#8f979f" },
+        ],
+      },
+    },
+  ],
+
+  ninja: [
+    {
+      id: "wakizashi",
+      name: "Wakizashi",
+      blurb:
+        "The companion sword a man of his rank wore indoors and out. Worth remembering that the record calls him Devil Hanzo for what he did with a spear - the knives and the black hood are a later century's idea of him, and the sword is the part he actually carried.",
+      unlock: { kind: "wins", count: 3 },
+      parts: {
+        tanto: [
+          { geo: "poly", size: [-7, 3.6, 7, 3.2, 7, -3.2, -7, -3.6], pos: [-2, 0], color: "#2a2136" },
+          { geo: "box", size: [2, 5.6], pos: [-5, 0], rot: 45, color: "#c9b489" },
+          { geo: "box", size: [2, 5.6], pos: [-1, 0], rot: 45, color: "#c9b489" },
+          // A real guard and a longer blade with the curve a tanto does not have.
+          { geo: "disc", size: [5], pos: [6, 0], color: "#7d6a3f" },
+          { geo: "ring", size: [5, 1.2], pos: [6, 0], color: "#4f4326", z: 0.1 },
+          { geo: "blade", size: [46, 5.8, 0.35], pos: [32, 2], rot: 5, color: "#a9b4c2" },
+          { geo: "poly", size: [-20, 1.7, 20, 1.1, 18, -1, -20, -0.7], pos: [32, 3], rot: 5, color: "#eef2f6" },
+        ],
+      },
+    },
+  ],
+
+  mongol: [
+    {
+      id: "warbow",
+      name: "War Bow",
+      blurb:
+        "The heavy end of the same design: longer rigid ears, a deeper set to the limbs and a draw nobody shoots all day. The steppe bow is a family of weapons rather than one, and this is the one that goes through armour.",
+      unlock: { kind: "wins", count: 4 },
+      parts: {
+        bow: [
+          { geo: "poly", size: [-5, 8, 4, 7, 4, -7, -5, -8], pos: [-5, 0], color: "#2f2115" },
+          // Longer limbs, deeper recurve, and the siyahs set harder back.
+          { geo: "poly", size: [-4, 14, 3, 13, 4, -12, -3, -13], pos: [-9, 17], rot: 16, color: "#432f1d" },
+          { geo: "poly", size: [-4, 14, 3, 13, 4, -12, -3, -13], pos: [-9, -17], rot: -16, color: "#432f1d" },
+          { geo: "poly", size: [-2.4, 10, 2.4, 9, 2.4, -9, -2.4, -10], pos: [-3, 33], rot: -46, color: "#b8903c" },
+          { geo: "poly", size: [-2.4, 10, 2.4, 9, 2.4, -9, -2.4, -10], pos: [-3, -33], rot: 46, color: "#b8903c" },
+          // Sinew backing and horn belly, bound at the grip.
+          { geo: "box", size: [9, 2.4], pos: [-5, 6], color: "#8f7a58" },
+          { geo: "box", size: [9, 2.4], pos: [-5, -6], color: "#8f7a58" },
+          { geo: "box", size: [7, 3], pos: [-5, 0], color: "#6b5636" },
+          { geo: "box", size: [1.8, 74], pos: [4, 0], color: "#efe8d6" },
+        ],
+      },
+    },
+  ],
+
+  shaolin: [
+    {
+      id: "ironstaff",
+      name: "Iron Staff",
+      blurb:
+        "Zheng Ruoceng, writing up what the monks did to a raiding party at Wengjiagang, is specific that the staves were iron. It is the same weapon and the same art, weighing about four times as much.",
+      unlock: { kind: "wins", count: 4 },
+      parts: {
+        staff: [
+          { geo: "cyl", size: [3, 118], pos: [22, 0], rot: 90, color: "#4a5058" },
+          { geo: "cyl", size: [1.3, 118], pos: [22, 1.6], rot: 90, color: "#6b737d" },
+          // Forged ferrules rather than fitted caps, and a corded grip so the
+          // thing can be held at all.
+          { geo: "box", size: [13, 8.5], pos: [76, 0], color: "#2f353a" },
+          { geo: "box", size: [13, 8.5], pos: [-32, 0], color: "#2f353a" },
+          { geo: "box", size: [3.4, 9], pos: [81, 0], color: "#8d959e" },
+          { geo: "box", size: [3.4, 9], pos: [-37, 0], color: "#8d959e" },
+          { geo: "box", size: [14, 7.4], pos: [4, 0], color: "#3a2a1a" },
+          { geo: "box", size: [14, 1.6], pos: [4, 2.2], color: "#6b5636" },
+          { geo: "box", size: [14, 7.4], pos: [38, 0], color: "#3a2a1a" },
+          { geo: "box", size: [14, 1.6], pos: [38, 2.2], color: "#6b5636" },
+        ],
+      },
+    },
+  ],
+
+  nihang: [
+    {
+      id: "khanda",
+      name: "Khanda",
+      blurb:
+        "Straight, broad, double-edged and widening towards the tip - and the one on the Khalsa emblem, so for a Nihang it is not simply another sword. The tulwar is what he would fight with; this is what he would be buried holding.",
+      unlock: { kind: "clear", level: "Brawler" },
+      parts: {
+        tulwar: [
+          // Straight and leaf-shaped: broadest near the point, not the hilt.
+          { geo: "poly", size: [0, -5, 18, -6, 34, -8, 46, -9, 54, -4, 54, 4, 46, 9, 34, 8, 18, 6, 0, 5], pos: [14, 0], color: "#dde5ec" },
+          { geo: "poly", size: [0, -2, 18, -2.6, 34, -3.6, 44, -4, 50, 0, 44, 4, 34, 3.6, 18, 2.6, 0, 2], pos: [14, 0], color: "#f2f7fb", z: 0.1 },
+          // The reinforcing plate down the forte that a khanda carries.
+          { geo: "poly", size: [0, -4, 20, -5, 20, 5, 0, 4], pos: [14, 0], color: "#b6c0c9", z: 0.15 },
+          { geo: "box", size: [5, 6], pos: [11, 0], color: "#d8b452" },
+          { geo: "poly", size: [-2.4, -11, 2.4, -11, 3, 0, 2.4, 11, -2.4, 11, -3, 0], pos: [8, 0], color: "#d8b452" },
+          { geo: "box", size: [13, 5.5], pos: [0, 0], color: "#3f2c1c" },
+          // Disc pommel with the spike a khanda has and a tulwar does not.
+          { geo: "disc", size: [5], pos: [-9, 0], color: "#d8b452" },
+          { geo: "poly", size: [0, 3, -12, 1.4, -16, 0, -12, -1.4, 0, -3], pos: [-11, 0], color: "#d8b452" },
+        ],
+      },
+    },
+  ],
+
+  shade: [
+    {
+      id: "boshuriken",
+      name: "Bo-shuriken",
+      blurb:
+        "Straight iron spikes rather than a leaf blade - the shape the surviving Edo manuals actually teach, thrown point-first with no spin. Every province that tells his story hands him a different tool; this is the one the manuals agree on.",
+      unlock: { kind: "wins", count: 3 },
+      parts: {
+        kunaiF: BO_SPIKE,
+        kunaiB: BO_SPIKE,
+      },
+    },
+  ],
+
+  ethiopia: [
+    {
+      id: "wujigra",
+      name: "Wujigra",
+      blurb:
+        "The Amharic name for the Vetterli - the Italian service rifle, so the ones in Ethiopian hands had been taken off Italians. At Dogali that is exactly where they came from, which makes it the most pointed object on his person.",
+      unlock: { kind: "wins", count: 4 },
+      parts: {
+        rifle: [
+          // Longer, plainer and all wood: a bolt-action military rifle rather
+          // than the Remington's dropping block.
+          { geo: "poly", size: [-20, 4.5, 16, 4, 16, -4, -20, -4.5], pos: [-4, 1], color: "#6b4a2c" },
+          // Butted up against the stock rather than floated off it - the two
+          // wood blocks are one piece of furniture, and a gap between them
+          // reads as a broken rifle.
+          { geo: "poly", size: [-11, 3.6, 21, 3.2, 21, -3.2, -11, -3.6], pos: [23, 1], color: "#7a5636" },
+          { geo: "box", size: [30, 1.4], pos: [23, 3], color: "#8a6440" },
+          { geo: "cyl", size: [1.7, 34], pos: [60, 1], rot: 90, color: "#2b3036" },
+          { geo: "poly", size: [-11, 0, -9, 5.5, 9, 5.5, 11, 0], pos: [-2, 5], color: "#3a4046" },
+          // The straight bolt handle sticking out of the receiver.
+          { geo: "box", size: [3, 9], pos: [4, 9], color: "#4a5158" },
+          { geo: "disc", size: [2.4], pos: [4, 13], color: "#6b737d" },
+          { geo: "poly", size: [-3, 6.5, 3, 6, 4, -7, -2, -7], pos: [2, -7], rot: -6, color: "#5c3f26" },
+          { geo: "poly", size: [3, 4, -2, 3, -5, -6, 0, -7], pos: [-8, -5], color: "#2b3036" },
+          { geo: "box", size: [6, 3.4], pos: [78, 1], color: "#3f454b" },
+        ],
+        gasha: [
+          // A campaign shield: plain hide over a low boss, none of the silver.
+          { geo: "disc", size: [23], pos: [10, 0], color: "#6b4a30", z: 0.5 },
+          { geo: "ring", size: [23, 2.4], pos: [10, 0], color: "#4a3320", z: 0.55 },
+          { geo: "disc", size: [17], pos: [10, 0], color: "#7a5636", z: 0.58 },
+          { geo: "disc", size: [6], pos: [10, 0], color: "#8f979f", z: 0.62 },
+          { geo: "disc", size: [2.4], pos: [10, 0], color: "#c9d1d8", z: 0.64 },
+        ],
+      },
+    },
+  ],
+
+  duelist: [
+    {
+      id: "rapier",
+      name: "Transitional Rapier",
+      blurb:
+        "Longer in the blade and heavier in the hilt: the weapon the salles were still teaching when she learned, on its way out as the smallsword came in. She fought across the years the fashion changed, so either is defensible and this is the one she started on.",
+      unlock: { kind: "wins", count: 3 },
+      parts: {
+        smallsword: [
+          // Wider than the smallsword it replaces, and it has to be: drawn at the
+          // smallsword's section but longer, the blade thins out to a line that
+          // vanishes against a pale stage.
+          { geo: "poly", size: [0, 0, -92, 3.6, -102, 2.4, -102, -2.4, -92, -3.6], pos: [106, 0], color: "#cdd6e0" },
+          { geo: "box", size: [80, 1.4], pos: [52, 0.9], color: "#f4f8fc" },
+          // A swept hilt instead of a plain shell: bars round the hand.
+          { geo: "ring", size: [9, 1.8], pos: [10, 0], color: "#b8912f", z: 0.1 },
+          { geo: "poly", size: [0, 0, 7, -7, 12, -13, 9, -15, 3, -8, -2, -2], pos: [6, -7], color: "#c9a24a" },
+          { geo: "poly", size: [0, 0, 7, 7, 12, 13, 9, 15, 3, 8, -2, 2], pos: [6, 7], color: "#c9a24a" },
+          { geo: "poly", size: [-2, -13, 2, -13, 2.6, 0, 2, 13, -2, 13, -2.6, 0], pos: [9, 0], color: "#c9a24a" },
+          { geo: "box", size: [16, 4.6], pos: [-3, 0], color: "#3a2a1e" },
+          { geo: "box", size: [16, 1.2], pos: [-3, 1.3], color: "#c9a24a" },
+          // The heavy pommel a rapier needs to balance that much blade.
+          { geo: "disc", size: [4.6], pos: [-13, 0], color: "#c9a24a" },
+        ],
+      },
+    },
+  ],
+
+  celt: [
+    {
+      id: "earlylatene",
+      name: "Early La Tène",
+      blurb:
+        "The shorter pattern from a century or two before him, with a waisted blade and a leaf point that can still be used to thrust. The long cutting sword he carries is the late form - Gaul spent four hundred years arriving at it.",
+      unlock: { kind: "wins", count: 3 },
+      parts: {
+        longsword: [
+          // Waisted: wide at the shoulder, pinched, then swelling to a point.
+          { geo: "poly", size: [0, 0, -8, 6, -22, 7.5, -34, 6, -46, 8, -52, 8.5, -52, -8.5, -46, -8, -34, -6, -22, -7.5, -8, -6], pos: [58, 0], color: "#b6bec7" },
+          { geo: "poly", size: [0, 0, -10, 2, -44, 2.4, -50, 2, -50, -2, -44, -2.4, -10, -2], pos: [56, 0], color: "#e6edf3" },
+          { geo: "box", size: [4, 13], pos: [7, 0], color: "#5a4630" },
+          { geo: "cyl", size: [3, 17], pos: [-2, 0], rot: 90, color: "#4a3524" },
+          { geo: "box", size: [15, 1.6], pos: [-2, 1.8], color: "#8a6a42" },
+          // Anthropoid pommel: the little pair of arms these are known for.
+          { geo: "poly", size: [-6, 4, 6, 4, 5, -4, -5, -4], pos: [-12, 0], color: "#c08a3e" },
+          { geo: "box", size: [3, 7], pos: [-14, 6], rot: 18, color: "#c08a3e" },
+          { geo: "box", size: [3, 7], pos: [-14, -6], rot: -18, color: "#c08a3e" },
         ],
       },
     },
