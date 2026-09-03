@@ -1,3 +1,5 @@
+import logo from "@/assets/logo.jpg";
+
 /**
  * The game's wordmark.
  *
@@ -18,19 +20,20 @@
  */
 
 /**
- * DROP THE REAL LOGO IN HERE.
+ * The logo. The CSS lockup underneath is what shows if this is ever unset -
+ * it was the stand-in while the artwork was in transit, and it is kept rather
+ * than deleted because it is the only version that survives without an asset
+ * pipeline and it costs nothing to leave there.
  *
- * Put the file at `src/assets/logo.png`, add
- *
- *     import logo from "@/assets/logo.png";
- *
- * at the top, and set `LOGO = logo`. The CSS lockup below falls away and the
- * artwork renders in its place at the same size, keeping the accessible name.
- *
- * It is a constant rather than a prop because there is one logo and every
- * screen that shows it should show the same one - a prop would let them drift.
+ * A constant rather than a prop because there is one logo and every screen
+ * showing it should show the same one.
  */
-const LOGO: string | null = null;
+const LOGO: string | null = logo;
+
+const EDGE_FADE = [
+  "linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%)",
+  "linear-gradient(to bottom, transparent 0, #000 4%, #000 96%, transparent 100%)",
+].join(",");
 
 const SHEAR = "skewX(-9deg)";
 /** Where the diagonal crosses, left edge to right edge. */
@@ -43,8 +46,25 @@ export function Wordmark({ className = "" }: { className?: string }) {
       <img
         src={LOGO}
         alt="Plank Fighter World"
-        className={`block w-[min(88vw,760px)] select-none ${className}`}
+        className={`block w-[min(74vw,430px)] select-none ${className}`}
         draggable={false}
+        style={{
+          // The artwork is a rectangle of dark wood with its own hard edge, and
+          // the title screen it lands on is a map. Left alone it reads as a
+          // picture pasted onto the page; feathered at the border it reads as
+          // part of it. Only the outer few percent are touched, so the crest
+          // and the glow are untouched.
+          // Two linear masks intersected, rather than one radial. A radial on a
+          // non-square box either fades nothing (the stop lands outside it) or
+          // cuts the corners off as an ellipse; this feathers each of the four
+          // edges by the same small amount and leaves the middle alone. Four
+          // percent is about fourteen pixels - enough to lose the hard border,
+          // not enough to touch the W in WORLD.
+          maskImage: EDGE_FADE,
+          WebkitMaskImage: EDGE_FADE,
+          maskComposite: "intersect",
+          WebkitMaskComposite: "source-in",
+        }}
       />
     );
   }
