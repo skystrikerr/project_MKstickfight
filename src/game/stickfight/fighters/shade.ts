@@ -188,6 +188,8 @@ export const SHADE: FighterDef = {
       throwRange: 56,
       rollSpeed: 9,
       weaponIdle: { shoulderB: 34, elbowB: 64, weaponBack: 152 },
+      // Held blade-down, same as the ninja and lifted the other way.
+      rollCarry: { back: -84 },
     }),
 
     // ---------------------------------------------------------------- normals

@@ -49,8 +49,18 @@ export interface UniversalOptions {
   backThrowDamage?: number;
   /** Reach of the grab in units. */
   throwRange?: number;
-  /** Sidestep distance multiplier. */
+  /** Dodge distance multiplier - scales both the roll and the backstep. */
   rollSpeed?: number;
+  /**
+   * Extra rotation, in degrees, applied to a hand's weapon through the roll.
+   *
+   * The roll holds each weapon at the angle its owner already carries it at,
+   * which keeps every grip intact - but a weapon carried point-down (the
+   * Viking's axe, the ninja's reversed tanto) then digs into the stage when
+   * the hand swings past the floor. These lift those few blades clear without
+   * imposing one generic carry on the whole roster.
+   */
+  rollCarry?: { front?: number; back?: number };
   /** Weapon-holding fighters keep the arm angled during universal moves. */
   weaponIdle?: Pose;
 }
@@ -63,21 +73,56 @@ export interface UniversalOptions {
  *
  * Control scheme:
  *   S (hold)      Block          ← + S   Parry
- *   → + S         Sidestep       ← ← (tap back twice)   Backstep
+ *   → + S         Roll           ← ← (tap back twice)   Backstep
  *   ↓ + S         Low guard      A + B  Throw       ← + A + B  Back throw
  */
 export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
   const throwDamage = opts.throwDamage ?? 120;
   const backThrowDamage = opts.backThrowDamage ?? 130;
   const range = opts.throwRange ?? 62;
-  // Per-fighter dodge distance. `rollSpeed` kept its name from the roll this
-  // replaced so no fighter file has to change. The push now fires on frame 3
-  // rather than frame 1 - he has to get off the ground first - so the same
-  // authored number is given back the two frames of travel that cost it.
-  // Roughly two and a half character-widths of net travel, not one -
-  // a dodge that barely outruns a walk is not worth committing invuln to.
+  // Per-fighter dodge distance, in units, against a 40-unit hurtbox.
+  //
+  // The push fires on frame 3 rather than frame 1 - he has to get off the
+  // ground first - so the authored number is scaled back up to pay for the two
+  // frames of travel that costs. A roll ends up crossing something like five
+  // character widths: a dodge that barely outruns a walk is not worth
+  // committing invulnerability to, and Souls rolls move you a body length or
+  // more clear of what you rolled through.
+  //
+  // The roll commits and covers ground; the backstep is a short sharp exit and
+  // is deliberately left at the distance it always had. They are separate
+  // numbers because they are separate decisions - raising one to make the roll
+  // feel like a roll should not quietly lengthen the other.
+  const rollSpeed = (opts.rollSpeed ?? 7.5) * 2.3;
   const stepSpeed = (opts.rollSpeed ?? 7.5) * 2.05;
   const w = opts.weaponIdle ?? {};
+
+  /**
+   * Weapon angles for the roll.
+   *
+   * A hand-held prop hangs off the rig group, so the tumble turns it too - and
+   * unlike the body, a weapon cannot tuck. Left on its idle angle the blade
+   * sweeps a circle of its own length: measured, the duelist's smallsword
+   * drove its tip 135 units below the stage, deeper than he is tall, and every
+   * armed fighter raked the floor to some degree.
+   *
+   * So the weapon is counter-rotated. Each value cancels that frame's body
+   * spin and the change in forearm angle since the stance, which holds the
+   * blade at the angle the fighter was already carrying it at while his body
+   * turns underneath - what you would actually do with a sword in your hand.
+   * Writing them as offsets from the idle angle rather than as absolute
+   * numbers keeps every fighter's own grip.
+   *
+   * The offsets end on a whole turn rather than returning to zero, for the
+   * same reason the body's `spin` holds at 360: -360 and 0 draw the same
+   * picture but interpolate as a full turn, which would spin the weapon in
+   * his hand all through the recovery.
+   */
+  const lift = opts.rollCarry ?? {};
+  const carry = (front: number, back: number): Pose => ({
+    weapon: (w.weapon ?? 0) + front + (lift.front ?? 0),
+    weaponBack: (w.weaponBack ?? 0) + back + (lift.back ?? 0),
+  });
 
   return [
     {
@@ -193,53 +238,84 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       ],
     },
     {
-      id: "sidestep",
-      name: "Sidestep",
+      id: "roll",
+      name: "Roll",
       input: { button: "S", dir: "f", stance: ["stand", "crouch"] },
       tags: ["dodge"],
       priority: 55,
-      duration: 20,
-      invuln: [{ from: 3, to: 13, kind: "strike" }],
-      // The push happens on the ground; the travel happens in the air. Moving
-      // this fast with a foot planted is what made it skate.
+      duration: 26,
+      // Souls timing: the invulnerability starts almost at once, covers the
+      // whole tumble, and ENDS while he is still getting his feet back under
+      // him. The last eight frames are the price of using it - roll into
+      // something with no plan and the recovery is where you get hit.
+      invuln: [{ from: 3, to: 18, kind: "strike" }],
       vel: [
-        { at: 3, x: stepSpeed },
-        { at: 13, x: 0 },
+        { at: 3, x: rollSpeed },
+        { at: 18, x: 0 },
       ],
-      friction: 0.95,
-      desc: "A hard step past the attack, staying on your feet and facing them the whole way.",
+      // Higher than the old step's 0.95 so he keeps sliding out of the tumble
+      // rather than stopping dead the moment the push ends.
+      friction: 0.97,
+      desc: "A committed roll that covers real ground. Invincible through the tumble and wide open coming out of it.",
       notation: "\u2192 + S",
       /**
-       * A step, not a tumble - and not a skate either.
+       * A tuck and roll, the way Dark Souls does it.
        *
-       * The roll this replaced turned 360 degrees while covering less ground
-       * than simply walking for the same thirty frames, which is why it looked
-       * like spinning on the spot. Replacing it with a grounded step fixed the
-       * distance and introduced a different lie: 119 units of foot slide over
-       * 59 units of travel, because a planted foot cannot carry a body that
-       * fast. Feet slid across the floor faster than he moved.
+       * There was a roll here once and it was cut, because it turned a full
+       * 360 while covering less ground than simply walking for the same
+       * length of time - it read as spinning on the spot. The fault was never
+       * the rolling. It was that the distance and the pivot were both wrong:
+       * a body that pinwheels around its ankles goes nowhere, which is what
+       * `spinPivot` exists to fix. Turning about the middle instead, with
+       * enough push behind it to cross two body lengths, is a roll.
        *
-       * So the weight goes onto the back leg, that leg drives, and he is off
-       * the ground for the whole fast part - which is what a real sidestep
-       * does. Nothing is planted while he is moving, so nothing can slide.
+       * Nothing is planted while he is turning, so nothing can slide.
        */
       frames: [
-        // Gather: weight drops onto the back leg. Feet planted, body still.
-        kf(0, { ...w, torso: 10, crouch: 0.34, hipF: 10, kneeF: 40, hipB: -30, kneeB: 58, offX: -3 }, "out"),
-        // Drive: the back leg extends hard against the floor, the lead knee
-        // picks up. Last frame with anything on the ground.
-        kf(3, { ...w, torso: 18, crouch: 0.16, hipF: 44, kneeF: 74, hipB: -46, kneeB: 20, offX: -1, head: -4 }, "out"),
-        // Off the ground, opening into the stride.
-        kf(6, { ...w, free: 1, torso: 16, hipF: 62, kneeF: 44, hipB: -54, kneeB: 18, offY: 9, head: -4 }, "linear"),
-        // Full extension, still square to the opponent.
-        kf(10, { ...w, free: 1, torso: 13, hipF: 68, kneeF: 26, hipB: -50, kneeB: 22, offY: 7, head: -3 }, "in"),
-        // Reaching for the floor with the lead foot.
-        kf(12, { ...w, free: 1, torso: 12, hipF: 50, kneeF: 30, hipB: -34, kneeB: 34, offY: 2, head: -2 }, "in"),
-        // Land: the lead foot takes the weight and the knee absorbs it.
-        kf(14, { ...w, torso: 14, crouch: 0.38, hipF: 28, kneeF: 60, hipB: -18, kneeB: 50, head: -2 }, "out"),
-        // Trailing leg swings through underneath and he stands up into stance.
-        kf(17, { ...w, torso: 9, crouch: 0.16, hipF: 20, kneeF: 34, hipB: -22, kneeB: 38 }, "inOut"),
-        kf(20, { ...w }),
+        // Load: weight drops and the chest pitches over the lead foot.
+        kf(0, { ...w, torso: 22, crouch: 0.42, hipF: 26, kneeF: 56, hipB: -22, kneeB: 48, head: 6, offX: -2 }, "in"),
+        // Dive: he commits, leaves the floor and starts to close up. The pivot
+        // rises from the floor to the centre of the ball he is becoming.
+        kf(3, { ...w, free: 1, torso: 48, crouch: 0.62, spin: 30, spinPivot: 14, offX: -9, offY: 13,
+                hipF: 68, kneeF: 92, hipB: 18, kneeB: 78,
+                shoulderF: 28, elbowF: 104, shoulderB: 22, elbowB: 98, head: 18, ...carry(-133, -59) }, "linear"),
+        // Tucked. Every joint is now inside the ball, which is what lets the
+        // next four frames be pure rotation.
+        kf(7, { ...w, free: 1, torso: 75, crouch: 0.92, squash: 0.92, spin: 128, spinPivot: 22, offX: -21, offY: 1,
+                hipF: 104, kneeF: 124, hipB: 92, kneeB: 118,
+                shoulderF: 30, elbowF: 150, shoulderB: 24, elbowB: 146, head: 35, ...carry(-288, -216) }, "linear"),
+        // All the way round, holding exactly the same shape. A ball that
+        // changes shape while it is upside down is a fighter flailing, not
+        // rolling - the tumble is carried by the rotation alone, and holding
+        // the tuck this late is also what keeps his head out of the floor
+        // through the bottom of the turn.
+        kf(13, { ...w, free: 1, torso: 75, crouch: 0.92, squash: 0.92, spin: 268, spinPivot: 22, offX: -21, offY: 1,
+                 hipF: 104, kneeF: 124, hipB: 92, kneeB: 118,
+                 shoulderF: 30, elbowF: 150, shoulderB: 24, elbowB: 146, head: 35, ...carry(-428, -356) }, "linear"),
+        // Opening out: the legs come down under him while the last of the
+        // rotation carries him upright.
+        kf(16, { ...w, free: 1, torso: 58, crouch: 0.84, squash: 0.95, spin: 330, spinPivot: 22, offX: -14, offY: 4,
+                 hipF: 82, kneeF: 100, hipB: 54, kneeB: 92,
+                 shoulderF: 28, elbowF: 118, shoulderB: 22, elbowB: 112, head: 22, ...carry(-450, -376) }, "out"),
+        // Feet down, spin unwound, the knee taking the landing.
+        kf(18, { ...w, torso: 30, crouch: 0.62, spin: 360, spinPivot: 22, hipF: 40, kneeF: 78, hipB: -14, kneeB: 58,
+                 head: 6, offY: 1, ...carry(-363, -363) }, "in"),
+        // Up out of it - and this is the part that can be punished.
+        //
+        // These hold spin at 360 rather than dropping it to 0. Three hundred
+        // and sixty degrees is the same picture as zero, but interpolating
+        // between them is not: leaving these unset let the tween run 360 back
+        // down to 0 across the recovery, so he landed the roll and then
+        // unwound a full turn backwards on his feet.
+        //
+        // The rise is eased in, not out. Standing straight up on the first
+        // frame after landing spends the whole punish window looking idle,
+        // which reads as the game ignoring you rather than as a cost you are
+        // paying: he stays down over the knee and only comes up at the end.
+        kf(21, { ...w, spin: 360, spinPivot: 22, torso: 26, crouch: 0.5, hipF: 34, kneeF: 66, hipB: -18, kneeB: 52,
+                 head: 4, ...carry(-360, -360) }, "in"),
+        kf(24, { ...w, spin: 360, spinPivot: 22, torso: 14, crouch: 0.2, hipF: 20, kneeF: 38, hipB: -20, kneeB: 38, ...carry(-360, -360) }, "inOut"),
+        kf(26, { ...w, spin: 360, spinPivot: 22, ...carry(-360, -360) }),
       ],
     },
     {
@@ -255,7 +331,8 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       priority: 55,
       duration: 20,
       invuln: [{ from: 3, to: 13, kind: "strike" }],
-      // Same speed and timing as the sidestep, opposite sign - the leg work
+      // The short sharp exit, deliberately left exactly as it was: same
+      // distance and timing it has always had. The leg work
       // that makes this direction honest lives in the frames below, not here.
       vel: [
         { at: 3, x: -stepSpeed },
@@ -264,7 +341,7 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       friction: 0.95,
       desc: "Tap back twice to snap out of range instead of past them. Same invulnerability, opposite direction.",
       notation: "← ←",
-      // A mirror of the sidestep's leg work, not just its numbers run
+      // A mirror of a forward step's leg work, not just its numbers run
       // backward. Moving away means the *front* leg is the one that has to
       // drive - pushing off toward the opponent to launch the body away from
       // them - while the back leg lifts and reaches out behind to catch the

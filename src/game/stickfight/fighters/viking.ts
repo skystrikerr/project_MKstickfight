@@ -206,6 +206,9 @@ export const VIKING: FighterDef = {
       throwRange: 62,
       rollSpeed: 7,
       weaponIdle: { weaponBack: STANCE.weaponBack },
+      // The axe rides head-down on his back hand, so it needs turning out of
+      // the floor while he is tumbling.
+      rollCarry: { back: -50 },
     }),
 
     // ---------------------------------------------------------------- normals

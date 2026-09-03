@@ -24,7 +24,7 @@ import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./sav
 import { BINDABLE_ACTIONS, codeLabel, defaultKeyMap, isKeyCode, toKeyBindings } from "./keybinds";
 import { STAGE_THEMES } from "./render/stage";
 import { attachTransform } from "./render/rig";
-import { buildSkeleton, sampleClip } from "./skeleton";
+import { buildSkeleton, sampleClip, sampleFrames } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
 import { applyWeapon, WEAPONS, weaponsFor } from "./weapons";
 import type { FighterDef, MoveDef } from "./types";
@@ -324,6 +324,83 @@ progressionTests();
 }
 
 {
+  // A tumble turns one way. Dropping spin back to 0 on a later keyframe reads
+  // as "upright" to the author and interpolates as a full reverse turn to the
+  // renderer, so the fighter lands the roll and then unwinds 360 degrees on
+  // his feet. It is invisible in the data and obvious on screen.
+  for (const def of ROSTER) {
+    const rollMove = def.moves.find((m) => m.id === "roll");
+    if (!rollMove) continue;
+    let prev = -Infinity;
+    let ok = true;
+    for (let t = 0; t <= rollMove.duration; t++) {
+      const spin = sampleFrames(rollMove.frames, t, def.stance).spin ?? 0;
+      if (spin < prev - 0.001) ok = false;
+      prev = spin;
+    }
+    check(`${def.id}: the roll never turns backwards`, ok);
+  }
+
+  // Nothing may sink through the stage during the roll.
+  //
+  // The renderer turns the whole rig about a point `spinPivot` above the
+  // fighter's feet, so any joint further from that point than the point is
+  // high swings below the floor when he is upside down. Authoring the tuck as
+  // joint angles gives no hint of this - the first version buried his head 20
+  // units under the stage for a sixth of a second and read, on screen, as him
+  // sliding through the ground.
+  //
+  // A little penetration is wanted, not avoided: a hand or a foot at the
+  // bottom of the turn should touch. The bar is that nothing digs in.
+  const DEG = Math.PI / 180;
+  const JOINTS = ["pelvis", "neck", "head", "kneeF", "footF", "toeF", "kneeB", "footB", "toeB",
+                  "elbowF", "handF", "elbowB", "handB"] as const;
+  /** How far a prop part reaches from where it is attached. Mirrors rig.ts. */
+  const reach = (part: any): number => {
+    if (part.geo === "poly") {
+      let max = 0;
+      for (let i = 0; i < part.size.length; i += 2) max = Math.max(max, Math.abs(part.size[i]));
+      return part.pos[0] + max;
+    }
+    if (part.geo === "ring") return part.pos[0] + part.size[0];
+    const half = part.geo === "cyl" ? part.size[1] / 2 : Math.max(part.size[0], part.size[1] ?? 0) / 2;
+    return part.pos[0] + half;
+  };
+  for (const def of ROSTER) {
+    const rollMove = def.moves.find((m) => m.id === "roll");
+    if (!rollMove) continue;
+    let body = Infinity;
+    let weapon = Infinity;
+    for (let t = 0; t <= rollMove.duration; t++) {
+      const pose = sampleFrames(rollMove.frames, t, def.stance);
+      const sk = buildSkeleton(pose, !pose.free, def.stats.scale) as any;
+      const a = (sk.spin ?? 0) * DEG;
+      const cos = Math.cos(a);
+      const sin = Math.sin(a);
+      // The rig slides the group so the pivot height holds across the turn.
+      const lift = sk.spinPivot !== 0 && sk.spin !== 0 ? sk.spinPivot * (1 - cos) : 0;
+      const worldY = (x: number, y: number) => x * sin + y * cos + lift;
+      for (const key of JOINTS) {
+        const j = sk[key];
+        if (j) body = Math.min(body, worldY(j.x, j.y));
+      }
+      // A hand-held prop hangs off the rig group, so the tumble turns it too -
+      // and a weapon cannot tuck. Left on its stance angle a long blade sweeps
+      // a circle of its own length; measured, one smallsword reached further
+      // below the stage than its owner is tall.
+      for (const prop of def.props) {
+        if (prop.attach !== "handF" && prop.attach !== "handB") continue;
+        if (prop.conditional || rollMove.hideProps?.includes(prop.id)) continue;
+        const len = Math.max(...prop.parts.map(reach));
+        const at = attachTransform(sk, prop.attach);
+        const dir = (at.rot + 90) * DEG;
+        weapon = Math.min(weapon, worldY(at.x + Math.cos(dir) * len, at.y + Math.sin(dir) * len));
+      }
+    }
+    check(`${def.id}: the roll keeps him out of the floor`, body > -6, `deepest=${body.toFixed(1)}`);
+    check(`${def.id}: the roll keeps his weapon out of the floor`, weapon > 0, `deepest=${weapon.toFixed(1)}`);
+  }
+
   // The sidestep passes through an attack.
   //
   // Run the same exchange twice - once stepping, once standing still - and

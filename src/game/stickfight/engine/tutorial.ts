@@ -43,7 +43,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   { kind: "special", title: "Special move", prompt: "Every fighter has five. Check the move list, then throw one out." },
   { kind: "blockHigh", title: "Block", prompt: "They are about to swing. Hold S to guard it." },
   { kind: "blockLow", title: "Block low", prompt: "This one comes in low - it goes through a standing guard. Hold S and ↓." },
-  { kind: "dodge", title: "Sidestep", prompt: "Hold → and press S the instant they commit, to dodge clean through it." },
+  { kind: "dodge", title: "Roll", prompt: "Hold → and press S the instant they commit. You are invincible through the tumble, so roll into the attack, not away from it." },
   { kind: "throw", title: "Throw", prompt: "Get in close and press A + B together to throw them." },
   { kind: "combo", title: "Combo", prompt: "Chain light into medium into heavy - A, then B, then C, without a gap." },
 ];

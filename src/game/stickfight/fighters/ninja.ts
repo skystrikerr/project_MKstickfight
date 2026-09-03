@@ -186,6 +186,8 @@ export const NINJA: FighterDef = {
       throwRange: 56,
       rollSpeed: 9.2,
       weaponIdle: IDLE_ARMS,
+      // Reversed grip: the tanto points down at rest and would dig in.
+      rollCarry: { back: 86 },
     }),
 
     // ---------------------------------------------------------------- normals
