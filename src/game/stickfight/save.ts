@@ -15,7 +15,9 @@ import { ROSTER } from "./fighters";
 import { STAGE_LIST, type StageTheme } from "./render/stage";
 import { SKINS } from "./skins";
 import { BINDABLE_ACTIONS, defaultKeyMap, isKeyCode, type KeyMap } from "./keybinds";
-import { weaponsFor } from "./weapons";
+import { isInputScheme, type InputScheme } from "./inputscheme";
+import { weaponsFor, type WeaponVariant } from "./weapons";
+import { applyClear, applyMatch, isUnlocked, NO_MASTERY, type Mastery, type ProgressState } from "./progress";
 
 const KEY = "stickfighter.save";
 const VERSION = 1;
@@ -39,6 +41,12 @@ export interface SaveData {
   highContrast: boolean;
   /** Player 1's key map. Player 2 stays on the fixed arrow-key layout. */
   p1Keys: KeyMap;
+  /**
+   * Which buttons the move list and the tutorial name. The simulation is
+   * unaffected - a pad works whatever this says - it only changes whether the
+   * player is told to press C or square.
+   */
+  inputScheme: InputScheme;
   /** Fighter id -> the hardest difficulty their ladder has been cleared on. */
   cleared: Record<string, AiLevel>;
   /**
@@ -46,6 +54,12 @@ export interface SaveData {
    * what they were drawn with, which is most of the roster.
    */
   weapons: Record<string, string>;
+  /**
+   * Fighter id -> what has been done with them. This is the whole progression
+   * record: weapon variants are earned per fighter off these counters and the
+   * `cleared` table above, and nothing else reads it.
+   */
+  mastery: Record<string, Mastery>;
 }
 
 export const DEFAULT_SAVE: SaveData = {
@@ -63,8 +77,10 @@ export const DEFAULT_SAVE: SaveData = {
   motion: "full",
   highContrast: false,
   p1Keys: defaultKeyMap(),
+  inputScheme: "keyboard",
   cleared: {},
   weapons: {},
+  mastery: {},
 };
 
 const isFighter = (v: unknown): v is string => ROSTER.some((f) => f.id === v);
@@ -111,9 +127,32 @@ function coerce(raw: unknown): SaveData {
   // has dropped costs that one fighter their weapon rather than resetting
   // everybody's.
   const weapons: Record<string, string> = {};
+  const mastery: Record<string, Mastery> = {};
+  if (o.mastery && typeof o.mastery === "object") {
+    for (const [id, m] of Object.entries(o.mastery)) {
+      if (!isFighter(id) || !m || typeof m !== "object") continue;
+      const { matches, wins } = m as Partial<Mastery>;
+      // Counters only ever go up, so anything negative, fractional or not a
+      // number at all is a corrupted blob rather than a real record.
+      const ok = (n: unknown): n is number => typeof n === "number" && Number.isInteger(n) && n >= 0;
+      if (!ok(matches) || !ok(wins)) continue;
+      // More wins than matches is impossible and would hand out unlocks that
+      // were never earned, so it is clamped rather than trusted.
+      mastery[id] = { matches, wins: Math.min(wins, matches) };
+    }
+  }
+  // Same rule as `cleared`: rebuilt entry by entry, so a variant this build
+  // has dropped costs that one fighter their weapon rather than resetting
+  // everybody's. It also has to still be unlocked - a hand-edited blob or a
+  // record that predates a change to the unlock rules must not keep handing
+  // out a weapon nobody earned.
+  const progress: ProgressState = { mastery, cleared };
   if (o.weapons && typeof o.weapons === "object") {
     for (const [id, variant] of Object.entries(o.weapons)) {
-      if (isFighter(id) && weaponsFor(id).some((w) => w.id === variant)) weapons[id] = variant as string;
+      if (!isFighter(id) || typeof variant !== "string") continue;
+      if (!weaponsFor(id).some((w) => w.id === variant)) continue;
+      if (!isUnlocked(progress, id, variant)) continue;
+      weapons[id] = variant;
     }
   }
   return {
@@ -131,8 +170,10 @@ function coerce(raw: unknown): SaveData {
     motion: isMotion(o.motion) ? o.motion : DEFAULT_SAVE.motion,
     highContrast: typeof o.highContrast === "boolean" ? o.highContrast : DEFAULT_SAVE.highContrast,
     p1Keys: coerceKeyMap(o.p1Keys),
+    inputScheme: isInputScheme(o.inputScheme) ? o.inputScheme : DEFAULT_SAVE.inputScheme,
     cleared,
     weapons,
+    mastery,
   };
 }
 
@@ -165,11 +206,25 @@ export function patchSave(patch: Partial<SaveData>): SaveData {
  * Records a cleared ladder, keeping the hardest difficulty it was beaten on.
  * Clearing on Rookie after clearing on Legend must not demote the record.
  */
-export function recordClear(fighterId: string, level: AiLevel): SaveData {
+export function recordClear(fighterId: string, level: AiLevel): { save: SaveData; unlocked: WeaponVariant[] } {
   const save = loadSave();
+  const unlocked = applyClear({ mastery: save.mastery, cleared: save.cleared }, fighterId, level);
   const had = save.cleared[fighterId];
-  if (had && AI_LEVELS.indexOf(had) >= AI_LEVELS.indexOf(level)) return save;
-  return patchSave({ cleared: { ...save.cleared, [fighterId]: level } });
+  if (had && AI_LEVELS.indexOf(had) >= AI_LEVELS.indexOf(level)) return { save, unlocked };
+  return { save: patchSave({ cleared: { ...save.cleared, [fighterId]: level } }), unlocked };
+}
+
+/**
+ * Records one finished match for the fighter the player was using, and gives
+ * back anything it unlocked so the caller can say so on screen.
+ *
+ * Only the seat the player actually held is counted. The CPU picking up a
+ * fighter for one arcade rung has not earned anything with them.
+ */
+export function recordMatch(fighterId: string, won: boolean): { save: SaveData; unlocked: WeaponVariant[] } {
+  const save = loadSave();
+  const { state, unlocked } = applyMatch({ mastery: save.mastery, cleared: save.cleared }, fighterId, won);
+  return { save: patchSave({ mastery: state.mastery }), unlocked };
 }
 
 export function clearSave(): void {

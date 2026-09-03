@@ -18,6 +18,7 @@
  * first, so a recoloured fighter recolours whichever weapon they are holding.
  */
 
+import { AI_LEVELS, type AiLevel } from "./constants";
 import type { FighterDef, PropDef, ShapePart } from "./types";
 
 /**
@@ -39,6 +40,21 @@ export interface WeaponStats {
   speed?: number;
 }
 
+/**
+ * What it takes to earn a variant.
+ *
+ * Deliberately a small closed set rather than a free-form predicate: the
+ * select screen has to be able to say what you still owe in one short line,
+ * and a rule it cannot describe is a rule nobody will ever meet on purpose.
+ *
+ * Everything is per fighter. Playing Vercingetorix does not move Ötzi an inch,
+ * because the whole point is that the kit belongs to the person carrying it.
+ */
+export type WeaponUnlock =
+  | { kind: "wins"; count: number }
+  | { kind: "matches"; count: number }
+  | { kind: "clear"; level: AiLevel };
+
 export interface WeaponVariant {
   id: string;
   name: string;
@@ -49,6 +65,8 @@ export interface WeaponVariant {
    * a sword and its scabbard are one decision, not two.
    */
   parts: Record<string, ShapePart[]>;
+  /** What has to happen before this can be selected. */
+  unlock: WeaponUnlock;
   /** Reserved - see WeaponStats. Unset on everything that ships today. */
   stats?: WeaponStats;
 }
@@ -77,6 +95,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Hasta",
       blurb:
         "The thrusting spear the legions carried before the pilum took over, and kept in the third rank long after. Heavier head, no throwing shank, a butt-spike to plant it.",
+      unlock: { kind: "wins", count: 3 },
       parts: {
         spear: [
           { geo: "cyl", size: [3, 130], pos: [24, 0], rot: 90, color: "#7a5230" },
@@ -102,6 +121,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Gorgon Blazon",
       blurb:
         "A personal device rather than the state one. The lambda everybody draws on a Spartan shield is attested well after Thermopylae; a gorgoneion is what the vase painters were actually putting on shields in his lifetime.",
+      unlock: { kind: "wins", count: 3 },
       parts: {
         aspis: [
           { geo: "disc", size: [27], pos: [15, 0], color: "#7c5a24", z: 0.5 },
@@ -138,6 +158,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Dane Axe",
       blurb:
         "The long-hafted broad axe that spreads across the Norse world around her own lifetime. A thin crescent on the end of a much longer shaft - all reach and all commitment.",
+      unlock: { kind: "clear", level: "Veteran" },
       parts: {
         axe: [
           // Half again the haft of the bearded axe, and no beard on the head.
@@ -171,6 +192,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Kaad Chuek",
       blurb:
         "Hemp cord wound over the hands and up the forearms, the binding used before gloves and the one in every account of the prize fights he was made to take. Soaked and dried it sets hard, which is the point of it.",
+      unlock: { kind: "wins", count: 3 },
       parts: {
         handwrapF: KAAD_HAND,
         handwrapB: KAAD_HAND,
@@ -184,6 +206,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Tepoztopilli",
       blurb:
         "The other half of the Mexica armoury: a polearm with obsidian set down both edges of a broad head, used to keep a Spanish sword at a distance the macuahuitl could not. Sahagun's informants describe both in the same breath.",
+      unlock: { kind: "wins", count: 3 },
       parts: {
         macuahuitl: [
           { geo: "cyl", size: [2.8, 76], pos: [26, 0], rot: 90, color: "#8a5a30" },
@@ -212,6 +235,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Smith & Wesson Model 3",
       blurb:
         "The top-break the frontier actually liked: the whole barrel hinges down and every case ejects at once, so it reloads in a fraction of the time a Colt's loading gate allows. Earp is on record with more than one revolver, and the Buntline is the part of the story nobody can source.",
+      unlock: { kind: "wins", count: 4 },
       parts: {
         revolver: [
           // Longer barrel, and the top-break latch and hinge that name it.
@@ -240,6 +264,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "M14",
       blurb:
         "What the battalion had been carrying until the month before. The changeover was still running through Vietnam in 1965, so both rifles were in the valley: wood stock, twenty rounds of 7.62, and a great deal more of it going downrange per trigger pull.",
+      unlock: { kind: "wins", count: 4 },
       parts: {
         rifle: [
           // Wood, not plastic, and a straight stock with no carry handle.
@@ -271,6 +296,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Isijula",
       blurb:
         "The long throwing spear Shaka is said to have taken off his regiments in favour of the short stabbing one, on the grounds that a man who throws his weapon has then given it away. Mgobozi fought through the change and would have started with this.",
+      unlock: { kind: "wins", count: 3 },
       parts: {
         iklwa: [
           // Long light shaft: thrown, so all the length is behind the head.
@@ -292,6 +318,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Tewhatewha",
       blurb:
         "The quarter-moon club: the broad blade is a flag rather than an edge - it is waved to signal the line - and the killing end is the point on the shaft. A chief's weapon and a chief's instrument at once, which is exactly the job he held.",
+      unlock: { kind: "clear", level: "Rookie" },
       parts: {
         taiaha: [
           { geo: "cyl", size: [3, 92], pos: [8, 0], rot: 90, color: "#4a3526" },
@@ -316,6 +343,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Silver Pomegranate",
       blurb:
         "Herodotus counts the corps twice over: a thousand with golden apples on the butt of the spear, and nine thousand behind them with silver pomegranates. This is the other nine thousand's spear - the same weapon, one rank down.",
+      unlock: { kind: "matches", count: 5 },
       parts: {
         spear: [
           { geo: "cyl", size: [2.8, 88], pos: [26, 0], rot: 90, color: "#8a6238" },
@@ -341,6 +369,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Flint Blade",
       blurb:
         "The axe he did not carry, and the one everybody assumes he did. Knapped stone was still the ordinary answer in 3300 BC - the copper blade in the ice is the surprise, and the reason the find rewrote a date.",
+      unlock: { kind: "wins", count: 3 },
       parts: {
         axe: [
           { geo: "cyl", size: [3, 34], pos: [6, 0], rot: 90, color: "#6b5334" },
@@ -367,6 +396,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Tachi",
       blurb:
         "The sword she would actually have been wearing. The Genpei war is tachi country - deeper curve, slung edge-down from the belt cords. The katana is a later fashion the retellings gave her.",
+      unlock: { kind: "clear", level: "Veteran" },
       parts: {
         katana: [
           // More sori than the katana, and the curve carried nearer the hilt.
@@ -400,6 +430,7 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       name: "Type XV",
       blurb:
         "Oakeshott's Type XV: a stiff diamond section tapering the whole way to the point, no fuller. The answer the armourers forced - by Poitiers a cutting edge was losing the argument with plate.",
+      unlock: { kind: "wins", count: 4 },
       parts: {
         sword: [
           // One long taper rather than parallel edges and a fuller.

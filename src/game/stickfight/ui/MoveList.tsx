@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef, MoveDef } from "../types";
+import { INPUT_SCHEMES, renderNotation, schemeLegend, type InputScheme } from "../inputscheme";
+import { loadSave, patchSave } from "../save";
 
 const has = (m: MoveDef, tag: string) => !!m.tags?.includes(tag as never);
 
@@ -37,11 +39,12 @@ function frameData(m: MoveDef): string | null {
 }
 
 /** Input label for one step of a string: 5A -> "A", 6A -> "→ + A". */
-function stamp(m: MoveDef): string {
+function stamp(m: MoveDef, scheme: InputScheme): string {
   const arrow =
     m.input.dir === "f" ? "→" : m.input.dir === "b" ? "←" : m.input.dir === "d" ? "↓" : m.input.dir === "df" ? "↘" : "";
   const btn = m.input.button ?? "";
-  return arrow ? `${arrow} + ${btn}` : btn;
+  const label = arrow ? `${arrow} + ${btn}` : btn;
+  return renderNotation(label, scheme);
 }
 
 /**
@@ -77,6 +80,13 @@ function stringsFor(def: FighterDef): { name: string; moves: MoveDef[] }[] {
 
 export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: () => void }) {
   const [id, setId] = useState(fighterId);
+  // Remembered rather than per-open: somebody playing on a pad is playing on a
+  // pad, and being asked again every time they check a command is a papercut.
+  const [scheme, setScheme] = useState<InputScheme>(() => loadSave().inputScheme);
+  const pick = (next: InputScheme) => {
+    setScheme(next);
+    patchSave({ inputScheme: next });
+  };
   const def = getFighter(id);
 
   const grouped = useMemo(() => {
@@ -126,9 +136,31 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
       <div className="flex-1 overflow-y-auto p-4">
         <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]">
           <div className="cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-3 text-xs text-[var(--bone-dim)]">
+            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--bone)]">Buttons</span>
+              {INPUT_SCHEMES.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => pick(s.id)}
+                  aria-pressed={scheme === s.id}
+                  className={`cut-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] transition ${
+                    scheme === s.id
+                      ? "border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--bone)]"
+                      : "border-[var(--rule)] text-[var(--bone-dim)] hover:border-[var(--bone-dim)]"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--bone)]">Notation</span> — → is towards the
-            opponent, ↓↘→ is a quarter circle forward. A = Light, B = Medium, C = Heavy, S = Guard (hold to block). Frame data is
-            shown as startup / active / recovery.
+            opponent, ↓↘→ is a quarter circle forward. {renderNotation("A", scheme)} = Light,{" "}
+            {renderNotation("B", scheme)} = Medium, {renderNotation("C", scheme)} = Heavy,{" "}
+            {renderNotation("S", scheme)} = Guard (hold to block). Frame data is shown as startup / active / recovery.
+            {schemeLegend(scheme) && (
+              <span className="mt-1.5 block text-[var(--bone-dim)]">{schemeLegend(scheme)}</span>
+            )}
           </div>
           <div className="cut-sm flex flex-wrap items-center gap-2 border border-[var(--rule)] bg-[var(--ink-2)] p-3 font-mono text-[10px] uppercase tracking-[0.12em]">
             {[
@@ -160,7 +192,7 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
                       {st.name}
                     </span>
                     <span className="font-mono text-[11px] text-[var(--accent)]">
-                      {st.moves.map(stamp).join(", ")}
+                      {st.moves.map((sm) => stamp(sm, scheme)).join(", ")}
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs leading-snug text-[var(--bone-dim)]">
@@ -190,7 +222,9 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
                       <span className="font-display text-xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)]">
                         {m.name}
                       </span>
-                      <span className="shrink-0 font-mono text-[11px] text-[var(--accent)]">{m.notation ?? ""}</span>
+                      <span className="shrink-0 font-mono text-[11px] text-[var(--accent)]">
+                        {m.notation ? renderNotation(m.notation, scheme) : ""}
+                      </span>
                     </div>
                     <p className="mt-0.5 text-xs leading-snug text-[var(--bone-dim)]">{m.desc}</p>
                     <div className="mt-1 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.1em] text-[#7e8f85]">

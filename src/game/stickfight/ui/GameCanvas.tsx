@@ -10,6 +10,7 @@ import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
 import { Announcement, Hud } from "./Hud";
 import { TouchControls } from "./TouchControls";
+import { renderNotation, renderPrompt } from "../inputscheme";
 
 export interface MatchConfig {
   p1: string;
@@ -31,6 +32,7 @@ export function GameCanvas({
   onQuit,
   onShowMoves,
   onMatchEnd,
+  onResult,
   touch,
 }: {
   config: MatchConfig;
@@ -43,11 +45,22 @@ export function GameCanvas({
    * top of theirs.
    */
   onMatchEnd?: (winner: number, finishing: { move: string; damage: number } | null) => void;
+  /**
+   * Fired on every decided match, whether or not anyone owns what happens
+   * next. Separate from `onMatchEnd` on purpose: passing that one hides the
+   * built-in winner card, and progression has to be recorded in the modes
+   * that still want it.
+   */
+  onResult?: (winner: number) => void;
   touch: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const sessionRef = useRef<GameSession | null>(null);
+  // Read once on mount. The move list writes this and the match does not, so
+  // re-reading storage every HUD frame would be a syscall per frame for a
+  // value that cannot change while a round is running.
+  const [inputScheme] = useState(() => loadSave().inputScheme);
   const [hud, setHud] = useState<HudState | null>(null);
   const [paused, setPaused] = useState(false);
   const [ready, setReady] = useState(false);
@@ -153,8 +166,9 @@ export function GameCanvas({
     }
     if (reported.current) return;
     reported.current = true;
+    onResult?.(hud.matchWinner);
     onMatchEnd?.(hud.matchWinner, hud.finishingMove ? { move: hud.finishingMove, damage: hud.finishingDamage ?? 0 } : null);
-  }, [hud?.phase, hud?.matchWinner, onMatchEnd]);
+  }, [hud?.phase, hud?.matchWinner, onMatchEnd, onResult]);
 
   const togglePause = () => {
     const s = sessionRef.current;
@@ -204,7 +218,7 @@ export function GameCanvas({
             <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--accent)]">
               Lesson {hud.tutorial.index + 1} of {hud.tutorial.total} · {hud.tutorial.title}
             </div>
-            <div className="mt-1 text-sm text-[var(--bone)]">{hud.tutorial.prompt}</div>
+            <div className="mt-1 text-sm text-[var(--bone)]">{renderPrompt(hud.tutorial.prompt, inputScheme)}</div>
           </div>
         </div>
       )}
@@ -255,7 +269,9 @@ export function GameCanvas({
             <>
               <div className="text-sm font-bold leading-tight">{hud.training.last.name}</div>
               {hud.training.last.notation && (
-                <div className="mb-1.5 font-mono text-[11px] text-[var(--accent)]">{hud.training.last.notation}</div>
+                <div className="mb-1.5 font-mono text-[11px] text-[var(--accent)]">
+                  {renderNotation(hud.training.last.notation, inputScheme)}
+                </div>
               )}
               <div className="grid grid-cols-3 gap-1 text-center">
                 {[

@@ -28,6 +28,8 @@ import { buildSkeleton, sampleClip } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
 import { applyWeapon, WEAPONS, weaponsFor } from "./weapons";
 import type { FighterDef, MoveDef } from "./types";
+import { INPUT_SCHEMES, renderNotation } from "./inputscheme";
+import { applyClear, applyMatch, isUnlocked, unlockLabel, unlockProgress, type ProgressState } from "./progress";
 
 const results: { name: string; ok: boolean; detail: string }[] = [];
 
@@ -55,6 +57,107 @@ const qcf = (btn: "A" | "B" | "C" | "S"): RawInput[] => [
   inp({ right: true, [btn]: true }),
   inp({ right: true, [btn]: true }),
 ];
+
+// ---------------------------------------------------------------------------
+// Weapon progression
+// ---------------------------------------------------------------------------
+
+function progressionTests() {
+  const empty = (): ProgressState => ({ mastery: {}, cleared: {} });
+
+  // Nothing is on by default. A brand new save has the whole roster holding
+  // what they were drawn with, which is the only state the art was authored in.
+  for (const def of ROSTER) {
+    for (const w of weaponsFor(def.id)) {
+      check(`progress: ${def.id}.${w.id} starts locked`, !isUnlocked(empty(), def.id, w.id));
+      check(`progress: ${def.id}.${w.id} has a requirement a player can read`, unlockLabel(w.unlock, def.name).length > 8);
+    }
+  }
+
+  // Winning with a fighter moves that fighter and nobody else.
+  let st = empty();
+  for (let i = 0; i < 4; i++) st = applyMatch(st, "soldier", true).state;
+  check("progress: four wins unlocks the M14", isUnlocked(st, "soldier", "m14"));
+  check("progress: it did not unlock anyone else's", !isUnlocked(st, "western", "schofield"));
+
+  // A loss counts as a match played but not as a win, so a "play N" unlock
+  // still moves and a "win N" one does not.
+  let lost = empty();
+  for (let i = 0; i < 6; i++) lost = applyMatch(lost, "persian", false).state;
+  check("progress: losses count towards a play-N unlock", isUnlocked(lost, "persian", "pomegranate"));
+  let lostSoldier = empty();
+  for (let i = 0; i < 6; i++) lostSoldier = applyMatch(lostSoldier, "soldier", false).state;
+  check("progress: losses do not buy a win-N unlock", !isUnlocked(lostSoldier, "soldier", "m14"));
+
+  // The match that crosses the line reports it, and only that one does.
+  let run = empty();
+  for (let i = 0; i < 3; i++) {
+    const r = applyMatch(run, "soldier", true);
+    run = r.state;
+    check(`progress: win ${i + 1} of 4 unlocks nothing yet`, r.unlocked.length === 0, r.unlocked.map((w) => w.id).join(","));
+  }
+  const fourth = applyMatch(run, "soldier", true);
+  check("progress: the fourth win reports the unlock", fourth.unlocked.map((w) => w.id).join(",") === "m14");
+  const fifth = applyMatch(fourth.state, "soldier", true);
+  check("progress: an unlock is reported once", fifth.unlocked.length === 0);
+
+  // Ladder unlocks run off difficulty, and a harder clear satisfies an easier
+  // requirement while an easier one does not satisfy a harder.
+  check("progress: clearing on Rookie earns the tewhatewha", applyClear(empty(), "maori", "Rookie").map((w) => w.id).join(",") === "tewhatewha");
+  check("progress: Rookie does not earn a Veteran unlock", applyClear(empty(), "viking", "Rookie").length === 0);
+  check("progress: Legend satisfies a Veteran unlock", applyClear(empty(), "viking", "Legend").map((w) => w.id).join(",") === "daneaxe");
+
+  // Progress is reported in the units the label counts in, and never overruns.
+  const two = applyMatch(applyMatch(empty(), "zulu", true).state, "zulu", true).state;
+  const p = unlockProgress(two, "zulu", { kind: "wins", count: 3 });
+  check("progress: partial progress reads 2/3", p.have === 2 && p.need === 3 && !p.done, `${p.have}/${p.need}`);
+  const over = unlockProgress(applyMatch(two, "zulu", true).state, "zulu", { kind: "wins", count: 3 });
+  check("progress: progress never overruns its target", over.have === 3 && over.done);
+}
+
+// ---------------------------------------------------------------------------
+// Input schemes
+// ---------------------------------------------------------------------------
+
+/**
+ * Every notation is rewritten for a controller at render time, and the one way
+ * that goes wrong quietly is over-eager substitution: several fighters spend a
+ * named resource in their notation - "(20 Chi)", "(1 Obsidian)", "(1 Chakram)"
+ * - and a plain character replace turns those into "(20 □hi)". Nobody would
+ * notice until a player read it.
+ */
+function inputSchemeTests() {
+  const RESOURCE_WORDS = ["Chi", "Obsidian", "Chakram", "Impi", "Vow"];
+  for (const { id: scheme } of INPUT_SCHEMES) {
+    for (const def of ROSTER) {
+      for (const m of def.moves) {
+        if (!m.notation) continue;
+        const out = renderNotation(m.notation, scheme);
+        check(`${scheme}: ${def.id}.${m.id} renders to something`, out.length > 0, out);
+        for (const w of RESOURCE_WORDS) {
+          if (!m.notation.includes(w)) continue;
+          check(`${scheme}: ${def.id}.${m.id} keeps "${w}" intact`, out.includes(w), out);
+        }
+        // A pad scheme must not leave an abstract button behind: a controller
+        // has no C, so a stray one means the pattern was missed.
+        if (scheme !== "keyboard") {
+          const stray = /\b[CS]\b/.test(out.replace(/\([^)]*\)/g, ""));
+          check(`${scheme}: ${def.id}.${m.id} names no keyboard-only button`, !stray, out);
+        }
+      }
+    }
+  }
+  // The keyboard scheme is the identity: it is what the notation is authored in.
+  for (const def of ROSTER) {
+    for (const m of def.moves) {
+      if (!m.notation) continue;
+      check(`keyboard leaves ${def.id}.${m.id} alone`, renderNotation(m.notation, "keyboard") === m.notation);
+    }
+  }
+  // The two-button shortcuts become one shoulder button on a pad.
+  check("pad: A + B is the throw shortcut", renderNotation("A + B", "playstation") === "R2");
+  check("pad: A + C is the skill shortcut", renderNotation("A + C", "xbox") === "RB");
+}
 
 // ---------------------------------------------------------------------------
 // Roster contract
@@ -150,6 +253,8 @@ function contract(def: FighterDef) {
 }
 
 for (const def of ROSTER) contract(def);
+inputSchemeTests();
+progressionTests();
 
 // ---------------------------------------------------------------------------
 // Mechanics
@@ -1550,8 +1655,22 @@ function scriptFor(move: MoveDef): RawInput[] {
   // variant this build no longer ships costs that fighter their weapon rather
   // than clearing everybody's.
   check("save: no weapon choices by default", Object.keys(loadSave().weapons).length === 0);
+
+  // Weapons are earned, so a choice only survives a reload once the fighter
+  // has actually met the requirement. Storing one without the mastery behind
+  // it is what a hand-edited blob looks like, and it must not stick.
+  patchSave({ mastery: {}, weapons: { roman: "hasta" } });
+  check("save: an unearned weapon does not stick", !("roman" in loadSave().weapons), JSON.stringify(loadSave().weapons));
+
+  patchSave({ mastery: { roman: { matches: 6, wins: 6 } } });
   patchSave({ weapons: { roman: "hasta", viking: "daneaxe" } });
-  check("save: a weapon choice round-trips", loadSave().weapons.roman === "hasta", loadSave().weapons.roman);
+  check("save: an earned weapon round-trips", loadSave().weapons.roman === "hasta", loadSave().weapons.roman);
+  // The Dane Axe is behind a cleared ladder, which wins alone do not buy.
+  check("save: a ladder unlock is not bought with wins", !("viking" in loadSave().weapons), JSON.stringify(loadSave().weapons));
+  patchSave({ cleared: { viking: "Champion" } });
+  patchSave({ weapons: { roman: "hasta", viking: "daneaxe" } });
+  check("save: clearing the ladder unlocks it", loadSave().weapons.viking === "daneaxe", JSON.stringify(loadSave().weapons));
+
   patchSave({ weapons: { roman: "hasta", viking: "not-a-real-axe", nobody: "hasta" } });
   const salvagedWeapons = loadSave().weapons;
   check("save: a dropped variant is forgotten alone", salvagedWeapons.roman === "hasta" && !("viking" in salvagedWeapons), JSON.stringify(salvagedWeapons));
@@ -1559,6 +1678,20 @@ function scriptFor(move: MoveDef): RawInput[] {
   // A variant belonging to a different fighter is not a valid choice either.
   patchSave({ weapons: { roman: "tachi" } });
   check("save: another fighter's variant is rejected", !("roman" in loadSave().weapons), JSON.stringify(loadSave().weapons));
+
+  // Counters are rebuilt defensively: more wins than matches would hand out
+  // unlocks nobody earned.
+  patchSave({ mastery: { spartan: { matches: 2, wins: 99 } as never } });
+  check("save: wins cannot exceed matches", loadSave().mastery.spartan?.wins === 2, JSON.stringify(loadSave().mastery.spartan));
+  patchSave({ mastery: { spartan: { matches: -3, wins: 1 } as never } });
+  check("save: a negative counter is dropped", !("spartan" in loadSave().mastery), JSON.stringify(loadSave().mastery));
+
+  // The input scheme is remembered so a pad player is not asked every time.
+  check("save: input scheme defaults to keyboard", loadSave().inputScheme === "keyboard");
+  patchSave({ inputScheme: "playstation" });
+  check("save: input scheme round-trips", loadSave().inputScheme === "playstation", loadSave().inputScheme);
+  patchSave({ inputScheme: "atari" as never });
+  check("save: a garbled input scheme falls back", loadSave().inputScheme === DEFAULT_SAVE.inputScheme, loadSave().inputScheme);
 
   clearSave();
   delete (globalThis as { window?: unknown }).window;

@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { AI_LEVELS, type AiLevel } from "../constants";
-import { ROSTER } from "../fighters";
+import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef } from "../types";
 import type { GameMode } from "../engine/game";
 import { STAGE_LIST, STAGE_THEMES, type StageTheme } from "../render/stage";
 import { applySkin, getSkin, SKINS } from "../skins";
 import { applyWeapon, weaponsFor } from "../weapons";
+import { unlockLabel, unlockProgress, type ProgressState } from "../progress";
 import { loadSave, patchSave } from "../save";
 import { FighterPortrait } from "./Portrait";
 
@@ -110,14 +111,17 @@ function SkinChip({
 function WeaponRow({
   fighterId,
   chosen,
+  progress,
   onPick,
 }: {
   fighterId: string;
   chosen: string | undefined;
+  progress: ProgressState;
   onPick: (variantId: string | undefined) => void;
 }) {
   const variants = weaponsFor(fighterId);
   if (!variants.length) return null;
+  const name = getFighter(fighterId).name;
   const chip = (selected: boolean) =>
     `cut-sm border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] transition ${
       selected
@@ -135,18 +139,41 @@ function WeaponRow({
       >
         As drawn
       </button>
-      {variants.map((w) => (
-        <button
-          key={w.id}
-          type="button"
-          onClick={() => onPick(w.id)}
-          title={`${w.name} — ${w.blurb}`}
-          aria-pressed={chosen === w.id}
-          className={chip(chosen === w.id)}
-        >
-          {w.name}
-        </button>
-      ))}
+      {variants.map((w) => {
+        const p = unlockProgress(progress, fighterId, w.unlock);
+        const need = unlockLabel(w.unlock, name);
+        // A locked variant is shown rather than hidden, with what it costs and
+        // how far along it is. Hiding it would make the fighter look finished
+        // and give nobody a reason to keep playing them; showing a bare padlock
+        // would make it look like something to buy.
+        if (!p.done) {
+          return (
+            <span
+              key={w.id}
+              title={`${w.name} — locked. ${need}.`}
+              className="cut-sm flex items-center gap-1 border border-dashed border-[var(--rule)] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[#5f6f66]"
+            >
+              <span aria-hidden>◇</span>
+              {w.name}
+              <span className="text-[#4e6a5c]">
+                {w.unlock.kind === "clear" ? need : `${p.have}/${p.need}`}
+              </span>
+            </span>
+          );
+        }
+        return (
+          <button
+            key={w.id}
+            type="button"
+            onClick={() => onPick(w.id)}
+            title={`${w.name} — ${w.blurb}`}
+            aria-pressed={chosen === w.id}
+            className={chip(chosen === w.id)}
+          >
+            {w.name}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -260,6 +287,9 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
   // the screen he comes out on, and in a mirror match on both.
   const [weapons, setWeapons] = useState<Record<string, string>>(saved.weapons);
   const cleared = saved.cleared;
+  // What has been earned. Read once when the screen opens: nothing on the
+  // select screen can change it, because unlocks only move when a match ends.
+  const progress: ProgressState = { mastery: saved.mastery, cleared };
 
   const preview = ROSTER.find((f) => f.id === hover) ?? ROSTER[0];
   const ratings = ratingFor(preview);
@@ -495,6 +525,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
                 <WeaponRow
                   fighterId={[p1, p2][i]}
                   chosen={weapons[[p1, p2][i]]}
+                  progress={progress}
                   onPick={(variantId) =>
                     setWeapons((prev) => {
                       const next = { ...prev };

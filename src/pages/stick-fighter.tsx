@@ -16,7 +16,8 @@ import { Settings } from "@/game/stickfight/ui/Settings";
 import { music } from "@/game/stickfight/engine/music";
 import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
-import { loadSave, recordClear } from "@/game/stickfight/save";
+import { loadSave, recordClear, recordMatch } from "@/game/stickfight/save";
+import type { WeaponVariant } from "@/game/stickfight/weapons";
 import { SKINS } from "@/game/stickfight/skins";
 import menuMap from "@/assets/menu-map.jpg";
 
@@ -67,6 +68,9 @@ function mirrorSafeSkin(step: LadderStep, p1Skin?: string, p2Skin?: string): str
 export default function StickFighter() {
   const [screen, setScreen] = useState<Screen>("title");
   const [config, setConfig] = useState<MatchConfig | null>(null);
+  // What the last finished match unlocked, if anything. Cleared when the
+  // player acknowledges it or starts another fight.
+  const [earned, setEarned] = useState<{ fighter: string; items: WeaponVariant[] } | null>(null);
   const [moveListFor, setMoveListFor] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [touch, setTouch] = useState(false);
@@ -93,6 +97,26 @@ export default function StickFighter() {
     if (screen === "title") music.play("menu");
     else if (screen === "select") music.play("select");
   }, [screen]);
+
+  /**
+   * Credits a finished match to whoever actually played it.
+   *
+   * Only a seat a human held counts. In two-player both seats do; against the
+   * CPU only seat one does, because the computer picking a fighter up for one
+   * arcade rung has not earned anything with them.
+   */
+  const creditMatch = (cfg: MatchConfig, winner: number) => {
+    const seats: { id: string; won: boolean }[] =
+      cfg.mode === "versus"
+        ? [
+            { id: cfg.p1, won: winner === 0 },
+            { id: cfg.p2, won: winner === 1 },
+          ]
+        : [{ id: cfg.p1, won: winner === 0 }];
+    const items: WeaponVariant[] = [];
+    for (const seat of seats) items.push(...recordMatch(seat.id, seat.won).unlocked);
+    if (items.length) setEarned({ fighter: seats[0].id, items });
+  };
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-[var(--ink)] text-[var(--bone)]">
@@ -265,6 +289,7 @@ export default function StickFighter() {
           touch={touch}
           onQuit={() => setScreen("select")}
           onShowMoves={() => setMoveListFor(config.p1)}
+          onResult={(winner) => creditMatch(config, winner)}
         />
       )}
 
@@ -295,11 +320,15 @@ export default function StickFighter() {
               setScreen("select");
             }}
             onShowMoves={() => setMoveListFor(config.p1)}
+            onResult={(winner) => creditMatch({ ...config, mode: "cpu" }, winner)}
             onMatchEnd={(winner, finishing) => {
               setRun((r) => {
                 if (!r) return r;
                 const next = advanceRun(r, winner === 0, finishing);
-                if (next.phase === "cleared" && r.phase !== "cleared") recordClear(next.fighter, next.level);
+                if (next.phase === "cleared" && r.phase !== "cleared") {
+                  const { unlocked } = recordClear(next.fighter, next.level);
+                  if (unlocked.length) setEarned({ fighter: next.fighter, items: unlocked });
+                }
                 return next;
               });
             }}
@@ -343,6 +372,37 @@ export default function StickFighter() {
             />
           )}
         </>
+      )}
+
+      {/*
+        The one moment the progression system is allowed to interrupt. An
+        unlock that arrives silently is not a reward, and one that blocks the
+        rematch button is a toll - so this sits at the bottom, says what was
+        earned and where to put it on, and goes away when it is clicked.
+      */}
+      {earned && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-6 z-50 flex justify-center px-4">
+          <button
+            type="button"
+            onClick={() => setEarned(null)}
+            className="cut-sm pointer-events-auto max-w-md border border-[var(--accent)] bg-[var(--ink-2)] px-4 py-3 text-left"
+          >
+            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--accent)]">
+              {earned.items.length > 1 ? "Weapons unlocked" : "Weapon unlocked"}
+            </div>
+            {earned.items.map((w) => (
+              <div key={w.id} className="mt-1">
+                <div className="font-display text-xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)]">
+                  {w.name}
+                </div>
+                <p className="mt-1 text-xs leading-snug text-[var(--bone-dim)]">{w.blurb}</p>
+              </div>
+            ))}
+            <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-[#5f6f66]">
+              Equip it on the character select · click to dismiss
+            </div>
+          </button>
+        </div>
       )}
 
       {moveListFor && <MoveList fighterId={moveListFor} onClose={() => setMoveListFor(null)} />}
