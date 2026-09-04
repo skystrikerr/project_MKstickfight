@@ -142,6 +142,23 @@ export const SPARTAN: FighterDef = {
       ],
     },
     {
+      id: "javelin",
+      attach: "handB",
+      // Conditional: only on screen for the throw. He fights with the dory,
+      // which is hidden for those frames - a hoplite carried a throwing spear
+      // as well as the thrusting one, and swapping is what the wind-up is.
+      conditional: true,
+      parts: [
+        { geo: "cyl", size: [2.4, 74], pos: [6, 0], rot: 90, color: "#8a6238" },
+        // Leaf blade, smaller than the dory's - this one is meant to leave.
+        { geo: "poly", size: [-10, 0, -4, 6, 6, 4, 16, 0, 6, -4, -4, -6], pos: [46, 0], color: IRON },
+        { geo: "box", size: [18, 1.6], pos: [45, 0], color: "#eef2f6" },
+        // The ankyle - the leather loop a hoplite hurled one with.
+        { geo: "box", size: [5, 8], pos: [-2, 0], color: "#5a3d22" },
+        { geo: "box", size: [8, 5], pos: [-32, 0], color: "#a8823a" },
+      ],
+    },
+    {
       id: "cloak",
       attach: "neck",
       parts: [
@@ -653,87 +670,132 @@ export const SPARTAN: FighterDef = {
 
     // -------------------------------------------------------- five specials
     {
-      id: "aspisThrow",
-      name: "Aspis Throw",
+      id: "javelinThrow",
+      name: "Javelin",
       input: { button: "B", motion: "qcf", stance: ["stand", "crouch"] },
       tags: ["special", "projectile"],
-      duration: 42,
-      resourceCost: 34,
-      resourceMin: 34,
-      hideProps: ["aspis"],
+      duration: 40,
+      // Cheaper than hurling the shield was, because it no longer costs him
+      // the shield. The old throw's real price was fighting on without an
+      // aspis until the bar came back; this one only costs the Aegis.
+      resourceCost: 26,
+      resourceMin: 26,
+      meterGain: 6,
+      // The dory goes away and the throwing spear comes out, in the back hand.
+      // The shield stays where it is on the front arm - a hoplite throwing
+      // from behind his own guard is the whole point of the move, and it is
+      // why this is thrown with the spear arm rather than the shield arm.
+      // The javelin is in his hand until the frame it leaves it, and the dory
+      // stays stowed a beat longer while he re-grips.
+      propsAt: [
+        // Ends at 13, not 14: the projectile spawns on 14, and showing the
+        // held javelin on that frame too draws two of them in the same place.
+        { from: 0, to: 13, show: ["javelin"], hide: ["dory"] },
+        { from: 14, to: 24, hide: ["dory"] },
+      ],
       projectiles: [
         {
-          at: 12,
-          kind: "aspis",
-          x: 34,
-          y: 56,
-          vx: 11,
-          vy: 0.2,
-          drag: 0.012,
-          life: 70,
-          box: { x: -22, y: -22, w: 44, h: 44 },
-          damage: 64,
-          hitstun: 22,
-          blockstun: 15,
+          at: 14,
+          kind: "javelin",
+          x: 36,
+          y: 60,
+          vx: 12.4,
+          vy: 0.4,
+          gravity: 0.028,
+          life: 90,
+          box: { x: -24, y: -7, w: 48, h: 14 },
+          damage: 62,
+          hitstun: 20,
+          blockstun: 14,
           chip: 6,
           pushX: 6,
-          hits: 2,
           clashes: true,
-          fx: "blunt",
-          spin: 26,
-          color: BRONZE,
+          fx: "pierce",
           scale: 1,
+          color: "#d7dee6",
         },
       ],
-      desc: "Hurls the shield like a discus. Costs Aegis, and it stays gone until the bar refills.",
-      notation: "↓↘→ + B",
+      desc: "Throws a javelin from behind the shield. Costs Aegis, and the aspis never leaves his arm.",
+      notation: "\u2193\u2198\u2192 + B",
+      /**
+       * An overhand throw, thrown with the whole body rather than the arm.
+       *
+       * The shape is the one the Roman's pilum uses, because it is the shape a
+       * spear is actually thrown with and it already reads at this scale: the
+       * arm cocks back past the shoulder while the weight goes onto the back
+       * foot, then the hips come round, the front foot plants, and the arm
+       * whips through and finishes low across the body. `weapon` turns with it
+       * so the point leads all the way rather than the shaft swinging flat.
+       */
       frames: [
-        kf(0, { ...STANCE }, "out"),
-        kf(7, { ...STANCE, shoulderF: -30, elbowF: 40, torso: -18, offX: -5 }, "inOut"),
-        kf(12, { ...STANCE, shoulderF: 108, elbowF: 4, torso: 26, hipF: 38, kneeF: 22, offX: 8 }, "out"),
-        kf(24, { ...STANCE, shoulderF: 70, elbowF: 34, torso: 14 }, "inOut"),
-        kf(42, { ...STANCE }),
+        kf(0, { ...STANCE, weaponBack: 43 }, "out"),
+        // Load: weight back, throwing arm drawn behind the head, point up.
+        kf(9, { ...STANCE, shoulderB: 172, elbowB: -58, weaponBack: 60, torso: -22,
+                hipB: -32, kneeB: 44, hipF: -14, offX: -7 }, "inOut"),
+        // Release, on the frame the javelin leaves: hips through, front foot
+        // planted, arm at full extension with the point already level.
+        kf(14, { ...STANCE, shoulderB: 58, elbowB: 8, weaponBack: -62, torso: 28,
+                 hipF: 42, kneeF: 20, hipB: -16, kneeB: 46, offX: 10 }, "out"),
+        // Follow through - the arm keeps going down and across.
+        kf(22, { ...STANCE, shoulderB: 44, elbowB: 12, torso: 18, offX: 5 }, "inOut"),
+        kf(40, { ...STANCE }),
       ],
     },
     {
-      id: "phalanx",
-      name: "Phalanx Charge",
+      id: "shieldCharge",
+      name: "Shield Charge",
       input: { button: "B", motion: "hcf", stance: ["stand", "crouch"] },
       tags: ["special"],
       priority: 22,
-      duration: 56,
-      armor: [{ from: 3, to: 40, hits: 3, damageScale: 0.25 }],
+      // Was a fifty-six frame march that ground forward through three separate
+      // hits. It armoured well and covered ground, but it never read as a
+      // charge - it read as walking. This is the same idea committed to: one
+      // explosive shove off the back foot, one hit, and it is over in half the
+      // time. The armour is still what makes it a Spartan answer to pressure.
+      duration: 34,
+      armor: [{ from: 4, to: 20, hits: 2, damageScale: 0.3 }],
+      // The whole distance is spent in one burst rather than paid out over
+      // three steps, so it closes from full screen and cannot be walked away
+      // from once it starts.
       vel: [
-        { at: 1, x: 4.2 },
-        { at: 16, x: 4.2 },
-        { at: 32, x: 4.6 },
-        { at: 44, x: 0 },
+        { at: 4, x: 13.5 },
+        { at: 20, x: 0 },
       ],
-      friction: 0.94,
+      friction: 0.9,
       hits: [
-        hit(10, 13, bx(24, 34, 62, 52), 38, { group: 1, fx: "blunt", pushX: 1.4, hitstun: 16, hitstop: 5 }),
-        hit(22, 25, bx(24, 34, 66, 52), 38, { group: 2, fx: "blunt", pushX: 1.4, hitstun: 16, hitstop: 5 }),
-        hit(34, 40, bx(22, 26, 74, 62), 70, {
-          group: 3,
+        hit(8, 18, bx(26, 22, 66, 66), 88, {
           fx: "blunt",
-          pushX: 12,
+          pushX: 13,
           knockdown: "wallbounce",
-          hitstun: 26,
-          shake: 2,
+          hitstun: 28,
+          hitstop: 7,
+          shake: 2.4,
         }),
       ],
-      desc: "Marches forward behind the shield, absorbing three hits. Carries them to the corner and slams them off it.",
-      notation: "←↙↓↘→ + B",
+      desc: "Drives off the back foot and rams them with the full aspis. Armoured through the run, and it puts them into the wall.",
+      notation: "\u2190\u2199\u2193\u2198\u2192 + B",
+      /**
+       * A charge is a shove, not a walk.
+       *
+       * The read on it comes from the first four frames: he sinks, turns the
+       * shield square to them and gets his shoulder behind it, and only then
+       * goes. Skipping that load and simply moving is what made the old
+       * version look like walking - there was no moment where he decided.
+       */
       frames: [
+        // Load. Weight drops onto the back leg, shield comes square.
         kf(0, { ...STANCE }, "out"),
-        kf(6, { ...STANCE, torso: 20, shoulderF: 84, elbowF: 18, hipF: 26, kneeF: 22 }),
-        kf(10, { ...STANCE, torso: 26, shoulderF: 94, elbowF: 8, hipF: 34, kneeF: 20, offX: 5 }, "out"),
-        kf(18, { ...STANCE, torso: 20, shoulderF: 84, elbowF: 18, hipF: 20, kneeF: 30 }, "inOut"),
-        kf(22, { ...STANCE, torso: 26, shoulderF: 94, elbowF: 8, hipF: 36, kneeF: 20, offX: 5 }, "out"),
-        kf(30, { ...STANCE, torso: 18, shoulderF: 80, elbowF: 22, hipF: 18, kneeF: 32 }, "inOut"),
-        kf(34, { ...STANCE, torso: 34, shoulderF: 30, elbowF: 22, hipF: 44, kneeF: 24, hipB: -26, kneeB: 56, offX: 10 }, "out"),
-        kf(46, { ...STANCE, torso: 20, shoulderF: 60, elbowF: 34, offX: 5 }, "inOut"),
-        kf(56, { ...STANCE }),
+        kf(4, { ...STANCE, torso: 30, crouch: 0.3, shoulderF: 96, elbowF: 6,
+                hipB: -34, kneeB: 54, hipF: 30, kneeF: 26, offX: -7 }, "out"),
+        // Behind the shield, running. Head down, back leg driving.
+        kf(9, { ...STANCE, torso: 38, crouch: 0.16, shoulderF: 100, elbowF: 2,
+                hipF: 44, kneeF: 20, hipB: -40, kneeB: 30, head: 8, offX: 8 }, "linear"),
+        kf(15, { ...STANCE, torso: 40, crouch: 0.12, shoulderF: 102, elbowF: 0,
+                 hipF: 30, kneeF: 40, hipB: -30, kneeB: 20, head: 10, offX: 10 }, "out"),
+        // The impact: everything stops moving forward except the shield.
+        kf(20, { ...STANCE, torso: 26, shoulderF: 84, elbowF: 14,
+                 hipF: 40, kneeF: 26, hipB: -26, kneeB: 48, offX: 6 }, "inOut"),
+        kf(34, { ...STANCE }),
       ],
     },
     {
@@ -860,68 +922,75 @@ export const SPARTAN: FighterDef = {
 
     // ------------------------------------------------------------------ EX
     {
-      id: "aspisThrowEx",
-      name: "Aspis Throw EX",
+      id: "javelinThrowEx",
+      name: "Javelin Volley EX",
       input: { button: "S", motion: "qcf", stance: ["stand", "crouch"] },
       tags: ["special", "ex", "projectile"],
       priority: 26,
       duration: 46,
       meterCost: 50,
-      hideProps: ["aspis"],
+      // Two javelins: each one is in hand until it goes, and he pulls the
+      // second in the gap between them.
+      propsAt: [
+        { from: 0, to: 11, show: ["javelin"], hide: ["dory"] },
+        { from: 12, to: 17, hide: ["dory"] },
+        { from: 18, to: 23, show: ["javelin"], hide: ["dory"] },
+        { from: 25, to: 34, hide: ["dory"] },
+      ],
       projectiles: [
         {
-          at: 10,
-          kind: "aspis",
-          x: 34,
+          at: 12,
+          kind: "javelin",
+          x: 36,
           y: 66,
-          vx: 13,
-          vy: 0.4,
-          drag: 0.008,
-          life: 80,
-          box: { x: -24, y: -24, w: 48, h: 48 },
-          damage: 52,
-          hitstun: 22,
-          blockstun: 15,
+          vx: 13.4,
+          vy: 0.3,
+          gravity: 0.022,
+          life: 88,
+          box: { x: -24, y: -7, w: 48, h: 14 },
+          damage: 46,
+          hitstun: 20,
+          blockstun: 14,
           chip: 5,
           pushX: 4,
-          hits: 3,
-          fx: "blunt",
-          spin: 30,
-          color: BRONZE,
-          scale: 1.05,
+          clashes: true,
+          fx: "pierce",
+          scale: 1,
+          color: "#d7dee6",
         },
         {
-          at: 20,
-          kind: "aspis",
-          x: 34,
+          at: 24,
+          kind: "javelin",
+          x: 36,
           y: 40,
-          vx: 12,
+          vx: 12.6,
           vy: 0.1,
-          drag: 0.008,
-          life: 80,
-          box: { x: -24, y: -24, w: 48, h: 48 },
-          damage: 58,
+          gravity: 0.03,
+          life: 88,
+          box: { x: -24, y: -7, w: 48, h: 14 },
+          damage: 54,
           hitstun: 26,
           blockstun: 16,
           chip: 6,
           pushX: 11,
           knockdown: "hard",
-          hits: 3,
-          fx: "blunt",
-          spin: -30,
-          color: "#e0b13a",
+          clashes: true,
+          fx: "pierce",
           scale: 1.05,
+          color: "#e0b13a",
         },
       ],
-      desc: "EX. Two shields at two heights that plough through anything in the way. No Aegis cost.",
-      notation: "↓↘→ + S  (50 meter)",
+      desc: "EX. Two javelins at two heights, high then low. No Aegis cost.",
+      notation: "\u2193\u2198\u2192 + S  (50 meter)",
+      // The same throw twice, the second one rushed - he does not fully reset
+      // between them, which is what makes it a volley rather than two throws.
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(6, { ...STANCE, shoulderF: -34, elbowF: 36, torso: -18, offX: -5 }, "inOut"),
-        kf(10, { ...STANCE, shoulderF: 112, elbowF: 2, torso: 26, offX: 8 }, "out"),
-        kf(16, { ...STANCE, shoulderF: -26, elbowF: 40, torso: -12, offX: -3 }, "inOut"),
-        kf(20, { ...STANCE, shoulderF: 104, elbowF: 6, torso: 28, hipF: 38, kneeF: 22, offX: 9 }, "out"),
-        kf(32, { ...STANCE, shoulderF: 70, elbowF: 34, torso: 12 }, "inOut"),
+        kf(7, { ...STANCE, shoulderB: 150, elbowB: -38, weaponBack: 64, torso: -18, hipB: -28, kneeB: 40, offX: -6 }, "inOut"),
+        kf(12, { ...STANCE, shoulderB: 78, elbowB: -6, weaponBack: 32, torso: 26, hipF: 36, kneeF: 22, offX: 8 }, "out"),
+        kf(18, { ...STANCE, shoulderB: 140, elbowB: -32, weaponBack: 58, torso: -12, offX: -3 }, "inOut"),
+        kf(24, { ...STANCE, shoulderB: 70, elbowB: -8, weaponBack: 26, torso: 28, hipF: 40, kneeF: 22, offX: 10 }, "out"),
+        kf(34, { ...STANCE, shoulderB: 46, elbowB: 14, torso: 12 }, "inOut"),
         kf(46, { ...STANCE }),
       ],
     },

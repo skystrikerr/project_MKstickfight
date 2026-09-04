@@ -425,6 +425,17 @@ export interface MoveDef {
   showProps?: string[];
   /** Prop ids hidden during this move (a thrown javelin, a holstered gun). */
   hideProps?: string[];
+  /**
+   * The same two lists, but only for a range of frames, layered over the
+   * whole-move ones above.
+   *
+   * A throw needs this: `showProps` alone keeps the javelin in his hand for
+   * the entire animation, so he releases it and is still holding one, and the
+   * throw stops reading as a throw at the exact frame it matters. With a
+   * window the weapon leaves on the frame the projectile appears, which is
+   * the whole point of the wind-up.
+   */
+  propsAt?: { from: number; to: number; show?: string[]; hide?: string[] }[];
   /** Description shown in the move list. */
   desc: string;
   /** Notation shown in the move list, e.g. "↓↘→ + B". */

@@ -5,6 +5,7 @@ import { AI_LEVELS, type AiLevel } from "../constants";
 import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef } from "../types";
 import type { GameMode } from "../engine/game";
+import menuSelect from "@/assets/menu-select.jpg";
 import { STAGE_LIST, STAGE_THEMES, type StageTheme } from "../render/stage";
 import { applySkin, getSkin, SKINS } from "../skins";
 import { applyWeapon, weaponsFor } from "../weapons";
@@ -325,7 +326,22 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
   };
 
   return (
-    <div className="grain relative flex h-full flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+    <div className="relative flex h-full flex-col overflow-y-auto">
+      {/* The backdrop sits outside the scrolling content, fixed to the panel,
+          so it does not slide up the screen as the roster is scrolled. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${menuSelect})`, filter: "contrast(0.72) saturate(0.8)" }}
+        />
+        {/* An explicit rgba rather than a Tailwind opacity modifier on a bare
+            CSS variable - that silently renders no scrim at all, and this
+            painting is bright enough in the middle to swallow a whole column
+            of roster names if it comes through at full strength. */}
+        <div className="absolute inset-0" style={{ background: "rgba(12, 17, 15, 0.76)" }} />
+      </div>
+
+      <div className="grain relative z-10 flex flex-1 flex-col gap-4 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-4xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)] sm:text-5xl">
@@ -574,6 +590,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
         >
           {mode === "training" ? "Train" : solo ? "Begin" : "Fight"}
         </button>
+      </div>
       </div>
     </div>
   );

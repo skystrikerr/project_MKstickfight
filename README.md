@@ -53,7 +53,7 @@ no network traffic of any kind.
 
 `0.x` means the game has not reached early access yet. `1.0` is reserved for
 the early-access release, and nothing before it should be read as finished.
-The current version is **0.5.1**.
+The current version is **0.5.2**.
 
 ## Controls
 
@@ -122,7 +122,7 @@ shell.
 **To get a Windows `.exe`:** push a tag and let CI build it.
 
 ```bash
-git tag v0.5.1 && git push origin v0.5.1
+git tag v0.5.2 && git push origin v0.5.2
 ```
 
 `.github/workflows/release.yml` builds on a real Windows runner and attaches
@@ -152,7 +152,7 @@ desktop app:
 
 ```bash
 npm run get:exe        # newest dev build -> ./release
-npm run get:exe v0.5.1 # a specific tagged release instead
+npm run get:exe v0.5.2 # a specific tagged release instead
 ```
 
 Every push to `main` also rebuilds on a Windows runner and replaces the files
@@ -172,9 +172,9 @@ person with admin on the repository: the workflow token cannot create the site.
 
 ```bash
 npm run electron:dev   # run the shell against the Vite dev server
-npm run dist:win       # -> release/Plank Fighter World-0.5.1-x64.exe   (needs Windows)
-npm run dist:linux     # -> release/Plank Fighter World-0.5.1-x64.AppImage
-npm run dist:mac       # -> release/Plank Fighter World-0.5.1-x64.dmg   (needs macOS)
+npm run dist:win       # -> release/Plank Fighter World-0.5.2-x64.exe   (needs Windows)
+npm run dist:linux     # -> release/Plank Fighter World-0.5.2-x64.AppImage
+npm run dist:mac       # -> release/Plank Fighter World-0.5.2-x64.dmg   (needs macOS)
 ```
 
 Cross-building Windows from Linux needs Wine and is not worth the trouble — the

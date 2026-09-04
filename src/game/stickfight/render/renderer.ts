@@ -224,6 +224,19 @@ export class GameRenderer {
       }
       const visible = new Set(f.move?.showProps ?? []);
       const hidden = new Set(f.move?.hideProps ?? []);
+      // Frame-ranged overrides, so a thrown weapon can actually leave the hand
+      // on the frame it is thrown rather than for the whole move.
+      for (const win of f.move?.propsAt ?? []) {
+        if (f.moveFrame < win.from || f.moveFrame > win.to) continue;
+        for (const id of win.show ?? []) {
+          visible.add(id);
+          hidden.delete(id);
+        }
+        for (const id of win.hide ?? []) {
+          hidden.add(id);
+          visible.delete(id);
+        }
+      }
       // A prop that is currently flying around as a projectile (the Spartan's
       // aspis) stays off the fighter until it is gone.
       for (const p of match.projectiles) {
@@ -327,6 +340,25 @@ export class GameRenderer {
         const fin = new THREE.Mesh(new THREE.PlaneGeometry(10, 9), flat("#c0392b"));
         fin.position.x = -36;
         add(fin);
+        break;
+      }
+      // A Greek throwing spear, kept visibly distinct from the Roman pilum
+      // above: leaf blade rather than a pyramid point, bronze butt-spike, and
+      // the leather throwing-loop a hoplite actually hurled one with.
+      case "javelin": {
+        add(new THREE.Mesh(new THREE.PlaneGeometry(66, 3), flat("#8a6238")));
+        const blade = new THREE.Mesh(new THREE.PlaneGeometry(18, 7.5), flat("#d7dee6"));
+        blade.position.x = 40;
+        add(blade);
+        const midrib = new THREE.Mesh(new THREE.PlaneGeometry(18, 1.6), flat("#eef2f6"));
+        midrib.position.x = 40;
+        add(midrib);
+        const butt = new THREE.Mesh(new THREE.PlaneGeometry(9, 5), flat("#a8823a"));
+        butt.position.x = -32;
+        add(butt);
+        const loop = new THREE.Mesh(new THREE.PlaneGeometry(6, 8), flat("#5a3d22"));
+        loop.position.x = -6;
+        add(loop);
         break;
       }
       case "bullet":

@@ -99,9 +99,19 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   colosseum: {
     name: "The Colosseum",
     blurb: "Fifty thousand Romans, one patch of sand.",
-    sky: ["#2b1b3d", "#c8643c"],
-    ground: "#c9a267",
+    sky: ["#b9c6d4", "#e6d7b4"],
+    // Sampled straight off the painting just below its own floor line, so the
+    // ground plane the fighters stand on continues the painted sand instead of
+    // banding against it.
+    ground: "#d8ac77",
     accent: "#e0b13a",
+    // Sky and ground resampled off the painting so the arena floor the fighters
+    // stand on carries into the sand behind them instead of banding against it.
+    // sink solved rather than guessed: the painting's own floor line sits 168px
+    // above the bottom of a 768px source, which at this width is 141 world
+    // units, so sinking it 86 lands that line a little above the fighters' feet
+    // and the painted sand runs down behind them into the ground plane.
+    backdrop: { file: "colosseum.jpg", aspect: 1.8333, width: 1180, sink: 86 },
     ambient: { kind: "dust", count: 26, colors: ["#e8d4a8", "#c9a267"], speed: -0.12, wind: 0.16, size: [2, 5], opacity: 0.4 },
   },
   deck: {
@@ -475,6 +485,9 @@ export class Stage {
     sky.add(skyMesh);
     this.addLayer(sky, 0);
 
+    // A painted stage replaces the built shapes rather than standing behind
+    // them - drawing both leaves the old geometry poking through the painting.
+    if (!cfg.backdrop)
     switch (theme) {
       case "colosseum":
         this.buildColosseum();
