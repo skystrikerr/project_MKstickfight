@@ -16,7 +16,7 @@ import { AiController } from "./ai";
 import { Sfx } from "./audio";
 import { music } from "./music";
 import { EMPTY_INPUT, GamepadReader, Keyboard, mergeInputs, P1_KEYS, P2_KEYS, type KeyBindings, type RawInput } from "./input";
-import { Match, type Phase } from "./match";
+import { Match, type Phase , type MatchRule } from "./match";
 import { DEFAULT_TRAINING, TrainingRoom, type TrainingOptions, type TrainingReadout } from "./training";
 import { TutorialRunner } from "./tutorial";
 
@@ -24,7 +24,7 @@ import { TutorialRunner } from "./tutorial";
  * "arcade" is a run of "cpu" matches with a tower around it; the session
  * itself cannot tell them apart, and should not try to.
  */
-export type GameMode = "cpu" | "arcade" | "versus" | "training" | "tutorial";
+export type GameMode = "cpu" | "arcade" | "towers" | "versus" | "training" | "tutorial";
 
 export interface GameOptions {
   p1: string;
@@ -46,6 +46,12 @@ export interface GameOptions {
   motion?: "full" | "reduced" | "off";
   /** Player 1's rebound keys, if they have changed them. Defaults to WASD/JKL. */
   p1Keys?: KeyBindings;
+  /**
+   * Extra rules for this fight - the tower modifiers. Re-applied on `restart`
+   * as well as at construction, because a modifier that silently stops
+   * applying when you retry a floor is worse than one that never applied.
+   */
+  rules?: MatchRule[];
   /** Only read when `mode` is "training". */
   training?: TrainingOptions;
 }
@@ -144,10 +150,11 @@ export class GameSession {
       this.defs,
       options.roundsToWin ?? MATCH.roundsToWin,
       STAGE_THEMES[this.theme].platforms ?? [],
+      options.rules ?? [],
     );
     // Training keeps an AI around too, because "fight back" is one of the
     // dummy settings.
-    if (options.mode === "cpu" || options.mode === "arcade" || options.mode === "training") {
+    if (options.mode === "cpu" || options.mode === "arcade" || options.mode === "towers" || options.mode === "training") {
       this.ai = new AiController(options.aiLevel);
     }
     this.training = options.mode === "training" ? new TrainingRoom(options.training ?? DEFAULT_TRAINING) : null;
@@ -196,6 +203,7 @@ export class GameSession {
       this.defs,
       this.options.roundsToWin ?? MATCH.roundsToWin,
       STAGE_THEMES[this.theme].platforms ?? [],
+      this.options.rules ?? [],
     );
     this.ai?.reset();
     this.renderer?.resetEffects();

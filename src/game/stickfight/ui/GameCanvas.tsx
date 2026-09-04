@@ -5,6 +5,7 @@ import type { AiLevel } from "../constants";
 import { music } from "../engine/music";
 import { loadSave, patchSave } from "../save";
 import { GameSession, type GameMode, type HudState } from "../engine/game";
+import type { MatchRule } from "../engine/match";
 import { toKeyBindings } from "../keybinds";
 import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
@@ -25,6 +26,8 @@ export interface MatchConfig {
   /** Weapon variant ids; omitted means the weapon the fighter was drawn with. */
   p1Weapon?: string;
   p2Weapon?: string;
+  /** Tower modifiers in force for this fight. */
+  rules?: MatchRule[];
 }
 
 export function GameCanvas({
@@ -44,7 +47,16 @@ export function GameCanvas({
    * the built-in winner card stands down rather than offering a rematch on
    * top of theirs.
    */
-  onMatchEnd?: (winner: number, finishing: { move: string; damage: number } | null) => void;
+  /**
+   * `health` is what each side finished on, which the survival tower carries
+   * into the next floor. It comes from the HUD rather than the match so the
+   * caller gets the same numbers the player was just looking at.
+   */
+  onMatchEnd?: (
+    winner: number,
+    finishing: { move: string; damage: number } | null,
+    health: [{ left: number; max: number }, { left: number; max: number }],
+  ) => void;
   /**
    * Fired on every decided match, whether or not anyone owns what happens
    * next. Separate from `onMatchEnd` on purpose: passing that one hides the
@@ -81,6 +93,7 @@ export function GameCanvas({
       mode: config.mode,
       aiLevel: config.aiLevel,
       roundsToWin: config.rounds,
+      rules: config.rules,
       stage: config.stage,
       p1Skin: config.p1Skin,
       p2Skin: config.p2Skin,
@@ -167,7 +180,14 @@ export function GameCanvas({
     if (reported.current) return;
     reported.current = true;
     onResult?.(hud.matchWinner);
-    onMatchEnd?.(hud.matchWinner, hud.finishingMove ? { move: hud.finishingMove, damage: hud.finishingDamage ?? 0 } : null);
+    onMatchEnd?.(
+      hud.matchWinner,
+      hud.finishingMove ? { move: hud.finishingMove, damage: hud.finishingDamage ?? 0 } : null,
+      [
+        { left: hud.players[0].health, max: hud.players[0].maxHealth },
+        { left: hud.players[1].health, max: hud.players[1].maxHealth },
+      ],
+    );
   }, [hud?.phase, hud?.matchWinner, onMatchEnd, onResult]);
 
   const togglePause = () => {

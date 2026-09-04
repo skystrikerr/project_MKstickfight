@@ -31,6 +31,17 @@ import type { FighterDef, MoveDef } from "./types";
 import { INPUT_SCHEMES, renderNotation } from "./inputscheme";
 import { applyClear, applyMatch, isUnlocked, unlockLabel, unlockProgress, type ProgressState } from "./progress";
 import { CUES as SCORE_CUES, Score, type ScoreCue } from "./engine/score";
+import {
+  advanceTower,
+  buildTower,
+  continueTower,
+  MODIFIER_BY_ID,
+  MODIFIERS,
+  rulesFor,
+  startTower,
+  TOWER_BY_ID,
+  TOWERS,
+} from "./towers";
 
 const results: { name: string; ok: boolean; detail: string }[] = [];
 
@@ -2023,6 +2034,155 @@ function scriptFor(move: MoveDef): RawInput[] {
 }
 
 // ---------------------------------------------------------------------------
+
+{
+  // Towers.
+  //
+  // The mode is built out of a pure generator and twelve modifiers that reach
+  // into the simulation through five scalar knobs, so the things worth pinning
+  // down are: the same seed gives the same tower, a floor never fields the
+  // fighter you picked, the modifiers actually change the fight, and none of
+  // them can end a round on their own.
+  for (const tower of TOWERS) {
+    const a = buildTower(tower, "roman", 4242);
+    const b = buildTower(tower, "roman", 4242);
+    check(`${tower.id}: the same seed builds the same tower`, JSON.stringify(a) === JSON.stringify(b));
+    check(`${tower.id}: is as tall as it says`, a.length === tower.floors, `got ${a.length}`);
+    check(`${tower.id}: never fields the player's own fighter`, a.every((f) => f.opponent !== "roman"));
+    check(
+      `${tower.id}: never runs the same opponent twice in a row`,
+      a.every((f, i) => i === 0 || a[i - 1].opponent !== f.opponent),
+    );
+    check(
+      `${tower.id}: floors carry the modifier count the tower asks for`,
+      a.every((f) => f.modifiers.length >= tower.modifiers[0] && f.modifiers.length <= tower.modifiers[1]),
+    );
+    check(
+      `${tower.id}: never repeats a modifier within one floor`,
+      a.every((f) => new Set(f.modifiers).size === f.modifiers.length),
+    );
+    check(`${tower.id}: every modifier named is a real one`, a.every((f) => f.modifiers.every((m) => !!MODIFIER_BY_ID[m])));
+  }
+
+  // Different seeds have to actually produce different climbs, or the seed is
+  // decoration and every run of a tower is the same run.
+  const seedA = buildTower(TOWERS[1], "roman", 1);
+  const seedB = buildTower(TOWERS[1], "roman", 2);
+  check("towers: different seeds build different towers", JSON.stringify(seedA) !== JSON.stringify(seedB));
+
+  // Each modifier has to reach the simulation. A modifier that reads well and
+  // does nothing is the failure mode this mode is most exposed to.
+  for (const mod of MODIFIERS) {
+    const m = new Match([getFighter("roman"), getFighter("roman")]);
+    const before = m.fighters.map((f) => [f.health, f.meter, f.gravityScale, f.damageDealtScale, f.damageTakenScale, f.meterScale, f.healthDrain].join(","));
+    m.rules = [mod.rule];
+    m.startRound();
+    for (let i = 0; i < 30; i++) m.step([inp(), inp()]);
+    const after = m.fighters.map((f) => [f.health, f.meter, f.gravityScale, f.damageDealtScale, f.damageTakenScale, f.meterScale, f.healthDrain].join(","));
+    check(`modifier ${mod.id}: actually changes the fight`, before.join("|") !== after.join("|"));
+  }
+
+  // Drain and regeneration must never decide a round. A tower that kills you
+  // with a status effect while you are stood still is a bug, not a modifier.
+  for (const id of ["poison", "regen", "second-wind"]) {
+    const m = new Match([getFighter("roman"), getFighter("roman")]);
+    m.rules = [MODIFIER_BY_ID[id].rule];
+    m.startRound();
+    for (let i = 0; i < 60 * 120; i++) m.step([inp(), inp()]);
+    const alive = m.fighters.every((f) => f.health >= 1);
+    check(`modifier ${id}: cannot finish a round on its own`, alive && m.matchWinner === null,
+      `health=${m.fighters.map((f) => f.health.toFixed(0)).join("/")} winner=${m.matchWinner}`);
+  }
+
+  // Modifiers have to be live on the FIRST round, without anyone calling
+  // `startRound`.
+  //
+  // They were not. `startRound` only runs between rounds, so every rule was
+  // applied from round two onward and a single-round fight - which is what the
+  // survival tower is made of - never applied them at all. Every test above
+  // called `startRound` by hand and so agreed with a broken game. Construct it
+  // the way the session does instead.
+  {
+    const m = new Match([getFighter("roman"), getFighter("roman")], 2, [], [MODIFIER_BY_ID["charged"].rule]);
+    check("modifiers are live on the first round", m.fighters[0].meter > 0, `meter=${m.fighters[0].meter}`);
+    const single = new Match([getFighter("roman"), getFighter("roman")], 1, [], [MODIFIER_BY_ID["wounded"].rule]);
+    check(
+      "modifiers are live in a one-round fight",
+      single.fighters[1].health < single.fighters[1].def.stats.health,
+      `health=${single.fighters[1].health}`,
+    );
+  }
+
+  // Knobs are reset between rounds, so a modifier cannot stack with itself.
+  {
+    const m = new Match([getFighter("roman"), getFighter("roman")]);
+    m.rules = [MODIFIER_BY_ID["brittle"].rule];
+    m.startRound();
+    const first = m.fighters[0].damageTakenScale;
+    m.startRound();
+    check("modifiers do not stack across rounds", m.fighters[0].damageTakenScale === first, `${first} -> ${m.fighters[0].damageTakenScale}`);
+  }
+
+  // A match with no rules must behave exactly as it always did.
+  {
+    const m = new Match([getFighter("roman"), getFighter("roman")]);
+    m.startRound();
+    for (let i = 0; i < 120; i++) m.step([inp(), inp()]);
+    const f = m.fighters[0];
+    check(
+      "a fight with no modifiers is untouched",
+      f.gravityScale === 1 && f.damageDealtScale === 1 && f.damageTakenScale === 1 && f.meterScale === 1 && f.healthDrain === 0,
+    );
+  }
+
+  // Run state.
+  {
+    let run = startTower("turning", "roman", 7);
+    check("tower run: starts on the first floor", run.at === 0 && run.phase === "versus" && run.cleared === 0);
+    // Only a run that is fighting can advance, same guard as the ladder.
+    const ignored = advanceTower(run, true);
+    check("tower run: a report outside a fight is ignored", ignored.at === 0 && ignored.cleared === 0);
+    for (let i = 0; i < TOWER_BY_ID["turning"].floors; i++) {
+      run = advanceTower({ ...run, phase: "fight" }, true);
+    }
+    check("tower run: clears at the top", run.phase === "cleared", run.phase);
+    check("tower run: counts every floor", run.cleared === TOWER_BY_ID["turning"].floors, `${run.cleared}`);
+
+    let lost = advanceTower({ ...startTower("turning", "roman", 7), phase: "fight" }, false);
+    check("tower run: a loss ends the climb", lost.phase === "lost");
+    check("tower run: a normal tower lets you continue", continueTower(lost).phase === "versus");
+
+    // Survival is the one that does not.
+    const surv = advanceTower({ ...startTower("survivor", "roman", 7), phase: "fight" }, false);
+    check("tower run: survival has no continues", continueTower(surv).phase === "lost");
+
+    // And it carries health, healing a little on each win.
+    const first = advanceTower(
+      { ...startTower("survivor", "roman", 7), phase: "fight" },
+      true,
+      { left: 400, max: 1000 },
+    );
+    check("tower run: survival carries health forward", first.carry !== null && first.carry > 400 && first.carry < 1000, `${first.carry}`);
+    const full = advanceTower(
+      { ...startTower("survivor", "roman", 7), phase: "fight" },
+      true,
+      { left: 990, max: 1000 },
+    );
+    check("tower run: survival healing cannot overfill the bar", (full.carry ?? 0) <= 1000, `${full.carry}`);
+  }
+
+  // The carry rule has to win over a modifier that also sets health, or a
+  // floor rolling "Already Bleeding" would quietly refill a survival run.
+  {
+    const tower = TOWER_BY_ID["survivor"];
+    const floor = { index: 1, opponent: "spartan", level: "Veteran" as const, modifiers: ["wounded"] };
+    const rules = rulesFor(floor, tower, 300);
+    const m = new Match([getFighter("roman"), getFighter("roman")]);
+    m.rules = rules;
+    m.startRound();
+    check("survival: the carried health survives a modifier that sets health", m.fighters[0].health === 300, `${m.fighters[0].health}`);
+  }
+}
 
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);

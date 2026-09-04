@@ -17,12 +17,22 @@ import { StartButton } from "@/game/stickfight/ui/StartButton";
 import { music } from "@/game/stickfight/engine/music";
 import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
-import { loadSave, recordClear, recordMatch } from "@/game/stickfight/save";
+import { loadSave, recordClear, recordMatch, recordTower } from "@/game/stickfight/save";
+import { FloorCard, TowerCleared, TowerLost, TowerSelect } from "@/game/stickfight/ui/Towers";
+import {
+  advanceTower,
+  continueTower,
+  rulesFor,
+  startTower,
+  TOWER_BY_ID,
+  TOWERS,
+  type TowerRun,
+} from "@/game/stickfight/towers";
 import type { WeaponVariant } from "@/game/stickfight/weapons";
 import { SKINS } from "@/game/stickfight/skins";
 import menuMap from "@/assets/menu-map.jpg";
 
-type Screen = "title" | "select" | "fight";
+type Screen = "title" | "select" | "towers" | "fight";
 
 const CONTROLS: { keys: string; label: string }[] = [
   { keys: "W A S D", label: "Move · W jumps · S crouches" },
@@ -76,6 +86,10 @@ export default function StickFighter() {
   const [showSettings, setShowSettings] = useState(false);
   const [touch, setTouch] = useState(false);
   const [run, setRun] = useState<Run | null>(null);
+  // A tower climb. Held separately from the arcade run rather than unified
+  // with it: they share a shape but not a rulebook, and the last time two
+  // modes shared one state object every branch had to ask which one it was.
+  const [tower, setTower] = useState<TowerRun | null>(null);
 
   useEffect(() => {
     setTouch(typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
@@ -272,13 +286,28 @@ export default function StickFighter() {
           onStart={(opts) => {
             setConfig(opts);
             setRun(opts.mode === "arcade" ? startRun(opts.p1, opts.aiLevel) : null);
-            setScreen("fight");
+            setTower(null);
+            // Towers needs one more choice - which tower - before there is a
+            // fight to set up, so it stops at the list on the way through.
+            setScreen(opts.mode === "towers" ? "towers" : "fight");
           }}
           onShowMoves={(id) => setMoveListFor(id)}
         />
       )}
 
-      {screen === "fight" && config && !run && (
+      {screen === "towers" && config && (
+        <TowerSelect
+          towers={TOWERS}
+          records={loadSave().towers}
+          onPick={(id) => {
+            setTower(startTower(id, config.p1));
+            setScreen("fight");
+          }}
+          onQuit={() => setScreen("select")}
+        />
+      )}
+
+      {screen === "fight" && config && !run && !tower && (
         <GameCanvas
           config={config}
           touch={touch}
@@ -287,6 +316,102 @@ export default function StickFighter() {
           onResult={(winner) => creditMatch(config, winner)}
         />
       )}
+
+      {screen === "fight" && config && tower && (() => {
+        const def = TOWER_BY_ID[tower.tower];
+        const floor = tower.floors[tower.at];
+        if (!def || !floor) return null;
+        // Only used to show the carried health as a percentage on the card;
+        // the carry itself is measured against the bar the HUD reported.
+        const maxHealth = ROSTER.find((f) => f.id === config.p1)?.stats.health ?? 1000;
+        const best = loadSave().towers[tower.tower] ?? 0;
+        return (
+          <>
+            {/*
+              Same trick as the arcade ladder: the canvas stays mounted behind
+              the floor card so the next fight is already warm. The key is the
+              floor index, because a modifier is applied when a round starts -
+              so a floor with different rules has to be a different match, not
+              the same one carried forward.
+            */}
+            <GameCanvas
+              key={`${tower.tower}-${tower.at}`}
+              config={{
+                ...config,
+                mode: "cpu",
+                p2: floor.opponent,
+                aiLevel: floor.level,
+                rounds: def.singleRound ? 1 : config.rounds,
+                p2Skin: floor.opponent === config.p1 && config.p2Skin === config.p1Skin
+                  ? SKINS.find((sk) => sk.id !== config.p1Skin)?.id
+                  : config.p2Skin,
+                p2Weapon: loadSave().weapons[floor.opponent],
+                rules: rulesFor(floor, def, tower.carry),
+              }}
+              touch={touch}
+              onQuit={() => {
+                setTower(null);
+                setScreen("select");
+              }}
+              onShowMoves={() => setMoveListFor(config.p1)}
+              onResult={(winner) => creditMatch({ ...config, mode: "cpu" }, winner)}
+              onMatchEnd={(winner, _finishing, health) => {
+                setTower((t) => {
+                  if (!t) return t;
+                  const next = advanceTower(t, winner === 0, health[0]);
+                  // Recorded only on a transition, for the same reason the
+                  // ladder guards its advance: the match-end phase lasts many
+                  // frames and reports more than once.
+                  if (next.phase !== t.phase && (next.phase === "lost" || next.phase === "cleared")) {
+                    recordTower(t.tower, next.cleared);
+                  }
+                  return next;
+                });
+              }}
+            />
+
+            {tower.phase === "versus" && (
+              <FloorCard
+                playerId={config.p1}
+                tower={def}
+                floor={floor}
+                carry={tower.carry === null ? null : tower.carry / maxHealth}
+                onFight={() => setTower({ ...tower, phase: "fight" })}
+                onQuit={() => {
+                  setTower(null);
+                  setScreen("select");
+                }}
+              />
+            )}
+
+            {tower.phase === "lost" && (
+              <TowerLost
+                tower={def}
+                floor={floor}
+                cleared={tower.cleared}
+                best={best}
+                onRetry={() => setTower(continueTower(tower))}
+                onQuit={() => {
+                  setTower(null);
+                  setScreen("select");
+                }}
+              />
+            )}
+
+            {tower.phase === "cleared" && (
+              <TowerCleared
+                playerId={config.p1}
+                tower={def}
+                cleared={tower.cleared}
+                onDone={() => {
+                  setTower(null);
+                  setScreen("select");
+                }}
+              />
+            )}
+          </>
+        );
+      })()}
 
       {screen === "fight" && config && run && (
         <>

@@ -278,6 +278,10 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
   const [picking, setPicking] = useState<"p1" | "p2">("p1");
   const [hover, setHover] = useState(saved.p1);
   const [mode, setMode] = useState<GameMode>("arcade");
+  // Arcade and Towers are both one-player climbs: you pick who goes up and the
+  // mode supplies everyone they meet. Every place that used to name "arcade"
+  // means this, so it is asked once here rather than spelled out five times.
+  const solo = mode === "arcade" || mode === "towers";
   const [aiLevel, setAiLevel] = useState<AiLevel>(saved.aiLevel);
   const [rounds, setRounds] = useState(saved.rounds);
   const [stage, setStage] = useState<StageTheme | "random">(saved.stage);
@@ -307,7 +311,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
   const pick = (id: string) => {
     // An arcade run has one player, so every click sets P1 rather than
     // alternating - otherwise the second click hands your pick to the CPU.
-    if (mode === "arcade") {
+    if (solo) {
       setP1(id);
       return;
     }
@@ -328,8 +332,8 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             Choose your fighter
           </h2>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
-            {mode === "arcade" ? (
-              <>Eight fights · pick who climbs</>
+            {solo ? (
+              <>{mode === "towers" ? "Pick who climbs · the tower is chosen next" : "Eight fights · pick who climbs"}</>
             ) : (
               <>
                 Selecting for{" "}
@@ -344,7 +348,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex border border-[var(--rule)]">
-            {(["arcade", "cpu", "versus", "training"] as GameMode[]).map((m) => (
+            {(["arcade", "towers", "cpu", "versus", "training"] as GameMode[]).map((m) => (
               <button
                 key={m}
                 type="button"
@@ -355,12 +359,20 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
                     : "text-[var(--bone-dim)] hover:bg-white/5 hover:text-[var(--bone)]"
                 }`}
               >
-                {m === "arcade" ? "Arcade" : m === "cpu" ? "1P vs CPU" : m === "versus" ? "2 Players" : "Training"}
+                {m === "arcade"
+                  ? "Arcade"
+                  : m === "towers"
+                    ? "Towers"
+                    : m === "cpu"
+                      ? "1P vs CPU"
+                      : m === "versus"
+                        ? "2 Players"
+                        : "Training"}
               </button>
             ))}
           </div>
 
-          {(mode === "cpu" || mode === "arcade" || mode === "training") && (
+          {(mode === "cpu" || solo || mode === "training") && (
             <select
               value={aiLevel}
               onChange={(e) => setAiLevel(e.target.value as AiLevel)}
@@ -397,7 +409,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
               index={String(i + 1).padStart(2, "0")}
               clearedAt={cleared[def.id]}
               selected={
-                mode === "arcade"
+                solo
                   ? p1 === def.id
                     ? "p1"
                     : null
@@ -493,7 +505,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
 
       <div className="cut-sm flex flex-wrap items-center justify-between gap-3 border border-[var(--rule)] bg-[var(--ink-2)] p-3">
         <div className="flex flex-wrap items-center gap-5">
-          {(mode === "arcade" ? picked.slice(0, 1) : picked).map((def, i) => (
+          {(solo ? picked.slice(0, 1) : picked).map((def, i) => (
             <div key={i} className="flex items-center gap-2">
               <FighterPortrait def={def} className="h-14 w-14" facing={i === 0 ? 1 : -1} />
               <div>
@@ -560,7 +572,7 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
           }}
           className="cut bg-[var(--accent)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
         >
-          {mode === "training" ? "Train" : mode === "arcade" ? "Begin" : "Fight"}
+          {mode === "training" ? "Train" : solo ? "Begin" : "Fight"}
         </button>
       </div>
     </div>

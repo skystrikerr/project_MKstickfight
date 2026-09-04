@@ -58,6 +58,16 @@ export interface RoundResult {
   finishingDamage?: number;
 }
 
+/**
+ * A per-fight rule change. `onRoundStart` runs after the fighters are reset,
+ * so it is the place to set up anything that should hold for the round;
+ * `onFrame` runs once per frame of live play.
+ */
+export interface MatchRule {
+  onRoundStart?: (m: Match) => void;
+  onFrame?: (m: Match) => void;
+}
+
 let projId = 0;
 
 export class Match {
@@ -82,6 +92,16 @@ export class Match {
   roundsToWin: number;
 
   /**
+   * Extra rules for this fight, used by the towers.
+   *
+   * The engine deliberately knows nothing about what a rule is called or what
+   * it is worth - only when to run it. Everything presentational lives with
+   * the tower data, so a modifier can be added there without touching the
+   * simulation.
+   */
+  rules: MatchRule[] = [];
+
+  /**
    * `platforms` are the ledges of whatever stage this is being played on. The
    * engine is handed them rather than looking a stage up, so it stays free of
    * anything to do with drawing.
@@ -90,11 +110,22 @@ export class Match {
     defs: [FighterDef, FighterDef],
     roundsToWin = MATCH.roundsToWin,
     platforms: Platform[] = [],
+    rules: MatchRule[] = [],
   ) {
     this.fighters = [new Fighter(defs[0], 0), new Fighter(defs[1], 1)];
     this.roundsToWin = roundsToWin;
     for (const f of this.fighters) f.platforms = platforms;
+    this.rules = rules;
     this.resetPositions();
+    // The first round never goes through `startRound` - that only runs between
+    // rounds - so applying the rules there alone left round one, and every
+    // round of a single-round fight, quietly unmodified.
+    this.applyRules();
+  }
+
+  /** Runs every rule's round-start hook. Called for the first round too. */
+  private applyRules() {
+    for (const rule of this.rules) rule.onRoundStart?.(this);
   }
 
   /** Puts both fighters back on their marks. Training mode reuses this. */
@@ -119,6 +150,14 @@ export class Match {
       f.grabbedBy = null;
       f.pendingKnockdown = "none";
       f.input.reset();
+      // Rule knobs are reset with the rest of the fighter and re-applied by
+      // `onRoundStart` below, so a modifier cannot leak into the next round
+      // and cannot stack with itself across a three-round match.
+      f.gravityScale = 1;
+      f.damageDealtScale = 1;
+      f.damageTakenScale = 1;
+      f.meterScale = 1;
+      f.healthDrain = 0;
       f.setState("intro");
     }
     a.facing = 1;
@@ -133,6 +172,7 @@ export class Match {
     this.phaseFrame = 0;
     this.timer = MATCH.roundTime * FPS;
     this.lastResult = null;
+    this.applyRules();
   }
 
   get roundActive(): boolean {
@@ -196,6 +236,16 @@ export class Match {
   }
 
   private stepFight() {
+    for (const rule of this.rules) rule.onFrame?.(this);
+    // Drain and regeneration are resolved here rather than inside a modifier
+    // so every rule that moves health does it at the same point in the frame,
+    // and so none of them can win the round outright: a fight has to be
+    // finished by someone hitting someone.
+    for (const f of this.fighters) {
+      if (f.healthDrain === 0) continue;
+      const next = f.health - f.healthDrain / FPS;
+      f.health = Math.max(1, Math.min(f.def.stats.health, next));
+    }
     const [a, b] = this.fighters;
 
     a.faceOpponent(b);
@@ -504,7 +554,16 @@ export class Match {
 
     const counter = defender.inStartup && !fromProjectile;
     const scale = Math.max(COMBAT.minScale, defender.scaling);
-    const damage = Math.max(1, Math.round(hit.damage * scale * (counter ? COMBAT.counterDamageScale : 1)));
+    const damage = Math.max(
+      1,
+      Math.round(
+        hit.damage *
+          scale *
+          (counter ? COMBAT.counterDamageScale : 1) *
+          attacker.damageDealtScale *
+          defender.damageTakenScale,
+      ),
+    );
 
     defender.health = Math.max(0, defender.health - damage);
     this.lastHitTaken[defender.index] = { move: name, damage };

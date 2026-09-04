@@ -18,6 +18,7 @@ import { BINDABLE_ACTIONS, defaultKeyMap, isKeyCode, type KeyMap } from "./keybi
 import { isInputScheme, type InputScheme } from "./inputscheme";
 import { weaponsFor, type WeaponVariant } from "./weapons";
 import { applyClear, applyMatch, isUnlocked, NO_MASTERY, type Mastery, type ProgressState } from "./progress";
+import { TOWERS } from "./towers";
 
 const KEY = "stickfighter.save";
 const VERSION = 1;
@@ -60,6 +61,13 @@ export interface SaveData {
    * `cleared` table above, and nothing else reads it.
    */
   mastery: Record<string, Mastery>;
+  /**
+   * Tower id -> the most floors ever cleared in one run of it. This is the
+   * whole tower record: runs themselves are rebuilt from a seed rather than
+   * saved, so a climb in progress does not survive closing the tab - only
+   * what you got to.
+   */
+  towers: Record<string, number>;
 }
 
 export const DEFAULT_SAVE: SaveData = {
@@ -81,6 +89,7 @@ export const DEFAULT_SAVE: SaveData = {
   cleared: {},
   weapons: {},
   mastery: {},
+  towers: {},
 };
 
 const isFighter = (v: unknown): v is string => ROSTER.some((f) => f.id === v);
@@ -155,8 +164,19 @@ function coerce(raw: unknown): SaveData {
       weapons[id] = variant;
     }
   }
+  // Same rule again: a tower this build has dropped, or a floor count that is
+  // not a whole positive number, loses that one entry rather than the record.
+  const towers: Record<string, number> = {};
+  if (o.towers && typeof o.towers === "object") {
+    for (const [id, floors] of Object.entries(o.towers)) {
+      if (!TOWERS.some((t) => t.id === id)) continue;
+      if (typeof floors !== "number" || !Number.isInteger(floors) || floors < 0) continue;
+      towers[id] = floors;
+    }
+  }
   return {
     v: VERSION,
+    towers,
     p1: isFighter(o.p1) ? o.p1 : DEFAULT_SAVE.p1,
     p2: isFighter(o.p2) ? o.p2 : DEFAULT_SAVE.p2,
     p1Skin: isSkin(o.p1Skin) ? o.p1Skin : DEFAULT_SAVE.p1Skin,
@@ -225,6 +245,16 @@ export function recordMatch(fighterId: string, won: boolean): { save: SaveData; 
   const save = loadSave();
   const { state, unlocked } = applyMatch({ mastery: save.mastery, cleared: save.cleared }, fighterId, won);
   return { save: patchSave({ mastery: state.mastery }), unlocked };
+}
+
+/**
+ * Records how far a tower run got. Only an improvement is written, so giving
+ * up on floor two after reaching floor nine does not erase floor nine.
+ */
+export function recordTower(towerId: string, floorsCleared: number): SaveData {
+  const save = loadSave();
+  if ((save.towers[towerId] ?? 0) >= floorsCleared) return save;
+  return patchSave({ towers: { ...save.towers, [towerId]: floorsCleared } });
 }
 
 export function clearSave(): void {

@@ -17,7 +17,7 @@ sci-fi, fantasy, horror. Noted, not designed.
 
 | | What | Shape |
 |---|---|---|
-| 1 | **Towers mode**, and more modes after it | Content, once the AI is good |
+| 1 | ~~Towers mode~~ — **built**; more modes after it | Content, once the AI is good |
 | 2 | **Unique stages** — walls, cliffs, hazards | Systemic |
 | 3 | **Create-a-fighter** | New product surface |
 | 4 | **Progression**, beyond weapon unlocks | Extends what exists |
@@ -34,9 +34,17 @@ and get harder the longer they wait. One is a different product.
 ## Notes per item
 
 ### Towers and other modes
-Cheap to build, and almost entirely gated on the AI. A tower is a long
-sequence of AI fights; if the AI is exploitable, a tower is a chore with a
-health bar. Do not start this before the AI work below.
+**Built.** Three towers - a straight ten-fight climb, an eight-floor tower
+where the rules change every floor, and an endless survival run on one health
+bar. Floors are dealt from a seed, so a run is three numbers rather than a
+saved blob, and modifiers are data: each one is a pair of callbacks plus the
+warning text, driving five scalar knobs on a fighter and nothing else.
+
+The gating concern below was right and still stands. A tower is a long
+sequence of AI fights, so an exploitable AI makes it a chore with a health
+bar - the modifiers buy some variety but they do not fix that. The next work
+here is the AI, not more towers, and more game modes should wait behind it
+for the same reason.
 
 ### Stages with walls, cliffs and hazards
 This is the one that gets harder with every fighter added, so it should come

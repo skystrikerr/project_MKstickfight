@@ -95,6 +95,27 @@ export class Fighter {
   health: number;
   meter = 0;
   guard = COMBAT.maxGuard;
+
+  // ---------------------------------------------------------------------------
+  // Rule knobs
+  //
+  // Tower modifiers change a fight by changing these, rather than by reaching
+  // into the simulation. Keeping the whole surface to five scalars is what
+  // makes a modifier a line of data instead of a special case in the engine,
+  // and it means a modifier can never desync a match: they are read where the
+  // ordinary values are read, and reset with everything else between rounds.
+  // ---------------------------------------------------------------------------
+
+  /** Multiplies this fighter's own gravity. Below 1 floats, above 1 slams. */
+  gravityScale = 1;
+  /** Multiplies damage this fighter deals. */
+  damageDealtScale = 1;
+  /** Multiplies damage this fighter takes. */
+  damageTakenScale = 1;
+  /** Multiplies meter this fighter earns. Zero locks them out of EX and super. */
+  meterScale = 1;
+  /** Health lost per second; negative regenerates. Never kills on its own. */
+  healthDrain = 0;
   resource: number;
   /** Refills left. Only meaningful when the fighter carries spare magazines. */
   spares: number;
@@ -837,7 +858,7 @@ export class Fighter {
 
     if (airborne) {
       const holdingDown = this.input.holdingDown();
-      this.vy -= s.gravity * (holdingDown && this.state === "air" ? 1 + COMBAT.fastFall : 1);
+      this.vy -= s.gravity * this.gravityScale * (holdingDown && this.state === "air" ? 1 + COMBAT.fastFall : 1);
       this.vx *= PHYSICS.airDrag;
       if (this.vy < -PHYSICS.terminalVelocity) this.vy = -PHYSICS.terminalVelocity;
     }
@@ -987,7 +1008,7 @@ export class Fighter {
   }
 
   addMeter(amount: number) {
-    this.meter = Math.min(COMBAT.maxMeter, this.meter + amount);
+    this.meter = Math.min(COMBAT.maxMeter, this.meter + amount * this.meterScale);
   }
 
   /**
