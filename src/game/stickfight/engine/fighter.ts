@@ -275,7 +275,12 @@ export class Fighter {
 
   hurtboxes(): WorldBox[] {
     if (this.state === "knockdown" || this.state === "ko") return [];
-    const base = this.move?.hurtbox
+    const framed = this.move?.hurtboxAt?.find(
+      (h) => this.moveFrame >= h.from && this.moveFrame <= h.to,
+    );
+    const base = framed
+      ? framed.box
+      : this.move?.hurtbox
       ? this.move.hurtbox
       : this.stance === "crouch"
         ? HURTBOX.crouch

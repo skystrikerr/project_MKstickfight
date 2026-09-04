@@ -277,9 +277,9 @@ export class AiController {
         // answer by closing, not by surviving. Guarding everything is what
         // turned the first version of this into a draw machine.
         const wantsIn = st.range === "close" ? 1.6 : st.range === "far" ? 0.35 : 1;
-        // Dodging through beats guarding outright, because the universal
-        // dodges carry strike invulnerability and projectiles honour it, and
-        // it covers ground while it does.
+        // Dodging beats guarding outright, because the roll tucks under
+        // head-height while it covers ground - it avoids the attack by not
+        // being where it lands, so it costs no chip and ends somewhere better.
         if (r < 0.22 * wantsIn * st.aggression) {
           const dodge = this.pickMove(self, (m) => (m.tags?.includes("dodge") ?? false) && m.input.dir === "f");
           if (dodge) return this.queueMove(self, dodge);

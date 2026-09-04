@@ -14,7 +14,7 @@
  * silence, so nothing breaks. See public/music/README.md.
  */
 
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,6 +29,29 @@ try {
 } catch {
   console.error("No dist/assets - run `npm run build` first.");
   process.exit(1);
+}
+
+// Packing a stale bundle is silent and looks exactly like success: the file
+// is the right size, it opens, it plays - it is just the previous build. That
+// shipped an old version of the dodge to a play-tester once, so refuse to do
+// it rather than warn about it.
+{
+  const newest = async (dir) => {
+    let latest = 0;
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+      const full = path.join(dir, entry.name);
+      latest = Math.max(latest, entry.isDirectory() ? await newest(full) : (await stat(full)).mtimeMs);
+    }
+    return latest;
+  };
+  const built = (await stat(path.join(DIST, "assets", assets.find((f) => f.endsWith(".js")) ?? ""))).mtimeMs;
+  const edited = Math.max(await newest(path.join(ROOT, "src")), await newest(path.join(ROOT, "tools")));
+  if (edited > built) {
+    const age = Math.round((edited - built) / 1000);
+    console.error(`dist/assets is ${age}s older than the sources - run \`npm run build\` first.`);
+    process.exit(1);
+  }
 }
 
 const js = assets.find((f) => f.endsWith(".js"));

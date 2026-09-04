@@ -734,7 +734,10 @@ export const SHADE: FighterDef = {
       ],
     },
     {
-      id: "roll",
+      // Not "roll": that id belongs to the universal dodge every fighter has,
+      // and this was silently colliding with it - a lookup by id found the
+      // universal move at index 6 and never reached his own at index 29.
+      id: "shadowRoll",
       name: "Roll Dodge",
       input: { motion: "ff", stance: ["stand", "crouch"] },
       tags: ["special", "movement"],
@@ -745,7 +748,7 @@ export const SHADE: FighterDef = {
       // the roll or it cannot come out at all.
       followUps: [{ button: "C", move: "dashAttack", from: 4, to: 22, string: "Shadow Rush" }],
       invuln: [{ from: 3, to: 24, kind: "strike" }],
-      // Twice the universal sidestep's travel - a real escape, not a feint.
+      // Further than the universal roll - a real escape, not a feint.
       vel: [
         { at: 3, x: 16 },
         { at: 24, x: 0 },

@@ -84,10 +84,10 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
   //
   // The push fires on frame 3 rather than frame 1 - he has to get off the
   // ground first - so the authored number is scaled back up to pay for the two
-  // frames of travel that costs. A roll ends up crossing something like five
-  // character widths: a dodge that barely outruns a walk is not worth
-  // committing invulnerability to, and Souls rolls move you a body length or
-  // more clear of what you rolled through.
+  // frames of travel that costs. A roll ends up crossing something like eight
+  // character widths, which is the whole mechanic: nothing here makes a
+  // fighter untouchable, so a dodge that barely outruns a walk does not avoid
+  // anything at all. The distance is the defence.
   //
   // The roll commits and covers ground; the backstep is a short sharp exit and
   // is deliberately left at the distance it always had. They are separate
@@ -244,11 +244,13 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       tags: ["dodge"],
       priority: 55,
       duration: 26,
-      // Souls timing: the invulnerability starts almost at once, covers the
-      // whole tumble, and ENDS while he is still getting his feet back under
-      // him. The last eight frames are the price of using it - roll into
-      // something with no plan and the recovery is where you get hit.
-      invuln: [{ from: 3, to: 18, kind: "strike" }],
+      // No invulnerability. What avoids the attack is where his body is: for
+      // the sixteen frames he is tucked he is a ball forty-six units tall,
+      // less than half his standing height and lower than a crouch, so a swing
+      // aimed at a standing man passes over him. The moment he starts standing
+      // back up he is a full-sized target again, which is what makes the
+      // recovery the price of the move rather than a formality.
+      hurtboxAt: [{ from: 3, to: 18, box: { x: -22, y: 0, w: 44, h: 46 } }],
       vel: [
         { at: 3, x: rollSpeed },
         { at: 18, x: 0 },
@@ -256,7 +258,7 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       // Higher than the old step's 0.95 so he keeps sliding out of the tumble
       // rather than stopping dead the moment the push ends.
       friction: 0.97,
-      desc: "A committed roll that covers real ground. Invincible through the tumble and wide open coming out of it.",
+      desc: "A committed roll that covers real ground. He tucks under head-height while he tumbles, and is a full-sized target again the moment he stands up.",
       notation: "\u2192 + S",
       /**
        * A tuck and roll, the way Dark Souls does it.
@@ -330,7 +332,10 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
       tags: ["dodge"],
       priority: 55,
       duration: 20,
-      invuln: [{ from: 3, to: 13, kind: "strike" }],
+      // Also no invulnerability, and it never needed any: measured against
+      // every attack in the game it was already avoiding all of them purely by
+      // leaving, and stripping the window out changed nothing it does.
+      //
       // The short sharp exit, deliberately left exactly as it was: same
       // distance and timing it has always had. The leg work
       // that makes this direction honest lives in the frames below, not here.
@@ -339,7 +344,7 @@ export function universalMoves(opts: UniversalOptions = {}): MoveDef[] {
         { at: 13, x: 0 },
       ],
       friction: 0.95,
-      desc: "Tap back twice to snap out of range instead of past them. Same invulnerability, opposite direction.",
+      desc: "Tap back twice to leave the range instead of rolling past them. Nothing protects you but the distance, so make it early.",
       notation: "← ←",
       // A mirror of a forward step's leg work, not just its numbers run
       // backward. Moving away means the *front* leg is the one that has to

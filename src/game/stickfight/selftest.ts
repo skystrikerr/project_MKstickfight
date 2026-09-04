@@ -422,6 +422,60 @@ progressionTests();
 }
 
 {
+  // The dodges avoid attacks by where the body goes, not by a window of being
+  // untouchable.
+  //
+  // This is the whole design of them, and it is the kind of thing that rots
+  // silently: someone adds an `invuln` window to fix a matchup, the dodges
+  // still "work", and the mechanic quietly becomes invulnerability again with
+  // the movement as decoration. So assert the absence directly, and then
+  // assert that the dodge still avoids the attack anyway.
+  for (const def of ROSTER) {
+    for (const mv of def.moves) {
+      if (!mv.tags?.includes("dodge")) continue;
+      check(
+        `${def.id}/${mv.id}: dodges avoid by moving, not by invulnerability`,
+        (mv.invuln ?? []).length === 0,
+        `windows=${JSON.stringify(mv.invuln)}`,
+      );
+    }
+  }
+
+  // A committed attack whiffs; the same attack thrown at the recovery lands.
+  // Both halves matter - the first says the dodge works, the second says it is
+  // still a decision rather than a free button.
+  const roll = (theirAttackAt: number) => {
+    const m = newMatch("roman", "roman");
+    m.fighters[0].x = -30;
+    m.fighters[1].x = 30;
+    const hp = m.fighters[0].health;
+    run(m, 60,
+      (f) => inp({ right: f < 2, S: f < 2 }),
+      (f) => inp({ B: f >= theirAttackAt && f < theirAttackAt + 2 }));
+    return hp - m.fighters[0].health;
+  };
+  // Move ids have to be unique per fighter, because everything that refers to
+  // a move - follow-ups, cancels, the tests above - looks it up by id and
+  // takes the first match. The Shade shipped with his signature "Roll Dodge"
+  // under the same id as the universal roll, so his own move was unreachable
+  // by name and nothing said so.
+  for (const def of ROSTER) {
+    const seen = new Set<string>();
+    const dupes = new Set<string>();
+    for (const mv of def.moves) {
+      if (seen.has(mv.id)) dupes.add(mv.id);
+      seen.add(mv.id);
+    }
+    check(`${def.id}: every move id is unique`, dupes.size === 0, `duplicates=${[...dupes].join(", ")}`);
+  }
+
+  const read = roll(0);
+  const punish = roll(14);
+  check("roll: beats an attack thrown before it", read === 0, `lost=${read}`);
+  check("roll: loses to an attack thrown at its recovery", punish > 0, `lost=${punish}`);
+}
+
+{
   // A dodge has to cover ground. The roll this replaced turned a full circle
   // while travelling less far than simply walking for the same number of
   // frames, which is exactly why it looked like spinning on the spot.

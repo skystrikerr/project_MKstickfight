@@ -398,6 +398,18 @@ export interface MoveDef {
   /** Move to run when the hold ends (for stances). */
   holdRelease?: string;
   hurtbox?: Box;
+  /**
+   * Hurtbox overrides for frame ranges, first match winning, falling back to
+   * `hurtbox` and then to the stance.
+   *
+   * This is what lets a move avoid an attack by where the body actually is
+   * rather than by being briefly untouchable: a roll that tucks into a ball
+   * genuinely passes under a swing aimed at a standing man. A single static
+   * `hurtbox` cannot express it, because it would leave the fighter just as
+   * small while he stands back up - making the recovery, which is meant to be
+   * the price of the move, safe from exactly the attacks it should lose to.
+   */
+  hurtboxAt?: { from: number; to: number; box: Box }[];
   /** Frames during which an incoming strike is parried instead of blocked. */
   parryWindow?: [number, number];
   /** Skips the normal turn-to-face check during the move. */

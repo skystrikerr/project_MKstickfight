@@ -32,7 +32,7 @@ const CONTROLS: { keys: string; label: string }[] = [
   { keys: "S + J / K / L", label: "Crouching light / medium / heavy" },
   { keys: "hold U / ;", label: "Block (S) · + ↓ blocks low" },
   { keys: "← + S", label: "Parry" },
-  { keys: "→ + S", label: "Roll (invincible through the tumble)" },
+  { keys: "→ + S", label: "Roll (ducks under the swing, travels past them)" },
   { keys: "← ←", label: "Backstep (retreats out of range)" },
   { keys: "J + L", label: "Character skill" },
   { keys: "J + K", label: "Throw" },
