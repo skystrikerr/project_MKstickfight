@@ -2391,6 +2391,32 @@ function scriptFor(move: MoveDef): RawInput[] {
   }
 }
 
+{
+  // A prop that shares its name with a projectile has to be hand-held.
+  //
+  // The renderer hides any prop whose id matches a projectile in flight, and
+  // that is deliberate: it is how a thrown javelin leaves the hand that threw
+  // it. It is only wrong when the prop is not the thing being thrown. The
+  // pirate's cannon and her cannonballs were both called "cannon", so serving
+  // the gun deleted the gun - it fired once and was never seen again.
+  //
+  // Hand-held is the line, because that is the case the mechanism was built
+  // for. Anything mounted, worn or put down stays where it is when it shoots.
+  for (const def of ROSTER) {
+    const kinds = new Set<string>();
+    for (const mv of def.moves) for (const p of mv.projectiles ?? []) kinds.add(p.kind);
+    for (const prop of def.props) {
+      if (!kinds.has(prop.id)) continue;
+      const held = prop.attach === "handF" || prop.attach === "handB";
+      check(
+        `${def.id}: prop "${prop.id}" shares a projectile's name, so it must be carried`,
+        held,
+        `attached to ${prop.attach}, so firing would hide it`,
+      );
+    }
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);

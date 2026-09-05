@@ -670,6 +670,10 @@ export function attachTransform(sk: Skeleton, attach: PropDef["attach"]): { x: n
         y: (sk.elbowB.y + sk.handB.y) / 2,
         rot: sk.foreAngleB - 90,
       };
+    // Put down, not carried: the rig group already sits at the fighter's feet
+    // with forward as +x, so the prop's own part offsets place it.
+    case "ground":
+      return { x: 0, y: 0, rot: 0 };
     case "back":
       return { x: sk.neck.x, y: sk.neck.y - 12, rot: -sk.torsoAngle };
     // Greaves, ankle wraps and spurs hang off the ankle but belong to the

@@ -508,7 +508,15 @@ export type PropAttach =
   | "forearmB"
   | "back"
   | "footF"
-  | "footB";
+  | "footB"
+  /**
+   * Standing on the floor at the fighter's feet rather than hanging off a
+   * bone, for things that are put down rather than carried - a cannon wheeled
+   * into place, a planted banner. It still mirrors with the fighter, so
+   * "forward" is forward whichever way they are facing, and it does not
+   * inherit any joint's rotation.
+   */
+  | "ground";
 
 /** A simulated cape/tail hanging from the prop's attachment point. */
 export interface PropCloth {

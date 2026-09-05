@@ -120,6 +120,62 @@ export const PIRATE: FighterDef = {
       ],
     },
     {
+      id: "sixPounder",
+      attach: "ground",
+      conditional: true,
+      // Run out and ready: a naval six-pounder on a truck carriage.
+      parts: [
+        // Carriage: two trucks and the wooden bed they carry.
+        { geo: "disc", size: [9], pos: [26, 9], color: "#5a3b21" },
+        { geo: "ring", size: [9, 2], pos: [26, 9], color: "#3a2614" },
+        { geo: "disc", size: [2.4], pos: [26, 9], color: GOLD },
+        { geo: "disc", size: [7], pos: [50, 7], color: "#5a3b21" },
+        { geo: "ring", size: [7, 2], pos: [50, 7], color: "#3a2614" },
+        { geo: "disc", size: [2], pos: [50, 7], color: GOLD },
+        { geo: "poly", size: [-18, 5, 20, 3, 22, -5, -20, -4], pos: [38, 17], color: "#6b4626" },
+        { geo: "box", size: [34, 3], pos: [38, 21], color: "#7d5730" },
+        // Barrel: breech, taper, and a flared muzzle with a reinforcing ring.
+        { geo: "cyl", size: [8.5, 20], pos: [30, 29], rot: 90, color: "#3a3f47" },
+        { geo: "cyl", size: [6.6, 34], pos: [53, 29], rot: 90, color: "#454b54" },
+        { geo: "cyl", size: [7.4, 6], pos: [72, 29], rot: 90, color: "#565d67" },
+        { geo: "ring", size: [7.4, 1.6], pos: [72, 29], color: GOLD, z: 0.2 },
+        // Cascabel at the breech, trunnion where it pivots on the carriage.
+        { geo: "disc", size: [4], pos: [19, 29], color: "#3a3f47" },
+        { geo: "disc", size: [3.4], pos: [40, 26], color: "#2c3037" },
+        // Touch hole and a curl of slow match.
+        { geo: "box", size: [2, 3], pos: [26, 37], color: "#2c3037" },
+      ],
+    },
+    {
+      id: "sixPounderRecoil",
+      attach: "ground",
+      conditional: true,
+      // The same gun thrown back on its tackle by the shot. Swapped in for a
+      // couple of frames on each discharge - a gun that does not move when it
+      // fires reads as scenery.
+      parts: [
+        // Carriage: two trucks and the wooden bed they carry.
+        { geo: "disc", size: [9], pos: [17, 9], color: "#5a3b21" },
+        { geo: "ring", size: [9, 2], pos: [17, 9], color: "#3a2614" },
+        { geo: "disc", size: [2.4], pos: [17, 9], color: GOLD },
+        { geo: "disc", size: [7], pos: [41, 7], color: "#5a3b21" },
+        { geo: "ring", size: [7, 2], pos: [41, 7], color: "#3a2614" },
+        { geo: "disc", size: [2], pos: [41, 7], color: GOLD },
+        { geo: "poly", size: [-18, 5, 20, 3, 22, -5, -20, -4], pos: [29, 17], color: "#6b4626" },
+        { geo: "box", size: [34, 3], pos: [29, 21], color: "#7d5730" },
+        // Barrel: breech, taper, and a flared muzzle with a reinforcing ring.
+        { geo: "cyl", size: [8.5, 20], pos: [21, 29], rot: 90, color: "#3a3f47" },
+        { geo: "cyl", size: [6.6, 34], pos: [44, 29], rot: 90, color: "#454b54" },
+        { geo: "cyl", size: [7.4, 6], pos: [63, 29], rot: 90, color: "#565d67" },
+        { geo: "ring", size: [7.4, 1.6], pos: [63, 29], color: GOLD, z: 0.2 },
+        // Cascabel at the breech, trunnion where it pivots on the carriage.
+        { geo: "disc", size: [4], pos: [10, 29], color: "#3a3f47" },
+        { geo: "disc", size: [3.4], pos: [31, 26], color: "#2c3037" },
+        // Touch hole and a curl of slow match.
+        { geo: "box", size: [2, 3], pos: [17, 37], color: "#2c3037" },
+      ],
+    },
+    {
       id: "pistol",
       attach: "handB",
       conditional: true,
@@ -980,24 +1036,43 @@ export const PIRATE: FighterDef = {
       input: { button: "S", motion: "hcf", stance: ["stand", "crouch"] },
       tags: ["super"],
       priority: 60,
-      duration: 110,
+      duration: 116,
       meterCost: 100,
       superFreeze: 40,
       invuln: [{ from: 1, to: 10, kind: "strike" }],
       showProps: ["pistol"],
       friction: 0.92,
+      /**
+       * The gun is run out on frame 12 and fires three times from its muzzle.
+       *
+       * It used to be three cannonballs that appeared out of her hand, which
+       * read as throwing them. The shot now leaves a barrel that is actually
+       * standing there, and the gun is swapped for a recoiled copy of itself
+       * for four frames after each discharge - a gun that does not move when
+       * it fires is scenery.
+       */
+      propsAt: [
+        { from: 12, to: 21, show: ["sixPounder"] },
+        { from: 22, to: 25, show: ["sixPounderRecoil"] },
+        { from: 26, to: 37, show: ["sixPounder"] },
+        { from: 38, to: 41, show: ["sixPounderRecoil"] },
+        { from: 42, to: 53, show: ["sixPounder"] },
+        { from: 54, to: 58, show: ["sixPounderRecoil"] },
+        { from: 59, to: 88, show: ["sixPounder"] },
+      ],
       projectiles: [
         {
-          at: 20,
+          at: 22,
           kind: "cannon",
           armAfter: 0,
-          x: 40,
-          y: 30,
-          vx: 11,
-          vy: 0.2,
+          // Out of the muzzle, not out of her hand.
+          x: 80,
+          y: 29,
+          vx: 11.5,
+          vy: 0.25,
           life: 100,
           box: { x: -16, y: -14, w: 32, h: 28 },
-          damage: 60,
+          damage: 100,
           hitstun: 26,
           blockstun: 16,
           chip: 8,
@@ -1008,16 +1083,16 @@ export const PIRATE: FighterDef = {
           trail: "#8a8f98",
         },
         {
-          at: 34,
+          at: 38,
           kind: "cannon",
           armAfter: 0,
-          x: 40,
-          y: 62,
-          vx: 12,
-          vy: 0,
+          x: 80,
+          y: 29,
+          vx: 12.5,
+          vy: 0.05,
           life: 100,
           box: { x: -16, y: -14, w: 32, h: 28 },
-          damage: 55,
+          damage: 95,
           hitstun: 26,
           blockstun: 16,
           chip: 7,
@@ -1028,16 +1103,16 @@ export const PIRATE: FighterDef = {
           trail: "#8a8f98",
         },
         {
-          at: 48,
+          at: 54,
           kind: "cannon",
           armAfter: 0,
-          x: 40,
-          y: 44,
-          vx: 13,
+          x: 80,
+          y: 29,
+          vx: 13.5,
           vy: 0.1,
           life: 100,
           box: { x: -18, y: -16, w: 36, h: 32 },
-          damage: 90,
+          damage: 110,
           hitstun: 34,
           blockstun: 18,
           chip: 10,
@@ -1052,20 +1127,29 @@ export const PIRATE: FighterDef = {
       ],
       vfx: [
         { at: 2, kind: "super", x: 0, y: 50, scale: 2.4, color: "#4fd1c5" },
-        { at: 20, kind: "explode", x: 44, y: 30, scale: 0.9 },
-        { at: 34, kind: "explode", x: 44, y: 62, scale: 0.9 },
-        { at: 48, kind: "explode", x: 44, y: 44, scale: 1.2 },
+        // Muzzle flash where the muzzle actually is.
+        { at: 22, kind: "explode", x: 84, y: 29, scale: 1 },
+        { at: 38, kind: "explode", x: 84, y: 29, scale: 1 },
+        { at: 54, kind: "explode", x: 84, y: 29, scale: 1.4 },
       ],
-      desc: "SUPER. Calls in a broadside from the ship offshore - three cannonballs, the last one explodes.",
-      notation: "←↙↓↘→ + S  (100 meter)",
+      desc: "SUPER. Runs out a six-pounder and works it - three shots from the muzzle, the last one bursts.",
+      notation: "\u2190\u2199\u2193\u2198\u2192 + S  (100 meter)",
+      /**
+       * She is not throwing anything now, she is serving a gun: signal, stand
+       * clear of the recoil, put the match to the touch hole three times, then
+       * step back off it.
+       */
       frames: [
         kf(0, { ...STANCE }, "out"),
+        // The signal to the ship.
         kf(10, { ...STANCE, shoulderF: 150, elbowF: -20, weapon: 60, torso: -16, offX: -4 }, "inOut"),
-        kf(18, { ...STANCE, shoulderF: 172, elbowF: -10, weapon: 40, torso: -22, head: -14, offY: 2 }, "out"),
-        kf(30, { ...STANCE, shoulderF: 166, elbowF: -12, weapon: 44, torso: -18, head: -10 }),
-        kf(48, { ...STANCE, shoulderF: 150, elbowF: -18, weapon: 52, torso: -10, head: -6 }, "inOut"),
-        kf(70, { ...STANCE, shoulderF: 90, elbowF: 20, weapon: 40, torso: 6 }, "inOut"),
-        kf(110, { ...STANCE }),
+        // Stands off the breech - nobody sane stands behind a gun on tackle.
+        kf(18, { ...STANCE, shoulderF: 120, elbowF: -6, weapon: 30, torso: -10, offX: -10, hipB: -22, kneeB: 34 }, "out"),
+        kf(22, { ...STANCE, shoulderF: 108, elbowF: 4, weapon: 22, torso: -4, offX: -12, head: -8 }, "inOut"),
+        kf(38, { ...STANCE, shoulderF: 112, elbowF: 0, weapon: 26, torso: -6, offX: -12, head: -6 }, "inOut"),
+        kf(54, { ...STANCE, shoulderF: 116, elbowF: -4, weapon: 28, torso: -8, offX: -12, head: -10 }, "out"),
+        kf(70, { ...STANCE, shoulderF: 96, elbowF: 14, weapon: 34, torso: 4, offX: -8 }, "inOut"),
+        kf(116, { ...STANCE }),
       ],
     },
   ],
