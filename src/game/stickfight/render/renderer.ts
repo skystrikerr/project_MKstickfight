@@ -6,6 +6,7 @@
 
 import * as THREE from "three";
 import { CAMERA, GROUND_Y, STAGE_HALF_WIDTH } from "../constants";
+import { projectileArmed } from "../engine/match";
 import type { Match, Projectile } from "../engine/match";
 import { buildSkeleton } from "../skeleton";
 import { FxSystem } from "./fx";
@@ -309,7 +310,25 @@ export class GameRenderer {
         this.projectileGroup.add(mesh);
       }
       mesh.position.set(p.x, p.y, 0);
-      mesh.scale.x = p.facing;
+      // A shot that has not armed yet passes through people, so it has to look
+      // like it has not arrived - otherwise the first time one sails through
+      // an opponent at point blank it reads as the game dropping a hit.
+      // Small and faint while it is still leaving the barrel, full size the
+      // instant it can hurt someone.
+      const armed = projectileArmed(p);
+      const grow = armed ? 1 : 0.55;
+      mesh.scale.set(p.facing * grow, grow, 1);
+      if (mesh.userData.armed !== armed) {
+        mesh.userData.armed = armed;
+        mesh.traverse((o) => {
+          const m = (o as THREE.Mesh).material as THREE.Material | undefined;
+          if (!m || Array.isArray(m)) return;
+          const base = (m.userData.baseOpacity ??= m.opacity);
+          m.opacity = armed ? base : base * 0.35;
+          m.transparent = m.opacity < 1;
+          m.depthWrite = !m.transparent;
+        });
+      }
       if (p.spin) mesh.rotation.z += p.spin * 0.03;
       else if (p.gravity > 0) mesh.rotation.z = Math.atan2(p.vy, p.vx * p.facing);
     }

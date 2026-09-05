@@ -714,8 +714,8 @@ export const ETHIOPIA: FighterDef = {
         { at: 26, y: -1, mode: "add" },
       ],
       hits: [
-        hit(4, 10, bx(12, 40, 60, 78), 80, { launch: [2.2, 11], knockdown: "launch", fx: "slash", hitstun: 26, shake: 1.8 }),
-        hit(11, 18, bx(10, 56, 54, 64), 34, { group: 2, launch: [1.6, 5.5], fx: "slash", hitstun: 17 }),
+        hit(4, 10, bx(12, 40, 60, 78), 80, { launch: [2.2, 11], knockdown: "launch", fx: "pierce", hitstun: 26, shake: 1.8 }),
+        hit(11, 18, bx(10, 56, 54, 64), 34, { group: 2, launch: [1.6, 5.5], fx: "pierce", hitstun: 17 }),
       ],
       desc: "Straight up off the front foot with the curve leading, shield tucked. Invincible on the way in - his reversal.",
       notation: "→↓↘ + C",

@@ -416,7 +416,7 @@ export const NIHANG: FighterDef = {
       followUps: [
         { button: "B", move: "6B", from: 7, to: 17, string: "Chakram Work" },
       ],
-      hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "slash", pushX: 3, hitstun: 14, hitstop: 5 })],
+      hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "pierce", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Steps in and snaps the chakram edge across. Fast, and it keeps them honest.",
       notation: "\u2192 + A",
       frames: [

@@ -384,7 +384,7 @@ export const NINJA: FighterDef = {
       followUps: [
         { button: "A", move: "5A", from: 6, to: 17, string: "Kunai Flurry" },
       ],
-      hits: [hit(6, 8, bx(20, 60, 44, 26), 28, { guard: "high", fx: "slash", pushX: 3, hitstun: 13, hitstop: 5 })],
+      hits: [hit(6, 8, bx(20, 60, 44, 26), 28, { guard: "high", fx: "pierce", pushX: 3, hitstun: 13, hitstop: 5 })],
       desc: "Steps in and flicks the kunai across. Her fastest button by a wide margin.",
       notation: "\u2192 + A",
       frames: [
@@ -411,7 +411,7 @@ export const NINJA: FighterDef = {
       followUps: [
         { button: "C", move: "4C", from: 16, to: 37, string: "Tanto Work" },
       ],
-      hits: [hit(16, 20, bx(16, 22, 52, 68), 88, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(16, 22, 52, 68), 88, { guard: "mid", fx: "pierce", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Closes and drags the blade through on the way past. Puts them in the wall.",
       notation: "\u2192 + C",
       frames: [

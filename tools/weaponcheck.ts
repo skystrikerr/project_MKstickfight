@@ -130,7 +130,16 @@ for (const def of ROSTER) {
       // the point travelled at all, not just how far downrange.
       const drive = Math.hypot(forward, lastTip.y - (firstTip?.y ?? 0));
       // A cut sweeps the shaft; a thrust keeps the line and pushes the point.
-      const wrong = fx === "pierce" ? sweep > 70 || drive < 10 : sweep < 45;
+      //
+      // How far the point has to travel scales with the weapon. Ten units was
+      // a flat figure, which is thirty-eight per cent of a kunai's whole
+      // length and eight per cent of a spear's - so it called every knife jab
+      // on the roster a failed thrust while letting a spear poke count. A
+      // short blade cannot drive its point as far as a long one and should
+      // not be asked to.
+      const reach = Math.max(...prop.parts.map(partReach));
+      const needsDrive = Math.max(4, reach * 0.12);
+      const wrong = fx === "pierce" ? sweep > 70 || drive < needsDrive : sweep < 45;
       if (wrong) mismatches++;
       if (wrong || showAll) {
         rows.push(

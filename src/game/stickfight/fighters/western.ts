@@ -308,7 +308,7 @@ export const WESTERN: FighterDef = {
       duration: 30,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 26],
-      hits: [hit(11, 15, bx(18, 2, 80, 24), 74, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 6 })],
+      hits: [hit(11, 15, bx(18, 2, 80, 24), 74, { guard: "low", knockdown: "sweep", fx: "blunt", pushX: 6 })],
       desc: "Spurred boot along the dirt. Knocks down and sets up dynamite oki.",
       notation: "↓ + C",
       frames: [

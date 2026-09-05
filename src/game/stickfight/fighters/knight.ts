@@ -660,7 +660,7 @@ export const KNIGHT: FighterDef = {
       armor: [{ from: 3, to: 19, hits: 2, damageScale: 0.45 }],
       hits: [
         hit(11, 19, bx(18, 24, 68, 62), 96, {
-          fx: "slash",
+          fx: "pierce",
           pushX: 10,
           knockdown: "hard",
           hitstun: 24,

@@ -425,7 +425,7 @@ export const MUAYTHAI: FighterDef = {
       followUps: [
         { button: "B", move: "5B", from: 8, to: 19, string: "Elbow Chain" },
       ],
-      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "slash", pushX: 6, hitstun: 15, hitstop: 6 })],
+      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Steps out and cuts back with the taped point of the elbow. Short and it opens skin.",
       notation: "\u2190 + A",
       frames: [

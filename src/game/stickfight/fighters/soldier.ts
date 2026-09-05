@@ -197,7 +197,7 @@ export const SOLDIER: FighterDef = {
       followUps: [
         { button: "A", move: "4A", from: 3, to: 9, string: "Knife Work" },
       ],
-      hits: [hit(3, 5, bx(16, 52, 44, 22), 30, { fx: "slash", hitstun: 14, blockstun: 10, pushX: 2.8 })],
+      hits: [hit(3, 5, bx(16, 52, 44, 22), 30, { fx: "pierce", hitstun: 14, blockstun: 10, pushX: 2.8 })],
       desc: "Three-frame knife jab. His fastest button, and the head of the knife string.",
       notation: "A",
       frames: [
@@ -281,7 +281,7 @@ export const SOLDIER: FighterDef = {
       showProps: ["knife"],
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 12],
-      hits: [hit(3, 5, bx(14, 12, 44, 22), 28, { guard: "low", fx: "slash", hitstun: 13, blockstun: 10, pushX: 2.6 })],
+      hits: [hit(3, 5, bx(14, 12, 44, 22), 28, { guard: "low", fx: "pierce", hitstun: 13, blockstun: 10, pushX: 2.6 })],
       desc: "Knife across the shins. His fastest low.",
       notation: "↓ + A",
       frames: [
@@ -468,7 +468,7 @@ export const SOLDIER: FighterDef = {
       followUps: [
         { button: "A", move: "2A", from: 8, to: 19, string: "Knife Work" },
       ],
-      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "slash", pushX: 6, hitstun: 15, hitstop: 6 })],
+      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "pierce", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Steps back and cuts across with the knife. Keeps hands off him.",
       notation: "\u2190 + A",
       frames: [
@@ -537,7 +537,7 @@ export const SOLDIER: FighterDef = {
       landRecovery: 2,
       cancelInto: ["medium", "heavy", "special"],
       cancelWindow: [4, 16],
-      hits: [hit(4, 9, bx(14, 32, 46, 30), 32, { fx: "slash", hitstun: 14, pushX: 2.6 })],
+      hits: [hit(4, 9, bx(14, 32, 46, 30), 32, { fx: "pierce", hitstun: 14, pushX: 2.6 })],
       desc: "Quick knife slash out of a jump.",
       notation: "(air) A",
       frames: [

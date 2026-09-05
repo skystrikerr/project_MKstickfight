@@ -70,6 +70,17 @@ export interface MatchRule {
   onFrame?: (m: Match) => void;
 }
 
+/**
+ * Whether a shot has travelled far enough to hurt anyone yet.
+ *
+ * Exported because the renderer has to agree with the simulation about it: a
+ * projectile that cannot hit is drawn unsettled, and the two would drift apart
+ * the first time either side of the rule was edited on its own.
+ */
+export function projectileArmed(p: Projectile): boolean {
+  return Math.abs(p.x - p.spawnX) >= (p.spec.armAfter ?? COMBAT.projectileArm);
+}
+
 let projId = 0;
 
 export class Match {
@@ -759,8 +770,7 @@ export class Match {
         // through. It is not destroyed and it is not blocked - as far as
         // anyone standing this close is concerned, it simply is not a weapon
         // yet. See `armAfter`.
-        const armed = Math.abs(p.x - p.spawnX) >= (p.spec.armAfter ?? COMBAT.projectileArm);
-        if (armed && !target.hasInvuln("projectile") && !target.hasInvuln("strike")) {
+        if (projectileArmed(p) && !target.hasInvuln("projectile") && !target.hasInvuln("strike")) {
           const hurt = target.hurtboxes();
           if (hurt.some((h) => boxesOverlap(box, h))) {
             const hitDef: HitDef = {
