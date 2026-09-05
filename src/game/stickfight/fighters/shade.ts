@@ -586,6 +586,7 @@ export const SHADE: FighterDef = {
         {
           at: 9,
           kind: "shuriken",
+          armAfter: 40,
           x: 32,
           y: 60,
           vx: 18,
@@ -628,6 +629,7 @@ export const SHADE: FighterDef = {
         {
           at: 9,
           kind: "smokebomb",
+          armAfter: 0,
           x: 24,
           y: 64,
           vx: 8,
@@ -711,6 +713,7 @@ export const SHADE: FighterDef = {
         {
           at: 12,
           kind: "hook",
+          armAfter: 0,
           x: 34,
           y: 58,
           vx: 14,

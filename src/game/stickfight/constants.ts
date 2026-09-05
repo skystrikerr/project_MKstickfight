@@ -46,6 +46,12 @@ export const COMBAT = {
   chipFloor: 1,
   /** Meter, in units. Supers cost 100. */
   maxMeter: 200,
+  /**
+   * Default arming distance for projectiles, in units. Roughly the gap two
+   * fighters sit at while trading normals, so anyone who has fought their way
+   * inside that is safe from gunfire until they get pushed back out.
+   */
+  projectileArm: 90,
   meterOnWhiff: 1.2,
   meterOnHit: 6,
   meterOnBlock: 2,

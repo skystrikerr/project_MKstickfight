@@ -937,6 +937,7 @@ export const ROMAN: FighterDef = {
         {
           at: 14,
           kind: "shock",
+          armAfter: 0,
           x: 34,
           y: 8,
           vx: 8.5,

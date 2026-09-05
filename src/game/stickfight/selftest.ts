@@ -2345,6 +2345,52 @@ function scriptFor(move: MoveDef): RawInput[] {
   }
 }
 
+{
+  // A shot has to travel before it can hurt anyone.
+  //
+  // Measured, this is the only anti-zoning lever that did anything: cutting
+  // fire rate, damage, hitstun, pushback, chip and projectile speed all moved
+  // the zoner-versus-melee matchup by five points or less, and damage at five
+  // per cent still left them winning. Making the weapon wrong at close range
+  // moved it more than twenty.
+  //
+  // Fire at a target standing on top of the shooter and at one across the
+  // stage; the first should pass straight through.
+  const shooters: [string, string][] = [
+    ["soldier", "5C"], ["mongol", "powerShot"], ["western", "quickdraw"], ["persian", "shoot"],
+  ];
+  for (const [who, moveId] of shooters) {
+    const def = getFighter(who);
+    const mv = def.moves.find((m) => m.id === moveId);
+    if (!mv) continue;
+    const fire = (gap: number) => {
+      const m = newMatch(who, "roman");
+      const me = m.fighters[0];
+      const foe = m.fighters[1];
+      me.x = -gap / 2;
+      foe.x = gap / 2;
+      if (def.resource) me.resource = def.resource.max;
+      me.startMove(mv, true);
+      const hp = foe.health;
+      for (let f = 0; f < 160; f++) m.step([inp(), inp()]);
+      return Math.round(hp - foe.health);
+    };
+    const close = fire(40);
+    const far = fire(420);
+    check(`${who}/${moveId}: does nothing point blank`, close === 0, `${close} damage at a gap of 40`);
+    check(`${who}/${moveId}: still works at range`, far > 0, `${far} damage at a gap of 420`);
+  }
+
+  // The moves that are meant to land at your feet must be exempt, or a sweep
+  // along the ground becomes a move with a hole in the middle of it.
+  for (const [who, moveId] of [["roman", "stomp"], ["pirate", "hook"], ["mongol", "caltrops"]] as [string, string][]) {
+    const mv = getFighter(who).moves.find((m) => m.id === moveId);
+    if (!mv) continue;
+    const armed = (mv.projectiles ?? []).every((p) => p.armAfter === 0);
+    check(`${who}/${moveId}: arms immediately`, armed);
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);

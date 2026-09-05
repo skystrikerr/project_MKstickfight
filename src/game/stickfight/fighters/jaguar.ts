@@ -658,6 +658,7 @@ export const JAGUAR: FighterDef = {
         {
           at: 11,
           kind: "dart",
+          armAfter: 0,
           x: 36,
           y: 58,
           vx: 14,

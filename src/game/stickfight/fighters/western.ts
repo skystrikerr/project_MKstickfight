@@ -1064,6 +1064,7 @@ export const WESTERN: FighterDef = {
         {
           at: 40,
           kind: "bullet",
+          armAfter: 0,
           x: 46,
           y: 66,
           vx: 30,
@@ -1083,6 +1084,7 @@ export const WESTERN: FighterDef = {
         {
           at: 48,
           kind: "bullet",
+          armAfter: 0,
           x: 46,
           y: 58,
           vx: 30,
@@ -1102,6 +1104,7 @@ export const WESTERN: FighterDef = {
         {
           at: 56,
           kind: "bullet",
+          armAfter: 0,
           x: 46,
           y: 50,
           vx: 32,

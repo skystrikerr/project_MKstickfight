@@ -578,6 +578,7 @@ export const NIHANG: FighterDef = {
         {
           at: 8,
           kind: "chakram",
+          armAfter: 40,
           x: 26,
           y: 26,
           vx: 11,
@@ -655,6 +656,7 @@ export const NIHANG: FighterDef = {
         {
           at: 11,
           kind: "chakram",
+          armAfter: 40,
           x: 36,
           y: 56,
           vx: 12.5,
@@ -783,6 +785,7 @@ export const NIHANG: FighterDef = {
         {
           at: 13,
           kind: "chakram",
+          armAfter: 40,
           x: 34,
           y: 16,
           vx: 10,
@@ -874,6 +877,7 @@ export const NIHANG: FighterDef = {
         {
           at: 14,
           kind: "chakram",
+          armAfter: 40,
           x: 34,
           y: 58,
           vx: 8,
@@ -1011,6 +1015,7 @@ export const NIHANG: FighterDef = {
         {
           at: 10,
           kind: "chakram",
+          armAfter: 0,
           x: 34,
           y: 76,
           vx: 13,
@@ -1032,6 +1037,7 @@ export const NIHANG: FighterDef = {
         {
           at: 16,
           kind: "chakram",
+          armAfter: 0,
           x: 34,
           y: 56,
           vx: 14,
@@ -1051,6 +1057,7 @@ export const NIHANG: FighterDef = {
         {
           at: 22,
           kind: "chakram",
+          armAfter: 0,
           x: 34,
           y: 34,
           vx: 14,
@@ -1070,6 +1077,7 @@ export const NIHANG: FighterDef = {
         {
           at: 28,
           kind: "chakram",
+          armAfter: 0,
           x: 34,
           y: 14,
           vx: 13,

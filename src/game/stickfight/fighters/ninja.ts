@@ -83,7 +83,7 @@ export const NINJA: FighterDef = {
   }),
   resource: {
     name: "Kage",
-    max: 3,
+    max: 5,
     start: 2,
     // Two seconds of standing still buys one teleport back.
     regen: 0.0085,
@@ -600,6 +600,7 @@ export const NINJA: FighterDef = {
         {
           at: 10,
           kind: "kunai",
+          armAfter: 0,
           x: 34,
           y: 62,
           vx: 17,
@@ -644,6 +645,7 @@ export const NINJA: FighterDef = {
         {
           at: 8,
           kind: "kunai",
+          armAfter: 0,
           x: 30,
           y: 20,
           vx: 14,
@@ -716,6 +718,7 @@ export const NINJA: FighterDef = {
         {
           at: 9,
           kind: "smokebomb",
+          armAfter: 0,
           x: 26,
           y: 66,
           vx: 8.5,

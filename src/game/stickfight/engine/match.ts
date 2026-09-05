@@ -45,6 +45,8 @@ export interface Projectile {
   facing: 1 | -1;
   spin: number;
   dead: boolean;
+  /** Where it was fired from, so an arming distance can be measured. */
+  spawnX: number;
   /** The move that spawned it, for attributing a hit back to a move name. */
   sourceMove: string;
 }
@@ -703,6 +705,7 @@ export class Match {
         owner: f.index,
         kind: spec.kind,
         x: f.x + f.facing * spec.x,
+        spawnX: f.x + f.facing * spec.x,
         y: f.y + spec.y,
         vx: f.facing * spec.vx,
         vy: spec.vy,
@@ -752,7 +755,12 @@ export class Match {
       if (this.roundActive) {
         const target = this.fighters[p.owner === 0 ? 1 : 0];
         const box = toWorldBox(p.spec.box, p.x, p.y, p.facing);
-        if (!target.hasInvuln("projectile") && !target.hasInvuln("strike")) {
+        // A shot that has not travelled far enough yet passes straight
+        // through. It is not destroyed and it is not blocked - as far as
+        // anyone standing this close is concerned, it simply is not a weapon
+        // yet. See `armAfter`.
+        const armed = Math.abs(p.x - p.spawnX) >= (p.spec.armAfter ?? COMBAT.projectileArm);
+        if (armed && !target.hasInvuln("projectile") && !target.hasInvuln("strike")) {
           const hurt = target.hurtboxes();
           if (hurt.some((h) => boxesOverlap(box, h))) {
             const hitDef: HitDef = {

@@ -731,6 +731,7 @@ export const PIRATE: FighterDef = {
         {
           at: 12,
           kind: "hook",
+          armAfter: 0,
           x: 36,
           y: 58,
           vx: 14,
@@ -989,6 +990,7 @@ export const PIRATE: FighterDef = {
         {
           at: 20,
           kind: "cannon",
+          armAfter: 0,
           x: 40,
           y: 30,
           vx: 11,
@@ -1008,6 +1010,7 @@ export const PIRATE: FighterDef = {
         {
           at: 34,
           kind: "cannon",
+          armAfter: 0,
           x: 40,
           y: 62,
           vx: 12,
@@ -1027,6 +1030,7 @@ export const PIRATE: FighterDef = {
         {
           at: 48,
           kind: "cannon",
+          armAfter: 0,
           x: 40,
           y: 44,
           vx: 13,

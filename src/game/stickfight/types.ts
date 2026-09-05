@@ -237,6 +237,20 @@ export interface ProjectileSpawn {
   knockdown?: KnockdownKind;
   pushX?: number;
   chip?: number;
+  /**
+   * How far the shot has to travel before it can hurt anyone, in units.
+   *
+   * You cannot shoot a man who is already on top of you. Without this a
+   * projectile is live the instant it leaves the hand, which makes a gun a
+   * better melee button than a melee button - and measurably so: these moves
+   * beat everything the melee side has at every range, not just at range.
+   * Arming the shot late gives whoever got inside a pocket where the weapon
+   * is simply the wrong tool, which is the whole point of getting inside.
+   *
+   * Defaults to `COMBAT.projectileArm`. Set it to 0 for things that are meant
+   * to land at your feet - a sweep along the ground, a grapple, caltrops.
+   */
+  armAfter?: number;
   /** How many opponents/projectiles it can hit before disappearing. */
   hits?: number;
   /** Destroyed when it collides with an enemy projectile. */

@@ -953,6 +953,7 @@ export const SOLDIER: FighterDef = {
         {
           at: 30,
           kind: "grenade",
+          armAfter: 0,
           x: 120,
           y: 300,
           vx: 2,
@@ -972,6 +973,7 @@ export const SOLDIER: FighterDef = {
         {
           at: 44,
           kind: "grenade",
+          armAfter: 0,
           x: 230,
           y: 320,
           vx: -1,
@@ -991,6 +993,7 @@ export const SOLDIER: FighterDef = {
         {
           at: 58,
           kind: "grenade",
+          armAfter: 0,
           x: 60,
           y: 320,
           vx: 3,

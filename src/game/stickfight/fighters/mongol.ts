@@ -807,6 +807,7 @@ export const MONGOL: FighterDef = {
         {
           at: 10,
           kind: "caltrop",
+          armAfter: 0,
           x: 24,
           y: 44,
           vx: 6.5,
@@ -831,6 +832,7 @@ export const MONGOL: FighterDef = {
         {
           at: 13,
           kind: "caltrop",
+          armAfter: 0,
           x: 24,
           y: 44,
           vx: 10.5,
@@ -1008,6 +1010,7 @@ export const MONGOL: FighterDef = {
         {
           at: 24,
           kind: "arrow",
+          armAfter: 0,
           x: 44,
           y: 70,
           vx: 26,
@@ -1027,6 +1030,7 @@ export const MONGOL: FighterDef = {
         {
           at: 32,
           kind: "arrow",
+          armAfter: 0,
           x: 44,
           y: 62,
           vx: 27,
@@ -1046,6 +1050,7 @@ export const MONGOL: FighterDef = {
         {
           at: 40,
           kind: "arrow",
+          armAfter: 0,
           x: 44,
           y: 54,
           vx: 28,
@@ -1065,6 +1070,7 @@ export const MONGOL: FighterDef = {
         {
           at: 48,
           kind: "arrow",
+          armAfter: 0,
           x: 44,
           y: 46,
           vx: 29,
@@ -1084,6 +1090,7 @@ export const MONGOL: FighterDef = {
         {
           at: 56,
           kind: "arrow",
+          armAfter: 0,
           x: 44,
           y: 38,
           vx: 30,
@@ -1103,6 +1110,7 @@ export const MONGOL: FighterDef = {
         {
           at: 66,
           kind: "arrow",
+          armAfter: 0,
           x: 46,
           y: 58,
           vx: 34,
