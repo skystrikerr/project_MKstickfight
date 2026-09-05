@@ -17,6 +17,7 @@
  */
 
 import type { FighterDef } from "../types";
+import { withStrings } from "../strings";
 import { CELT } from "./celt";
 import { DUELIST } from "./duelist";
 import { ETHIOPIA } from "./ethiopia";
@@ -40,6 +41,10 @@ import { VIKING } from "./viking";
 import { WESTERN } from "./western";
 import { ZULU } from "./zulu";
 
+// Strings are wired here rather than in each fighter file: they are declared
+// in `strings.ts` as a name and a list of moves, and the follow-up links and
+// their frame windows are derived from the moves themselves so they cannot
+// drift out of step with a move's timing.
 export const ROSTER: FighterDef[] = [
   ROMAN,
   SPARTAN,
@@ -63,7 +68,7 @@ export const ROSTER: FighterDef[] = [
   ICEMAN,
   CELT,
   PERSIAN,
-];
+].map(withStrings);
 
 export const ROSTER_BY_ID: Record<string, FighterDef> = Object.fromEntries(
   ROSTER.map((f) => [f.id, f]),

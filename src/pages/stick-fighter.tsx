@@ -274,7 +274,7 @@ export default function StickFighter() {
           <p className="relative mt-6 max-w-3xl pb-4 text-center text-xs leading-relaxed text-[var(--bone-dim)]">
             Every fighter has <span className="text-[var(--bone)]">five specials</span>, a light and a heavy attack, a
             block, two dodges and a jump — plus their own skill, super, and three strings built out of their own
-            weapons. Specials use motion inputs: ↓↘→ + button for quarter circles, →↓↘ for dragon punches. Meter pays
+            weapons, the longest of them five hits. Specials use motion inputs: ↓↘→ + button for quarter circles, →↓↘ for dragon punches. Meter pays
             for EX specials (50) and supers (100).
           </p>
         </div>

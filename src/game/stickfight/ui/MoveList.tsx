@@ -5,6 +5,7 @@ import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef, MoveDef } from "../types";
 import { INPUT_SCHEMES, renderNotation, schemeLegend, type InputScheme } from "../inputscheme";
 import { loadSave, patchSave } from "../save";
+import { stringsFor } from "../strings";
 
 const has = (m: MoveDef, tag: string) => !!m.tags?.includes(tag as never);
 
@@ -40,40 +41,43 @@ function frameData(m: MoveDef): string | null {
 
 /** Input label for one step of a string: 5A -> "A", 6A -> "→ + A". */
 function stamp(m: MoveDef, scheme: InputScheme): string {
+  // A crouching normal is reached by holding down, but says so through its
+  // stance rather than through `dir` - so reading only `dir` printed the
+  // opener of every low string as a plain button and told the player to press
+  // something that would give them the standing move instead.
+  const stance = m.input.stance;
+  const crouching =
+    m.input.dir === "d" ||
+    stance === "crouch" ||
+    (Array.isArray(stance) && stance.length === 1 && stance[0] === "crouch");
   const arrow =
-    m.input.dir === "f" ? "→" : m.input.dir === "b" ? "←" : m.input.dir === "d" ? "↓" : m.input.dir === "df" ? "↘" : "";
+    m.input.dir === "f" ? "→" : m.input.dir === "b" ? "←" : crouching ? "↓" : m.input.dir === "df" ? "↘" : "";
   const btn = m.input.button ?? "";
   const label = arrow ? `${arrow} + ${btn}` : btn;
   return renderNotation(label, scheme);
 }
 
 /**
- * Rebuilds each named string from the follow-up links scattered across the
- * moves. A link knows only what continues it, so the chain is reassembled by
- * finding the move nothing else leads into and walking forward from there.
+ * The strings a fighter has, as the player would perform them.
+ *
+ * Taken from the declared strings rather than rebuilt by walking follow-up
+ * links, because the links are derived from those declarations in the first
+ * place and reconstructing them only adds a way to disagree.
+ *
+ * The buttons matter more than they look. A string step is reached by pressing
+ * the *target move's* button, not by performing that move's own input - the
+ * second hit of a chain that ends at `6A` is reached with A, not with forward
+ * and A. Printing each move's own notation, which is what this used to do, told
+ * a player to hold a direction they do not need; harmless at two hits and
+ * actively wrong at five.
  */
-function stringsFor(def: FighterDef): { name: string; moves: MoveDef[] }[] {
+function chainsFor(def: FighterDef): { name: string; moves: MoveDef[]; buttons: string[] }[] {
   const byId = new Map(def.moves.map((m) => [m.id, m]));
-  const groups = new Map<string, { from: string; to: string }[]>();
-  for (const m of def.moves) {
-    for (const f of m.followUps ?? []) {
-      if (!f.string) continue;
-      groups.set(f.string, [...(groups.get(f.string) ?? []), { from: m.id, to: f.move }]);
-    }
-  }
-  const out: { name: string; moves: MoveDef[] }[] = [];
-  for (const [name, links] of groups) {
-    const targets = new Set(links.map((l) => l.to));
-    const head = links.find((l) => !targets.has(l.from));
-    if (!head) continue;
-    const seq = [head.from];
-    for (let i = 0; i < links.length; i++) {
-      const next = links.find((l) => l.from === seq[seq.length - 1]);
-      if (!next || seq.includes(next.to)) break;
-      seq.push(next.to);
-    }
-    const moves = seq.map((id) => byId.get(id)).filter((m): m is MoveDef => !!m);
-    if (moves.length > 1) out.push({ name, moves });
+  const out: { name: string; moves: MoveDef[]; buttons: string[] }[] = [];
+  for (const s of stringsFor(def.id)) {
+    const moves = s.steps.map((id) => byId.get(id)).filter((m): m is MoveDef => !!m);
+    if (moves.length < 2) continue;
+    out.push({ name: s.name, moves, buttons: moves.map((m) => m.input.button ?? "") });
   }
   return out;
 }
@@ -99,7 +103,7 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
     })).filter((g) => g.moves.length > 0);
   }, [def]);
 
-  const strings = useMemo(() => stringsFor(def), [def]);
+  const strings = useMemo(() => chainsFor(def), [def]);
 
   const specialCount = def.moves.filter(
     (m) => m.tags?.includes("special") && !m.tags?.includes("ex") && !m.variant && !m.internal,
@@ -192,7 +196,9 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
                       {st.name}
                     </span>
                     <span className="font-mono text-[11px] text-[var(--accent)]">
-                      {st.moves.map((sm) => stamp(sm, scheme)).join(", ")}
+                      {[stamp(st.moves[0], scheme), ...st.buttons.slice(1).map((btn) => renderNotation(btn, scheme))].join(
+                        ", ",
+                      )}
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs leading-snug text-[var(--bone-dim)]">

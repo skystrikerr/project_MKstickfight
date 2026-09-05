@@ -31,6 +31,7 @@ import type { FighterDef, MoveDef } from "./types";
 import { INPUT_SCHEMES, renderNotation } from "./inputscheme";
 import { applyClear, applyMatch, isUnlocked, unlockLabel, unlockProgress, type ProgressState } from "./progress";
 import { CUES as SCORE_CUES, Score, type ScoreCue } from "./engine/score";
+import { stringsFor as declaredStrings } from "./strings";
 import {
   advanceTower,
   buildTower,
@@ -743,7 +744,15 @@ function scriptFor(move: MoveDef): RawInput[] {
       const dir = move.input.dir;
       const held: Partial<RawInput> =
         dir === "f" ? { right: true } : dir === "b" ? { left: true } : dir === "d" ? { down: true } : dir === "df" ? { down: true, right: true } : {};
-      return [inp(held), press(held), press(held)];
+      // A crouching normal is selected by the stance, not by a direction, so
+      // holding down is the only way to reach it - without this the script
+      // pressed the button standing up and quietly performed a different move.
+      const stance = move.input.stance;
+      const crouching = stance === "crouch" || (Array.isArray(stance) && stance.length === 1 && stance[0] === "crouch");
+      if (crouching) held.down = true;
+      // Two frames of holding it before the button, so the stance has actually
+      // changed by the time the press is read.
+      return [inp(held), inp(held), press(held), press(held)];
     }
   }
 }
@@ -2181,6 +2190,116 @@ function scriptFor(move: MoveDef): RawInput[] {
     m.rules = rules;
     m.startRound();
     check("survival: the carried health survives a modifier that sets health", m.fighters[0].health === 300, `${m.fighters[0].health}`);
+  }
+}
+
+{
+  // Strings.
+  //
+  // The engine test above already proves every link can actually be performed.
+  // These are about the declarations they are generated from, which is where a
+  // string can be wrong in ways no amount of pressing buttons would reveal.
+  for (const def of ROSTER) {
+    const byId = new Map(def.moves.map((m) => [m.id, m]));
+    const declared = declaredStrings(def.id);
+    check(`${def.id}: has strings`, declared.length >= 2, `${declared.length}`);
+
+    let longest = 0;
+    for (const st of declared) {
+      longest = Math.max(longest, st.steps.length);
+      check(
+        `${def.id}/${st.name}: every step is a move this fighter has`,
+        st.steps.every((id) => byId.has(id)),
+        st.steps.filter((id) => !byId.has(id)).join(", "),
+      );
+      // A repeat would silently truncate the chain: the move list stops
+      // walking when it revisits a step, and a move can only hold one
+      // follow-up per button anyway.
+      check(
+        `${def.id}/${st.name}: never repeats a move`,
+        new Set(st.steps).size === st.steps.length,
+        st.steps.join(" "),
+      );
+      check(`${def.id}/${st.name}: is at least two moves long`, st.steps.length >= 2, `${st.steps.length}`);
+      // A string named after one of its own moves reads as a mistake in the
+      // move list - the header and one of the rows say the same thing.
+      const clash = st.steps.map((id) => byId.get(id)?.name).find((n) => n === st.name);
+      check(`${def.id}/${st.name}: is not named after one of its own moves`, !clash, clash ?? "");
+    }
+
+    // The point of the exercise: everyone gets a genuinely long one, not a
+    // pair of two-hit links with a name over them.
+    check(`${def.id}: has a string of four or more`, longest >= 4, `longest=${longest}`);
+
+    // Two links out of the same move on the same button means the second is
+    // dead - the engine takes the first that matches and never looks further.
+    for (const m of def.moves) {
+      const links = (m.followUps ?? []).filter((f) => f.string);
+      const buttons = links.map((f) => f.button);
+      check(
+        `${def.id}/${m.id}: no two string links share a button`,
+        new Set(buttons).size === buttons.length,
+        links.map((f) => `${f.button}->${f.move}`).join(" "),
+      );
+    }
+
+    // And the whole thing, start to finish, in the simulation.
+    //
+    // The per-link test above proves each hop works on its own. It cannot
+    // catch a chain that breaks in the middle - a third link whose window has
+    // closed by the time the second move reaches it would pass link-by-link
+    // and still leave a five-hit string that nobody can finish.
+    for (const st of declared) {
+      const m = newMatch(def.id, "roman");
+      const me = m.fighters[0];
+      me.x = -300;
+      m.fighters[1].x = 300;
+      if (def.resource) me.resource = def.resource.max;
+      const byId2 = new Map(def.moves.map((mv) => [mv.id, mv]));
+      const opener = byId2.get(st.steps[0]);
+      if (!opener) continue;
+      const stance = opener.input.stance;
+      const crouch = stance === "crouch" || (Array.isArray(stance) && stance.length === 1 && stance[0] === "crouch");
+      const held: Partial<RawInput> =
+        opener.input.dir === "f" ? { right: true } : opener.input.dir === "b" ? { left: true } : crouch ? { down: true } : {};
+      const seen: string[] = [];
+      let at = 0;
+      for (let f = 0; f < 400 && at < st.steps.length - 1; f++) {
+        // Hold the direction a few frames before pressing: a crouching normal
+        // is reached through the stance, which has to have changed first.
+        let step = f >= 4 && f < 7 ? inp({ ...held, [opener.input.button!]: true }) : inp(held);
+        const cur = me.move;
+        if (f >= 7 && cur && cur.id === st.steps[at]) {
+          const link = (cur.followUps ?? []).find((l) => l.move === st.steps[at + 1]);
+          if (link && me.moveFrame >= link.from && me.moveFrame <= link.to) {
+            step = inp({ ...held, [link.button]: true });
+          }
+        }
+        m.step([step, inp()]);
+        const id = me.move?.id;
+        if (id && seen[seen.length - 1] !== id) {
+          seen.push(id);
+          if (id === st.steps[at + 1]) at++;
+        }
+      }
+      check(
+        `${def.id}/${st.name}: the whole string can be performed`,
+        st.steps.every((id, i) => seen[i] === id),
+        `wanted ${st.steps.join(">")} got ${seen.join(">") || "nothing"}`,
+      );
+    }
+
+    // A window has to sit inside the move it belongs to, and open late enough
+    // that the button press starting the move cannot be read as the follow-up.
+    for (const m of def.moves) {
+      for (const f of (m.followUps ?? []).filter((x) => x.string)) {
+        check(
+          `${def.id}/${m.id}->${f.move}: window is inside the move`,
+          f.from >= 1 && f.to < m.duration && f.from < f.to,
+          `${f.from}-${f.to} of ${m.duration}`,
+        );
+      }
+    }
   }
 }
 
