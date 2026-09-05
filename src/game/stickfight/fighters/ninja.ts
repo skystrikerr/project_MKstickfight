@@ -594,6 +594,7 @@ export const NINJA: FighterDef = {
       input: { button: "B", motion: "qcf", stance: ["stand", "crouch"] },
       tags: ["special", "projectile"],
       duration: 28,
+      resourceCost: 1,
       showProps: ["kunai"],
       projectiles: [
         {
@@ -636,6 +637,7 @@ export const NINJA: FighterDef = {
       variant: "kunaiThrow",
       priority: 20,
       duration: 26,
+      resourceCost: 1,
       airborne: true,
       showProps: ["kunai"],
       projectiles: [

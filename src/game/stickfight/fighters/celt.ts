@@ -599,6 +599,7 @@ export const CELT: FighterDef = {
       tags: ["special"],
       priority: 20,
       duration: 36,
+      resourceCost: 1,
       showProps: ["gaesum"],
       hideProps: ["shield"],
       projectiles: [

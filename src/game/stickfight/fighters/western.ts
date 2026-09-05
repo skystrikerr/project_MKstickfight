@@ -803,6 +803,8 @@ export const WESTERN: FighterDef = {
       tags: ["special", "projectile"],
       priority: 18,
       duration: 40,
+      resourceCost: 2,
+      resourceMin: 2,
       showProps: ["dynamite"],
       projectiles: [
         {

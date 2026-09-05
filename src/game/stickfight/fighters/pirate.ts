@@ -724,6 +724,8 @@ export const PIRATE: FighterDef = {
       tags: ["special", "projectile"],
       priority: 18,
       duration: 40,
+      resourceCost: 1,
+      resourceMin: 1,
       showProps: ["hook"],
       projectiles: [
         {

@@ -2303,6 +2303,48 @@ function scriptFor(move: MoveDef): RawInput[] {
   }
 }
 
+{
+  // Nothing may be spammed.
+  //
+  // A damaging projectile has to be paid for, whether by a resource or by its
+  // own recovery. Measured over the whole roster there was a clean split: the
+  // ones that cost a real bite of a slow resource sustained about a shot every
+  // two to five seconds, and the ones that were free, or cost one out of a
+  // hundred, sustained better than one a second. Four times the volume for the
+  // same damage.
+  //
+  // Fire for thirty seconds and count only the last fifteen, so the opening
+  // magazine does not flatter the number - a burst is fine, an endless stream
+  // is not.
+  const CAP = 0.6; // shots a second, sustained
+  for (const def of ROSTER) {
+    for (const mv of def.moves) {
+      const shots = mv.projectiles ?? [];
+      if (!shots.length || mv.internal) continue;
+      if (mv.tags?.includes("super") || mv.tags?.includes("ex")) continue;
+      // Only things that actually hurt: a smoke bomb is not a zoning tool.
+      if (!shots.some((p) => (p.damage ?? 0) > 0)) continue;
+
+      const m = newMatch(def.id, "roman");
+      const me = m.fighters[0];
+      me.x = -320;
+      m.fighters[1].x = 320;
+      if (def.resource) me.resource = def.resource.max;
+      let late = 0;
+      for (let f = 0; f < 60 * 30; f++) {
+        if (me.state !== "move" && me.grounded && me.startMove(mv, true) && f >= 60 * 15) late++;
+        m.step([inp(), inp()]);
+      }
+      const perSec = late / 15;
+      check(
+        `${def.id}/${mv.id}: cannot be spammed`,
+        perSec <= CAP,
+        `${perSec.toFixed(2)} a second sustained`,
+      );
+    }
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);

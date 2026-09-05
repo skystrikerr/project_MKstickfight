@@ -579,6 +579,7 @@ export const SHADE: FighterDef = {
       input: { button: "B", motion: "qcf", stance: ["stand", "crouch"] },
       tags: ["special", "projectile"],
       duration: 26,
+      resourceCost: 1,
       showProps: ["shuriken"],
       hideProps: ["kunaiF"],
       projectiles: [
@@ -702,6 +703,8 @@ export const SHADE: FighterDef = {
       tags: ["special", "projectile"],
       priority: 18,
       duration: 40,
+      resourceCost: 1,
+      resourceMin: 1,
       showProps: ["hook"],
       hideProps: ["kunaiB"],
       projectiles: [

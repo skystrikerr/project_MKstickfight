@@ -236,8 +236,8 @@ export const SOLDIER: FighterDef = {
       input: { button: "C", stance: "stand" },
       tags: ["heavy", "projectile"],
       duration: 28,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 4,
+      resourceMin: 4,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 24],
       projectiles: [
@@ -262,8 +262,8 @@ export const SOLDIER: FighterDef = {
         },
       ],
       vfx: [{ at: 9, kind: "shot", x: 52, y: 66, scale: 1.1, color: "#fff0c0" }],
-      desc: "Shoulders the rifle and puts one round downrange. Heavy button, one shot at a time.",
-      notation: "C  (1 round)",
+      desc: "Shoulders the rifle and puts one round downrange. Heavy button, and it costs a real bite of the magazine.",
+      notation: "C  (4 rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 84, elbowF: 6, shoulderB: 74, elbowB: 10, weaponBack: -4, torso: 4, head: 2 }, "out"),
@@ -297,8 +297,8 @@ export const SOLDIER: FighterDef = {
       input: { button: "B", stance: "crouch" },
       tags: ["medium", "projectile"],
       duration: 26,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 3,
+      resourceMin: 3,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [10, 24],
       projectiles: [
@@ -324,7 +324,7 @@ export const SOLDIER: FighterDef = {
       ],
       vfx: [{ at: 8, kind: "shot", x: 50, y: 36, scale: 1, color: "#fff0c0" }],
       desc: "Fires from a knee, under the usual jump-in arc.",
-      notation: "↓ + B  (1 round)",
+      notation: "↓ + B  (3 rounds)",
       frames: [
         kf(0, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }, "out"),
         kf(6, { ...STANCE, crouch: 1, torso: 12, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 78, elbowF: 10, shoulderB: 70, elbowB: 14, weaponBack: -6 }, "out"),
@@ -626,8 +626,8 @@ export const SOLDIER: FighterDef = {
       tags: ["special", "projectile"],
       priority: 20,
       duration: 52,
-      resourceCost: 8,
-      resourceMin: 8,
+      resourceCost: 10,
+      resourceMin: 10,
       friction: 0.9,
       vel: [{ at: 10, x: -1.2 }],
       projectiles: [
@@ -647,8 +647,8 @@ export const SOLDIER: FighterDef = {
         { at: 32, kind: "shot", x: 50, y: 50, scale: 1.1, color: "#fff0c0" },
         { at: 36, kind: "shot", x: 50, y: 48, scale: 1.3, color: "#fff6dd" },
       ],
-      desc: "Empties eight rounds on the trigger. The muzzle climbs as it goes, so the burst walks upward - the last shot knocks down.",
-      notation: "↓↘→ + C  (8 rounds)",
+      desc: "Empties the magazine on the trigger. The muzzle climbs as it goes, so the burst walks upward - the last shot knocks down.",
+      notation: "↓↘→ + C  (10 rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 82, elbowF: 8, shoulderB: 72, elbowB: 12, weaponBack: -6, torso: 8 }, "out"),
@@ -666,8 +666,8 @@ export const SOLDIER: FighterDef = {
       input: { button: "B", motion: "qcf", stance: ["stand", "crouch"] },
       tags: ["special", "projectile", "low"],
       duration: 44,
-      resourceCost: 3,
-      resourceMin: 3,
+      resourceCost: 5,
+      resourceMin: 5,
       hurtbox: { x: -20, y: 0, w: 52, h: 40 },
       invuln: [{ from: 6, to: 20, kind: "projectile" }],
       vel: [
@@ -688,7 +688,7 @@ export const SOLDIER: FighterDef = {
         { at: 20, kind: "shot", x: 44, y: 30, scale: 1.2, color: "#fff6dd" },
       ],
       desc: "Slides in under fire on his hip, firing upward as he goes. The slide hits low and ducks projectiles.",
-      notation: "↓↘→ + B  (3 rounds)",
+      notation: "↓↘→ + B  (5 rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(4, { ...STANCE, crouch: 1, torso: 34, squash: 0.86, hipF: 74, kneeF: 30, hipB: -18, kneeB: 96, shoulderF: 66, elbowF: 16, shoulderB: 56, elbowB: 20, weaponBack: -30, offY: -2 }, "out"),
@@ -705,6 +705,7 @@ export const SOLDIER: FighterDef = {
       tags: ["special", "projectile"],
       priority: 18,
       duration: 40,
+      resourceCost: 6,
       projectiles: [
         {
           at: 12,

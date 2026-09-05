@@ -254,8 +254,8 @@ export const MONGOL: FighterDef = {
       input: { button: "C", stance: "stand" },
       tags: ["heavy"],
       duration: 32,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 12,
+      resourceMin: 12,
       showProps: ["nocked"],
       cancelInto: ["special", "super"],
       cancelWindow: [14, 28],
@@ -563,8 +563,8 @@ export const MONGOL: FighterDef = {
       airborne: true,
       landCancel: true,
       landRecovery: 8,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 8,
+      resourceMin: 8,
       showProps: ["nocked"],
       projectiles: [
         {
@@ -629,8 +629,8 @@ export const MONGOL: FighterDef = {
       tags: ["special", "projectile"],
       priority: 22,
       duration: 40,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 14,
+      resourceMin: 14,
       showProps: ["nocked"],
       friction: 0.9,
       projectiles: [
@@ -675,8 +675,8 @@ export const MONGOL: FighterDef = {
       input: { button: "B", motion: "qcf", stance: ["stand", "crouch"] },
       tags: ["special", "projectile"],
       duration: 42,
-      resourceCost: 2,
-      resourceMin: 2,
+      resourceCost: 20,
+      resourceMin: 20,
       showProps: ["nocked"],
       projectiles: [
         {
@@ -756,8 +756,8 @@ export const MONGOL: FighterDef = {
       tags: ["special", "projectile", "overhead"],
       priority: 18,
       duration: 36,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 10,
+      resourceMin: 10,
       showProps: ["nocked"],
       projectiles: [
         {
@@ -801,6 +801,8 @@ export const MONGOL: FighterDef = {
       tags: ["special", "projectile", "low"],
       priority: 18,
       duration: 34,
+      resourceCost: 8,
+      resourceMin: 8,
       projectiles: [
         {
           at: 10,

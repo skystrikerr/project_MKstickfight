@@ -647,8 +647,8 @@ export const NIHANG: FighterDef = {
       tags: ["special", "projectile"],
       priority: 20,
       duration: 32,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 2,
+      resourceMin: 2,
       meterGain: 6,
       hideProps: ["chakram"],
       projectiles: [
@@ -673,8 +673,8 @@ export const NIHANG: FighterDef = {
           trail: "#6fa8ff",
         },
       ],
-      desc: "Spins a quoit off the fingers, flat and edge-on. Spends one - and he only carries five.",
-      notation: "↓↘→ + B  (1 Chakram)",
+      desc: "Spins a quoit off the fingers, flat and edge-on. Spends two - and he only carries five.",
+      notation: "↓↘→ + B  (2 Chakram)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderB: 150, elbowB: -34, torso: -16, hipB: -28, kneeB: 42, offX: -5 }, "inOut"),
@@ -862,8 +862,8 @@ export const NIHANG: FighterDef = {
       tags: ["special", "projectile"],
       priority: 24,
       duration: 48,
-      resourceCost: 1,
-      resourceMin: 1,
+      resourceCost: 2,
+      resourceMin: 2,
       // The quoit is thrown flat and caught again on the way past, so the belt
       // ends the move exactly where it started. It is the only throw he can
       // afford to spam - and it is slow enough that he pays for it in frames.

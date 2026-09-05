@@ -930,6 +930,8 @@ export const ROMAN: FighterDef = {
       tags: ["special", "projectile", "low"],
       priority: 20,
       duration: 42,
+      resourceCost: 1,
+      resourceMin: 1,
       friction: 0.9,
       projectiles: [
         {
