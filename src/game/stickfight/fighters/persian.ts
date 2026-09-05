@@ -809,79 +809,59 @@ export const PERSIAN: FighterDef = {
       input: { button: "S", motion: "dd", stance: ["stand", "crouch"] },
       tags: ["super"],
       priority: 60,
-      duration: 106,
+      duration: 104,
       meterCost: 100,
-      superFreeze: 42,
-      invuln: [{ from: 1, to: 15, kind: "strike" }],
-      showProps: ["bow"],
-      vel: [
-        { at: 40, x: 8 },
-        { at: 62, x: 5 },
-        { at: 78, x: 0 },
-      ],
-      friction: 0.93,
-      // Opens at range with the bow, then closes: the volley is the corps and
-      // the spear at the end is him.
+      superFreeze: 40,
+      invuln: [{ from: 1, to: 14, kind: "strike" }],
+      /**
+       * He does not do this himself - he calls it, and it walks up the screen
+       * without him. That is the whole point: every other super on the roster
+       * was the same five-hit flurry with different art on it, and a formation
+       * is a thing only a man who commands one can produce.
+       *
+       * It is a projectile because nothing else in the engine advances on its
+       * own, and it grinds rather than spikes: several hits as the rank walks
+       * through them, so it is worth blocking and worth not being in front of.
+       */
       projectiles: [
         {
-          at: 14, kind: "arrow", x: 44, y: 76, vx: 19, vy: 2.6, gravity: 0.11, life: 90,
-          box: { x: -22, y: -3, w: 44, h: 7 },
-          damage: 36, hitstun: 18, blockstun: 12, chip: 4, pushX: 3,
-          clashes: true, fx: "pierce", hitstop: 4, color: "#8a6a3f", trail: "#e0c88f",
-        },
-        {
-          at: 20, kind: "arrow", x: 44, y: 70, vx: 21, vy: 1.2, gravity: 0.06, life: 90,
-          box: { x: -22, y: -3, w: 44, h: 7 },
-          damage: 36, hitstun: 18, blockstun: 12, chip: 4, pushX: 3,
-          clashes: true, fx: "pierce", hitstop: 4, color: "#8a6a3f", trail: "#e0c88f",
-        },
-        {
-          at: 26, kind: "arrow", x: 44, y: 64, vx: 23, vy: 0, life: 80,
-          box: { x: -22, y: -3, w: 44, h: 7 },
-          damage: 36, hitstun: 18, blockstun: 12, chip: 4, pushX: 3,
-          clashes: true, fx: "pierce", hitstop: 4, color: "#8a6a3f", trail: "#e0c88f",
-        },
-        {
-          at: 32, kind: "arrow", x: 44, y: 68, vx: 21, vy: 0.8, gravity: 0.05, life: 80,
-          box: { x: -22, y: -3, w: 44, h: 7 },
-          damage: 36, hitstun: 18, blockstun: 12, chip: 4, pushX: 3,
-          clashes: true, fx: "pierce", hitstop: 4, color: "#8a6a3f", trail: "#e0c88f",
-        },
-      ],
-      hits: [
-        hit(48, 52, bx(32, 42, 104, 28), 54, { group: 1, fx: "pierce", pushX: 1, hitstun: 20, hitstop: 6 }),
-        hit(58, 62, bx(28, 20, 100, 26), 46, { group: 2, guard: "low", fx: "pierce", pushX: 1, hitstun: 18, hitstop: 5 }),
-        hit(70, 76, bx(22, 16, 112, 86), 132, {
-          group: 3,
+          at: 22,
+          kind: "sparabara",
+          armAfter: 0,
+          x: 46,
+          y: 0,
+          vx: 4.6,
+          vy: 0,
+          life: 150,
+          box: { x: -34, y: 0, w: 78, h: 92 },
+          damage: 52,
+          hitstun: 22,
+          blockstun: 16,
+          chip: 5,
+          pushX: 4,
+          hits: 6,
+          clashes: false,
           fx: "pierce",
-          pushX: 12,
-          knockdown: "hard",
-          launch: [6, 8.5],
-          hitstop: 17,
-          shake: 3,
-        }),
+          scale: 1.25,
+          color: "#e0b13a",
+        },
       ],
       vfx: [
-        { at: 2, kind: "super", x: 0, y: 52, scale: 2.4, color: BRONZE },
-        { at: 70, kind: "explode", x: 60, y: 44, scale: 1.3 },
+        { at: 2, kind: "super", x: 0, y: 50, scale: 2.4, color: "#e0b13a" },
+        { at: 22, kind: "explode", x: 40, y: 20, scale: 0.8, color: "#e0b13a" },
       ],
-      desc: "SUPER. Four arrows to make them move, and then he walks in behind them with the spear. The corps first, the man last.",
-      notation: "↓↓ + S (100 meter)",
+      desc: "SUPER. The Immortals close up and come on - a rank of wicker and spears that does not stop.",
+      notation: "↓↓ + S  (100 meter)",
       frames: [
-        kf(0, { ...STANCE, crouch: 0.5, torso: -10 }, "out"),
-        kf(8, { ...STANCE, shoulderF: 76, elbowF: 8, shoulderB: 26, elbowB: 86, weaponBack: 62, torso: -8, offX: -2 }, "out"),
-        kf(14, { ...STANCE, shoulderF: 78, elbowF: 4, shoulderB: 92, elbowB: 18, torso: -6, offX: 1 }, "out"),
-        kf(20, { ...STANCE, shoulderF: 86, elbowF: 0, shoulderB: 94, elbowB: 16, torso: 0, offX: 2 }, "out"),
-        kf(26, { ...STANCE, shoulderF: 94, elbowF: -4, shoulderB: 96, elbowB: 14, torso: 6, offX: 2 }, "out"),
-        kf(32, { ...STANCE, shoulderF: 88, elbowF: 0, shoulderB: 94, elbowB: 16, torso: 2, offX: 2 }, "out"),
-        kf(40, { ...STANCE, shoulderF: 30, elbowF: 92, shoulderB: 36, elbowB: 60, weaponBack: 4, torso: 14, offX: 3 }, "inOut"),
-        kf(48, { ...STANCE, shoulderB: 86, elbowB: -2, weaponBack: -8, torso: 22, hipF: 36, offX: 9 }, "out"),
-        kf(54, { ...STANCE, crouch: 0.5, shoulderB: 34, elbowB: 58, weaponBack: -22, torso: 10 }, "inOut"),
-        kf(58, { ...STANCE, crouch: 0.7, shoulderB: 58, elbowB: -8, weaponBack: -14, torso: 30, hipF: 46, kneeF: 40, offX: 9 }, "out"),
-        kf(65, { ...STANCE, shoulderB: 30, elbowB: 70, weaponBack: 2, shoulderF: 44, elbowF: 62, torso: -12, offX: -5 }, "inOut"),
-        kf(70, { ...STANCE, shoulderB: 94, elbowB: -8, weaponBack: -8, shoulderF: 80, elbowF: 6, torso: 34, hipF: 46, kneeF: 22, hipB: -22, kneeB: 56, offX: 14 }, "out"),
-        kf(88, { ...STANCE, shoulderB: 66, elbowB: 30, weaponBack: -6, torso: 14, offX: 4 }, "inOut"),
-        kf(106, { ...STANCE }),
+        kf(0, { ...STANCE }, "out"),
+        // The call: weapon up, weight back, shouting past them rather than at
+        // them - he is talking to the line, not to the man in front of him.
+        kf(10, { ...STANCE, shoulderF: 156, elbowF: -24, torso: -18, head: -12, offX: -6 }, "inOut"),
+        kf(20, { ...STANCE, shoulderF: 172, elbowF: -8, torso: -24, head: -16, offX: -8, hipB: -26, kneeB: 38 }, "out"),
+        // Then he steps aside and lets them past.
+        kf(34, { ...STANCE, shoulderF: 120, elbowF: 10, torso: -6, offX: -14 }, "inOut"),
+        kf(60, { ...STANCE, shoulderF: 96, elbowF: 18, torso: 2, offX: -10 }, "inOut"),
+        kf(104, { ...STANCE }),
       ],
     },
   ],

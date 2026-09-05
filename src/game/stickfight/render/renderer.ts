@@ -31,6 +31,81 @@ function disposeTree(root: THREE.Object3D) {
   });
 }
 
+/**
+ * Three ranks of men behind their shields, walking forward.
+ *
+ * Drawn back to front and progressively darker so it reads as depth rather
+ * than as one flat block - the first version overlapped three shields so
+ * tightly, with the helmets floating above them, that it came out as a red
+ * rectangle with three balls balanced on it. The ranks are spaced wider than
+ * feels right on paper for the same reason: at this size, separation is the
+ * only thing that says "several men".
+ */
+function rank(
+  add: (m: THREE.Mesh, order?: number) => void,
+  o: {
+    shield: string; trim: string; helm: string;
+    shieldW: number; shieldH: number; oval: boolean; weave?: boolean;
+    haft: string; head: string; haftLen: number; headLen: number; weaponY: number;
+  },
+) {
+  const FOOT = 4;
+  for (let i = 2; i >= 0; i--) {
+    const dim = 1 - i * 0.26;
+    const x = -i * 19;
+    const z = 54 - i * 2;
+    // Legs under the shield, so the rank is standing rather than floating.
+    for (const lx of [-6, 6]) {
+      const leg = new THREE.Mesh(new THREE.PlaneGeometry(4, 16), flat(shade("#3a3026", dim)));
+      leg.position.set(x + lx, FOOT + 8);
+      add(leg, z - 1);
+    }
+    // Head just above the rim, mostly hidden behind it.
+    const helm = new THREE.Mesh(new THREE.CircleGeometry(9.5, 14), flat(shade(o.helm, dim)));
+    helm.position.set(x - 2, FOOT + o.shieldH + 1);
+    add(helm, z - 1);
+    // The weapon comes over the top of the shield in front.
+    const haft = new THREE.Mesh(new THREE.PlaneGeometry(o.haftLen, 3.2), flat(shade(o.haft, dim)));
+    haft.position.set(x + o.haftLen / 2 + 6, o.weaponY + i * 5);
+    add(haft, z + 1);
+    const head = new THREE.Mesh(new THREE.PlaneGeometry(o.headLen, 6), flat(shade(o.head, dim)));
+    head.position.set(x + o.haftLen + 8, o.weaponY + i * 5);
+    add(head, z + 1);
+    // The shield itself, last so it covers the man holding it.
+    const body = o.oval
+      ? new THREE.Mesh(new THREE.CircleGeometry(o.shieldW * 0.62, 16), flat(shade(o.shield, dim)))
+      : new THREE.Mesh(new THREE.PlaneGeometry(o.shieldW, o.shieldH), flat(shade(o.shield, dim)));
+    if (o.oval) body.scale.set(1, o.shieldH / (o.shieldW * 1.24), 1);
+    body.position.set(x, FOOT + o.shieldH / 2);
+    add(body, z);
+    if (o.oval) {
+      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(o.shieldW * 0.3, o.shieldH * 0.8), flat(shade(o.trim, dim)));
+      stripe.position.set(x, FOOT + o.shieldH / 2);
+      add(stripe, z + 0.5);
+    } else if (o.weave) {
+      for (let r = 0; r < 4; r++) {
+        const w = new THREE.Mesh(new THREE.PlaneGeometry(o.shieldW, 2), flat(shade(o.trim, dim)));
+        w.position.set(x, FOOT + 8 + r * (o.shieldH / 4.5));
+        add(w, z + 0.5);
+      }
+    } else {
+      const boss = new THREE.Mesh(new THREE.CircleGeometry(5, 12), flat(shade(o.trim, dim)));
+      boss.position.set(x, FOOT + o.shieldH / 2);
+      add(boss, z + 0.5);
+      const spine = new THREE.Mesh(new THREE.PlaneGeometry(3, o.shieldH * 0.8), flat(shade(o.trim, dim)));
+      spine.position.set(x, FOOT + o.shieldH / 2);
+      add(spine, z + 0.4);
+    }
+  }
+}
+
+/** Darkens a colour, for ranks standing further back in a formation. */
+function shade(hex: string, k: number): string {
+  const c = new THREE.Color(hex);
+  c.multiplyScalar(k);
+  return `#${c.getHexString()}`;
+}
+
 function flat(color: THREE.ColorRepresentation, opacity = 1) {
   const translucent = opacity < 1;
   return new THREE.MeshBasicMaterial({
@@ -380,6 +455,28 @@ export class GameRenderer {
         add(loop);
         break;
       }
+      // Formations: a body of men that walks up the screen. See `rank()`.
+      case "testudo":
+        rank(add, {
+          shield: "#8d2f2f", trim: "#d9b45a", helm: "#b8bcc4",
+          shieldW: 30, shieldH: 64, oval: false,
+          haft: "#8a6238", head: "#d7dee6", haftLen: 40, headLen: 11, weaponY: 50,
+        });
+        break;
+      case "sparabara":
+        rank(add, {
+          shield: "#b08a45", trim: "#7d6030", helm: "#c8b48a",
+          shieldW: 28, shieldH: 72, oval: false, weave: true,
+          haft: "#8a6238", head: "#d7dee6", haftLen: 54, headLen: 13, weaponY: 58,
+        });
+        break;
+      case "impi":
+        rank(add, {
+          shield: "#c9b28d", trim: "#3f3428", helm: "#6b4a2a",
+          shieldW: 32, shieldH: 62, oval: true,
+          haft: "#8a6238", head: "#d7dee6", haftLen: 30, headLen: 14, weaponY: 54,
+        });
+        break;
       case "bullet":
       case "shot": {
         const body = new THREE.Mesh(new THREE.CircleGeometry(4.5, 12), flat(color));

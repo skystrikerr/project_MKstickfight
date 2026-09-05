@@ -458,7 +458,7 @@ export const PIRATE: FighterDef = {
       ],
       hits: [hit(6, 8, bx(20, 60, 44, 26), 30, { guard: "high", fx: "slash", pushX: 3, hitstun: 13, hitstop: 5 })],
       desc: "Steps in and flicks the point at the face. Quickest thing she has.",
-      notation: "\u2192 + A",
+      notation: "→ + A",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(3, { ...STANCE, shoulderF: 30, elbowF: 58, weapon: 62, torso: -2, offX: -2 }, "out"),
@@ -481,7 +481,7 @@ export const PIRATE: FighterDef = {
       cancelWindow: [20, 36],
       hits: [hit(16, 20, bx(16, 22, 52, 68), 90, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Runs onto them swinging. Ends against the wall more often than not.",
-      notation: "\u2192 + C",
+      notation: "→ + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderF: 150, elbowF: -40, weapon: 134, torso: -12, hipB: -30, kneeB: 48, offX: -6 }, "out"),
@@ -508,7 +508,7 @@ export const PIRATE: FighterDef = {
       ],
       hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Backs off and clubs them with the pistol butt. Cheap, fast, effective.",
-      notation: "\u2190 + A",
+      notation: "← + A",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(4, { ...STANCE, torso: -6, shoulderB: 20, elbowB: 84, weaponBack: 40, hipB: -26, kneeB: 40, offX: -6 }, "out"),
@@ -530,7 +530,7 @@ export const PIRATE: FighterDef = {
       cancelWindow: [16, 27],
       hits: [hit(12, 15, bx(34, 52, 88, 24), 56, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Steps out and drags the edge back across them. Keeps her at her range, not theirs.",
-      notation: "\u2190 + B",
+      notation: "← + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 108, elbowF: -22, weapon: 96, torso: -12, hipB: -28, kneeB: 42, offX: -8 }, "inOut"),
@@ -552,7 +552,7 @@ export const PIRATE: FighterDef = {
       cancelWindow: [26, 40],
       hits: [hit(20, 23, bx(14, 20, 70, 86), 100, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Both hands on the grip and straight down through the collarbone. Blocked standing only.",
-      notation: "\u2190 + C",
+      notation: "← + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderF: 140, elbowF: -38, weapon: 96, torso: -10, offX: -5 }, "inOut"),
@@ -1133,7 +1133,7 @@ export const PIRATE: FighterDef = {
         { at: 54, kind: "explode", x: 84, y: 29, scale: 1.4 },
       ],
       desc: "SUPER. Runs out a six-pounder and works it - three shots from the muzzle, the last one bursts.",
-      notation: "\u2190\u2199\u2193\u2198\u2192 + S  (100 meter)",
+      notation: "←↙↓↘→ + S  (100 meter)",
       /**
        * She is not throwing anything now, she is serving a gun: signal, stand
        * clear of the recoil, put the match to the touch hole three times, then

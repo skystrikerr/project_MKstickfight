@@ -421,7 +421,7 @@ export const ZULU: FighterDef = {
       ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Drives the shield edge in to hook theirs aside. Opens them up for everything else.",
-      notation: "\u2192 + A",
+      notation: "→ + A",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(4, { ...STANCE, shoulderB: 6, elbowB: 88, torso: -2, offX: -2 }, "out"),
@@ -444,7 +444,7 @@ export const ZULU: FighterDef = {
       cancelWindow: [20, 36],
       hits: [hit(16, 20, bx(19, 22, 70, 68), 88, { guard: "mid", fx: "blunt", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Runs them down behind the war shield. Carries them all the way to the wall.",
-      notation: "\u2192 + C",
+      notation: "→ + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, torso: -10, shoulderB: 2, elbowB: 94, hipB: -32, kneeB: 52, crouch: 0.28, offX: -6 }, "out"),
@@ -467,7 +467,7 @@ export const ZULU: FighterDef = {
       cancelWindow: [8, 20],
       hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Backs off and rakes the hide rim across them on the way out.",
-      notation: "\u2190 + A",
+      notation: "← + A",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(4, { ...STANCE, torso: -6, shoulderB: -6, elbowB: 98, hipB: -26, kneeB: 40, offX: -6 }, "out"),
@@ -493,7 +493,7 @@ export const ZULU: FighterDef = {
       ],
       hits: [hit(12, 15, bx(30, 46, 76, 22), 56, { guard: "mid", fx: "pierce", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Gives ground and stabs out low from behind the shield. Exactly what the iklwa was made for.",
-      notation: "\u2190 + B",
+      notation: "← + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 12, elbowF: 88, weapon: 56, torso: -10, hipB: -28, kneeB: 42, offX: -8 }, "inOut"),
@@ -515,7 +515,7 @@ export const ZULU: FighterDef = {
       cancelWindow: [26, 40],
       hits: [hit(20, 23, bx(14, 20, 70, 86), 100, { guard: "overhead", fx: "pierce", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Lifts the spear overhand and drives it down past the shield. Blocked standing only.",
-      notation: "\u2190 + C",
+      notation: "← + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderF: 132, elbowF: -40, weapon: 88, torso: -10, offX: -5 }, "inOut"),
@@ -875,55 +875,59 @@ export const ZULU: FighterDef = {
       input: { button: "S", motion: "dd", stance: ["stand", "crouch"] },
       tags: ["super"],
       priority: 60,
-      duration: 96,
+      duration: 104,
       meterCost: 100,
       superFreeze: 40,
       invuln: [{ from: 1, to: 14, kind: "strike" }],
-      vel: [
-        { at: 5, x: 12 },
-        { at: 28, x: 6 },
-        { at: 52, x: 4 },
-        { at: 68, x: 0 },
-      ],
-      friction: 0.93,
-      hits: [
-        hit(12, 15, bx(18, 40, 62, 42), 46, { group: 1, fx: "pierce", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(20, 23, bx(18, 20, 62, 44), 42, { group: 2, fx: "pierce", pushX: 1, hitstun: 18, hitstop: 4 }),
-        hit(28, 31, bx(18, 44, 62, 42), 42, { group: 3, fx: "blunt", pushX: 1, hitstun: 18, hitstop: 4 }),
-        hit(36, 39, bx(18, 26, 64, 50), 42, { group: 4, fx: "pierce", pushX: 1, hitstun: 18, hitstop: 4 }),
-        hit(44, 47, bx(18, 38, 64, 46), 42, { group: 5, fx: "pierce", pushX: 1, hitstun: 18, hitstop: 4 }),
-        hit(58, 66, bx(12, 12, 82, 92), 138, {
-          group: 6,
-          fx: "pierce",
-          pushX: 11,
-          knockdown: "hard",
-          launch: [5.5, 8.5],
-          hitstop: 17,
-          shake: 3,
-        }),
+      /**
+       * He does not do this himself - he calls it, and it walks up the screen
+       * without him. That is the whole point: every other super on the roster
+       * was the same five-hit flurry with different art on it, and a formation
+       * is a thing only a man who commands one can produce.
+       *
+       * It is a projectile because nothing else in the engine advances on its
+       * own, and it grinds rather than spikes: several hits as the rank walks
+       * through them, so it is worth blocking and worth not being in front of.
+       */
+      projectiles: [
+        {
+          at: 22,
+          kind: "impi",
+          armAfter: 0,
+          x: 46,
+          y: 0,
+          vx: 4.6,
+          vy: 0,
+          life: 150,
+          box: { x: -34, y: 0, w: 78, h: 92 },
+          damage: 56,
+          hitstun: 22,
+          blockstun: 16,
+          chip: 5,
+          pushX: 4,
+          hits: 6,
+          clashes: false,
+          fx: "slash",
+          scale: 1.25,
+          color: "#c9b28d",
+        },
       ],
       vfx: [
-        { at: 2, kind: "super", x: 0, y: 50, scale: 2.4, color: "#ff8a5c" },
-        { at: 58, kind: "explode", x: 52, y: 46, scale: 1.4 },
+        { at: 2, kind: "super", x: 0, y: 50, scale: 2.4, color: "#c9b28d" },
+        { at: 22, kind: "explode", x: 40, y: 20, scale: 0.8, color: "#c9b28d" },
       ],
-      desc: "SUPER. The formation in one man: the chest holds them, the horns come round, and the blade finishes it.",
+      desc: "SUPER. The impi comes at the run behind the hide shields. Nothing about it is subtle.",
       notation: "↓↓ + S  (100 meter)",
       frames: [
-        kf(0, { ...STANCE, torso: -14, shoulderB: 70, elbowB: 60, shoulderF: 8, elbowF: 94, weapon: 56, crouch: 0.4 }, "out"),
-        kf(6, { ...STANCE, torso: 32, shoulderB: 84, elbowB: 24, shoulderF: 66, elbowF: 10, weapon: 4, hipF: 42, kneeF: 22, offX: 7 }, "out"),
-        kf(12, { ...STANCE, torso: 34, shoulderF: 70, elbowF: 6, weapon: 2, hipF: 44, kneeF: 20, offX: 9 }),
-        kf(17, { ...STANCE, torso: 12, shoulderF: 8, elbowF: 96, weapon: 58 }, "inOut"),
-        kf(20, { ...STANCE, torso: 32, shoulderF: 56, elbowF: 6, weapon: 6, offX: 7 }, "out"),
-        kf(25, { ...STANCE, torso: 10, shoulderB: 150, elbowB: 20 }, "inOut"),
-        kf(28, { ...STANCE, torso: 34, shoulderB: 44, elbowB: 42, offX: 7 }, "out"),
-        kf(33, { ...STANCE, torso: 10, shoulderF: 6, elbowF: 98, weapon: 60 }, "inOut"),
-        kf(36, { ...STANCE, torso: 32, shoulderF: 74, elbowF: 8, weapon: 2, offX: 7 }, "out"),
-        kf(41, { ...STANCE, torso: 10, shoulderF: 10, elbowF: 92, weapon: 54 }, "inOut"),
-        kf(44, { ...STANCE, torso: 32, shoulderF: 62, elbowF: 8, weapon: 4, offX: 7 }, "out"),
-        kf(52, { ...STANCE, torso: -22, shoulderB: 160, elbowB: 10, shoulderF: 20, elbowF: 92, weapon: 62, hipB: -30, kneeB: 44, offX: -6 }, "inOut"),
-        kf(58, { ...STANCE, torso: 42, shoulderB: 40, elbowB: 30, shoulderF: 80, elbowF: 2, weapon: 0, hipF: 48, kneeF: 28, hipB: -24, kneeB: 56, offX: 12 }, "out"),
-        kf(78, { ...STANCE, torso: 26, shoulderF: 50, elbowF: 40, offX: 5 }, "inOut"),
-        kf(96, { ...STANCE }),
+        kf(0, { ...STANCE }, "out"),
+        // The call: weapon up, weight back, shouting past them rather than at
+        // them - he is talking to the line, not to the man in front of him.
+        kf(10, { ...STANCE, shoulderF: 156, elbowF: -24, torso: -18, head: -12, offX: -6 }, "inOut"),
+        kf(20, { ...STANCE, shoulderF: 172, elbowF: -8, torso: -24, head: -16, offX: -8, hipB: -26, kneeB: 38 }, "out"),
+        // Then he steps aside and lets them past.
+        kf(34, { ...STANCE, shoulderF: 120, elbowF: 10, torso: -6, offX: -14 }, "inOut"),
+        kf(60, { ...STANCE, shoulderF: 96, elbowF: 18, torso: 2, offX: -10 }, "inOut"),
+        kf(104, { ...STANCE }),
       ],
     },
   ],

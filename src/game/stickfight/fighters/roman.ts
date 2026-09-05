@@ -433,7 +433,7 @@ export const ROMAN: FighterDef = {
       ],
       hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { fx: "blunt", guard: "high", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Punches with the iron boss of the scutum. His fastest button and where pressure starts.",
-      notation: "\u2192 + A",
+      notation: "→ + A",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(4, { ...STANCE, shoulderB: 22, elbowB: 86, torso: -2, offX: -2 }, "out"),
@@ -458,7 +458,7 @@ export const ROMAN: FighterDef = {
         hit(16, 20, bx(19, 22, 70, 68), 88, { fx: "blunt", guard: "mid", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 }),
       ],
       desc: "Walks forward behind the shield and does not stop. Carries them into the wall.",
-      notation: "\u2192 + C",
+      notation: "→ + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, torso: -10, shoulderB: 18, elbowB: 92, hipB: -32, kneeB: 52, crouch: 0.28, offX: -6 }, "out"),
@@ -481,7 +481,7 @@ export const ROMAN: FighterDef = {
       friction: 0.86,
       hits: [hit(8, 10, bx(16, 50, 42, 32), 36, { fx: "blunt", guard: "mid", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Gives ground and chops down with the shield rim. Catches a step-in behind a whiff.",
-      notation: "\u2190 + A",
+      notation: "← + A",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(4, { ...STANCE, torso: -6, shoulderB: 6, elbowB: 96, hipB: -26, kneeB: 38, offX: -6 }, "out"),
@@ -504,7 +504,7 @@ export const ROMAN: FighterDef = {
       // He leaves, the point stays. Longest button on the roster.
       hits: [hit(12, 15, bx(46, 52, 108, 22), 56, { fx: "pierce", guard: "mid", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Steps off the line and holds the point out. Nothing walks into this for free.",
-      notation: "\u2190 + B",
+      notation: "← + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 46, elbowF: -12, weapon: 60, torso: -10, hipB: -28, kneeB: 42, offX: -8 }, "inOut"),
@@ -529,7 +529,7 @@ export const ROMAN: FighterDef = {
         hit(20, 23, bx(16, 20, 92, 86), 100, { fx: "blunt", guard: "overhead", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 }),
       ],
       desc: "Raises the spear two-handed and brings the shaft down on their head. Blocked standing only.",
-      notation: "\u2190 + C",
+      notation: "← + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderF: 128, elbowF: -46, weapon: 96, torso: -12, offX: -5 }, "inOut"),
@@ -1008,52 +1008,59 @@ export const ROMAN: FighterDef = {
       input: { button: "S", motion: "dd", stance: ["stand", "crouch"] },
       tags: ["super"],
       priority: 60,
-      duration: 96,
+      duration: 104,
       meterCost: 100,
       superFreeze: 40,
-      invuln: [{ from: 1, to: 12, kind: "strike" }],
-      vel: [
-        { at: 6, x: 8 },
-        { at: 30, x: 5 },
-        { at: 54, x: 3 },
-        { at: 70, x: 0 },
-      ],
-      friction: 0.94,
-      hits: [
-        hit(12, 16, bx(24, 40, 84, 46), 60, { group: 1, fx: "pierce", pushX: 1, hitstun: 22, hitstop: 6 }),
-        hit(24, 28, bx(24, 40, 88, 46), 46, { group: 2, fx: "pierce", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(36, 40, bx(24, 34, 92, 52), 46, { group: 3, fx: "pierce", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(48, 52, bx(24, 34, 92, 52), 46, { group: 4, fx: "pierce", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(62, 68, bx(18, 20, 96, 78), 130, {
-          group: 5,
-          fx: "slash",
-          pushX: 11,
-          knockdown: "hard",
-          launch: [6, 9],
-          hitstop: 16,
-          shake: 3,
-        }),
+      invuln: [{ from: 1, to: 14, kind: "strike" }],
+      /**
+       * He does not do this himself - he calls it, and it walks up the screen
+       * without him. That is the whole point: every other super on the roster
+       * was the same five-hit flurry with different art on it, and a formation
+       * is a thing only a man who commands one can produce.
+       *
+       * It is a projectile because nothing else in the engine advances on its
+       * own, and it grinds rather than spikes: several hits as the rank walks
+       * through them, so it is worth blocking and worth not being in front of.
+       */
+      projectiles: [
+        {
+          at: 22,
+          kind: "testudo",
+          armAfter: 0,
+          x: 46,
+          y: 0,
+          vx: 4.6,
+          vy: 0,
+          life: 150,
+          box: { x: -34, y: 0, w: 78, h: 92 },
+          damage: 54,
+          hitstun: 22,
+          blockstun: 16,
+          chip: 5,
+          pushX: 4,
+          hits: 6,
+          clashes: false,
+          fx: "pierce",
+          scale: 1.25,
+          color: "#d9b45a",
+        },
       ],
       vfx: [
-        { at: 2, kind: "super", x: 0, y: 50, scale: 2.4, color: "#ffb648" },
-        { at: 62, kind: "explode", x: 60, y: 50, scale: 1.4 },
+        { at: 2, kind: "super", x: 0, y: 50, scale: 2.4, color: "#d9b45a" },
+        { at: 22, kind: "explode", x: 40, y: 20, scale: 0.8, color: "#d9b45a" },
       ],
-      desc: "SUPER. Charges the length of the arena with a storm of thrusts, ending in a shield-driven finisher.",
+      desc: "SUPER. Calls the century up. The testudo advances on its own and walks straight over them.",
       notation: "↓↓ + S  (100 meter)",
       frames: [
-        kf(0, { ...STANCE, torso: -14, shoulderF: 46, elbowF: -30, weapon: 54, crouch: 0.4 }, "out"),
-        kf(8, { ...STANCE, torso: 24, shoulderF: 84, elbowF: -4, weapon: 0, hipF: 40, kneeF: 22, offX: 6 }, "out"),
-        kf(12, { ...STANCE, torso: 26, shoulderF: 88, elbowF: 0, weapon: -4, hipF: 42, kneeF: 20, offX: 8 }),
-        kf(20, { ...STANCE, torso: 16, shoulderF: 52, elbowF: -30, weapon: 56, hipF: 20, kneeF: 34 }, "inOut"),
-        kf(24, { ...STANCE, torso: 26, shoulderF: 88, elbowF: 0, weapon: 0, hipF: 42, kneeF: 20, offX: 8 }, "out"),
-        kf(32, { ...STANCE, torso: 16, shoulderF: 52, elbowF: -30, weapon: 58, hipF: 20, kneeF: 34 }, "inOut"),
-        kf(36, { ...STANCE, torso: 28, shoulderF: 92, elbowF: 2, weapon: -4, hipF: 44, kneeF: 20, offX: 9 }, "out"),
-        kf(44, { ...STANCE, torso: 16, shoulderF: 56, elbowF: -22, weapon: 50, hipF: 20, kneeF: 34 }, "inOut"),
-        kf(48, { ...STANCE, torso: 28, shoulderF: 92, elbowF: 2, weapon: -14, hipF: 44, kneeF: 20, offX: 9 }, "out"),
-        kf(58, { ...STANCE, torso: -20, shoulderF: 150, elbowF: -30, shoulderB: 130, elbowB: -10, weapon: 80, hipB: -30, kneeB: 46, offX: -4 }, "inOut"),
-        kf(62, { ...STANCE, torso: 34, shoulderF: 30, elbowF: 16, shoulderB: 40, elbowB: 12, weapon: -6, hipF: 46, kneeF: 26, hipB: -24, kneeB: 54, offX: 10 }, "out"),
-        kf(78, { ...STANCE, torso: 24, shoulderF: 44, elbowF: 4, offX: 6 }, "inOut"),
-        kf(96, { ...STANCE }),
+        kf(0, { ...STANCE }, "out"),
+        // The call: weapon up, weight back, shouting past them rather than at
+        // them - he is talking to the line, not to the man in front of him.
+        kf(10, { ...STANCE, shoulderF: 156, elbowF: -24, torso: -18, head: -12, offX: -6 }, "inOut"),
+        kf(20, { ...STANCE, shoulderF: 172, elbowF: -8, torso: -24, head: -16, offX: -8, hipB: -26, kneeB: 38 }, "out"),
+        // Then he steps aside and lets them past.
+        kf(34, { ...STANCE, shoulderF: 120, elbowF: 10, torso: -6, offX: -14 }, "inOut"),
+        kf(60, { ...STANCE, shoulderF: 96, elbowF: 18, torso: 2, offX: -10 }, "inOut"),
+        kf(104, { ...STANCE }),
       ],
     },
   ],
