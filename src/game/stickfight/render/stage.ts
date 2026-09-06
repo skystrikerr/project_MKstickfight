@@ -8,6 +8,7 @@
  * registry.
  */
 import type { Platform } from "../types";
+import type { StageLight } from "./shapes";
 
 import * as THREE from "three";
 import { STAGE_HALF_WIDTH } from "../constants";
@@ -78,6 +79,8 @@ export interface StageDef {
   ground: string;
   accent: string;
   ambient: AmbientDef;
+  /** How this stage lights the fighters standing in it. */
+  light?: StageLight;
   /** Ledges to stand on. Absent means a flat stage, which most of them are. */
   platforms?: Platform[];
   /** Painted rather than built. Skips the built-stage haze - see the Stage ctor. */
@@ -97,6 +100,8 @@ export const NO_WEATHER: AmbientDef = {
 
 export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   colosseum: {
+    // Midday sun off yellow sand, and half a mile of travertine bouncing it back.
+    light: { key: "#ffe6b8", fill: "#6b5a48", strength: 0.85, shadow: "#6e4a28", glow: 0.1 },
     name: "The Colosseum",
     blurb: "Fifty thousand Romans, one patch of sand.",
     sky: ["#b9c6d4", "#e6d7b4"],
@@ -115,6 +120,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "dust", count: 26, colors: ["#e8d4a8", "#c9a267"], speed: -0.12, wind: 0.16, size: [2, 5], opacity: 0.4 },
   },
   deck: {
+    // Moonlight and a lantern or two. Cold key, and the sea underneath it.
+    light: { key: "#cfe4ff", fill: "#16283a", strength: 0.7, shadow: "#1a2b3d", glow: 0.16 },
     name: "Storm Deck",
     blurb: "Wet planking, a rolling sea, nowhere to run.",
     sky: ["#0d1b2a", "#3f6b8a"],
@@ -123,6 +130,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "rain", count: 90, colors: ["#9fc7e8", "#cfe4f5"], speed: 13, wind: -2.6, size: [1.4, 22], opacity: 0.5 },
   },
   frontier: {
+    // Low sun an hour before dark, with the red rock throwing it back up.
+    light: { key: "#ffd08a", fill: "#5a2f33", strength: 0.85, shadow: "#7a3f2e", glow: 0.14 },
     name: "Perdition Flats",
     blurb: "A dead main street at sundown.",
     sky: ["#3a1f2b", "#e2925a"],
@@ -131,6 +140,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "dust", count: 34, colors: ["#e8c9a0", "#c98d5a"], speed: -0.08, wind: 0.9, size: [2, 6], opacity: 0.45 },
   },
   dojo: {
+    // Blossom light: a pink sky doing most of the work.
+    light: { key: "#ffd9df", fill: "#3a2f4e", strength: 0.7, shadow: "#4a3a52", glow: 0.14 },
     name: "Blossom Dojo",
     blurb: "Paper screens, old timber, falling petals.",
     sky: ["#2a2140", "#e79fa8"],
@@ -139,6 +150,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "petal", count: 40, colors: ["#ffc0cf", "#ff9db4", "#ffe1e8"], speed: 1.3, wind: 0.9, size: [5, 8], opacity: 0.9 },
   },
   neon: {
+    // Signage. There is no sun here at all - everything is lit by advertising.
+    light: { key: "#ff6ec4", fill: "#141a3a", strength: 0.75, shadow: "#0a0d1e", glow: 0.5 },
     name: "Neon Bazaar",
     blurb: "Rain, signage and a crowd that never looks up.",
     sky: ["#080a18", "#2b1b4d"],
@@ -147,6 +160,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "rain", count: 110, colors: ["#7ad7ff", "#ff6ec7"], speed: 15, wind: -1.4, size: [1.2, 26], opacity: 0.4 },
   },
   tundra: {
+    // Snow glare from every direction, and a blue sky filling the shadows. A shadow on snow is blue, not black - and nothing here should bloom.
+    light: { key: "#eaf4ff", fill: "#48719c", strength: 0.8, shadow: "#4a6c96", glow: 0.06 },
     name: "Frozen Pass",
     blurb: "Above the treeline, under the aurora.",
     sky: ["#0b1630", "#7099c6"],
@@ -155,6 +170,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "snow", count: 70, colors: ["#ffffff", "#dbeaff"], speed: 1.1, wind: 0.55, size: [3, 5], opacity: 0.85 },
   },
   forge: {
+    // Firelight. The key is the forge itself, so it is orange and it is close.
+    light: { key: "#ff9a4a", fill: "#2a1218", strength: 0.68, shadow: "#2a1412", glow: 0.4 },
     name: "Ember Forge",
     blurb: "Cut into a volcano. Mind the drop.",
     sky: ["#1a0a0e", "#8a2f1e"],
@@ -163,6 +180,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "ember", count: 46, colors: ["#ffb648", "#ff6a2c", "#ffe6a8"], speed: -1.5, wind: 0.5, size: [3, 6], opacity: 0.9 },
   },
   delta: {
+    // Sun through canopy - green-filtered, and the shadows go green with it.
+    light: { key: "#e8f2c0", fill: "#2a3a2e", strength: 0.7, shadow: "#2e3a2c", glow: 0.1 },
     name: "Monsoon Delta",
     blurb: "Flooded paddy, low cloud, and the treeline too close.",
     sky: ["#1d2a24", "#7f8f66"],
@@ -171,6 +190,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ambient: { kind: "rain", count: 80, colors: ["#b7cfa8", "#dfe9cf"], speed: 12, wind: -1.8, size: [1.3, 20], opacity: 0.42 },
   },
   aqueduct: {
+    // Overcast stone light. Flat, cool, and not much of it.
+    light: { key: "#dfeaf2", fill: "#25384a", strength: 0.7, shadow: "#33454f", glow: 0.08 },
     name: "The Aqueduct",
     blurb: "Two tiers of Roman arches over a dry channel.",
     sky: ["#241a2e", "#b9784a"],
@@ -186,6 +207,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
 
   terraces: {
+    // Torchlit terracing under a dark sky.
+    light: { key: "#ffc98a", fill: "#3a2a28", strength: 0.8, shadow: "#4a3428", glow: 0.14 },
     name: "Temple Terraces",
     blurb: "Cut stone steps above the cloud line.",
     sky: ["#132330", "#5c8fa6"],
@@ -200,6 +223,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
 
   siegeworks: {
+    // Burning timber somewhere off screen.
+    light: { key: "#ffc07a", fill: "#2e2630", strength: 0.8, shadow: "#3a2e30", glow: 0.16 },
     name: "The Siege Works",
     blurb: "Scaffolding thrown up against a wall that has not fallen yet.",
     sky: ["#1d1a24", "#8a5638"],
@@ -215,6 +240,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
 
   postroad: {
+    // Bright overcast. The painted sky is nearly white, so the fill is almost as strong as the key.
+    light: { key: "#fff0d0", fill: "#7a8a9a", strength: 0.8, shadow: "#6a5a48", glow: 0.08 },
     name: "The Post Road",
     blurb: "A staging post on the mountain highway: inn, teahouse, and the pass beyond.",
     // Sampled off the painting so the ground and the select-screen swatch sit
@@ -237,6 +264,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
 
   dryclaim: {
+    // Hard desert sun, and dust holding light in the shadows.
+    light: { key: "#ffe0a8", fill: "#6a5a48", strength: 0.8, shadow: "#7a4526", glow: 0.1 },
     name: "The Dry Claim",
     blurb: "Someone dug here, put up a water tower, and left. The desert took the rest.",
     sky: ["#9dc5d8", "#e8d3b0"],
@@ -249,6 +278,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
 
   swallowed: {
+    // Jungle light: what gets through the leaves, and it is green by the time it arrives.
+    light: { key: "#dcecd8", fill: "#3a5548", strength: 0.75, shadow: "#33452f", glow: 0.1 },
     name: "The Swallowed Temple",
     blurb: "Cut stone, then a thousand years of roots. The roots won.",
     sky: ["#6d97b5", "#cfe2e6"],
@@ -261,6 +292,8 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
 
   skyward: {
+    // Above the cloud deck. The key is unfiltered and the fill is the whole sky.
+    light: { key: "#fffaf0", fill: "#5a86b8", strength: 0.75, shadow: "#6a90b4", glow: 0.18 },
     name: "Cloudbreak Temple",
     blurb: "A stone platform floating in clear morning air.",
     sky: ["#2f6fb5", "#a9d3f0"],
@@ -303,6 +336,61 @@ function rect(
   opacity = 1,
 ): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat(color, opacity));
+  m.position.set(x, y + h / 2, layerZ(order));
+  m.renderOrder = order;
+  return m;
+}
+
+/**
+ * A quad that fades out toward its top edge.
+ *
+ * Used to feather the arena floor into a painted backdrop. The floor is one
+ * flat colour and the painting behind it is not, so however carefully the
+ * colour is sampled the two meet along a hard horizontal rule - which on the
+ * Colosseum read as a band across the bottom of the screen with the fighters
+ * standing on the join. Letting the top of the floor go transparent puts the
+ * painted sand behind the fighters' feet and the solid floor only underneath
+ * them, and the join stops existing.
+ */
+function fadeUpRect(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  color: THREE.ColorRepresentation,
+  order: number,
+): THREE.Mesh {
+  const geo = new THREE.PlaneGeometry(w, h, 1, 1);
+  const pos = geo.getAttribute("position");
+  const c = new THREE.Color(color);
+  const colors = new Float32Array(pos.count * 3);
+  const alphas = new Float32Array(pos.count);
+  for (let i = 0; i < pos.count; i++) {
+    colors[i * 3] = c.r;
+    colors[i * 3 + 1] = c.g;
+    colors[i * 3 + 2] = c.b;
+    // PlaneGeometry is centred on its own origin, so the top row is +h/2.
+    alphas[i] = pos.getY(i) > 0 ? 0 : 1;
+  }
+  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  geo.setAttribute("alpha", new THREE.BufferAttribute(alphas, 1));
+  const material = new THREE.MeshBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    depthWrite: false,
+  });
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nattribute float alpha;\nvarying float vAlpha;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvAlpha = alpha;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying float vAlpha;")
+      .replace(
+        "#include <dithering_fragment>",
+        "#include <dithering_fragment>\ngl_FragColor.a *= vAlpha;",
+      );
+  };
+  const m = new THREE.Mesh(geo, material);
   m.position.set(x, y + h / 2, layerZ(order));
   m.renderOrder = order;
   return m;
@@ -524,7 +612,7 @@ export class Stage {
     // it is already fading on its own. Veiling it again in flat horizon
     // colour only makes it muddy, so the haze is for built stages.
     if (!cfg.backdrop) this.buildHaze(cfg.sky[1]);
-    this.buildGround(cfg.ground, theme);
+    this.buildGround(cfg.ground, theme, !!cfg.backdrop);
     if (cfg.platforms?.length) this.buildPlatforms(cfg.platforms, cfg.ground, cfg.accent);
 
     this.ambient = new Ambient(cfg.ambient);
@@ -560,13 +648,26 @@ export class Stage {
     veil(5.6, 0.12, 0.62);
   }
 
-  private buildGround(color: string, theme: StageTheme) {
+  private buildGround(color: string, theme: StageTheme, painted: boolean) {
     const g = new THREE.Group();
-    g.add(rect(0, -420, 1800, 420, color, 8));
-    g.add(rect(0, -6, 1800, 7, "#000000", 9, 0.35));
-    // Floor markings, spaced along the fighting area.
-    for (let x = -STAGE_HALF_WIDTH; x <= STAGE_HALF_WIDTH; x += 130) {
-      g.add(rect(x, -34, 6, 34, "#000000", 9, 0.18));
+    if (painted) {
+      // Behind a painting the floor starts lower and arrives gradually. The
+      // top 74 units are a fade, so what is actually under the fighters' feet
+      // is the painted arena floor rather than a flat slab laid over it.
+      g.add(rect(0, -420, 1800, 420 - 74, color, 8));
+      g.add(fadeUpRect(0, -74, 1800, 74, color, 8));
+    } else {
+      g.add(rect(0, -420, 1800, 420, color, 8));
+    }
+    // The line along the floor edge. On a painted stage there is no edge to
+    // draw - the sand runs back into the picture - so it would be a rule ruled
+    // across the middle of the photograph.
+    if (!painted) {
+      g.add(rect(0, -6, 1800, 7, "#000000", 9, 0.35));
+      // Floor markings, spaced along the fighting area.
+      for (let x = -STAGE_HALF_WIDTH; x <= STAGE_HALF_WIDTH; x += 130) {
+        g.add(rect(x, -34, 6, 34, "#000000", 9, 0.18));
+      }
     }
     if (theme === "skyward") {
       // The platform has an edge instead of running off-screen.

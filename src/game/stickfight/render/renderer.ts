@@ -12,7 +12,7 @@ import { buildSkeleton } from "../skeleton";
 import { FxSystem } from "./fx";
 import { StickRig } from "./rig";
 import { defaultQuality, PostFx } from "./post";
-import { Stage, type StageTheme } from "./stage";
+import { Stage, STAGE_THEMES, type StageTheme } from "./stage";
 
 /**
  * "Reduced" still lets an impact read, just not as a full camera shake -
@@ -125,6 +125,8 @@ export class GameRenderer {
   private stage: Stage;
   private rigs: [StickRig, StickRig];
   private fx = new FxSystem();
+  /** How readily this stage blooms. See PostFx.setGlow. */
+  private glow = 0;
   private projectileMeshes = new Map<number, THREE.Object3D>();
   private projectileGroup = new THREE.Group();
   private zoneMeshes = new Map<number, THREE.Object3D>();
@@ -166,7 +168,15 @@ export class GameRenderer {
     this.stage = new Stage(theme);
     this.scene.add(this.stage.group);
 
-    this.rigs = [new StickRig(match.fighters[0].def), new StickRig(match.fighters[1].def)];
+    // Both fighters are lit by the stage they are standing in, so a figure
+    // never carries a different sun from the backdrop behind him.
+    const light = STAGE_THEMES[theme].light;
+    // Kept rather than applied: the post chain is built lazily on the first
+    // resize, and on a quality drop it is torn down and rebuilt, so the stage's
+    // glow has to be something the renderer remembers rather than something it
+    // sets once.
+    this.glow = light?.glow ?? 0;
+    this.rigs = [new StickRig(match.fighters[0].def, light), new StickRig(match.fighters[1].def, light)];
     for (const rig of this.rigs) {
       this.scene.add(rig.shadowMesh);
       this.scene.add(rig.group);
@@ -203,6 +213,7 @@ export class GameRenderer {
     if (this.quality === "high") {
       if (!this.post) {
         this.post = new PostFx(this.renderer, this.scene, this.camera, width * pr, height * pr);
+        this.post.setGlow(this.glow);
       } else {
         this.post.setSize(width * pr, height * pr);
       }

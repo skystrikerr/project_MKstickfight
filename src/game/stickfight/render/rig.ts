@@ -21,6 +21,7 @@ import {
   limbGeometry,
   rigMaterial,
 } from "./shapes";
+import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
 
 const ORDER = {
@@ -144,6 +145,8 @@ export class StickRig {
   private boots: THREE.Mesh[] = [];
   private bootOutlines: THREE.Mesh[] = [];
   private shadow!: THREE.Mesh;
+  private shadowWide!: THREE.Mesh;
+  private readonly shadowGroup = new THREE.Group();
   private props: PropMesh[] = [];
   private materials: THREE.Material[] = [];
   private propInk!: THREE.MeshBasicMaterial;
@@ -153,7 +156,7 @@ export class StickRig {
   private def: FighterDef;
   private scale: number;
 
-  constructor(def: FighterDef) {
+  constructor(def: FighterDef, private light?: StageLight) {
     this.def = def;
     this.scale = def.stats.scale;
     const p = def.palette;
@@ -243,10 +246,25 @@ export class StickRig {
     this.group.add(this.head, this.headOutline);
 
     // Ground shadow --------------------------------------------------------
-    const shadowMat = rigMaterial("#000000", { opacity: 0.3 });
-    this.materials.push(shadowMat);
-    this.shadow = new THREE.Mesh(new THREE.CircleGeometry(1, 20), shadowMat);
+    //
+    // Two ellipses rather than one. A single soft blob at 30% never reads as
+    // contact - on the Colosseum's bright sand it was very nearly invisible,
+    // and a fighter with no shadow under his feet floats no matter how well
+    // the rest of him is drawn. The wide one is the ambient occlusion the
+    // figure casts into the ground; the tight one is where he is actually
+    // touching it, and it is the one that tells you he has landed.
+    //
+    // Both take their colour from the stage. A black shadow on snow is a hole;
+    // a shadow on snow is blue.
+    const shadowColor = this.light?.shadow ?? "#000000";
+    const wideMat = rigMaterial(shadowColor, { opacity: 0.22 });
+    const coreMat = rigMaterial(shadowColor, { opacity: 0.42 });
+    this.materials.push(wideMat, coreMat);
+    this.shadowWide = new THREE.Mesh(new THREE.CircleGeometry(1, 20), wideMat);
+    this.shadow = new THREE.Mesh(new THREE.CircleGeometry(1, 20), coreMat);
+    this.shadowWide.renderOrder = ORDER.shadow - 1;
     this.shadow.renderOrder = ORDER.shadow;
+    this.shadowGroup.add(this.shadowWide, this.shadow);
 
     // Props, cloth and trail ----------------------------------------------
     for (const prop of def.props) {
@@ -275,8 +293,9 @@ export class StickRig {
     }
   }
 
-  get shadowMesh(): THREE.Mesh {
-    return this.shadow;
+  /** Both ellipses, so the renderer still adds one object to the scene. */
+  get shadowMesh(): THREE.Object3D {
+    return this.shadowGroup;
   }
 
   private buildProp(def: PropDef): THREE.Group {
@@ -331,6 +350,7 @@ export class StickRig {
       color,
       part.geo === "disc" || part.geo === "sphere" ? 0.55 : 1,
       (part.rot ?? 0) * DEG,
+      this.light,
     );
     const mat = rigMaterial(color, { vertexColors: true });
     this.materials.push(mat);
@@ -459,11 +479,21 @@ export class StickRig {
     }
 
     // Ground shadow shrinks as the fighter rises.
+    //
+    // The core tightens much faster than the wide one and fades out entirely
+    // near the top of a jump, which is what sells the landing: the two
+    // ellipses converge as he comes down and the dark one snaps under his feet
+    // on the frame he touches.
     const lift = Math.max(0, opts.y);
     const shrink = Math.max(0.35, 1 - lift / 260);
-    this.shadow.position.set(opts.x, 1.5, ORDER.shadow + (opts.z ?? 0));
-    this.shadow.scale.set(26 * shrink * this.scale, 6 * shrink, 1);
-    (this.shadow.material as THREE.MeshBasicMaterial).opacity = 0.3 * shrink;
+    const contact = Math.max(0, 1 - lift / 90);
+    const z = ORDER.shadow + (opts.z ?? 0);
+    this.shadowWide.position.set(opts.x, 1.5, z - 1);
+    this.shadowWide.scale.set(30 * shrink * this.scale, 7.5 * shrink, 1);
+    (this.shadowWide.material as THREE.MeshBasicMaterial).opacity = 0.2 * shrink;
+    this.shadow.position.set(opts.x, 1.5, z);
+    this.shadow.scale.set(17 * shrink * this.scale, 4 * shrink, 1);
+    (this.shadow.material as THREE.MeshBasicMaterial).opacity = 0.34 * contact;
 
     // White flash when hit.
     const flash = opts.flash > 0 ? Math.min(1, opts.flash / 8) : 0;
@@ -492,6 +522,7 @@ export class StickRig {
     this.head.geometry.dispose();
     this.headOutline.geometry.dispose();
     this.shadow.geometry.dispose();
+    this.shadowWide.geometry.dispose();
     for (const prop of this.props) {
       prop.cloth?.dispose();
       prop.group.traverse((o) => {
@@ -514,12 +545,17 @@ function applyPartShading(
   color: THREE.ColorRepresentation,
   strength = 1,
   rot = 0,
+  light?: StageLight,
 ) {
   const pos = geo.getAttribute("position");
   const base = new THREE.Color(color);
-  const white = new THREE.Color("#ffffff");
-  const black = new THREE.Color("#000000");
-  const light = base.clone().lerp(white, 0.2 * strength);
+  // The highlight goes toward the stage's key light and the shadow toward
+  // whatever is bouncing back into it, rather than toward white and black on
+  // every stage. Unset, these are white and black and nothing changes.
+  const k = light?.strength ?? 1;
+  const white = new THREE.Color("#ffffff").lerp(new THREE.Color(light?.key ?? "#ffffff"), k);
+  const black = new THREE.Color("#000000").lerp(new THREE.Color(light?.fill ?? "#000000"), k);
+  const lit = base.clone().lerp(white, 0.2 * strength);
   const hot = base.clone().lerp(white, 0.5 * strength);
   const dark = base.clone().lerp(black, 0.38 * strength);
   // Light comes from above the fighter, not from above the shape, so the ramp
@@ -540,8 +576,8 @@ function applyPartShading(
   const c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const t = (up(i) - minUp) / span;
-    if (t > 0.88) c.copy(light).lerp(hot, (t - 0.88) / 0.12);
-    else c.copy(dark).lerp(light, Math.pow(t / 0.88, 0.7));
+    if (t > 0.88) c.copy(lit).lerp(hot, (t - 0.88) / 0.12);
+    else c.copy(dark).lerp(lit, Math.pow(t / 0.88, 0.7));
     colors[i * 3] = c.r;
     colors[i * 3 + 1] = c.g;
     colors[i * 3 + 2] = c.b;

@@ -11,6 +11,42 @@ import * as THREE from "three";
 
 const CAP_SEGMENTS = 7;
 
+/**
+ * The light a stage casts on whoever is standing in it.
+ *
+ * The fighters were always shaded - limbs and props both carry a light-to-dark
+ * ramp - but they were shaded in a vacuum: highlights toward white, shadows
+ * toward black, on every stage. A figure lit neutrally in front of a backdrop
+ * lit warmly reads as a sticker on a photograph no matter how well it is
+ * drawn, and that was the single biggest reason the roster looked pasted on.
+ *
+ * So a stage says what colour its light is and what colour bounces back into
+ * the shadows, and the existing ramp is built between those two instead of
+ * between white and black. Nothing else changes: this is the same shading
+ * system, told what the weather is.
+ *
+ * `glow` is the other half of belonging - see PostFx. Left unset a stage keeps
+ * exactly the neutral look it had.
+ */
+export interface StageLight {
+  /** What the highlights tend toward. Sunlight, neon, firelight, snow-glare. */
+  key: string;
+  /** What the shadows tend toward - the sky, bouncing back in. */
+  fill: string;
+  /** How much of the tint to apply, 0..1. */
+  strength?: number;
+  /** Colour of the contact shadow on the floor. */
+  shadow?: string;
+  /**
+   * How readily this stage blooms, 0..1. The bloom threshold was fixed at a
+   * level nothing in the game ever reached, so the pass cost fill rate and
+   * produced nothing. A neon sign should bleed and a snowfield should not, and
+   * that is a property of the stage rather than a global constant.
+   */
+  glow?: number;
+}
+
+
 export interface ShadeOptions {
   /** Base colour of the limb. */
   color: THREE.ColorRepresentation;
@@ -18,14 +54,18 @@ export interface ShadeOptions {
   highlight?: number;
   /** How much darker the bottom edge gets, 0..1. */
   shade?: number;
+  /** What the highlight tends toward. Defaults to white. */
+  key?: string;
+  /** What the shadow tends toward. Defaults to black. */
+  fill?: string;
 }
 
 /** Applies a light-to-dark gradient across the shape's local y axis. */
 function shadeGeometry(geo: THREE.BufferGeometry, opts: ShadeOptions) {
   const pos = geo.getAttribute("position");
   const base = new THREE.Color(opts.color);
-  const light = base.clone().lerp(new THREE.Color("#ffffff"), opts.highlight ?? 0.22);
-  const dark = base.clone().lerp(new THREE.Color("#000000"), opts.shade ?? 0.3);
+  const light = base.clone().lerp(new THREE.Color(opts.key ?? "#ffffff"), opts.highlight ?? 0.22);
+  const dark = base.clone().lerp(new THREE.Color(opts.fill ?? "#000000"), opts.shade ?? 0.3);
 
   geo.computeBoundingBox();
   const bb = geo.boundingBox!;

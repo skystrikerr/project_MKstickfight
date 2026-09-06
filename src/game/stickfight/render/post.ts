@@ -90,15 +90,21 @@ export class PostFx {
     this.composer = new EffectComposer(renderer);
     this.composer.addPass(new RenderPass(scene, camera));
 
-    // Subtle: hot effects glow, the flat art itself stays crisp. The blur runs
-    // at half resolution - it is a soft glow, so nobody can tell, and it is
-    // four times cheaper on fill rate.
+    // Hot effects glow, the flat art itself stays crisp. The blur runs at half
+    // resolution - it is a soft glow, so nobody can tell, and it is four times
+    // cheaper on fill rate.
     //
-    // The threshold is high on purpose. Bright backdrops - the clouds over
-    // Cloudbreak Temple, a snowfield - sit just under it, so bloom only ever
-    // picks out muzzle flashes, supers, lava and weapon trails instead of
-    // washing out the whole stage.
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(width / 2, height / 2), 0.62, 0.5, 0.9);
+    // The threshold used to be a fixed 0.9, reasoned about as an sRGB value.
+    // The composer works in linear space, where 0.9 is brighter than anything
+    // the game draws: the pass ran on every frame on every stage and produced
+    // nothing at all. A neon city with a dozen saturated signs in it had no
+    // glow on any of them.
+    //
+    // The fix is not a lower constant - the worry behind the old number was
+    // real, and a snowfield really should not bloom. It is that how readily a
+    // stage glows is a property of the stage. `setGlow` is driven from the
+    // stage's light, and 0 restores exactly the old do-nothing behaviour.
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(width / 2, height / 2), 0, 0.6, 1);
     this.composer.addPass(this.bloom);
 
     this.grade = new ShaderPass(GradeShader);
@@ -109,6 +115,30 @@ export class PostFx {
     this.composer.addPass(new OutputPass());
 
     this.setSize(width, height);
+  }
+
+  /**
+   * How readily this stage blooms, 0..1.
+   *
+   * Strength and threshold move together: a stage that glows a lot also has to
+   * reach lower to find the things that are glowing, or only the few whitest
+   * pixels bleed and the effect reads as a bug rather than as light.
+   */
+  setGlow(glow: number) {
+    const g = Math.max(0, Math.min(1, glow));
+    // Threshold and strength are deliberately not the same curve. Tying them
+    // together gave a stage that either missed everything or washed out: at a
+    // setting low enough to catch a neon sign the strength was already high
+    // enough to smear the backdrop as well.
+    //
+    // So the threshold reaches down quickly - it has to, because a saturated
+    // green sign only measures about 0.75 in linear and the old fixed 0.9 was
+    // above everything in the game - while the strength stays moderate. What
+    // blooms is decided by the threshold; how hard it blooms is a separate
+    // decision, and it should stay gentle enough to read a fighter through.
+    this.bloom.threshold = 1 - g * 0.72;
+    this.bloom.strength = g * 0.9;
+    this.bloom.radius = 0.4 + g * 0.3;
   }
 
   setSize(width: number, height: number) {

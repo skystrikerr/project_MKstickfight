@@ -2639,6 +2639,55 @@ function scriptFor(move: MoveDef): RawInput[] {
   }
 }
 
+{
+  // -------------------------------------------------------------------------
+  // Stage light
+  // -------------------------------------------------------------------------
+
+  const hex = /^#[0-9a-f]{6}$/i;
+  for (const [id, def] of Object.entries(STAGE_THEMES)) {
+    const light = def.light;
+    // Every stage has to declare one. A stage without it silently falls back to
+    // lighting its fighters in a vacuum, which is exactly the bug this system
+    // exists to fix - and the fallback is invisible, so nothing else would
+    // catch a stage added later without one.
+    check(`stage ${id}: declares its light`, !!light);
+    if (!light) continue;
+    check(`stage ${id}: key is a colour`, hex.test(light.key), light.key);
+    check(`stage ${id}: fill is a colour`, hex.test(light.fill), light.fill);
+    check(`stage ${id}: shadow is a colour`, !light.shadow || hex.test(light.shadow), light.shadow ?? "");
+    check(`stage ${id}: strength is sane`, (light.strength ?? 1) > 0 && (light.strength ?? 1) <= 0.85,
+      `${light.strength}`);
+    check(`stage ${id}: glow is in range`, (light.glow ?? 0) >= 0 && (light.glow ?? 0) <= 1, `${light.glow}`);
+
+    // The fill is what bounces into the shadows, so it has to be darker than
+    // the key. Getting these the wrong way round inverts the form on every
+    // fighter standing there and is easy to do by eye.
+    const lum = (c: string) => {
+      const n = parseInt(c.slice(1), 16);
+      return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+    };
+    check(`stage ${id}: the fill is darker than the key`, lum(light.fill) < lum(light.key),
+      `key ${lum(light.key).toFixed(2)} vs fill ${lum(light.fill).toFixed(2)}`);
+  }
+
+  // A snowfield must not bloom and a neon city must. Pinning the two ends
+  // rather than every value keeps the test about the intent.
+  check("stage: the snowfield barely glows", (STAGE_THEMES.tundra.light?.glow ?? 1) <= 0.1,
+    `${STAGE_THEMES.tundra.light?.glow}`);
+  check("stage: the neon city does", (STAGE_THEMES.neon.light?.glow ?? 0) >= 0.3,
+    `${STAGE_THEMES.neon.light?.glow}`);
+}
+
+{
+  // The select screen's "N of them were real" is arithmetic over the roster
+  // minus the fighters who were never documented people. If an id in that list
+  // stops existing the count silently goes wrong, so the ids are checked here.
+  for (const id of ["shade"]) {
+    check(`roster: the legendary fighter "${id}" still exists`, ROSTER.some((f) => f.id === id));
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);

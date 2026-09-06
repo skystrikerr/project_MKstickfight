@@ -34,6 +34,31 @@ import menuMap from "@/assets/menu-map.jpg";
 
 type Screen = "title" | "select" | "towers" | "fight";
 
+/**
+ * The fighters who were never documented people.
+ *
+ * Kuro is a composite of stories nobody can pin to a year, and the select
+ * screen says so rather than quietly counting him with the rest. Anyone added
+ * on the same footing belongs here, and the headline arithmetic follows.
+ */
+const LEGENDARY = ["shade"];
+
+const WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+  "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+  "sixteen", "seventeen", "eighteen", "nineteen",
+];
+const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+
+/** Small cardinals in words, because "21 of them were real" reads like a stat. */
+function spellOut(n: number): string {
+  if (n < 20) return WORDS[n] ?? String(n);
+  if (n >= 100) return String(n);
+  const tens = TENS[Math.floor(n / 10)];
+  const ones = n % 10;
+  return ones ? `${tens}-${WORDS[ones]}` : tens;
+}
+
 const CONTROLS: { keys: string; label: string }[] = [
   { keys: "W A S D", label: "Move · W jumps · S crouches" },
   { keys: "J", label: "Light attack (A)" },
@@ -184,11 +209,13 @@ export default function StickFighter() {
               <span className="h-px flex-1 bg-[var(--rule)]" />
             </div>
             <Wordmark className="mt-5" />
-            {/* Kuro is still the only one who was not, so this number moves
-                every time a documented fighter is added. Saying "all of them"
-                would be the only lie on the screen. */}
+            {/* Counted rather than typed. It was typed, and adding the
+                twenty-third fighter left the line claiming twenty-one - a
+                number about honesty that had quietly stopped being true.
+                Saying "all of them" would be the only lie on the screen, so
+                the one who was not gets named here and the rest is arithmetic. */}
             <p className="mt-3 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
-              Twenty-one of them were real
+              {spellOut(ROSTER.length - LEGENDARY.length)} of them were real
             </p>
           </header>
 
