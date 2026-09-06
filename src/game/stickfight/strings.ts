@@ -207,11 +207,31 @@ export function withStrings(def: FighterDef): FighterDef {
     }
   }
 
+  // Which moves this system is responsible for.
+  //
+  // Superseding the old hand-written two-link chains is the whole point - they
+  // are what the declared strings replace - but the test for "old chain" used
+  // to be "has a `string` name on it", and an authored follow-up is allowed to
+  // have a name too. So anything labelled was deleted, including links that
+  // were never part of a normal chain at all.
+  //
+  // Kuro paid for that. He is the one fighter with no forward dash - the roll
+  // answers the double-tap - so his dash attack hangs off the roll as a
+  // follow-up, and it was quietly removed from the roster build. Shadow Rush
+  // has been unreachable for everyone, human and CPU alike, ever since: not a
+  // move that was hard to find, a move that was not there.
+  //
+  // A move the generator never touches keeps whatever it was authored with.
+  const managed = new Set<string>();
+  for (const s of strings) for (const id of s.steps) managed.add(id);
+
   return {
     ...def,
     moves: def.moves.map((m) => {
-      const kept = (m.followUps ?? []).filter((f) => !f.string);
       const mine = added.get(m.id) ?? [];
+      const kept = managed.has(m.id)
+        ? (m.followUps ?? []).filter((f) => !f.string)
+        : (m.followUps ?? []);
       if (!kept.length && !mine.length) return m.followUps ? { ...m, followUps: undefined } : m;
       return { ...m, followUps: [...kept, ...mine] };
     }),

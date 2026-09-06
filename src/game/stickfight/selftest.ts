@@ -2688,6 +2688,35 @@ function scriptFor(move: MoveDef): RawInput[] {
   }
 }
 
+{
+  // An authored follow-up on a move the strings system does not manage has to
+  // survive the roster build.
+  //
+  // It did not. `withStrings` cleared any follow-up carrying a `string` label,
+  // on the reasoning that a labelled link was one of the old hand-written
+  // chains it exists to replace - but an authored link is allowed to have a
+  // name, and Kuro's roll-into-dash-attack had one. It was deleted on every
+  // build, so the move was unreachable for players and CPU alike, and nothing
+  // noticed because the move itself was still perfectly legal.
+  for (const def of ROSTER) {
+    for (const m of def.moves) {
+      for (const f of m.followUps ?? []) {
+        check(
+          `${def.id}.${m.id}: follow-up to ${f.move} survives the build`,
+          def.moves.some((v) => v.id === f.move),
+          f.move,
+        );
+      }
+    }
+  }
+  const roll = getFighter("shade").moves.find((m) => m.id === "shadowRoll");
+  check(
+    "shade: the roll still reaches Shadow Rush",
+    (roll?.followUps ?? []).some((f) => f.move === "dashAttack"),
+    JSON.stringify(roll?.followUps ?? []),
+  );
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);

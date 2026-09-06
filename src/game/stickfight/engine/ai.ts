@@ -379,6 +379,17 @@ export class AiController {
       }
     }
 
+    // Setting something up: a stance, a buff, a teleport, a patch of ground.
+    // Rare on purpose, and only with distance, because every one of these is a
+    // turn spent not fighting.
+    if (dist > 220 && Math.random() < 0.08 * style.special) {
+      const setup = this.pickMove(
+        self,
+        (m) => (m.tags?.includes("special") ?? false) && !m.meterCost && !this.armedSpecial(m) && !m.throwDef,
+      );
+      if (setup) return this.queueMove(self, setup);
+    }
+
     // Super when it is available and they are close enough to connect.
     if (self.meter >= 100 && dist < 260 && Math.random() < Math.min(0.95, p.special * style.special * 0.7)) {
       const sup = this.pickMove(self, (m) => m.tags?.includes("super") ?? false);
@@ -417,7 +428,7 @@ export class AiController {
         if (poke) return this.queueMove(self, poke);
       }
       if (r < 0.4 && p.special * style.special > 0.3) {
-        const sp = this.pickMove(self, (m) => (m.tags?.includes("special") ?? false) && !m.meterCost);
+        const sp = this.pickMove(self, (m) => (m.tags?.includes("special") ?? false) && !m.meterCost && this.armedSpecial(m));
         if (sp && this.canAfford(self, sp)) return this.queueMove(self, sp);
       }
       // A far-style fighter holds the line here rather than closing it -
@@ -450,7 +461,7 @@ export class AiController {
       if (grab) return this.queueMove(self, grab);
     }
     if (r < 0.3 + p.special * style.special * 0.3) {
-      const sp = this.pickMove(self, (m) => (m.tags?.includes("special") ?? false) && !m.internal && this.canAfford(self, m));
+      const sp = this.pickMove(self, (m) => (m.tags?.includes("special") ?? false) && !m.internal && this.armedSpecial(m) && this.canAfford(self, m));
       if (sp) return this.queueMove(self, sp);
     }
     if (r < 0.86) {
@@ -478,6 +489,11 @@ export class AiController {
     if (move.resourceMin !== undefined && self.resource < move.resourceMin) return false;
     if (move.resourceCost && self.resource < move.resourceCost) return false;
     return true;
+  }
+
+  /** A special that actually threatens: it has a hitbox or it shoots. */
+  private armedSpecial(m: MoveDef): boolean {
+    return !!(m.hits?.length || m.projectiles?.length);
   }
 
   /**
@@ -561,7 +577,17 @@ export class AiController {
   private dashIn(facing: Facing, self: Fighter, frames: number, attack: number) {
     this.queue.push({ input: numToRaw(6, facing), frames: 3 });
     this.queue.push({ input: {}, frames: 2 });
-    const has = self.def.moves.some((m) => m.input.whileDashing);
+    // Two ways a fighter can have a dash attack. Most declare `whileDashing`.
+    // Kuro has no forward dash at all - the roll answers the double-tap - so
+    // his is a follow-up hanging off the roll instead, and asking only about
+    // `whileDashing` meant the one fighter whose approach *is* a special
+    // rolled in and then did nothing with it. A fifth of everything he did was
+    // that roll, which is most of what his twenty-one draws were.
+    const has =
+      self.def.moves.some((m) => m.input.whileDashing) ||
+      self.def.moves.some(
+        (m) => m.input.motion === "ff" && (m.followUps?.some((f) => f.button === "C") ?? false),
+      );
     if (has && Math.random() < attack) {
       this.queue.push({ input: numToRaw(6, facing), frames: Math.max(4, Math.round(frames * 0.45)) });
       this.queue.push({ input: { ...numToRaw(6, facing), C: true }, frames: 4 });
