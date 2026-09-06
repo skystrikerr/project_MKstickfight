@@ -320,6 +320,30 @@ export class AiController {
     const style = this.style(self);
     const threat = opponent.state === "move" && dist < 210;
     if (threat && Math.random() < Math.min(0.98, p.block * style.patience)) {
+      // Sometimes read it instead of eating it. The parry is the one universal
+      // move nothing in the AI had ever pressed - on any fighter, at any
+      // difficulty - so a player who committed to a heavy was never once
+      // punished for it by the CPU.
+      //
+      // Scaled hard by difficulty rather than by style: parrying is execution,
+      // not personality, and a Rookie who deflects on read is not a Rookie.
+      // It is deliberately rarer than blocking, because a parry that misses
+      // leaves him standing in the attack.
+      const parry = this.pickMove(self, (m) => m.id === "parry");
+      if (parry && Math.random() < p.block * 0.28) return this.queueMove(self, parry);
+      // Or simply not be there. Both dodges avoid an attack by distance rather
+      // than by invulnerability, so leaving is a real answer to a commitment -
+      // and neither of them was ever reachable except as a reaction to a
+      // projectile, which is why the backstep had never once been pressed on
+      // seventeen of the roster.
+      if (dist < 120 && Math.random() < 0.2 * style.aggression) {
+        const out = this.pickMove(self, (m) => (m.tags?.includes("dodge") ?? false) && m.input.motion === "bb");
+        if (out) return this.queueMove(self, out);
+      }
+      if (dist < 150 && Math.random() < 0.16 * style.aggression) {
+        const through = this.pickMove(self, (m) => (m.tags?.includes("dodge") ?? false) && m.input.dir === "f");
+        if (through) return this.queueMove(self, through);
+      }
       const low = opponent.move?.hits?.some((h) => h.guard === "low");
       return this.hold({ ...numToRaw(low ? 1 : 4, facing) }, this.profile.reaction + 8);
     }
@@ -328,6 +352,31 @@ export class AiController {
     if (opponent.state === "move" && opponent.moveHasHit === false && dist < 120 && Math.random() < Math.min(0.98, p.punish * style.patience)) {
       const punish = this.pickMove(self, (m) => (m.tags?.includes("heavy") ?? false) && !m.input.motion);
       if (punish) return this.queueMove(self, punish);
+    }
+
+    // The character's own skill.
+    //
+    // Nothing selected these, so all twenty-three signature moves were dead
+    // content: Anne Bonny never drank, Otzi never knapped a new point, and
+    // Lapulapu threw his one bamboo stake and never picked it up again.
+    //
+    // Two reasons to press it, and they want different conditions. Getting
+    // something back is urgent and specific - if the weapon is empty the fight
+    // is already going badly - so it fires whenever there is room to do it.
+    // Everything else (a stance, a buff, a taunt) is a luxury, and only worth
+    // it with the opponent well away.
+    const skill = this.pickMove(self, (m) => m.tags?.includes("skill") ?? false);
+    if (skill && self.grounded) {
+      const res = self.def.resource;
+      const restores = (skill.resourceGain ?? 0) > 0;
+      const empty = !!res && self.resource < (res.max > 2 ? res.max * 0.35 : 1);
+      const spares = res?.spares === undefined || self.spares > 0;
+      if (restores && empty && spares && dist > 190 && Math.random() < 0.5 + p.punish * 0.4) {
+        return this.queueMove(self, skill);
+      }
+      if (!restores && dist > 300 && Math.random() < 0.05 * style.special) {
+        return this.queueMove(self, skill);
+      }
     }
 
     // Super when it is available and they are close enough to connect.
@@ -352,9 +401,7 @@ export class AiController {
         // zoner backing off at their own walk speed was never actually caught.
         // Half of what looked like projectiles being overpowered was really
         // the approach being this slow.
-        this.queue.push({ input: numToRaw(6, facing), frames: 3 });
-        this.queue.push({ input: {}, frames: 2 });
-        this.queue.push({ input: numToRaw(6, facing), frames: 20 });
+        this.dashIn(facing, self, 20, 0.35 * style.aggression);
         return;
       }
       return this.hold({}, 12);
@@ -364,7 +411,9 @@ export class AiController {
       // Mid: pokes, dashes, jump-ins - weighted by what this fighter is for.
       const r = Math.random();
       if (r < 0.24 * style.poke) {
-        const poke = this.pickMove(self, (m) => m.id === "5B" || m.id === "2B");
+        // Everything that reaches. 6B and 4B were never once pressed by any
+        // fighter on the roster before they were named here.
+        const poke = this.pickAny(self, ["5B", "2B", "5B", "2B", "6B", "4B", "5C", "2C"]);
         if (poke) return this.queueMove(self, poke);
       }
       if (r < 0.4 && p.special * style.special > 0.3) {
@@ -377,17 +426,18 @@ export class AiController {
       // about most.
       const closeLean = style.range === "far" ? 0.55 : style.range === "close" ? 1.25 : 1;
       if (r < 0.62 * p.aggression * style.aggression * closeLean + 0.3) {
-        // Dash in.
-        this.queue.push({ input: numToRaw(6, facing), frames: 3 });
-        this.queue.push({ input: {}, frames: 2 });
-        this.queue.push({ input: numToRaw(6, facing), frames: 16 });
+        // Dash in, sometimes swinging on the way.
+        this.dashIn(facing, self, 16, 0.4 * style.aggression);
         return;
       }
       if (r < 0.8) {
         // Jump in with an attack.
         this.queue.push({ input: numToRaw(9, facing), frames: 4 });
         this.queue.push({ input: numToRaw(6, facing), frames: 14 });
-        this.queue.push({ input: { ...numToRaw(6, facing), C: true }, frames: 4 });
+        // Not always C. The jump-in hardcoded the heavy, which is why jA and
+        // jB existed on twenty-three fighters and happened on none of them.
+        const air = ["A", "B", "C", "C"][Math.floor(Math.random() * 4)] as "A" | "B" | "C";
+        this.queue.push({ input: { ...numToRaw(6, facing), [air]: true }, frames: 4 });
         return;
       }
       return this.hold({ ...numToRaw(4, facing) }, 14);
@@ -406,9 +456,12 @@ export class AiController {
     if (r < 0.86) {
       // Simple blockstring: light -> medium -> heavy.
       const chain: MoveDef[] = [];
-      const a = this.pickMove(self, (m) => m.id === (Math.random() < 0.5 ? "5A" : "2A"));
-      const bmv = this.pickMove(self, (m) => m.id === (Math.random() < 0.5 ? "5B" : "2B"));
-      const c = this.pickMove(self, (m) => m.id === (Math.random() < 0.5 ? "5C" : "2C"));
+      // Weighted toward the standing and crouching normals, which are what a
+      // blockstring is made of, but the command normals are in the pool now so
+      // a fighter's 6A and 4C are things you will actually be hit by.
+      const a = this.pickAny(self, ["5A", "2A", "5A", "2A", "6A", "4A"]);
+      const bmv = this.pickAny(self, ["5B", "2B", "5B", "2B", "6B", "4B"]);
+      const c = this.pickAny(self, ["5C", "2C", "5C", "2C", "6C", "4C", "3C"]);
       if (a) chain.push(a);
       if (bmv) chain.push(bmv);
       if (c && Math.random() < 0.6) chain.push(c);
@@ -425,6 +478,23 @@ export class AiController {
     if (move.resourceMin !== undefined && self.resource < move.resourceMin) return false;
     if (move.resourceCost && self.resource < move.resourceCost) return false;
     return true;
+  }
+
+  /**
+   * Picks one of a set of move ids at random, skipping any this fighter does
+   * not have.
+   *
+   * The AI used to name single ids inline - `m.id === "5B"` - which is why
+   * two-thirds of every fighter's move list was unreachable: 6A, 6C, 4A, 4B,
+   * 4C, 3C, jA and jB are perfectly good moves that nothing ever asked for.
+   * Naming a pool instead means adding a move to the AI's vocabulary is one
+   * entry rather than a new branch.
+   */
+  private pickAny(self: Fighter, ids: string[]): MoveDef | undefined {
+    const pool = ids.filter((id) => self.def.moves.some((m) => m.id === id));
+    if (!pool.length) return undefined;
+    const want = pool[Math.floor(Math.random() * pool.length)];
+    return this.pickMove(self, (m) => m.id === want);
   }
 
   private pickMove(self: Fighter, pred: (m: MoveDef) => boolean): MoveDef | undefined {
@@ -457,8 +527,47 @@ export class AiController {
         ? numToRaw(dirs[dirs.length - 1], facing)
         : {};
 
+    // A crouching move needs down held, and nothing above says so: the stance
+    // is not a direction, so `input.dir` is empty on 2A/2B/2C and the AI was
+    // pressing the button standing up. It got the standing move every time.
+    //
+    // Measured before this line existed: ask any fighter on the roster for 2B
+    // and 5B comes out. Which means the entire low game - the thing that makes
+    // blocking a decision rather than a default - did not exist on the CPU
+    // side of any match the game has ever played.
+    //
+    // Only when the move is crouch-only. A move that lists both stances is
+    // reachable standing, and forcing a crouch there would change which one
+    // the input picker returns.
+    const stances = Array.isArray(move.input.stance) ? move.input.stance : [move.input.stance];
+    if (stances.length === 1 && stances[0] === "crouch") dirHold.down = true;
+
+    // Crouching also has to be entered before the button, or the first frame
+    // of the press lands while he is still standing.
+    if (dirHold.down) this.queue.push({ input: { down: true }, frames: 2 });
     this.queue.push({ input: { ...dirHold, ...buttons }, frames: 4 });
     this.queue.push({ input: {}, frames: Math.max(4, Math.round(move.duration * 0.35)) });
+  }
+
+  /**
+   * Runs a fighter forward, and sometimes finishes with the dash attack.
+   *
+   * The dash attack is gated on `whileDashing`, so it is only reachable during
+   * the run itself. The AI dashed and then decided separately what to do,
+   * which meant the window had always closed by the time anything wanted the
+   * move - twenty-two of twenty-three fighters had one and none of them ever
+   * used it.
+   */
+  private dashIn(facing: Facing, self: Fighter, frames: number, attack: number) {
+    this.queue.push({ input: numToRaw(6, facing), frames: 3 });
+    this.queue.push({ input: {}, frames: 2 });
+    const has = self.def.moves.some((m) => m.input.whileDashing);
+    if (has && Math.random() < attack) {
+      this.queue.push({ input: numToRaw(6, facing), frames: Math.max(4, Math.round(frames * 0.45)) });
+      this.queue.push({ input: { ...numToRaw(6, facing), C: true }, frames: 4 });
+      return;
+    }
+    this.queue.push({ input: numToRaw(6, facing), frames });
   }
 
   private hold(input: Partial<RawInput>, frames: number) {
