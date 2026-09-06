@@ -71,6 +71,22 @@ const FOOTSIES = [
   ["4A", "4B", "3C"],
 ];
 
+/**
+ * One fighter, one shape.
+ *
+ * The four families above are all built around switching height to make the
+ * opponent guess. His whole game is the opposite: he does not want them
+ * guessing, he wants them *certain* it is coming low, because the only thing
+ * he needs from a string is for them to be crouching when the overhead
+ * arrives. So the long one goes low, low, low and then to the head, and the
+ * short one ends on the shove that puts the fight back at his range.
+ */
+const MACTAN = [
+  ["5A", "5B", "2B", "2C", "3C"],
+  ["2A", "6A", "6B", "6C"],
+  ["4A", "4B", "4C"],
+];
+
 /** Names per fighter, in the order their family lists the shapes. */
 const NAMES: Record<string, [string, string, string]> = {
   roman: ["Pilum Drill", "Testudo", "Trench Work"],
@@ -95,6 +111,7 @@ const NAMES: Record<string, [string, string, string]> = {
   iceman: ["Fell the Tree", "Ground Work", "Backhand Line"],
   celt: ["Long Cut Rhythm", "Lifting Line", "Backhand Line"],
   persian: ["Wicker and Spear", "Rank Work", "Low Ranks"],
+  lapulapu: ["Below the Knee", "Back to My Range", "Give Ground"],
 };
 
 const FAMILY: Record<string, string[][]> = {
@@ -109,6 +126,8 @@ const FAMILY: Record<string, string[][]> = {
   nihang: ZONER, shaolin: ZONER, persian: ZONER,
   // Counter-hitters.
   samurai: FOOTSIES, duelist: FOOTSIES, maori: FOOTSIES,
+  // A shape of his own - see MACTAN.
+  lapulapu: MACTAN,
 };
 
 /**

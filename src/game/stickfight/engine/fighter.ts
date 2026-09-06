@@ -10,10 +10,12 @@ import { COMBAT, GROUND_Y, HURTBOX, STAGE_HALF_WIDTH } from "../constants";
 import { buildSkeleton, sampleClip, sampleFrames } from "../skeleton";
 import { PHYSICS, Ragdoll } from "./physics";
 import type {
+  ArmourSlot,
   Box,
   ClipName,
   Facing,
   FighterDef,
+  GrantDef,
   HitDef,
   InvulnKind,
   MoveDef,
@@ -116,6 +118,29 @@ export class Fighter {
   meterScale = 1;
   /** Health lost per second; negative regenerates. Never kills on its own. */
   healthDrain = 0;
+
+  /**
+   * Lasting buffs from a move, ticked down here and multiplied on top of the
+   * knobs above rather than written into them. Keeping them separate is what
+   * lets a tower modifier and a character's own buff touch the same number
+   * without either quietly erasing the other.
+   */
+  grants: { def: GrantDef; source: string; left: number }[] = [];
+
+  /**
+   * Armour that has been knocked off this round. The renderer reads it to stop
+   * drawing the prop, and it is the reason the same strip cannot be cashed in
+   * twice: a helmet already on the sand is not there to be taken again.
+   */
+  stripped = new Set<string>();
+
+  /**
+   * Ground effects from whatever zone this fighter is standing in, recomputed
+   * once a frame by the match. The fighter does not know what put them there.
+   */
+  terrainDash = 1;
+  terrainNoBackdash = false;
+
   resource: number;
   /** Refills left. Only meaningful when the fighter carries spare magazines. */
   spares: number;
@@ -393,6 +418,10 @@ export class Fighter {
     this.cancelled = false;
     this.armorLeft = 0;
     this.armorWindow = -1;
+    // Refreshed, not stacked: pressing the button again re-arms the same buff
+    // rather than doubling it, so nothing here rewards mashing a stance move
+    // in the corner.
+    if (def.grants) this.applyGrants(def.id, def.grants);
     if (!keepMomentum && this.grounded) {
       this.vx = 0;
     }
@@ -442,6 +471,7 @@ export class Fighter {
     }
     if (this.guardShove > 0) this.guardShove = Math.max(0, this.guardShove - COMBAT.guardShoveDecay);
     this.regenResource();
+    this.tickGrants();
     if (this.guard < COMBAT.maxGuard) this.guard = Math.min(COMBAT.maxGuard, this.guard + COMBAT.guardRegen);
 
     if (this.state === "grabbed") {
@@ -454,6 +484,70 @@ export class Fighter {
     }
 
     this.integrate();
+  }
+
+  // -------------------------------------------------------------------------
+  // Grants and armour
+  // -------------------------------------------------------------------------
+
+  /**
+   * Replaces any grants this move was already responsible for, then adds its
+   * new ones. Tagging them by move id is what makes re-use a refresh.
+   */
+  applyGrants(source: string, defs: GrantDef[]) {
+    this.grants = this.grants.filter((g) => g.source !== source);
+    for (const def of defs) {
+      this.grants.push({ def, source, left: def.frames ?? -1 });
+    }
+  }
+
+  private tickGrants() {
+    if (!this.grants.length) return;
+    this.grants = this.grants.filter((g) => g.left < 0 || --g.left > 0);
+  }
+
+  /** Whether a grant's health condition is met right now. */
+  private grantLive(g: GrantDef): boolean {
+    if (g.belowHealth === undefined) return true;
+    return this.health <= this.def.stats.health * g.belowHealth;
+  }
+
+  /**
+   * Damage this fighter deals, and takes, after everything lasting is counted.
+   *
+   * The tower knob is the base and the grants multiply on top of it. Reading
+   * them through one accessor rather than at each call site is what stops the
+   * two systems drifting: there is exactly one definition of what a fighter's
+   * damage is worth.
+   */
+  get dealtScale(): number {
+    let v = this.damageDealtScale;
+    for (const g of this.grants) if (this.grantLive(g.def)) v *= g.def.damageDealt ?? 1;
+    return v;
+  }
+
+  get takenScale(): number {
+    let v = this.damageTakenScale;
+    for (const g of this.grants) if (this.grantLive(g.def)) v *= g.def.damageTaken ?? 1;
+    return v;
+  }
+
+  /**
+   * Knocks a piece of armour off, if there is one of that kind still on.
+   *
+   * Returns whether anything actually came off, because the caller only pays
+   * out the damage penalty when it did - hitting a bare-headed fighter in the
+   * head is just a hit.
+   */
+  stripArmour(slot: ArmourSlot): string[] {
+    const taken: string[] = [];
+    for (const prop of this.def.props) {
+      if (prop.armour !== slot) continue;
+      if (this.stripped.has(prop.id)) continue;
+      this.stripped.add(prop.id);
+      taken.push(prop.id);
+    }
+    return taken;
   }
 
   private regenResource() {
@@ -548,16 +642,23 @@ export class Fighter {
     const holdingDown = this.input.holdingDown();
 
     // Dashes.
+    //
+    // Both are worth less in water. The dash still happens - taking the input
+    // away outright would read as the game dropping a button - it just does
+    // not carry, and the backstep, which is a hop off the floor, cannot be
+    // made at all with the floor under a foot of surf. Walking is untouched:
+    // wading is slow, not impossible, and a fighter whose whole game is at
+    // walking pace should be the one who minds this least.
     if (this.input.hasMotion("ff") && this.state !== "dash") {
       this.input.consumeDash();
       this.setState("dash");
-      this.vx = this.facing * s.dashSpeed;
+      this.vx = this.facing * s.dashSpeed * this.terrainDash;
       return;
     }
-    if (this.input.hasMotion("bb")) {
+    if (this.input.hasMotion("bb") && !this.terrainNoBackdash) {
       this.input.consumeDash();
       this.setState("backdash");
-      this.vx = -this.facing * s.dashSpeed * 0.85;
+      this.vx = -this.facing * s.dashSpeed * 0.85 * this.terrainDash;
       this.y = GROUND_Y + 0.5;
       this.vy = 3.4;
       return;
@@ -674,8 +775,10 @@ export class Fighter {
       return;
     }
     // Running: holding forward keeps the dash alive.
-    this.accelerate(this.facing * s.dashSpeed, PHYSICS.walkAccel * 3);
-    if (this.stateFrame > s.dashFrames * 3) this.accelerate(this.facing * s.dashSpeed * 0.9);
+    this.accelerate(this.facing * s.dashSpeed * this.terrainDash, PHYSICS.walkAccel * 3);
+    if (this.stateFrame > s.dashFrames * 3) {
+      this.accelerate(this.facing * s.dashSpeed * 0.9 * this.terrainDash);
+    }
   }
 
   private launchJump() {
@@ -695,13 +798,19 @@ export class Fighter {
     this.moveFrame++;
 
     if (move.vel) {
+      // A dodge is distance, and distance is what water takes away. Scaling
+      // the push rather than refusing the move keeps the input honest: the
+      // roll still comes out, it just does not get him as far, which is the
+      // difference between standing in the surf being a cost and it being a
+      // lockout.
+      const drag = move.tags?.includes("dodge") ? this.terrainDash : 1;
       for (const v of move.vel) {
         if (v.at !== this.moveFrame) continue;
         if (v.mode === "add") {
-          if (v.x !== undefined) this.vx += this.facing * v.x;
+          if (v.x !== undefined) this.vx += this.facing * v.x * drag;
           if (v.y !== undefined) this.vy += v.y;
         } else {
-          if (v.x !== undefined) this.vx = this.facing * v.x;
+          if (v.x !== undefined) this.vx = this.facing * v.x * drag;
           if (v.y !== undefined) this.vy = v.y;
         }
       }
@@ -1102,6 +1211,10 @@ export class Fighter {
       }
       // Out of magazines: there is nothing to reload with.
       if (move.resourceGain && this.def.resource?.spares !== undefined && this.spares <= 0) continue;
+      // A backstep is a hop off the floor, and there is no floor to hop off
+      // in the shallows. Identified by the input rather than by name: the
+      // back-back motion *is* what a backstep is, on any fighter.
+      if (this.terrainNoBackdash && move.input.motion === "bb") continue;
       if (!this.inputMatches(move)) continue;
 
       const score = this.moveScore(move);

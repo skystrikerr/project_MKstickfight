@@ -86,6 +86,7 @@ export const ROMAN: FighterDef = {
     {
       id: "helmet",
       attach: "head",
+      armour: "head",
       // Galea: bowl, neck guard, hinged cheek pieces and a fore-and-aft crest.
       parts: [
         // Bowl: rounded over the crown, flaring out to the browband.
@@ -125,6 +126,7 @@ export const ROMAN: FighterDef = {
     {
       id: "shield",
       attach: "forearmB",
+      armour: "shield",
       // Scutum: a tall curved rectangle, bronze rim, iron boss and lightning wings.
       parts: [
         { geo: "poly", size: [-9, -28, 9, -28, 10, -18, 10, 18, 9, 28, -9, 28, -10, 18, -10, -18], pos: [14, 0], color: BRONZE, z: 0.55 },
@@ -143,6 +145,7 @@ export const ROMAN: FighterDef = {
     {
       id: "lorica",
       attach: "torso",
+      armour: "body",
       // Lorica segmentata: banded iron plates over the chest, shoulder guards
       // on top, all buckled down the centre.
       parts: [

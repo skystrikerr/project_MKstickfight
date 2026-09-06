@@ -200,6 +200,7 @@ export const CELT: FighterDef = {
     {
       id: "shield",
       attach: "forearmF",
+      armour: "shield",
       // Long oval body shield with a spindle boss over the horizontal grip -
       // wood and hide, so it is light for its size and does not last.
       parts: [

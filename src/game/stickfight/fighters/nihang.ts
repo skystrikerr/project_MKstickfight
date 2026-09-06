@@ -98,6 +98,7 @@ export const NIHANG: FighterDef = {
     {
       id: "dumalla",
       attach: "head",
+      armour: "head",
       // Dumalla: a tall conical turban wound over a bamboo frame, with the
       // chakrams stacked up it and a khanda pinned at the front. This is the
       // silhouette people recognise a Nihang by from across a battlefield.

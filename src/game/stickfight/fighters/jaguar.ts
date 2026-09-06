@@ -98,6 +98,7 @@ export const JAGUAR: FighterDef = {
     {
       id: "jaguarHelm",
       attach: "head",
+      armour: "head",
       // The helm is a jaguar's head with the jaws open and the warrior's face
       // looking out of the mouth: rounded skull, ears, a muzzle running forward
       // over the brow, and the lower jaw under the chin.
@@ -150,6 +151,7 @@ export const JAGUAR: FighterDef = {
     {
       id: "ichcahuipilli",
       attach: "torso",
+      armour: "body",
       // Quilted cotton armour, soaked in brine and dried - light, and it turns
       // an arrow better than the plate does.
       parts: [

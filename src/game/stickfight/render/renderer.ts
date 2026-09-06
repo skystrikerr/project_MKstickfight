@@ -7,7 +7,7 @@
 import * as THREE from "three";
 import { CAMERA, GROUND_Y, STAGE_HALF_WIDTH } from "../constants";
 import { projectileArmed } from "../engine/match";
-import type { Match, Projectile } from "../engine/match";
+import type { Match, Projectile, Zone } from "../engine/match";
 import { buildSkeleton } from "../skeleton";
 import { FxSystem } from "./fx";
 import { StickRig } from "./rig";
@@ -127,6 +127,8 @@ export class GameRenderer {
   private fx = new FxSystem();
   private projectileMeshes = new Map<number, THREE.Object3D>();
   private projectileGroup = new THREE.Group();
+  private zoneMeshes = new Map<number, THREE.Object3D>();
+  private zoneGroup = new THREE.Group();
   private debugGroup = new THREE.Group();
   private viewWidth = CAMERA.minViewWidth;
   private camX = 0;
@@ -171,6 +173,12 @@ export class GameRenderer {
       // Cloth and weapon trails simulate in world space.
       this.scene.add(rig.worldGroup);
     }
+
+    // Ground effects go behind the fighters - they are the floor, and drawing
+    // water over the top of a man standing in it looks like a filter rather
+    // than like a place.
+    this.zoneGroup.position.z = -6;
+    this.scene.add(this.zoneGroup);
 
     // Projectiles, effects and debug boxes sit in front of the fighters on z.
     this.projectileGroup.position.z = 55;
@@ -313,6 +321,15 @@ export class GameRenderer {
           visible.delete(id);
         }
       }
+      // A consumable that is an object: gone from the body while it is spent,
+      // back the moment it is recovered, with no move having to say so.
+      for (const prop of f.def.props) {
+        if (prop.needsResource !== undefined && f.resource < prop.needsResource) hidden.add(prop.id);
+      }
+      // Armour knocked off stays off. This is the whole visible payoff of a
+      // strip: the helmet is not in a status bar somewhere, it is simply not
+      // on his head any more for the rest of the round.
+      for (const id of f.stripped) hidden.add(id);
       // A prop that is currently flying around as a projectile (the Spartan's
       // aspis) stays off the fighter until it is gone.
       for (const p of match.projectiles) {
@@ -348,6 +365,7 @@ export class GameRenderer {
       }
     }
 
+    this.syncZones(match);
     this.syncProjectiles(match);
 
     for (const e of match.fx) {
@@ -373,6 +391,62 @@ export class GameRenderer {
   }
 
   // -------------------------------------------------------------------------
+
+  /**
+   * The shallows: a band of water lying on the sand, drawn as a few overlapping
+   * translucent strips so the edge reads as a waterline rather than a rectangle,
+   * with the whole thing fading out over its last second so it never blinks off.
+   */
+  private syncZones(match: Match) {
+    const seen = new Set<number>();
+    for (const z of match.zones) {
+      seen.add(z.id);
+      let mesh = this.zoneMeshes.get(z.id);
+      if (!mesh) {
+        mesh = this.buildZone(z);
+        this.zoneMeshes.set(z.id, mesh);
+        this.zoneGroup.add(mesh);
+      }
+      mesh.position.set(z.x, GROUND_Y, 0);
+      // In over the first ten frames, out over the last thirty.
+      const fade = Math.min(1, z.age / 10, z.life / 30);
+      mesh.traverse((o) => {
+        const m = (o as THREE.Mesh).material as THREE.Material | undefined;
+        if (!m || Array.isArray(m)) return;
+        m.opacity = (m.userData.baseOpacity ??= m.opacity) * fade;
+      });
+      // A slow swell across the surface, so it is visibly water and not a mat.
+      mesh.children.forEach((c, i) => {
+        c.position.x = Math.sin(z.age * 0.045 + i * 1.7) * (2 + i);
+      });
+    }
+    const stale: number[] = [];
+    this.zoneMeshes.forEach((mesh, id) => {
+      if (seen.has(id)) return;
+      this.zoneGroup.remove(mesh);
+      disposeTree(mesh);
+      stale.push(id);
+    });
+    for (const id of stale) this.zoneMeshes.delete(id);
+  }
+
+  private buildZone(z: Zone): THREE.Object3D {
+    const g = new THREE.Group();
+    const base = z.spec.color ?? "#5fb7c9";
+    const layer = (w: number, h: number, y: number, color: string, opacity: number) => {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, h),
+        new THREE.MeshBasicMaterial({ color: new THREE.Color(color), transparent: true, opacity, depthWrite: false }),
+      );
+      m.position.set(0, y, 0);
+      m.material.userData.baseOpacity = opacity;
+      g.add(m);
+    };
+    layer(z.w, 26, 11, shade(base, 0.55), 0.42);
+    layer(z.w * 0.94, 16, 14, base, 0.34);
+    layer(z.w * 0.82, 7, 19, "#e8f6fa", 0.30);
+    return g;
+  }
 
   private syncProjectiles(match: Match) {
     const seen = new Set<number>();
@@ -453,6 +527,20 @@ export class GameRenderer {
         const loop = new THREE.Mesh(new THREE.PlaneGeometry(6, 8), flat("#5a3d22"));
         loop.position.x = -6;
         add(loop);
+        break;
+      }
+      // A length of bamboo cut on the slant and fire-hardened - no head, no
+      // fletching, the point is just the cut end burnt black.
+      case "stake": {
+        add(new THREE.Mesh(new THREE.PlaneGeometry(62, 3.6), flat(color)));
+        for (let i = -1; i <= 1; i++) {
+          const node = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 5.4), flat("#8a7642"));
+          node.position.x = i * 18;
+          add(node);
+        }
+        const point = new THREE.Mesh(new THREE.PlaneGeometry(14, 3.2), flat("#2a2018"));
+        point.position.x = 34;
+        add(point);
         break;
       }
       // Formations: a body of men that walks up the screen. See `rank()`.
@@ -708,6 +796,11 @@ export class GameRenderer {
 
   resetEffects() {
     this.fx.clear();
+    this.zoneMeshes.forEach((mesh) => {
+      this.zoneGroup.remove(mesh);
+      disposeTree(mesh);
+    });
+    this.zoneMeshes.clear();
     this.projectileMeshes.forEach((mesh) => {
       this.projectileGroup.remove(mesh);
       disposeTree(mesh);
@@ -722,6 +815,7 @@ export class GameRenderer {
     this.fx.dispose();
     this.stage.dispose();
     for (const rig of this.rigs) rig.dispose();
+    this.zoneMeshes.forEach((mesh) => disposeTree(mesh));
     this.projectileMeshes.forEach((mesh) => disposeTree(mesh));
     this.projectileMeshes.clear();
     this.renderer.dispose();

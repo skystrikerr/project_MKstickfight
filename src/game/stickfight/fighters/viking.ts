@@ -89,6 +89,7 @@ export const VIKING: FighterDef = {
     {
       id: "helm",
       attach: "head",
+      armour: "head",
       // Spangenhelm: iron plates riveted to a browband, with a nose bar and a
       // pair of horns she took off something that lost.
       parts: [
@@ -146,6 +147,7 @@ export const VIKING: FighterDef = {
     {
       id: "buckler",
       attach: "forearmF",
+      armour: "shield",
       // Round shield: planks, an iron rim and a domed boss over the grip.
       parts: [
         { geo: "disc", size: [22], pos: [12, 0], color: "#5b3d24", z: 0.5 },

@@ -136,6 +136,7 @@ export const ZULU: FighterDef = {
     {
       id: "isihlangu",
       attach: "forearmB",
+      armour: "shield",
       // War shield: a tall oval of ox hide over a stick, white with the black
       // patches of the beast it came from, laced with a double row of hide
       // strips down the middle.

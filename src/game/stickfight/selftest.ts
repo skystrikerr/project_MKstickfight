@@ -2417,6 +2417,228 @@ function scriptFor(move: MoveDef): RawInput[] {
   }
 }
 
+{
+  // -------------------------------------------------------------------------
+  // Armour strips
+  // -------------------------------------------------------------------------
+
+  // Only genuine worn protection carries a slot. This is the whole reason the
+  // strip can be a matchup rather than a universal debuff, and it is the kind
+  // of thing that rots quietly: somebody tags a hat, and a move that was meant
+  // to be conditional silently starts working on everyone.
+  const NOT_ARMOUR = ["hair", "hat", "headband", "topknot", "bandana", "limehair",
+    "mongkhon", "headring", "tonsure", "bearcap", "wrap", "hood", "cape", "cloak",
+    "korowai", "poncho", "shamma", "surcoat", "pelt"];
+  for (const def of ROSTER) {
+    for (const prop of def.props) {
+      if (!prop.armour) continue;
+      check(
+        `${def.id}: "${prop.id}" is tagged as armour and is not a hat`,
+        !NOT_ARMOUR.includes(prop.id),
+        prop.id,
+      );
+    }
+  }
+
+  // Every slot named by a strip has to be worn by somebody, or the move is
+  // dead content nobody will ever see fire.
+  const wornSlots = new Set<string>();
+  for (const def of ROSTER) for (const p of def.props) if (p.armour) wornSlots.add(p.armour);
+  for (const def of ROSTER) {
+    for (const mv of def.moves) {
+      for (const h of mv.hits ?? []) {
+        if (!h.strips) continue;
+        check(
+          `${def.id}.${mv.id}: strips a slot somebody actually wears`,
+          wornSlots.has(h.strips.slot),
+          h.strips.slot,
+        );
+        // A strip that made you take *less* damage would be a reward for being
+        // hit, so the direction is pinned rather than assumed.
+        check(
+          `${def.id}.${mv.id}: stripping never helps the victim`,
+          (h.strips.damageTaken ?? 1) >= 1,
+          `${h.strips.damageTaken}`,
+        );
+      }
+    }
+  }
+
+  // End to end: the helmet actually comes off a fighter wearing one, stays off,
+  // and cannot be taken twice.
+  {
+    const m = new Match([getFighter("lapulapu"), getFighter("knight")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const [lapu, knight] = m.fighters;
+    knight.x = lapu.x + 60;
+    const helm = getFighter("knight").props.find((p) => p.armour === "head")!;
+    const before = knight.health;
+    lapu.startMove("knockHelm");
+    run(m, 40, () => inp());
+    check("strip: the helmet comes off a knight", knight.stripped.has(helm.id));
+    check("strip: it costs the knight damage taken", knight.takenScale > 1, `${knight.takenScale}`);
+    check("strip: the hit still lands", knight.health < before);
+
+    // And a second one finds nothing left to take, so nothing stacks.
+    const scale = knight.takenScale;
+    knight.stripped.has(helm.id) && lapu.startMove("knockHelm");
+    run(m, 40, () => inp());
+    check("strip: taking it twice does not stack", Math.abs(knight.takenScale - scale) < 1e-9);
+  }
+
+  // Against someone with nothing on their head it is simply a hit.
+  {
+    const m = new Match([getFighter("lapulapu"), getFighter("muaythai")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const [lapu, nai] = m.fighters;
+    nai.x = lapu.x + 60;
+    const before = nai.health;
+    lapu.startMove("knockHelm");
+    run(m, 40, () => inp());
+    check("strip: a bare head loses nothing", nai.stripped.size === 0);
+    check("strip: and takes no lasting penalty", Math.abs(nai.takenScale - 1) < 1e-9, `${nai.takenScale}`);
+    check("strip: but is still hit", nai.health < before);
+  }
+
+  // A round is the unit everything else resets on, and armour is no exception.
+  {
+    const m = new Match([getFighter("lapulapu"), getFighter("roman")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const [lapu, roman] = m.fighters;
+    roman.x = lapu.x + 60;
+    lapu.startMove("knockHelm");
+    run(m, 40, () => inp());
+    const took = roman.stripped.size;
+    m.startRound();
+    check("strip: something came off in round one", took > 0);
+    check("strip: and is back on for round two", m.fighters[1].stripped.size === 0);
+  }
+
+  // -------------------------------------------------------------------------
+  // Grants
+  // -------------------------------------------------------------------------
+
+  {
+    const m = new Match([getFighter("lapulapu"), getFighter("roman")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const lapu = m.fighters[0];
+    lapu.startMove("fortyNine");
+    run(m, 50, () => inp());
+    check("grant: does nothing at full health", Math.abs(lapu.dealtScale - 1) < 1e-9, `${lapu.dealtScale}`);
+    // The threshold is read live rather than latched, so simply being hurt
+    // turns it on without the move being pressed again.
+    lapu.health = lapu.def.stats.health * 0.4;
+    check("grant: pays out under half health", lapu.dealtScale > 1.15, `${lapu.dealtScale}`);
+    const half = lapu.dealtScale;
+    lapu.health = lapu.def.stats.health * 0.15;
+    check("grant: pays out more under a quarter", lapu.dealtScale > half, `${lapu.dealtScale}`);
+    // Pressing it again is a refresh, not a stack.
+    const peak = lapu.dealtScale;
+    lapu.startMove("fortyNine");
+    run(m, 50, () => inp());
+    check("grant: re-using it does not stack", Math.abs(lapu.dealtScale - peak) < 1e-9, `${lapu.dealtScale}`);
+    m.startRound();
+    check("grant: cleared between rounds", m.fighters[0].grants.length === 0);
+  }
+
+  // Grants multiply with the tower knobs rather than replacing them - the two
+  // systems touch the same number and neither may erase the other.
+  {
+    const m = new Match([getFighter("lapulapu"), getFighter("roman")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const lapu = m.fighters[0];
+    lapu.damageDealtScale = 2;
+    lapu.health = lapu.def.stats.health * 0.4;
+    lapu.startMove("fortyNine");
+    run(m, 50, () => inp());
+    check("grant: composes with a tower modifier", lapu.dealtScale > 2.2, `${lapu.dealtScale}`);
+  }
+
+  // -------------------------------------------------------------------------
+  // Terrain zones
+  // -------------------------------------------------------------------------
+
+  {
+    const m = new Match([getFighter("lapulapu"), getFighter("roman")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const [lapu, roman] = m.fighters;
+    lapu.startMove("shallows");
+    run(m, 30, () => inp());
+    check("zone: the shallows appear", m.zones.length === 1, `${m.zones.length}`);
+
+    // Both of them are standing in it, and the whole design rests on the owner
+    // not being exempt.
+    roman.x = lapu.x + 40;
+    m.step([inp(), inp()]);
+    check("zone: it slows the man who made it", lapu.terrainDash < 1, `${lapu.terrainDash}`);
+    check("zone: and the man who walked into it", roman.terrainDash < 1, `${roman.terrainDash}`);
+
+    // Step outside and it stops mattering, with no transition bookkeeping.
+    roman.x = lapu.x + 900;
+    m.step([inp(), inp()]);
+    check("zone: dry sand is dry", Math.abs(roman.terrainDash - 1) < 1e-9, `${roman.terrainDash}`);
+
+    // Laying a second one replaces the first: no covering the stage in surf.
+    lapu.startMove("shallows");
+    run(m, 30, () => inp());
+    check("zone: a second patch replaces the first", m.zones.length === 1, `${m.zones.length}`);
+  }
+
+  // The backstep is the one thing it takes away outright.
+  {
+    const m = new Match([getFighter("roman"), getFighter("pirate")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const roman = m.fighters[0];
+    const bb = [inp({ left: true }), inp(), inp({ left: true }), inp({ left: true })];
+    run(m, 4, (f) => bb[f]);
+    check("zone: the backstep works on dry sand", roman.move?.id === "backstep" || roman.state === "backdash",
+      roman.move?.id ?? roman.state);
+
+    const wet = new Match([getFighter("lapulapu"), getFighter("roman")]);
+    for (let i = 0; i < 80; i++) wet.step([inp(), inp()]);
+    const [lapu, foe] = wet.fighters;
+    lapu.startMove("shallows");
+    run(wet, 30, () => inp());
+    foe.x = lapu.x + 40;
+    run(wet, 4, () => inp(), (f) => bb[f]);
+    check("zone: and not in the surf", foe.move?.id !== "backstep" && foe.state !== "backdash",
+      foe.move?.id ?? foe.state);
+  }
+
+  // Zones expire, and expire cleanly - a fighter left permanently slowed by a
+  // patch of water that is no longer there is the failure this is guarding.
+  {
+    const m = new Match([getFighter("lapulapu"), getFighter("roman")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const lapu = m.fighters[0];
+    const spec = getFighter("lapulapu").moves.find((mv) => mv.id === "shallows")!.zones![0];
+    lapu.startMove("shallows");
+    run(m, spec.life + 60, () => inp());
+    check("zone: it drains away", m.zones.length === 0, `${m.zones.length}`);
+    check("zone: and leaves nobody slowed", Math.abs(lapu.terrainDash - 1) < 1e-9, `${lapu.terrainDash}`);
+  }
+
+  // -------------------------------------------------------------------------
+  // The stake
+  // -------------------------------------------------------------------------
+
+  {
+    // One stake, and getting it back is a move you have to spend time on.
+    const m = new Match([getFighter("lapulapu"), getFighter("roman")]);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const lapu = m.fighters[0];
+    check("stake: he starts with one", lapu.resource === 1, `${lapu.resource}`);
+    lapu.startMove("stake");
+    run(m, 40, () => inp());
+    check("stake: throwing it spends it", lapu.resource === 0, `${lapu.resource}`);
+    const fired = lapu.startMove("stake");
+    check("stake: and he cannot throw a second", !fired || lapu.move?.id !== "stake");
+    lapu.startMove("takeUpStake");
+    run(m, 50, () => inp());
+    check("stake: the skill gets it back", lapu.resource === 1, `${lapu.resource}`);
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);

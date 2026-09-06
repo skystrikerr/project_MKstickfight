@@ -164,6 +164,7 @@ export const ETHIOPIA: FighterDef = {
     {
       id: "gasha",
       attach: "forearmF",
+      armour: "shield",
       // Round hide shield with a raised boss and brass mounts.
       parts: [
         { geo: "disc", size: [24], pos: [13, 0], color: "#6b4a28", z: 0.5 },

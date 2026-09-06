@@ -89,6 +89,7 @@ export const SOLDIER: FighterDef = {
     {
       id: "helmet",
       attach: "head",
+      armour: "head",
       // M1 steel pot under a camouflage cover, band round the outside with
       // cigarettes and a bottle of bug juice tucked in it.
       parts: [
@@ -143,6 +144,7 @@ export const SOLDIER: FighterDef = {
     {
       id: "vest",
       attach: "torso",
+      armour: "body",
       // M69 flak jacket over a jungle fatigue shirt: quilted panels, big
       // pockets, grenades and a spare mag on the front.
       parts: [

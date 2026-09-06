@@ -202,6 +202,7 @@ export const PERSIAN: FighterDef = {
     {
       id: "spara",
       attach: "forearmF",
+      armour: "shield",
       // Sparabara: a man-high wicker pavise. It stops arrows and it does not
       // stop a spear, which is the entire story of the Persian wars.
       parts: [

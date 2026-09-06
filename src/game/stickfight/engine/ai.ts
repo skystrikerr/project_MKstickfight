@@ -125,6 +125,11 @@ export const STYLES: Record<string, Style> = {
   celt: { aggression: 1.45, special: 1.05, throw: 1.0, poke: 0.75, patience: 0.55, range: "close" },
   // Zoner / Ranks: shoots while the Ranks refill, and only closes when they do not.
   persian: { aggression: 0.7, special: 1.25, throw: 0.8, poke: 1.25, patience: 1.3, range: "far" },
+  // Low Footsies / Attrition: he owns a band of space with the longest lows in
+  // the game and has no reason to leave it. Not "far" - he has one stake and
+  // then nothing, so holding the far range is holding an empty hand. High poke
+  // and high patience, at mid.
+  lapulapu: { aggression: 0.8, special: 1.15, throw: 0.9, poke: 1.55, patience: 1.35, range: "mid" },
 };
 
 const MOTION_DIRS: Record<Motion, number[]> = {

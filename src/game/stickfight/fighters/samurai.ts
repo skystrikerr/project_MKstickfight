@@ -86,6 +86,7 @@ export const SAMURAI: FighterDef = {
     {
       id: "kabuto",
       attach: "head",
+      armour: "head",
       // Kabuto: lacquered bowl, a flared neck guard, a gold crescent maedate
       // and a demon mask over the lower face.
       parts: [
@@ -136,6 +137,7 @@ export const SAMURAI: FighterDef = {
     {
       id: "sode",
       attach: "torso",
+      armour: "body",
       // Do-maru: lacquered lamellar laced in crimson, with a big shoulder plate.
       parts: [
         { geo: "poly", size: [-13, -16, 13, -16, 14, 6, 10, 16, -10, 16, -14, 6], pos: [0, 3], color: LACQUER },

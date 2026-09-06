@@ -160,6 +160,32 @@ export type KnockdownKind =
 
 export type HitFx = "slash" | "blunt" | "pierce" | "shot" | "explode" | "burn" | "spark";
 
+/**
+ * The kind of protection a prop represents, so an attack can aim at a piece of
+ * armour without naming twenty-two fighters' prop ids.
+ *
+ * Only worn protection is tagged. A hat is not a helmet and a cloak is not a
+ * cuirass: if losing it would not change what an attack does to the man, it
+ * has no slot.
+ */
+export type ArmourSlot = "head" | "shield" | "body";
+
+/**
+ * Armour knocked off the defender by a hit, for the rest of the round.
+ *
+ * Pigafetta watched the Mactan warriors put Magellan's helmet on the sand
+ * twice before they killed him, and the fight turned on it. Nothing else on
+ * the roster reaches across and takes a piece of the other fighter's kit, so
+ * this is deliberately narrow: it names a slot rather than a prop, it only
+ * fires on a clean hit, and against someone who is not wearing that slot it
+ * does nothing at all beyond the damage the hit was already doing.
+ */
+export interface StripDef {
+  slot: ArmourSlot;
+  /** Multiplies damage the stripped fighter takes afterwards. */
+  damageTaken?: number;
+}
+
 export interface HitDef {
   /** Active window, inclusive, in frames from the start of the move. */
   from: number;
@@ -189,6 +215,8 @@ export interface HitDef {
   juggleCost?: number;
   /** Scales the screen shake this hit produces. */
   shake?: number;
+  /** Armour this hit takes off the defender permanently. */
+  strips?: StripDef;
 }
 
 export interface ThrowDef {
@@ -278,6 +306,60 @@ export interface ProjectileSpawn {
   spin?: number;
   color?: string;
   trail?: string;
+}
+
+/**
+ * A patch of ground a move leaves behind.
+ *
+ * A projectile is a thing that travels and then stops existing; this is the
+ * opposite - it never moves, it never deals damage, and all it does is change
+ * what the ground underfoot is worth. It exists because the Mactan warriors
+ * chose the beach: the boats grounded on the reef and the Spanish had to come
+ * the last stretch on foot through the shallows, which is not a hit anyone
+ * lands, it is a place that costs you something to stand in.
+ *
+ * The owner is not exempt. Whoever is happy fighting at walking pace in
+ * knee-deep water gets the better of it, and that is a matchup rather than a
+ * privilege.
+ */
+export interface ZoneSpawn {
+  /** Frame of the move it appears on. */
+  at: number;
+  /** Renderer key. */
+  kind: string;
+  /** Centre offset in facing space. */
+  x: number;
+  w: number;
+  /** Frames it lasts. */
+  life: number;
+  /** Multiplies dash speed for anyone standing in it. */
+  dashScale?: number;
+  /** Backdashing out is not possible from inside it. */
+  noBackdash?: boolean;
+  color?: string;
+}
+
+/**
+ * A rule knob change a move grants its user for the rest of the round.
+ *
+ * The tower modifiers already move the fight by turning these five scalars,
+ * and a buff that lasts is the same idea reached from inside a move instead of
+ * from outside the match. Grants multiply on top of whatever the modifiers set
+ * rather than overwriting it, so a fighter can be buffed inside a tower floor
+ * that is already changing the same number.
+ */
+export interface GrantDef {
+  /**
+   * Only counts while the user is at or below this fraction of their maximum
+   * health. Omitted means it applies the whole time.
+   */
+  belowHealth?: number;
+  /** Multiplies damage the user deals. */
+  damageDealt?: number;
+  /** Multiplies damage the user takes. */
+  damageTaken?: number;
+  /** Frames it lasts. Omitted means the rest of the round. */
+  frames?: number;
 }
 
 export type InvulnKind = "full" | "strike" | "throw" | "projectile" | "low" | "high";
@@ -372,6 +454,13 @@ export interface MoveDef {
   priority?: number;
   hits?: HitDef[];
   projectiles?: ProjectileSpawn[];
+  /** Ground this move leaves changed behind it. */
+  zones?: ZoneSpawn[];
+  /**
+   * Lasting buffs the move gives its user, applied when the move starts.
+   * Re-using the move refreshes them rather than stacking.
+   */
+  grants?: GrantDef[];
   throwDef?: ThrowDef;
   throwPayload?: ThrowPayload;
   /** Where the held opponent sits during a throw, in facing space. */
@@ -539,6 +628,20 @@ export interface PropDef {
   cloth?: PropCloth;
   /** Hidden unless the current move/state lists this prop id in `showProps`. */
   conditional?: boolean;
+  /**
+   * Only drawn while the fighter holds at least this much of their resource.
+   *
+   * For a consumable that is a physical object rather than a number: the stake
+   * across Lapulapu's back is either there or it is lying in the sand where he
+   * threw it, and no move can express that, because the frames it is missing
+   * for are all the frames in between his moves.
+   */
+  needsResource?: number;
+  /**
+   * What this prop protects, if anything. Tagged props can be knocked off by
+   * a hit carrying a matching `strips`, and stay off for the round.
+   */
+  armour?: ArmourSlot;
 }
 
 // ---------------------------------------------------------------------------

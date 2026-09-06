@@ -4,7 +4,7 @@
  */
 
 import { COMBAT, FPS, GROUND_Y, MATCH, STAGE_HALF_WIDTH } from "../constants";
-import type { FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn, Platform,
+import type { FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn, Platform, StripDef, ZoneSpawn,
 } from "../types";
 import { Fighter, boxesOverlap, toWorldBox, type WorldBox } from "./fighter";
 import { EMPTY_INPUT, type RawInput } from "./input";
@@ -51,6 +51,22 @@ export interface Projectile {
   sourceMove: string;
 }
 
+/**
+ * A live patch of changed ground. It has no hitbox and never expires early;
+ * the only thing it does is sit there and be inconvenient.
+ */
+export interface Zone {
+  id: number;
+  owner: 0 | 1;
+  kind: string;
+  /** Stage coordinates, already resolved out of the owner's facing. */
+  x: number;
+  w: number;
+  life: number;
+  age: number;
+  spec: ZoneSpawn;
+}
+
 export interface RoundResult {
   winner: 0 | 1 | null;
   reason: "ko" | "time" | "double";
@@ -82,10 +98,12 @@ export function projectileArmed(p: Projectile): boolean {
 }
 
 let projId = 0;
+let zoneId = 0;
 
 export class Match {
   readonly fighters: [Fighter, Fighter];
   projectiles: Projectile[] = [];
+  zones: Zone[] = [];
   fx: FxEvent[] = [];
 
   phase: Phase = "intro";
@@ -171,11 +189,20 @@ export class Match {
       f.damageTakenScale = 1;
       f.meterScale = 1;
       f.healthDrain = 0;
+      // Buffs and lost armour are both round-scoped. A helmet knocked off in
+      // round one is back on for round two - the round is the unit the game
+      // already resets everything else on, and a strip that carried across
+      // would decide the match on one hit rather than the round.
+      f.grants.length = 0;
+      f.stripped.clear();
+      f.terrainDash = 1;
+      f.terrainNoBackdash = false;
       f.setState("intro");
     }
     a.facing = 1;
     b.facing = -1;
     this.projectiles = [];
+    this.zones = [];
     this.combo = [null, null];
   }
 
@@ -264,6 +291,8 @@ export class Match {
     a.faceOpponent(b);
     b.faceOpponent(a);
 
+    this.applyTerrain();
+
     a.update(b, true);
     b.update(a, true);
 
@@ -288,6 +317,9 @@ export class Match {
     this.resolveHits(b, a);
     this.spawnProjectiles(a);
     this.spawnProjectiles(b);
+    this.spawnZones(a);
+    this.spawnZones(b);
+    this.updateZones();
     this.updateProjectiles();
     this.emitMovementFx();
 
@@ -573,13 +605,17 @@ export class Match {
         hit.damage *
           scale *
           (counter ? COMBAT.counterDamageScale : 1) *
-          attacker.damageDealtScale *
-          defender.damageTakenScale,
+          attacker.dealtScale *
+          defender.takenScale,
       ),
     );
 
     defender.health = Math.max(0, defender.health - damage);
     this.lastHitTaken[defender.index] = { move: name, damage };
+    // Only a clean hit takes armour off. Blocked and absorbed hits have both
+    // already returned above, which is the point: getting your guard up is
+    // what keeps your helmet on.
+    if (hit.strips) this.applyStrip(defender, hit.strips, contact);
     defender.flash = 8;
     defender.releaseHold();
     defender.scaling = Math.max(COMBAT.minScale, defender.scaling * COMBAT.scaleStep);
@@ -706,6 +742,77 @@ export class Match {
   // -------------------------------------------------------------------------
   // Projectiles
   // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // Zones
+  // -------------------------------------------------------------------------
+
+  private spawnZones(f: Fighter) {
+    if (f.state !== "move" || !f.move?.zones || f.hitstop > 0) return;
+    for (const spec of f.move.zones) {
+      if (spec.at !== f.moveFrame) continue;
+      const x = f.x + f.facing * spec.x;
+      // Laying a second patch replaces the first rather than adding to it, so
+      // the move cannot be stacked into a slick covering the whole stage.
+      this.zones = this.zones.filter((z) => !(z.owner === f.index && z.kind === spec.kind));
+      this.zones.push({
+        id: ++zoneId,
+        owner: f.index,
+        kind: spec.kind,
+        x,
+        w: spec.w,
+        life: spec.life,
+        age: 0,
+        spec,
+      });
+      this.pushFx({ kind: "dust", x, y: GROUND_Y + 4, scale: 2.2 });
+    }
+  }
+
+  private updateZones() {
+    if (!this.zones.length) return;
+    for (const z of this.zones) {
+      z.age++;
+      z.life--;
+    }
+    this.zones = this.zones.filter((z) => z.life > 0);
+  }
+
+  /**
+   * Works out what the ground under each fighter is worth this frame.
+   *
+   * Recomputed from scratch every frame rather than applied on entry and undone
+   * on exit: a zone can expire underneath someone, and the version that tracked
+   * transitions had to get every one of those cases right to avoid leaving a
+   * fighter permanently slowed on dry sand.
+   */
+  private applyTerrain() {
+    for (const f of this.fighters) {
+      f.terrainDash = 1;
+      f.terrainNoBackdash = false;
+      if (!f.grounded) continue;
+      for (const z of this.zones) {
+        if (Math.abs(f.x - z.x) > z.w / 2) continue;
+        f.terrainDash = Math.min(f.terrainDash, z.spec.dashScale ?? 1);
+        if (z.spec.noBackdash) f.terrainNoBackdash = true;
+      }
+    }
+  }
+
+  /**
+   * Takes a piece of armour off the defender, when they have that piece to
+   * lose. Whoever is not wearing it is simply not affected by this, which is
+   * the intended shape: the move is a matchup, not a universal debuff.
+   */
+  private applyStrip(defender: Fighter, strip: StripDef, at: { x: number; y: number }) {
+    const taken = defender.stripArmour(strip.slot);
+    if (!taken.length) return;
+    if (strip.damageTaken !== undefined) {
+      defender.applyGrants(`stripped:${strip.slot}`, [{ damageTaken: strip.damageTaken }]);
+    }
+    this.pushFx({ kind: "spark", x: at.x, y: at.y, scale: 1.6 });
+    this.shake = Math.max(this.shake, 5);
+  }
 
   private spawnProjectiles(f: Fighter) {
     if (f.state !== "move" || !f.move?.projectiles || f.hitstop > 0) return;

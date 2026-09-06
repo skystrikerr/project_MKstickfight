@@ -109,6 +109,7 @@ export const KNIGHT: FighterDef = {
     {
       id: "helm",
       attach: "head",
+      armour: "head",
       // Bascinet: a pointed skull tapering back, a hinged visor with a breath
       // slot, and a mail aventail hanging off the rim onto the shoulders.
       parts: [
@@ -157,6 +158,7 @@ export const KNIGHT: FighterDef = {
     {
       id: "shield",
       attach: "forearmB",
+      armour: "shield",
       // Heater shield: flat across the top, curving to a point, bearing his
       // arms - Or, a pile gules. A gold field with a red wedge run down from
       // the chief to the point, exactly as it sits on his Garter stall plate.
@@ -176,6 +178,7 @@ export const KNIGHT: FighterDef = {
     {
       id: "harness",
       attach: "torso",
+      armour: "body",
       // Cuirass with a raised centre ridge, articulated fauld hoops below it,
       // and big pauldrons that overlap the arms.
       parts: [

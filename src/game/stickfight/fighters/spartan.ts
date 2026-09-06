@@ -86,6 +86,7 @@ export const SPARTAN: FighterDef = {
     {
       id: "helm",
       attach: "head",
+      armour: "head",
       // Corinthian: one piece of bronze over the whole face, with eye slits and
       // a nose bar left in it, and the crest running ear to ear.
       parts: [
@@ -123,6 +124,7 @@ export const SPARTAN: FighterDef = {
     {
       id: "aspis",
       attach: "forearmF",
+      armour: "shield",
       // Aspis: a domed bowl of bronze with a rolled rim and the lambda of
       // Lacedaemon painted across the whole face.
       parts: [
@@ -179,6 +181,7 @@ export const SPARTAN: FighterDef = {
     {
       id: "cuirass",
       attach: "torso",
+      armour: "body",
       // Bronze muscle cuirass: shaped to the chest, with the abdominal lines
       // hammered into it and leather pteruges under the waist.
       parts: [

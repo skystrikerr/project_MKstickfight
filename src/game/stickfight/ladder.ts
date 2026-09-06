@@ -83,6 +83,10 @@ const RIVALS: Record<string, string> = {
   // He is the reason Thermopylae ended. He took the corps up the goat path in
   // the dark and came out behind the phalanx.
   persian: "spartan",
+  // The knight is the armour the whole character is an argument against, and
+  // he is the fighter Lapulapu can take the most off: helm, shield and harness,
+  // all three slots, one man.
+  lapulapu: "knight",
 };
 
 /** The last one standing. Tomoe is the only difficulty five on the roster. */
@@ -190,6 +194,8 @@ export const ENDINGS: Record<string, string> = {
     "He rode out of Alesia and laid his arms at Caesar's feet, which Caesar records without much comment. Then six years in the Tullianum in the dark, one afternoon walking in front of the triumph so Rome could look at him, and a strangling in the cell the same day. Caesar wrote the only full account of him, which is the other thing Rome took.",
   persian:
     "Herodotus hands him the ten thousand, hands him the march over the Anopaea path that decided Thermopylae, and then simply stops. There is no death, no later command, no return. The best-known unit of the ancient world and the man who led it, and the record keeps the corps and loses the commander - which is more or less what being an Immortal meant.",
+  lapulapu:
+    "Pigafetta, who was in the water and lived, put the date at the 27th of April 1521 and the numbers at forty-nine Spaniards against something like fifteen hundred. He records that they went for the legs because the legs were unarmoured, that Magellan's helmet was struck off twice, and that the ships sailed without recovering the body because Lapulapu would not give it back for any price offered. What happened to him afterwards is not written down anywhere - he simply stops appearing, which in this company counts as getting away with it.",
   shade:
     "There is no register that carries his name, because he was never written down in the first place - only repeated, in enough places and enough centuries that somebody eventually started calling all of them the same man. Ask who he really was and the honest answer is that the question does not have the kind of ending the other fourteen do.",
 };

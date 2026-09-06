@@ -684,6 +684,39 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       },
     },
   ],
+  lapulapu: [
+    {
+      id: "kalis",
+      name: "Kalis",
+      blurb:
+        "The wave-bladed sword of the same islands and the same century, double-edged and asymmetric at the base. A different weapon from the kampilan rather than a decorated one - shorter, and meant for the point.",
+      unlock: { kind: "wins", count: 4 },
+      parts: {
+        kampilan: [
+          // Grip, and the pommel carved as a stylised cockatoo head - the
+          // kakatua, which is what tells a kalis hilt from anything else.
+          { geo: "box", size: [14, 5.5], pos: [2, 0], color: "#4a3220" },
+          { geo: "box", size: [14, 1.6], pos: [2, 1.8], color: "#6b4a2c" },
+          { geo: "poly", size: [0, -6, -7, -8, -12, -2, -9, 5, -2, 7], pos: [-10, 0], color: "#8a6a3c" },
+          { geo: "poly", size: [0, 0, -7, 4, -10, 1, -6, -2], pos: [-19, 3], color: "#8a6a3c" },
+          { geo: "disc", size: [1.3], pos: [-12, 2], color: "#2a2018", z: 0.4 },
+          // Asymmetric guard: the kalis is cut away on one side at the base.
+          { geo: "poly", size: [0, 10, 8, 8, 9, -4, 0, -6], pos: [10, 0], color: "#d8ab4c" },
+          { geo: "poly", size: [0, 4, 6, 2, 6, -8, 0, -5], pos: [10, -4], color: "#b08a34", z: 0.3 },
+          // The waves. Seven of them, alternating off the centre line, running
+          // out to a straight point - a kalis is wavy at the forte and calm at
+          // the tip, not corrugated end to end.
+          { geo: "poly", size: [0, 6, 10, 8, 20, 4, 20, -3, 10, -7, 0, -5], pos: [18, 1], color: "#cdd6de" },
+          { geo: "poly", size: [0, 5, 10, 1, 20, 6, 20, -2, 10, -6, 0, -6], pos: [38, 0], color: "#cdd6de" },
+          { geo: "poly", size: [0, 6, 10, 2, 18, 5, 18, -2, 10, -5, 0, -5], pos: [58, 1], color: "#cdd6de" },
+          { geo: "poly", size: [0, 4, 12, 2, 18, 0, 12, -2, 0, -4], pos: [76, 0], color: "#cdd6de" },
+          // Pattern-welded lamination catching the light along the waves.
+          { geo: "poly", size: [0, 2, 12, 3, 22, 1, 12, 0, 0, 0], pos: [20, 2], color: "#eef3f7", z: 0.3 },
+          { geo: "poly", size: [0, 2, 12, 0, 20, 2, 12, 0, 0, 0], pos: [42, 1], color: "#eef3f7", z: 0.3 },
+        ],
+      },
+    },
+  ],
 };
 
 /** Every variant a fighter has, default excluded. Empty for most of the roster. */
