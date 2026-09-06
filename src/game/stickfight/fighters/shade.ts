@@ -57,7 +57,7 @@ export const SHADE: FighterDef = {
     aura: "#c9a6ec",
   },
   stats: {
-    health: 880,
+    health: 920,
     walkF: 3.35,
     walkB: 3.0,
     dashSpeed: 9.5,
@@ -204,7 +204,7 @@ export const SHADE: FighterDef = {
       followUps: [
         { button: "A", move: "4A", from: 3, to: 8, string: "Twin Jab" },
       ],
-      hits: [hit(3, 5, bx(16, 58, 42, 18), 24, { fx: "pierce", hitstun: 13, blockstun: 10, pushX: 2.4 })],
+      hits: [hit(3, 5, bx(16, 58, 42, 18), 25, { fx: "pierce", hitstun: 13, blockstun: 10, pushX: 2.4 })],
       desc: "Front kunai flicks out point-first. Three frames, cancels into everything.",
       notation: "A",
       frames: [
@@ -225,7 +225,7 @@ export const SHADE: FighterDef = {
       followUps: [
         { button: "C", move: "6C", from: 6, to: 16, string: "Cross Cut" },
       ],
-      hits: [hit(6, 9, bx(18, 46, 56, 32), 48, { fx: "slash", pushX: 4, hitstun: 17 })],
+      hits: [hit(6, 9, bx(18, 46, 56, 32), 50, { fx: "slash", pushX: 4, hitstun: 17 })],
       desc: "Both kunai cross at the wrists and open away from each other.",
       notation: "B",
       frames: [
@@ -248,7 +248,7 @@ export const SHADE: FighterDef = {
         { button: "B", move: "4B", from: 12, to: 26, string: "Rising Gouge" },
       ],
       hits: [
-        hit(12, 16, bx(20, 40, 66, 42), 80, {
+        hit(12, 16, bx(20, 40, 66, 42), 83, {
           fx: "pierce",
           pushX: 7,
           knockdown: "soft",
@@ -274,7 +274,7 @@ export const SHADE: FighterDef = {
       duration: 12,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 11],
-      hits: [hit(4, 6, bx(14, 14, 40, 18), 22, { guard: "low", fx: "pierce", hitstun: 13, blockstun: 10, pushX: 2.2 })],
+      hits: [hit(4, 6, bx(14, 14, 40, 18), 23, { guard: "low", fx: "pierce", hitstun: 13, blockstun: 10, pushX: 2.2 })],
       desc: "Point flicked at the shin from a crouch. His check button.",
       notation: "↓ + A",
       frames: [
@@ -292,7 +292,7 @@ export const SHADE: FighterDef = {
       duration: 21,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 19],
-      hits: [hit(7, 10, bx(18, 8, 60, 24), 46, { guard: "low", fx: "slash", pushX: 3.8, hitstun: 17 })],
+      hits: [hit(7, 10, bx(18, 8, 60, 24), 48, { guard: "low", fx: "slash", pushX: 3.8, hitstun: 17 })],
       desc: "Back kunai dragged across the ankle. Cancels into everything he has.",
       notation: "↓ + B",
       frames: [
@@ -311,7 +311,7 @@ export const SHADE: FighterDef = {
       duration: 28,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 24],
-      hits: [hit(10, 14, bx(16, 2, 78, 22), 68, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 5.2 })],
+      hits: [hit(10, 14, bx(16, 2, 78, 22), 71, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 5.2 })],
       desc: "Both blades spin through the ankles at once.",
       notation: "↓ + C",
       frames: [
@@ -333,7 +333,7 @@ export const SHADE: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
-      hits: [hit(15, 19, bx(16, 32, 54, 44), 54, { guard: "overhead", fx: "slash", pushX: 4.4, hitstun: 20 })],
+      hits: [hit(15, 19, bx(16, 32, 54, 44), 56, { guard: "overhead", fx: "slash", pushX: 4.4, hitstun: 20 })],
       desc: "Steps in and brings the back kunai down. Overhead - starts like his low cut.",
       notation: "→ + B",
       frames: [
@@ -354,7 +354,7 @@ export const SHADE: FighterDef = {
       duration: 30,
       cancelInto: ["special", "super"],
       cancelWindow: [11, 26],
-      hits: [hit(9, 13, bx(12, 40, 50, 74), 62, { launch: [2, 12.2], knockdown: "launch", fx: "slash", hitstun: 26 })],
+      hits: [hit(9, 13, bx(12, 40, 50, 74), 64, { launch: [2, 12.2], knockdown: "launch", fx: "slash", hitstun: 26 })],
       desc: "Both blades up through the chin. Launches for a follow-up.",
       notation: "↘ + C",
       frames: [
@@ -377,7 +377,7 @@ export const SHADE: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [6, 18],
-      hits: [hit(6, 8, bx(20, 58, 42, 24), 26, { guard: "high", fx: "pierce", pushX: 3, hitstun: 13, hitstop: 5 })],
+      hits: [hit(6, 8, bx(20, 58, 42, 24), 27, { guard: "high", fx: "pierce", pushX: 3, hitstun: 13, hitstop: 5 })],
       desc: "Steps in and flicks the front kunai across. His fastest button by a wide margin.",
       notation: "→ + A",
       frames: [
@@ -400,7 +400,7 @@ export const SHADE: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
-      hits: [hit(16, 20, bx(16, 22, 52, 68), 84, { guard: "mid", fx: "pierce", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(16, 22, 52, 68), 87, { guard: "mid", fx: "pierce", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Closes the gap and drives both points through on the way past.",
       notation: "→ + C",
       frames: [
@@ -423,7 +423,7 @@ export const SHADE: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
-      hits: [hit(8, 10, bx(16, 52, 40, 30), 34, { guard: "mid", fx: "slash", pushX: 6, hitstun: 15, hitstop: 6 })],
+      hits: [hit(8, 10, bx(16, 52, 40, 30), 35, { guard: "mid", fx: "slash", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Slips back and opens the elbow so the back blade rakes across.",
       notation: "← + A",
       frames: [
@@ -445,7 +445,7 @@ export const SHADE: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
-      hits: [hit(12, 15, bx(24, 44, 66, 30), 54, { guard: "mid", fx: "blunt", pushX: 7, hitstun: 18, hitstop: 8 })],
+      hits: [hit(12, 15, bx(24, 44, 66, 30), 56, { guard: "mid", fx: "blunt", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Gives ground and snaps the lead leg out at whatever follows.",
       notation: "← + B",
       frames: [
@@ -466,7 +466,7 @@ export const SHADE: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(12, 20, 58, 86), 92, { guard: "overhead", fx: "pierce", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(12, 20, 58, 86), 96, { guard: "overhead", fx: "pierce", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Jumps both points up and drives them straight down. Blocked standing only.",
       notation: "← + C",
       frames: [
@@ -490,7 +490,7 @@ export const SHADE: FighterDef = {
       landRecovery: 2,
       cancelInto: ["medium", "heavy", "special"],
       cancelWindow: [4, 15],
-      hits: [hit(4, 9, bx(14, 32, 42, 28), 26, { fx: "slash", hitstun: 14, pushX: 2.2 })],
+      hits: [hit(4, 9, bx(14, 32, 42, 28), 27, { fx: "slash", hitstun: 14, pushX: 2.2 })],
       desc: "Quick flick in the air to keep a juggle alive.",
       notation: "(air) A",
       frames: [
@@ -510,7 +510,7 @@ export const SHADE: FighterDef = {
       landCancel: true,
       landRecovery: 4,
       cancelInto: ["heavy", "special"],
-      hits: [hit(6, 13, bx(16, 18, 50, 42), 50, { fx: "blunt", pushX: 3.8, hitstun: 18 })],
+      hits: [hit(6, 13, bx(16, 18, 50, 42), 52, { fx: "blunt", pushX: 3.8, hitstun: 18 })],
       desc: "Knee out in front of him on the way in.",
       notation: "(air) B",
       frames: [
@@ -531,7 +531,7 @@ export const SHADE: FighterDef = {
       landCancel: true,
       landRecovery: 6,
       hits: [
-        hit(7, 17, bx(6, 4, 50, 48), 70, {
+        hit(7, 17, bx(6, 4, 50, 48), 73, {
           guard: "overhead",
           fx: "slash",
           knockdown: "soft",
@@ -560,7 +560,7 @@ export const SHADE: FighterDef = {
         { at: 15, x: 0 },
       ],
       friction: 0.9,
-      hits: [hit(7, 12, bx(18, 26, 60, 46), 64, { fx: "pierce", pushX: 6.5, knockdown: "soft", hitstun: 21, shake: 1.4 })],
+      hits: [hit(7, 12, bx(18, 26, 60, 46), 67, { fx: "pierce", pushX: 6.5, knockdown: "soft", hitstun: 21, shake: 1.4 })],
       desc: "Runs both points forward at chest height. Closes the screen fast.",
       notation: "→ + C",
       frames: [
@@ -594,7 +594,7 @@ export const SHADE: FighterDef = {
           gravity: 0.02,
           life: 66,
           box: { x: -8, y: -4, w: 16, h: 8 },
-          damage: 38,
+          damage: 40,
           hitstun: 16,
           blockstun: 11,
           chip: 3,
@@ -637,7 +637,7 @@ export const SHADE: FighterDef = {
           gravity: 0.42,
           life: 46,
           box: { x: -7, y: -7, w: 14, h: 14 },
-          damage: 0,
+          damage: 1,
           hitstun: 0,
           blockstun: 0,
           hits: 1,
@@ -647,7 +647,7 @@ export const SHADE: FighterDef = {
           fx: "burn",
           detonate: {
             radius: 52,
-            damage: 44,
+            damage: 46,
             hitstun: 25,
             blockstun: 20,
             knockdown: "none",
@@ -720,7 +720,7 @@ export const SHADE: FighterDef = {
           vy: 0,
           life: 26,
           box: { x: -18, y: -8, w: 36, h: 16 },
-          damage: 42,
+          damage: 44,
           hitstun: 28,
           blockstun: 16,
           pushX: -13,
@@ -818,11 +818,11 @@ export const SHADE: FighterDef = {
       ],
       friction: 0.9,
       hits: [
-        hit(13, 17, bx(-10, 32, 62, 50), 42, { group: 1, fx: "pierce", pushX: 0.6, hitstun: 21, hitstop: 5 }),
-        hit(28, 32, bx(-10, 32, 62, 50), 36, { group: 2, fx: "slash", pushX: 0.6, hitstun: 19, hitstop: 4 }),
-        hit(44, 48, bx(-10, 28, 62, 54), 36, { group: 3, fx: "pierce", pushX: 0.6, hitstun: 19, hitstop: 4 }),
-        hit(60, 64, bx(-10, 28, 62, 54), 36, { group: 4, fx: "slash", pushX: 0.6, hitstun: 19, hitstop: 4 }),
-        hit(84, 90, bx(2, 12, 74, 70), 132, {
+        hit(13, 17, bx(-10, 32, 62, 50), 44, { group: 1, fx: "pierce", pushX: 0.6, hitstun: 21, hitstop: 5 }),
+        hit(28, 32, bx(-10, 32, 62, 50), 37, { group: 2, fx: "slash", pushX: 0.6, hitstun: 19, hitstop: 4 }),
+        hit(44, 48, bx(-10, 28, 62, 54), 37, { group: 3, fx: "pierce", pushX: 0.6, hitstun: 19, hitstop: 4 }),
+        hit(60, 64, bx(-10, 28, 62, 54), 37, { group: 4, fx: "slash", pushX: 0.6, hitstun: 19, hitstop: 4 }),
+        hit(84, 90, bx(2, 12, 74, 70), 137, {
           group: 5,
           fx: "slash",
           pushX: 11,

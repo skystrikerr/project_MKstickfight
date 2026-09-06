@@ -50,7 +50,7 @@ export const VIKING: FighterDef = {
     aura: "#ff6a4a",
   },
   stats: {
-    health: 1080,
+    health: 1000,
     walkF: 2.6,
     walkB: 2.05,
     dashSpeed: 7.6,
@@ -226,7 +226,7 @@ export const VIKING: FighterDef = {
       followUps: [
         { button: "A", move: "6A", from: 4, to: 11, string: "Buckler Bind" },
       ],
-      hits: [hit(4, 6, bx(18, 52, 46, 22), 36, { fx: "blunt", hitstun: 15, blockstun: 11, pushX: 3.4 })],
+      hits: [hit(4, 6, bx(18, 52, 46, 22), 34, { fx: "blunt", hitstun: 15, blockstun: 11, pushX: 3.4 })],
       desc: "Short shield smash. Her fastest button and it chains into everything.",
       notation: "A",
       frames: [
@@ -248,7 +248,7 @@ export const VIKING: FighterDef = {
       followUps: [
         { button: "C", move: "5C", from: 9, to: 21, string: "Axe Work" },
       ],
-      hits: [hit(9, 12, bx(22, 40, 74, 46), 62, { fx: "slash", pushX: 5, hitstun: 18 })],
+      hits: [hit(9, 12, bx(22, 40, 74, 46), 58, { fx: "slash", pushX: 5, hitstun: 18 })],
       desc: "Horizontal chop across the ribs. Her bread-and-butter poke.",
       notation: "B",
       frames: [
@@ -273,7 +273,7 @@ export const VIKING: FighterDef = {
         { button: "C", move: "4C", from: 15, to: 31, string: "Axe Work" },
       ],
       hits: [
-        hit(15, 19, bx(18, 22, 76, 80), 98, {
+        hit(15, 19, bx(18, 22, 76, 80), 92, {
           fx: "slash",
           pushX: 7,
           knockdown: "hard",
@@ -299,7 +299,7 @@ export const VIKING: FighterDef = {
       duration: 15,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 14],
-      hits: [hit(4, 6, bx(16, 14, 46, 22), 30, { guard: "low", fx: "slash", hitstun: 14, blockstun: 10, pushX: 2.8 })],
+      hits: [hit(4, 6, bx(16, 14, 46, 22), 28, { guard: "low", fx: "slash", hitstun: 14, blockstun: 10, pushX: 2.8 })],
       desc: "Quick chop at the shins from a crouch.",
       notation: "↓ + A",
       frames: [
@@ -317,7 +317,7 @@ export const VIKING: FighterDef = {
       duration: 26,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [10, 24],
-      hits: [hit(10, 13, bx(20, 6, 76, 26), 58, { guard: "low", fx: "slash", pushX: 4.6, hitstun: 17 })],
+      hits: [hit(10, 13, bx(20, 6, 76, 26), 55, { guard: "low", fx: "slash", pushX: 4.6, hitstun: 17 })],
       desc: "Low sweeping chop. Must be blocked crouching.",
       notation: "↓ + B",
       frames: [
@@ -336,7 +336,7 @@ export const VIKING: FighterDef = {
       duration: 32,
       cancelInto: ["special", "super"],
       cancelWindow: [13, 28],
-      hits: [hit(12, 16, bx(18, 2, 84, 26), 82, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 6.5 })],
+      hits: [hit(12, 16, bx(18, 2, 84, 26), 77, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 6.5 })],
       desc: "Full-swing sweep with the axe head. Knocks them flat.",
       notation: "↓ + C",
       frames: [
@@ -359,7 +359,7 @@ export const VIKING: FighterDef = {
       armor: [{ from: 4, to: 12, hits: 1, damageScale: 0.35 }],
       cancelInto: ["special", "super"],
       cancelWindow: [14, 26],
-      hits: [hit(13, 17, bx(20, 44, 52, 44), 64, { guard: "overhead", fx: "blunt", pushX: 5.5, hitstun: 20 })],
+      hits: [hit(13, 17, bx(20, 44, 52, 44), 60, { guard: "overhead", fx: "blunt", pushX: 5.5, hitstun: 20 })],
       desc: "Leads with the helmet. Armoured, and it has to be blocked standing.",
       notation: "→ + B",
       frames: [
@@ -379,7 +379,7 @@ export const VIKING: FighterDef = {
       duration: 34,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 30],
-      hits: [hit(9, 14, bx(12, 50, 60, 76), 78, { launch: [2.2, 12], knockdown: "launch", fx: "slash", hitstun: 26 })],
+      hits: [hit(9, 14, bx(12, 50, 60, 76), 73, { launch: [2.2, 12], knockdown: "launch", fx: "slash", hitstun: 26 })],
       desc: "Upward chop that launches. Start your juggles here.",
       notation: "↘ + C",
       frames: [
@@ -408,7 +408,7 @@ export const VIKING: FighterDef = {
       followUps: [
         { button: "B", move: "6B", from: 7, to: 17, string: "Buckler Bind" },
       ],
-      hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
+      hits: [hit(7, 9, bx(20, 60, 44, 26), 30, { guard: "high", fx: "blunt", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Punches in with the iron boss of the shield. Her fastest way in.",
       notation: "\u2192 + A",
       frames: [
@@ -435,7 +435,7 @@ export const VIKING: FighterDef = {
       followUps: [
         { button: "C", move: "3C", from: 16, to: 37, string: "Cleaving Blow" },
       ],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 96, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
+      hits: [hit(16, 20, bx(18, 22, 64, 68), 90, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.4 })],
       desc: "Steps in and buries the axe. No guard on the way in and none on the way out.",
       notation: "\u2192 + C",
       frames: [
@@ -459,7 +459,7 @@ export const VIKING: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
-      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
+      hits: [hit(8, 10, bx(16, 52, 42, 30), 34, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Gives ground and gets the shield in the way. Punishes a step-in.",
       notation: "\u2190 + A",
       frames: [
@@ -481,7 +481,7 @@ export const VIKING: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
-      hits: [hit(12, 15, bx(30, 50, 78, 30), 56, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
+      hits: [hit(12, 15, bx(30, 50, 78, 30), 53, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Steps out and hooks with the beard of the axe. Drags their guard down with it.",
       notation: "\u2190 + B",
       frames: [
@@ -503,7 +503,7 @@ export const VIKING: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 108, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(14, 20, 70, 86), 102, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Takes the axe all the way back and splits down through the crown. Blocked standing only.",
       notation: "\u2190 + C",
       frames: [
@@ -528,7 +528,7 @@ export const VIKING: FighterDef = {
       landRecovery: 3,
       cancelInto: ["medium", "heavy", "special"],
       cancelWindow: [5, 17],
-      hits: [hit(5, 10, bx(16, 32, 48, 30), 38, { fx: "blunt", hitstun: 15, pushX: 3 })],
+      hits: [hit(5, 10, bx(16, 32, 48, 30), 36, { fx: "blunt", hitstun: 15, pushX: 3 })],
       desc: "Shield swat on the way down.",
       notation: "(air) A",
       frames: [
@@ -549,7 +549,7 @@ export const VIKING: FighterDef = {
       landRecovery: 5,
       cancelInto: ["heavy", "special"],
       cancelWindow: [8, 23],
-      hits: [hit(6, 13, bx(18, 14, 68, 50), 60, { fx: "slash", pushX: 4.2, hitstun: 19 })],
+      hits: [hit(6, 13, bx(18, 14, 68, 50), 56, { fx: "slash", pushX: 4.2, hitstun: 19 })],
       desc: "Wide air swing that covers the whole arc in front of her.",
       notation: "(air) B",
       frames: [
@@ -571,7 +571,7 @@ export const VIKING: FighterDef = {
       landRecovery: 8,
       vel: [{ at: 6, y: -4, mode: "add" }],
       hits: [
-        hit(8, 20, bx(0, -6, 64, 52), 88, {
+        hit(8, 20, bx(0, -6, 64, 52), 83, {
           guard: "overhead",
           fx: "slash",
           knockdown: "hard",
@@ -601,7 +601,7 @@ export const VIKING: FighterDef = {
       ],
       friction: 0.9,
       armor: [{ from: 3, to: 16, hits: 1, damageScale: 0.45 }],
-      hits: [hit(9, 16, bx(20, 26, 70, 60), 82, { fx: "slash", pushX: 8.5, knockdown: "soft", hitstun: 23, shake: 1.7 })],
+      hits: [hit(9, 16, bx(20, 26, 70, 60), 77, { fx: "slash", pushX: 8.5, knockdown: "soft", hitstun: 23, shake: 1.7 })],
       desc: "Runs in behind the shield with the axe already swinging.",
       notation: "→ + C",
       frames: [
@@ -634,7 +634,7 @@ export const VIKING: FighterDef = {
           drag: 0.004,
           life: 80,
           box: { x: -18, y: -16, w: 36, h: 32 },
-          damage: 62,
+          damage: 58,
           hitstun: 22,
           blockstun: 15,
           chip: 6,
@@ -673,9 +673,9 @@ export const VIKING: FighterDef = {
       friction: 0.92,
       armor: [{ from: 4, to: 40, hits: 2, damageScale: 0.3 }],
       hits: [
-        hit(8, 12, bx(-30, 26, 108, 58), 44, { group: 1, fx: "slash", pushX: 1.6, hitstun: 18, hitstop: 5 }),
-        hit(20, 24, bx(-30, 26, 108, 58), 40, { group: 2, fx: "slash", pushX: 1.6, hitstun: 18, hitstop: 5 }),
-        hit(32, 38, bx(-28, 20, 112, 66), 66, {
+        hit(8, 12, bx(-30, 26, 108, 58), 41, { group: 1, fx: "slash", pushX: 1.6, hitstun: 18, hitstop: 5 }),
+        hit(20, 24, bx(-30, 26, 108, 58), 38, { group: 2, fx: "slash", pushX: 1.6, hitstun: 18, hitstop: 5 }),
+        hit(32, 38, bx(-28, 20, 112, 66), 62, {
           group: 3,
           fx: "slash",
           pushX: 9,
@@ -710,8 +710,8 @@ export const VIKING: FighterDef = {
         { at: 26, y: -1, mode: "add" },
       ],
       hits: [
-        hit(3, 8, bx(8, 50, 64, 84), 86, { launch: [2, 10.5], knockdown: "launch", fx: "slash", hitstun: 26, shake: 2 }),
-        hit(9, 17, bx(6, 64, 58, 72), 38, { group: 2, launch: [1.6, 5], fx: "slash" }),
+        hit(3, 8, bx(8, 50, 64, 84), 81, { launch: [2, 10.5], knockdown: "launch", fx: "slash", hitstun: 26, shake: 2 }),
+        hit(9, 17, bx(6, 64, 58, 72), 36, { group: 2, launch: [1.6, 5], fx: "slash" }),
       ],
       desc: "Invincible rising axe. Her reversal, and it takes them up with her.",
       notation: "→↓↘ + C",
@@ -738,8 +738,8 @@ export const VIKING: FighterDef = {
       ],
       friction: 0.92,
       hits: [
-        hit(12, 16, bx(22, 30, 60, 56), 48, { group: 1, fx: "blunt", pushX: 2, hitstun: 18, hitstop: 5 }),
-        hit(24, 30, bx(20, 24, 70, 64), 74, {
+        hit(12, 16, bx(22, 30, 60, 56), 45, { group: 1, fx: "blunt", pushX: 2, hitstun: 18, hitstop: 5 }),
+        hit(24, 30, bx(20, 24, 70, 64), 70, {
           group: 2,
           fx: "blunt",
           pushX: 14,
@@ -774,7 +774,7 @@ export const VIKING: FighterDef = {
         { at: 26, y: -0.7, mode: "add" },
       ],
       hits: [
-        hit(20, 30, bx(10, 4, 66, 66), 92, {
+        hit(20, 30, bx(10, 4, 66, 66), 86, {
           guard: "overhead",
           fx: "slash",
           pushX: 8,
@@ -839,10 +839,10 @@ export const VIKING: FighterDef = {
       ],
       friction: 0.92,
       hits: [
-        hit(8, 12, bx(-32, 24, 116, 62), 42, { group: 1, fx: "slash", pushX: 1.2, hitstun: 18, hitstop: 5 }),
-        hit(20, 24, bx(-32, 24, 116, 62), 38, { group: 2, fx: "slash", pushX: 1.2, hitstun: 18, hitstop: 5 }),
-        hit(32, 36, bx(-32, 24, 116, 62), 38, { group: 3, fx: "slash", pushX: 1.2, hitstun: 18, hitstop: 5 }),
-        hit(44, 50, bx(-30, 16, 120, 74), 76, {
+        hit(8, 12, bx(-32, 24, 116, 62), 39, { group: 1, fx: "slash", pushX: 1.2, hitstun: 18, hitstop: 5 }),
+        hit(20, 24, bx(-32, 24, 116, 62), 36, { group: 2, fx: "slash", pushX: 1.2, hitstun: 18, hitstop: 5 }),
+        hit(32, 36, bx(-32, 24, 116, 62), 36, { group: 3, fx: "slash", pushX: 1.2, hitstun: 18, hitstop: 5 }),
+        hit(44, 50, bx(-30, 16, 120, 74), 71, {
           group: 4,
           fx: "slash",
           pushX: 12,
@@ -878,9 +878,9 @@ export const VIKING: FighterDef = {
         { at: 32, y: -1, mode: "add" },
       ],
       hits: [
-        hit(3, 8, bx(8, 48, 70, 90), 70, { launch: [2, 12], knockdown: "launch", fx: "slash", hitstun: 28, shake: 2.2 }),
-        hit(9, 18, bx(6, 62, 64, 82), 36, { group: 2, launch: [1.4, 5], fx: "slash" }),
-        hit(19, 28, bx(6, 74, 62, 74), 56, { group: 3, launch: [2, 4], fx: "slash", knockdown: "hard" }),
+        hit(3, 8, bx(8, 48, 70, 90), 66, { launch: [2, 12], knockdown: "launch", fx: "slash", hitstun: 28, shake: 2.2 }),
+        hit(9, 18, bx(6, 62, 64, 82), 34, { group: 2, launch: [1.4, 5], fx: "slash" }),
+        hit(19, 28, bx(6, 74, 62, 74), 53, { group: 3, launch: [2, 4], fx: "slash", knockdown: "hard" }),
       ],
       desc: "EX. Fully invincible, higher, and it drags them up the whole way.",
       notation: "→↓↘ + S  (50 meter)",
@@ -913,11 +913,11 @@ export const VIKING: FighterDef = {
       ],
       friction: 0.93,
       hits: [
-        hit(14, 18, bx(20, 26, 80, 64), 56, { group: 1, fx: "slash", pushX: 1, hitstun: 22, hitstop: 6 }),
-        hit(24, 28, bx(-24, 24, 104, 62), 44, { group: 2, fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(34, 38, bx(20, 20, 84, 70), 44, { group: 3, fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(46, 50, bx(-24, 22, 108, 66), 46, { group: 4, fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(62, 70, bx(16, 8, 96, 92), 148, {
+        hit(14, 18, bx(20, 26, 80, 64), 53, { group: 1, fx: "slash", pushX: 1, hitstun: 22, hitstop: 6 }),
+        hit(24, 28, bx(-24, 24, 104, 62), 41, { group: 2, fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
+        hit(34, 38, bx(20, 20, 84, 70), 41, { group: 3, fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
+        hit(46, 50, bx(-24, 22, 108, 66), 43, { group: 4, fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
+        hit(62, 70, bx(16, 8, 96, 92), 139, {
           group: 5,
           fx: "slash",
           pushX: 14,

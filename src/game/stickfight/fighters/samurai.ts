@@ -49,7 +49,7 @@ export const SAMURAI: FighterDef = {
     aura: "#9fe8ff",
   },
   stats: {
-    health: 960,
+    health: 1010,
     walkF: 2.85,
     walkB: 2.45,
     dashSpeed: 8.2,
@@ -197,7 +197,7 @@ export const SAMURAI: FighterDef = {
       followUps: [
         { button: "B", move: "5B", from: 4, to: 10, string: "Kenjutsu Kata" },
       ],
-      hits: [hit(4, 6, bx(18, 52, 44, 22), 32, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 3 })],
+      hits: [hit(4, 6, bx(18, 52, 44, 22), 37, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 3 })],
       desc: "Jab with the sword hilt - the blade never leaves the scabbard. Fast and cancellable.",
       notation: "A",
       frames: [
@@ -220,7 +220,7 @@ export const SAMURAI: FighterDef = {
         { button: "C", move: "6C", from: 8, to: 19, string: "Kenjutsu Kata" },
         { button: "B", move: "4B", from: 8, to: 19, string: "Two Cuts" },
       ],
-      hits: [hit(8, 11, bx(24, 44, 78, 42), 56, { fx: "slash", pushX: 4.6, hitstun: 18 })],
+      hits: [hit(8, 11, bx(24, 44, 78, 42), 64, { fx: "slash", pushX: 4.6, hitstun: 18 })],
       desc: "Diagonal shoulder-to-hip cut with real reach. Her main poke.",
       notation: "B",
       frames: [
@@ -240,7 +240,7 @@ export const SAMURAI: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [14, 28],
       hits: [
-        hit(14, 18, bx(18, 24, 84, 78), 94, {
+        hit(14, 18, bx(18, 24, 84, 78), 108, {
           fx: "slash",
           pushX: 6.5,
           knockdown: "hard",
@@ -266,7 +266,7 @@ export const SAMURAI: FighterDef = {
       duration: 13,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 12],
-      hits: [hit(4, 6, bx(16, 14, 44, 22), 28, { guard: "low", fx: "blunt", hitstun: 13, blockstun: 10, pushX: 2.8 })],
+      hits: [hit(4, 6, bx(16, 14, 44, 22), 32, { guard: "low", fx: "blunt", hitstun: 13, blockstun: 10, pushX: 2.8 })],
       desc: "Quick low knock with the pommel. Opens up a standing guard.",
       notation: "↓ + A",
       frames: [
@@ -284,7 +284,7 @@ export const SAMURAI: FighterDef = {
       duration: 24,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [9, 22],
-      hits: [hit(9, 12, bx(20, 6, 82, 26), 54, { guard: "low", fx: "slash", pushX: 4.4, hitstun: 17 })],
+      hits: [hit(9, 12, bx(20, 6, 82, 26), 61, { guard: "low", fx: "slash", pushX: 4.4, hitstun: 17 })],
       desc: "Long low sweep of the blade. Must be blocked crouching.",
       notation: "↓ + B",
       frames: [
@@ -303,7 +303,7 @@ export const SAMURAI: FighterDef = {
       duration: 30,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 26],
-      hits: [hit(11, 15, bx(18, 2, 88, 24), 76, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 6 })],
+      hits: [hit(11, 15, bx(18, 2, 88, 24), 87, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 6 })],
       desc: "Full-extension sweep. Knockdown into her okizeme.",
       notation: "↓ + C",
       frames: [
@@ -325,7 +325,7 @@ export const SAMURAI: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [14, 26],
-      hits: [hit(13, 17, bx(20, 36, 54, 48), 58, { guard: "overhead", fx: "blunt", pushX: 5, hitstun: 20 })],
+      hits: [hit(13, 17, bx(20, 36, 54, 48), 67, { guard: "overhead", fx: "blunt", pushX: 5, hitstun: 20 })],
       desc: "Hopping knee that must be blocked standing. Her only fast overhead.",
       notation: "→ + B",
       frames: [
@@ -346,7 +346,7 @@ export const SAMURAI: FighterDef = {
       duration: 32,
       cancelInto: ["special", "super"],
       cancelWindow: [11, 28],
-      hits: [hit(8, 12, bx(12, 48, 62, 76), 72, { launch: [2, 12.5], knockdown: "launch", fx: "slash", hitstun: 26 })],
+      hits: [hit(8, 12, bx(12, 48, 62, 76), 83, { launch: [2, 12.5], knockdown: "launch", fx: "slash", hitstun: 26 })],
       desc: "Upward arc that launches. Follow into air normals for the juggle.",
       notation: "↘ + C",
       frames: [
@@ -375,7 +375,7 @@ export const SAMURAI: FighterDef = {
       followUps: [
         { button: "C", move: "3C", from: 7, to: 17, string: "Rising Cut" },
       ],
-      hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "pierce", pushX: 3, hitstun: 14, hitstop: 5 })],
+      hits: [hit(7, 9, bx(20, 60, 44, 26), 37, { guard: "high", fx: "pierce", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "A short step and a straight thrust off the hip. Her quickest opening.",
       notation: "\u2192 + A",
       frames: [
@@ -400,7 +400,7 @@ export const SAMURAI: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 92, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(18, 22, 64, 68), 105, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Steps through with the full diagonal cut, collarbone to hip.",
       notation: "\u2192 + C",
       frames: [
@@ -423,7 +423,7 @@ export const SAMURAI: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
-      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
+      hits: [hit(8, 10, bx(16, 52, 42, 30), 41, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Slips back and cracks them with the hilt. Made for punishing a whiff.",
       notation: "\u2190 + A",
       frames: [
@@ -449,7 +449,7 @@ export const SAMURAI: FighterDef = {
       followUps: [
         { button: "C", move: "4C", from: 12, to: 27, string: "Two Cuts" },
       ],
-      hits: [hit(12, 15, bx(26, 44, 82, 46), 56, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
+      hits: [hit(12, 15, bx(26, 44, 82, 46), 64, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Draws back and cuts upward from low guard. Her counter to anything reaching in.",
       notation: "\u2190 + B",
       frames: [
@@ -471,7 +471,7 @@ export const SAMURAI: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 104, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(14, 20, 70, 86), 119, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Raises to jodan and cuts straight down through the head. Blocked standing only.",
       notation: "\u2190 + C",
       frames: [
@@ -496,7 +496,7 @@ export const SAMURAI: FighterDef = {
       landRecovery: 2,
       cancelInto: ["medium", "heavy", "special"],
       cancelWindow: [4, 16],
-      hits: [hit(4, 9, bx(16, 32, 52, 30), 34, { fx: "slash", hitstun: 14, pushX: 2.8 })],
+      hits: [hit(4, 9, bx(16, 32, 52, 30), 39, { fx: "slash", hitstun: 14, pushX: 2.8 })],
       desc: "Quick air cut. Starts air strings after a launcher.",
       notation: "(air) A",
       frames: [
@@ -517,7 +517,7 @@ export const SAMURAI: FighterDef = {
       landRecovery: 4,
       cancelInto: ["heavy", "special"],
       cancelWindow: [8, 22],
-      hits: [hit(6, 12, bx(18, 14, 74, 52), 58, { fx: "slash", pushX: 4, hitstun: 18 })],
+      hits: [hit(6, 12, bx(18, 14, 74, 52), 67, { fx: "slash", pushX: 4, hitstun: 18 })],
       desc: "Wide diagonal cut with the reach to catch anyone in the air.",
       notation: "(air) B",
       frames: [
@@ -538,7 +538,7 @@ export const SAMURAI: FighterDef = {
       landCancel: true,
       landRecovery: 7,
       hits: [
-        hit(8, 18, bx(2, -4, 66, 50), 82, {
+        hit(8, 18, bx(2, -4, 66, 50), 94, {
           guard: "overhead",
           fx: "slash",
           knockdown: "soft",
@@ -567,7 +567,7 @@ export const SAMURAI: FighterDef = {
         { at: 16, x: 0 },
       ],
       friction: 0.9,
-      hits: [hit(9, 15, bx(20, 28, 74, 58), 76, { fx: "slash", pushX: 7.5, knockdown: "soft", hitstun: 22, shake: 1.5 })],
+      hits: [hit(9, 15, bx(20, 28, 74, 58), 87, { fx: "slash", pushX: 7.5, knockdown: "soft", hitstun: 22, shake: 1.5 })],
       desc: "Sprints past with the blade extended. Covers half the screen.",
       notation: "→ + C",
       frames: [
@@ -595,7 +595,7 @@ export const SAMURAI: FighterDef = {
       friction: 0.88,
       invuln: [{ from: 8, to: 14, kind: "projectile" }],
       hits: [
-        hit(12, 16, bx(16, 20, 118, 64), 96, {
+        hit(12, 16, bx(16, 20, 118, 64), 110, {
           fx: "slash",
           pushX: 8,
           knockdown: "hard",
@@ -631,8 +631,8 @@ export const SAMURAI: FighterDef = {
         { at: 26, y: -0.9, mode: "add" },
       ],
       hits: [
-        hit(3, 8, bx(8, 50, 62, 84), 78, { launch: [2, 11], knockdown: "launch", fx: "slash", hitstun: 26, shake: 1.8 }),
-        hit(9, 16, bx(6, 64, 58, 72), 38, { group: 2, launch: [1.6, 5], fx: "slash" }),
+        hit(3, 8, bx(8, 50, 62, 84), 89, { launch: [2, 11], knockdown: "launch", fx: "slash", hitstun: 26, shake: 1.8 }),
+        hit(9, 16, bx(6, 64, 58, 72), 43, { group: 2, launch: [1.6, 5], fx: "slash" }),
       ],
       desc: "Invincible rising cut. Reversal, anti-air and juggle starter.",
       notation: "→↓↘ + C",
@@ -675,7 +675,7 @@ export const SAMURAI: FighterDef = {
       vel: [{ at: 2, x: 8 }],
       friction: 0.86,
       hits: [
-        hit(5, 10, bx(18, 22, 96, 60), 104, {
+        hit(5, 10, bx(18, 22, 96, 60), 119, {
           fx: "slash",
           pushX: 9,
           knockdown: "hard",
@@ -730,7 +730,7 @@ export const SAMURAI: FighterDef = {
       landRecovery: 9,
       vel: [{ at: 3, x: 6.5, y: -13 }],
       hits: [
-        hit(5, 30, bx(10, 4, 58, 56), 70, {
+        hit(5, 30, bx(10, 4, 58, 56), 81, {
           guard: "overhead",
           fx: "slash",
           pushX: 4,
@@ -786,8 +786,8 @@ export const SAMURAI: FighterDef = {
       ],
       friction: 0.88,
       hits: [
-        hit(10, 14, bx(16, 18, 132, 70), 70, { group: 1, fx: "slash", pushX: 2, hitstun: 24, hitstop: 8 }),
-        hit(18, 24, bx(16, 14, 138, 78), 86, {
+        hit(10, 14, bx(16, 18, 132, 70), 81, { group: 1, fx: "slash", pushX: 2, hitstun: 24, hitstop: 8 }),
+        hit(18, 24, bx(16, 14, 138, 78), 99, {
           group: 2,
           fx: "slash",
           pushX: 10,
@@ -828,9 +828,9 @@ export const SAMURAI: FighterDef = {
         { at: 32, y: -1, mode: "add" },
       ],
       hits: [
-        hit(3, 8, bx(8, 48, 68, 88), 66, { launch: [2, 12], knockdown: "launch", fx: "slash", hitstun: 28, shake: 2 }),
-        hit(9, 16, bx(6, 62, 62, 80), 34, { group: 2, launch: [1.4, 5], fx: "slash" }),
-        hit(17, 26, bx(6, 74, 60, 72), 52, { group: 3, launch: [2, 4], fx: "slash", knockdown: "hard" }),
+        hit(3, 8, bx(8, 48, 68, 88), 75, { launch: [2, 12], knockdown: "launch", fx: "slash", hitstun: 28, shake: 2 }),
+        hit(9, 16, bx(6, 62, 62, 80), 39, { group: 2, launch: [1.4, 5], fx: "slash" }),
+        hit(17, 26, bx(6, 74, 60, 72), 59, { group: 3, launch: [2, 4], fx: "slash", knockdown: "hard" }),
       ],
       desc: "EX. Fully invincible and carries them all the way up with three cuts.",
       notation: "→↓↘ + S  (50 meter)",
@@ -861,12 +861,12 @@ export const SAMURAI: FighterDef = {
       ],
       friction: 0.92,
       hits: [
-        hit(14, 17, bx(18, 24, 104, 62), 52, { group: 1, fx: "slash", pushX: 0.6, hitstun: 22, hitstop: 5 }),
-        hit(22, 25, bx(18, 30, 104, 62), 40, { group: 2, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
-        hit(30, 33, bx(18, 20, 108, 68), 40, { group: 3, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
-        hit(38, 41, bx(18, 30, 108, 68), 40, { group: 4, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
-        hit(46, 49, bx(18, 22, 112, 72), 40, { group: 5, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
-        hit(58, 64, bx(14, 10, 128, 86), 150, {
+        hit(14, 17, bx(18, 24, 104, 62), 59, { group: 1, fx: "slash", pushX: 0.6, hitstun: 22, hitstop: 5 }),
+        hit(22, 25, bx(18, 30, 104, 62), 46, { group: 2, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
+        hit(30, 33, bx(18, 20, 108, 68), 46, { group: 3, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
+        hit(38, 41, bx(18, 30, 108, 68), 46, { group: 4, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
+        hit(46, 49, bx(18, 22, 112, 72), 46, { group: 5, fx: "slash", pushX: 0.6, hitstun: 20, hitstop: 4 }),
+        hit(58, 64, bx(14, 10, 128, 86), 172, {
           group: 6,
           fx: "slash",
           pushX: 12,

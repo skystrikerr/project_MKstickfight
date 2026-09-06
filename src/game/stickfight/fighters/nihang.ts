@@ -59,7 +59,7 @@ export const NIHANG: FighterDef = {
     aura: "#6fa8ff",
   },
   stats: {
-    health: 980,
+    health: 1020,
     walkF: 2.6,
     walkB: 2.4,
     dashSpeed: 7.8,
@@ -216,7 +216,7 @@ export const NIHANG: FighterDef = {
       followUps: [
         { button: "A", move: "6A", from: 4, to: 10, string: "Chakram Work" },
       ],
-      hits: [hit(4, 6, bx(18, 52, 44, 22), 30, { blockstun: 10, hitstun: 14, fx: "slash", pushX: 2.8 })],
+      hits: [hit(4, 6, bx(18, 52, 44, 22), 34, { blockstun: 10, hitstun: 14, fx: "slash", pushX: 2.8 })],
       desc: "Rakes the held quoit across their face without letting go of it. Fast, and it chains.",
       notation: "A",
       frames: [
@@ -238,7 +238,7 @@ export const NIHANG: FighterDef = {
       followUps: [
         { button: "C", move: "5C", from: 8, to: 19, string: "Tulwar Kata" },
       ],
-      hits: [hit(8, 11, bx(24, 42, 68, 40), 58, { fx: "slash", pushX: 4.6, hitstun: 18 })],
+      hits: [hit(8, 11, bx(24, 42, 68, 40), 67, { fx: "slash", pushX: 4.6, hitstun: 18 })],
       desc: "A drawing cut with the curve of the blade. His most honest button.",
       notation: "B",
       frames: [
@@ -262,7 +262,7 @@ export const NIHANG: FighterDef = {
         { button: "C", move: "4C", from: 14, to: 29, string: "Tulwar Kata" },
       ],
       hits: [
-        hit(14, 18, bx(20, 30, 78, 64), 88, {
+        hit(14, 18, bx(20, 30, 78, 64), 101, {
           fx: "slash",
           knockdown: "soft",
           pushX: 6.5,
@@ -287,7 +287,7 @@ export const NIHANG: FighterDef = {
       duration: 14,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 13],
-      hits: [hit(4, 6, bx(16, 16, 42, 20), 26, { guard: "low", blockstun: 10, hitstun: 13, pushX: 2.4 })],
+      hits: [hit(4, 6, bx(16, 16, 42, 20), 30, { guard: "low", blockstun: 10, hitstun: 13, pushX: 2.4 })],
       desc: "Rakes the quoit along the floor. Must be blocked crouching.",
       notation: "↓ + A",
       frames: [
@@ -305,7 +305,7 @@ export const NIHANG: FighterDef = {
       duration: 25,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [9, 23],
-      hits: [hit(9, 12, bx(22, 10, 68, 26), 54, { guard: "low", fx: "slash", pushX: 4.4 })],
+      hits: [hit(9, 12, bx(22, 10, 68, 26), 61, { guard: "low", fx: "slash", pushX: 4.4 })],
       desc: "Cuts across the shins with the tip of the curve. Long low.",
       notation: "↓ + B",
       frames: [
@@ -325,7 +325,7 @@ export const NIHANG: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [13, 27],
       hits: [
-        hit(12, 16, bx(18, 2, 74, 24), 72, {
+        hit(12, 16, bx(18, 2, 74, 24), 83, {
           guard: "low",
           knockdown: "sweep",
           fx: "slash",
@@ -353,7 +353,7 @@ export const NIHANG: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [16, 25],
       hits: [
-        hit(16, 19, bx(16, 44, 52, 56), 58, {
+        hit(16, 19, bx(16, 44, 52, 56), 67, {
           guard: "overhead",
           fx: "slash",
           pushX: 4.6,
@@ -381,7 +381,7 @@ export const NIHANG: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [12, 28],
       hits: [
-        hit(10, 14, bx(14, 52, 58, 74), 68, {
+        hit(10, 14, bx(14, 52, 58, 74), 77, {
           launch: [2, 12.5],
           knockdown: "launch",
           fx: "slash",
@@ -417,7 +417,7 @@ export const NIHANG: FighterDef = {
       followUps: [
         { button: "B", move: "6B", from: 7, to: 17, string: "Chakram Work" },
       ],
-      hits: [hit(7, 9, bx(20, 60, 44, 26), 32, { guard: "high", fx: "pierce", pushX: 3, hitstun: 14, hitstop: 5 })],
+      hits: [hit(7, 9, bx(20, 60, 44, 26), 37, { guard: "high", fx: "pierce", pushX: 3, hitstun: 14, hitstop: 5 })],
       desc: "Steps in and snaps the chakram edge across. Fast, and it keeps them honest.",
       notation: "\u2192 + A",
       frames: [
@@ -440,7 +440,7 @@ export const NIHANG: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 36],
-      hits: [hit(16, 20, bx(18, 22, 64, 68), 92, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
+      hits: [hit(16, 20, bx(18, 22, 64, 68), 105, { guard: "mid", fx: "slash", pushX: 17, hitstun: 24, hitstop: 12, knockdown: "wallbounce", shake: 2.2 })],
       desc: "Comes forward with the whole arc behind the tulwar. Puts them in the wall.",
       notation: "\u2192 + C",
       frames: [
@@ -463,7 +463,7 @@ export const NIHANG: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
-      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
+      hits: [hit(8, 10, bx(16, 52, 42, 30), 41, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
       desc: "Steps off and raps the hilt across their guard. Buys him the space back.",
       notation: "\u2190 + A",
       frames: [
@@ -489,7 +489,7 @@ export const NIHANG: FighterDef = {
       followUps: [
         { button: "C", move: "3C", from: 12, to: 27, string: "Draw Cut" },
       ],
-      hits: [hit(12, 15, bx(34, 52, 88, 24), 56, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
+      hits: [hit(12, 15, bx(34, 52, 88, 24), 64, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
       desc: "Retreats and lets the curve of the blade do the work on the way out.",
       notation: "\u2190 + B",
       frames: [
@@ -511,7 +511,7 @@ export const NIHANG: FighterDef = {
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(14, 20, 70, 86), 102, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      hits: [hit(20, 23, bx(14, 20, 70, 86), 117, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
       desc: "Takes it high and cuts straight down the centre. Blocked standing only.",
       notation: "\u2190 + C",
       frames: [
@@ -535,7 +535,7 @@ export const NIHANG: FighterDef = {
       landRecovery: 2,
       cancelInto: ["medium", "heavy", "special"],
       cancelWindow: [5, 16],
-      hits: [hit(5, 11, bx(14, 32, 46, 30), 32, { fx: "slash", pushX: 2.6, hitstun: 14 })],
+      hits: [hit(5, 11, bx(14, 32, 46, 30), 37, { fx: "slash", pushX: 2.6, hitstun: 14 })],
       desc: "Quick quoit rake out of a jump.",
       notation: "(air) A",
       frames: [
@@ -554,7 +554,7 @@ export const NIHANG: FighterDef = {
       airborne: true,
       landCancel: true,
       landRecovery: 4,
-      hits: [hit(6, 14, bx(18, 8, 62, 46), 58, { fx: "slash", pushX: 3.8, hitstun: 19 })],
+      hits: [hit(6, 14, bx(18, 8, 62, 46), 67, { fx: "slash", pushX: 3.8, hitstun: 19 })],
       desc: "Cuts down through the jump arc.",
       notation: "(air) B",
       frames: [
@@ -587,7 +587,7 @@ export const NIHANG: FighterDef = {
           gravity: 0.16,
           life: 80,
           box: { x: -13, y: -13, w: 26, h: 26 },
-          damage: 56,
+          damage: 64,
           hitstun: 20,
           blockstun: 13,
           chip: 5,
@@ -622,7 +622,7 @@ export const NIHANG: FighterDef = {
       ],
       friction: 0.89,
       hits: [
-        hit(9, 15, bx(18, 26, 64, 60), 76, {
+        hit(9, 15, bx(18, 26, 64, 60), 87, {
           fx: "slash",
           pushX: 8,
           knockdown: "soft",
@@ -664,7 +664,7 @@ export const NIHANG: FighterDef = {
           vy: 0,
           life: 100,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 54,
+          damage: 61,
           hitstun: 19,
           blockstun: 13,
           chip: 6,
@@ -706,7 +706,7 @@ export const NIHANG: FighterDef = {
           gravity: 0.04,
           life: 100,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 38,
+          damage: 43,
           hitstun: 17,
           blockstun: 12,
           chip: 4,
@@ -725,7 +725,7 @@ export const NIHANG: FighterDef = {
           vy: 0,
           life: 100,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 36,
+          damage: 41,
           hitstun: 17,
           blockstun: 12,
           chip: 4,
@@ -745,7 +745,7 @@ export const NIHANG: FighterDef = {
           gravity: 0.02,
           life: 100,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 46,
+          damage: 53,
           hitstun: 21,
           blockstun: 14,
           chip: 5,
@@ -796,7 +796,7 @@ export const NIHANG: FighterDef = {
           bounces: 3,
           life: 120,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 60,
+          damage: 69,
           hitstun: 22,
           blockstun: 14,
           guard: "low",
@@ -834,9 +834,9 @@ export const NIHANG: FighterDef = {
       ],
       friction: 0.9,
       hits: [
-        hit(10, 13, bx(20, 36, 62, 50), 34, { group: 1, fx: "slash", pushX: 1.5, hitstun: 15, hitstop: 4 }),
-        hit(17, 20, bx(20, 26, 64, 58), 34, { group: 2, fx: "slash", pushX: 1.5, hitstun: 15, hitstop: 4 }),
-        hit(26, 32, bx(18, 22, 72, 68), 76, {
+        hit(10, 13, bx(20, 36, 62, 50), 39, { group: 1, fx: "slash", pushX: 1.5, hitstun: 15, hitstop: 4 }),
+        hit(17, 20, bx(20, 26, 64, 58), 39, { group: 2, fx: "slash", pushX: 1.5, hitstun: 15, hitstop: 4 }),
+        hit(26, 32, bx(18, 22, 72, 68), 87, {
           group: 3,
           fx: "slash",
           pushX: 9,
@@ -886,7 +886,7 @@ export const NIHANG: FighterDef = {
           drag: 0.965,
           life: 96,
           box: { x: -16, y: -16, w: 32, h: 32 },
-          damage: 48,
+          damage: 55,
           hitstun: 20,
           blockstun: 14,
           chip: 5,
@@ -925,14 +925,14 @@ export const NIHANG: FighterDef = {
         { at: 26, y: -1, mode: "add" },
       ],
       hits: [
-        hit(3, 8, bx(4, 54, 58, 78), 78, {
+        hit(3, 8, bx(4, 54, 58, 78), 89, {
           launch: [2, 11],
           knockdown: "launch",
           fx: "slash",
           hitstun: 25,
           shake: 1.8,
         }),
-        hit(9, 16, bx(2, 66, 54, 66), 36, { group: 2, launch: [1.6, 5.5], fx: "slash", hitstun: 17 }),
+        hit(9, 16, bx(2, 66, 54, 66), 41, { group: 2, launch: [1.6, 5.5], fx: "slash", hitstun: 17 }),
       ],
       desc: "Comes up off the back foot with the tulwar leading. Invincible on startup - his reversal.",
       notation: "→↓↘ + C",
@@ -959,9 +959,9 @@ export const NIHANG: FighterDef = {
         { at: 30, y: -1, mode: "add" },
       ],
       hits: [
-        hit(2, 8, bx(4, 52, 64, 84), 70, { launch: [2, 12.5], knockdown: "launch", fx: "slash", hitstun: 27, shake: 2 }),
-        hit(9, 17, bx(2, 66, 58, 76), 34, { group: 2, launch: [1.4, 5], fx: "slash" }),
-        hit(18, 26, bx(2, 76, 56, 68), 46, { group: 3, launch: [2, 4], fx: "slash", knockdown: "hard" }),
+        hit(2, 8, bx(4, 52, 64, 84), 81, { launch: [2, 12.5], knockdown: "launch", fx: "slash", hitstun: 27, shake: 2 }),
+        hit(9, 17, bx(2, 66, 58, 76), 39, { group: 2, launch: [1.4, 5], fx: "slash" }),
+        hit(18, 26, bx(2, 76, 56, 68), 53, { group: 3, launch: [2, 4], fx: "slash", knockdown: "hard" }),
       ],
       desc: "EX. Fully invincible, higher, and it carries them up with him.",
       notation: "→↓↘ + S  (50 meter)",
@@ -1024,7 +1024,7 @@ export const NIHANG: FighterDef = {
           gravity: 0.03,
           life: 110,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 42,
+          damage: 48,
           hitstun: 18,
           blockstun: 12,
           chip: 4,
@@ -1045,7 +1045,7 @@ export const NIHANG: FighterDef = {
           vy: 0,
           life: 110,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 40,
+          damage: 46,
           hitstun: 18,
           blockstun: 12,
           chip: 4,
@@ -1065,7 +1065,7 @@ export const NIHANG: FighterDef = {
           vy: 0.4,
           life: 110,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 40,
+          damage: 46,
           hitstun: 18,
           blockstun: 12,
           chip: 4,
@@ -1085,7 +1085,7 @@ export const NIHANG: FighterDef = {
           vy: 0.2,
           life: 110,
           box: { x: -14, y: -14, w: 28, h: 28 },
-          damage: 44,
+          damage: 51,
           hitstun: 20,
           blockstun: 13,
           guard: "low",
@@ -1098,7 +1098,7 @@ export const NIHANG: FighterDef = {
         },
       ],
       hits: [
-        hit(56, 64, bx(14, 12, 88, 92), 140, {
+        hit(56, 64, bx(14, 12, 88, 92), 160, {
           fx: "slash",
           pushX: 12,
           knockdown: "hard",

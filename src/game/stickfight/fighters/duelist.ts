@@ -59,7 +59,7 @@ export const DUELIST: FighterDef = {
     aura: "#f0a0c8",
   },
   stats: {
-    health: 860,
+    health: 940,
     walkF: 3.5,
     walkB: 3.4,
     dashSpeed: 10.2,
@@ -192,7 +192,7 @@ export const DUELIST: FighterDef = {
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 10],
       followUps: [{ button: "A", move: "6A", from: 3, to: 9, string: "Phrase" }],
-      hits: [hit(3, 5, bx(28, 54, 62, 14), 22, { fx: "pierce", hitstun: 13, blockstun: 9, pushX: 2 })],
+      hits: [hit(3, 5, bx(28, 54, 62, 14), 25, { fx: "pierce", hitstun: 13, blockstun: 9, pushX: 2 })],
       desc: "Arm only. Three frames, almost no damage, and it reaches past anything else that fast.",
       notation: "A",
       frames: [
@@ -211,7 +211,7 @@ export const DUELIST: FighterDef = {
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [7, 17],
       followUps: [{ button: "C", move: "6C", from: 7, to: 16, string: "Phrase" }],
-      hits: [hit(7, 10, bx(30, 46, 74, 22), 44, { fx: "pierce", pushX: 3.6, hitstun: 17 })],
+      hits: [hit(7, 10, bx(30, 46, 74, 22), 52, { fx: "pierce", pushX: 3.6, hitstun: 17 })],
       desc: "Drops the point under their blade and comes back up the other side of it.",
       notation: "B",
       frames: [
@@ -233,7 +233,7 @@ export const DUELIST: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [14, 26],
       hits: [
-        hit(11, 15, bx(34, 44, 106, 22), 74, {
+        hit(11, 15, bx(34, 44, 106, 22), 86, {
           fx: "pierce",
           pushX: 6,
           hitstun: 22,
@@ -261,7 +261,7 @@ export const DUELIST: FighterDef = {
       duration: 12,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [4, 11],
-      hits: [hit(4, 6, bx(24, 12, 56, 14), 20, { guard: "low", fx: "pierce", hitstun: 13, blockstun: 9, pushX: 2 })],
+      hits: [hit(4, 6, bx(24, 12, 56, 14), 23, { guard: "low", fx: "pierce", hitstun: 13, blockstun: 9, pushX: 2 })],
       desc: "Point dropped to the ankle without moving her feet.",
       notation: "↓ + A",
       frames: [
@@ -280,7 +280,7 @@ export const DUELIST: FighterDef = {
       duration: 22,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [9, 20],
-      hits: [hit(8, 11, bx(28, 8, 80, 20), 46, { guard: "low", fx: "pierce", pushX: 3.4, hitstun: 17 })],
+      hits: [hit(8, 11, bx(28, 8, 80, 20), 54, { guard: "low", fx: "pierce", pushX: 3.4, hitstun: 17 })],
       desc: "Ducks under the line with a hand on the floor and thrusts from down there.",
       notation: "↓ + B",
       frames: [
@@ -300,7 +300,7 @@ export const DUELIST: FighterDef = {
       duration: 28,
       cancelInto: ["special", "super"],
       cancelWindow: [12, 24],
-      hits: [hit(10, 14, bx(22, 2, 84, 20), 64, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 5 })],
+      hits: [hit(10, 14, bx(22, 2, 84, 20), 75, { guard: "low", knockdown: "sweep", fx: "slash", pushX: 5 })],
       desc: "Sweeps the edge through both ankles. There is an edge on it after all, barely.",
       notation: "↓ + C",
       frames: [
@@ -322,7 +322,7 @@ export const DUELIST: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [15, 26],
-      hits: [hit(14, 18, bx(24, 36, 62, 40), 52, { guard: "overhead", fx: "pierce", pushX: 4.4, hitstun: 20 })],
+      hits: [hit(14, 18, bx(24, 36, 62, 40), 61, { guard: "overhead", fx: "pierce", pushX: 4.4, hitstun: 20 })],
       desc: "Lifts the point clear over their blade and comes down the far side. Blocked standing.",
       notation: "→ + B",
       frames: [
@@ -344,7 +344,7 @@ export const DUELIST: FighterDef = {
       duration: 29,
       cancelInto: ["special", "super"],
       cancelWindow: [11, 25],
-      hits: [hit(9, 13, bx(16, 40, 52, 76), 60, { launch: [1.8, 12.2], knockdown: "launch", fx: "pierce", hitstun: 26 })],
+      hits: [hit(9, 13, bx(16, 40, 52, 76), 70, { launch: [1.8, 12.2], knockdown: "launch", fx: "pierce", hitstun: 26 })],
       desc: "Comes up under the chin off the back foot. Launches.",
       notation: "↘ + C",
       frames: [
@@ -369,7 +369,7 @@ export const DUELIST: FighterDef = {
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [6, 17],
       followUps: [{ button: "A", move: "5A", from: 6, to: 16, string: "Phrase" }],
-      hits: [hit(5, 7, bx(30, 52, 66, 16), 24, { guard: "high", fx: "pierce", pushX: 2.6, hitstun: 13, hitstop: 4 })],
+      hits: [hit(5, 7, bx(30, 52, 66, 16), 28, { guard: "high", fx: "pierce", pushX: 2.6, hitstun: 13, hitstop: 4 })],
       desc: "A step and a thrust in the same beat. The fastest way she closes a foot of ground.",
       notation: "→ + A",
       frames: [
@@ -391,7 +391,7 @@ export const DUELIST: FighterDef = {
       friction: 0.9,
       cancelInto: ["special", "super"],
       cancelWindow: [20, 34],
-      hits: [hit(13, 17, bx(26, 30, 92, 44), 84, { guard: "mid", fx: "pierce", pushX: 16, hitstun: 24, hitstop: 11, knockdown: "wallbounce", shake: 2 })],
+      hits: [hit(13, 17, bx(26, 30, 92, 44), 98, { guard: "mid", fx: "pierce", pushX: 16, hitstun: 24, hitstop: 11, knockdown: "wallbounce", shake: 2 })],
       desc: "Runs at them behind the point rather than stepping. Carries them into the wall.",
       notation: "→ + C",
       frames: [
@@ -415,7 +415,7 @@ export const DUELIST: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [7, 18],
-      hits: [hit(7, 9, bx(30, 48, 64, 20), 32, { guard: "mid", fx: "pierce", pushX: 5, hitstun: 15, hitstop: 5 })],
+      hits: [hit(7, 9, bx(30, 48, 64, 20), 37, { guard: "mid", fx: "pierce", pushX: 5, hitstun: 15, hitstop: 5 })],
       desc: "Steps back and leaves the point exactly where their face was going to be.",
       notation: "← + A",
       frames: [
@@ -437,7 +437,7 @@ export const DUELIST: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [15, 25],
-      hits: [hit(11, 14, bx(22, 42, 56, 30), 50, { guard: "mid", fx: "blunt", pushX: 7, hitstun: 18, hitstop: 7 })],
+      hits: [hit(11, 14, bx(22, 42, 56, 30), 58, { guard: "mid", fx: "blunt", pushX: 7, hitstun: 18, hitstop: 7 })],
       desc: "Not fencing at all: a boot, thrown because it works.",
       notation: "← + B",
       frames: [
@@ -458,7 +458,7 @@ export const DUELIST: FighterDef = {
       duration: 42,
       cancelInto: ["special", "super"],
       cancelWindow: [25, 38],
-      hits: [hit(19, 22, bx(18, 22, 58, 84), 88, { guard: "overhead", fx: "pierce", pushX: 8, hitstun: 28, hitstop: 12, knockdown: "hard", shake: 2.2 })],
+      hits: [hit(19, 22, bx(18, 22, 58, 84), 102, { guard: "overhead", fx: "pierce", pushX: 8, hitstun: 28, hitstop: 12, knockdown: "hard", shake: 2.2 })],
       desc: "Takes the point high and drives it down over the guard. Blocked standing only.",
       notation: "← + C",
       frames: [
@@ -483,7 +483,7 @@ export const DUELIST: FighterDef = {
       landRecovery: 2,
       cancelInto: ["medium", "heavy", "special"],
       cancelWindow: [4, 14],
-      hits: [hit(4, 9, bx(24, 32, 58, 18), 24, { fx: "pierce", hitstun: 14, pushX: 2 })],
+      hits: [hit(4, 9, bx(24, 32, 58, 18), 28, { fx: "pierce", hitstun: 14, pushX: 2 })],
       desc: "Point stuck out in front of her on the way through.",
       notation: "(air) A",
       frames: [
@@ -503,7 +503,7 @@ export const DUELIST: FighterDef = {
       landCancel: true,
       landRecovery: 4,
       cancelInto: ["heavy", "special"],
-      hits: [hit(6, 13, bx(20, 20, 62, 38), 48, { fx: "slash", pushX: 3.6, hitstun: 18 })],
+      hits: [hit(6, 13, bx(20, 20, 62, 38), 56, { fx: "slash", pushX: 3.6, hitstun: 18 })],
       desc: "Cuts across underneath her in the air.",
       notation: "(air) B",
       frames: [
@@ -524,7 +524,7 @@ export const DUELIST: FighterDef = {
       landCancel: true,
       landRecovery: 6,
       hits: [
-        hit(7, 17, bx(10, 4, 52, 48), 70, {
+        hit(7, 17, bx(10, 4, 52, 48), 81, {
           guard: "overhead",
           fx: "pierce",
           knockdown: "soft",
@@ -554,7 +554,7 @@ export const DUELIST: FighterDef = {
         { at: 15, x: 0 },
       ],
       friction: 0.9,
-      hits: [hit(6, 11, bx(28, 30, 76, 40), 62, { fx: "pierce", pushX: 6, knockdown: "soft", hitstun: 21, shake: 1.3 })],
+      hits: [hit(6, 11, bx(28, 30, 76, 40), 73, { fx: "pierce", pushX: 6, knockdown: "soft", hitstun: 21, shake: 1.3 })],
       desc: "Closes the whole gap with the point already out.",
       notation: "→ + C",
       frames: [
@@ -579,7 +579,7 @@ export const DUELIST: FighterDef = {
       resourceGain: 1,
       // The counter lands whether or not the parry caught anything, but it is
       // the parry window that makes it worth pressing.
-      hits: [hit(14, 18, bx(30, 44, 96, 24), 92, { fx: "pierce", pushX: 7, hitstun: 26, hitstop: 12, knockdown: "soft", shake: 1.7 })],
+      hits: [hit(14, 18, bx(30, 44, 96, 24), 108, { fx: "pierce", pushX: 7, hitstun: 26, hitstop: 12, knockdown: "soft", shake: 1.7 })],
       desc: "Turns their blade aside and answers down the same line. The parry is the read; the thrust is what it is worth. Pays a Tempo back.",
       notation: "↓↙← + B",
       frames: [
@@ -607,7 +607,7 @@ export const DUELIST: FighterDef = {
       invuln: [{ from: 3, to: 14, kind: "strike" }],
       vel: [{ at: 3, x: -5 }, { at: 14, x: 0 }],
       friction: 0.86,
-      hits: [hit(9, 12, bx(26, 46, 72, 22), 46, { fx: "pierce", pushX: 4, hitstun: 18, hitstop: 7 })],
+      hits: [hit(9, 12, bx(26, 46, 72, 22), 54, { fx: "pierce", pushX: 4, hitstun: 18, hitstop: 7 })],
       desc: "Turns her hips out of the line, lets it go past, and thrusts from where she now is. Costs a Tempo.",
       notation: "↓↙← + A",
       frames: [
@@ -628,9 +628,9 @@ export const DUELIST: FighterDef = {
       vel: [{ at: 4, x: 3 }, { at: 12, x: 2.4 }, { at: 22, x: 2.4 }, { at: 32, x: 0 }],
       friction: 0.9,
       hits: [
-        hit(7, 9, bx(30, 50, 78, 18), 34, { group: 1, fx: "pierce", pushX: 1.4, hitstun: 15, hitstop: 4 }),
-        hit(16, 18, bx(30, 40, 82, 18), 32, { group: 2, fx: "pierce", pushX: 1.4, hitstun: 15, hitstop: 4 }),
-        hit(26, 30, bx(32, 44, 96, 22), 62, {
+        hit(7, 9, bx(30, 50, 78, 18), 40, { group: 1, fx: "pierce", pushX: 1.4, hitstun: 15, hitstop: 4 }),
+        hit(16, 18, bx(30, 40, 82, 18), 37, { group: 2, fx: "pierce", pushX: 1.4, hitstun: 15, hitstop: 4 }),
+        hit(26, 30, bx(32, 44, 96, 22), 73, {
           group: 3,
           fx: "pierce",
           pushX: 8,
@@ -671,8 +671,8 @@ export const DUELIST: FighterDef = {
       friction: 0.82,
       resourceGain: 1,
       hits: [
-        hit(11, 14, bx(12, 46, 46, 30), 54, { group: 1, fx: "pierce", pushX: 2, hitstun: 20, hitstop: 8 }),
-        hit(15, 19, bx(28, 44, 82, 22), 66, {
+        hit(11, 14, bx(12, 46, 46, 30), 63, { group: 1, fx: "pierce", pushX: 2, hitstun: 20, hitstop: 8 }),
+        hit(15, 19, bx(28, 44, 82, 22), 77, {
           group: 2,
           fx: "pierce",
           pushX: 8,
@@ -706,7 +706,7 @@ export const DUELIST: FighterDef = {
       vel: [{ at: 4, x: 1.6 }, { at: 12, x: 0 }],
       friction: 0.88,
       // Invulnerable to nothing. This move is a threat, not an escape.
-      hits: [hit(8, 10, bx(24, 52, 56, 18), 30, { fx: "pierce", pushX: 3, hitstun: 22, hitstop: 8, meterGain: 14 })],
+      hits: [hit(8, 10, bx(24, 52, 56, 18), 35, { fx: "pierce", pushX: 3, hitstun: 22, hitstop: 8, meterGain: 14 })],
       desc: "Stamps the front foot and puts the point in their face - the oldest way to ask a question in fencing. Barely hurts, holds them still, and buys Tempo and meter.",
       notation: "→↓↘ + B",
       frames: [
@@ -760,13 +760,13 @@ export const DUELIST: FighterDef = {
       ],
       friction: 0.9,
       hits: [
-        hit(13, 16, bx(30, 50, 84, 18), 40, { group: 1, fx: "pierce", pushX: 0.8, hitstun: 19, hitstop: 4 }),
-        hit(24, 27, bx(30, 38, 86, 18), 36, { group: 2, fx: "pierce", pushX: 0.8, hitstun: 18, hitstop: 4 }),
-        hit(35, 38, bx(30, 24, 88, 18), 36, { group: 3, guard: "low", fx: "pierce", pushX: 0.8, hitstun: 18, hitstop: 4 }),
-        hit(46, 49, bx(30, 46, 88, 18), 36, { group: 4, fx: "pierce", pushX: 0.8, hitstun: 18, hitstop: 4 }),
+        hit(13, 16, bx(30, 50, 84, 18), 46, { group: 1, fx: "pierce", pushX: 0.8, hitstun: 19, hitstop: 4 }),
+        hit(24, 27, bx(30, 38, 86, 18), 42, { group: 2, fx: "pierce", pushX: 0.8, hitstun: 18, hitstop: 4 }),
+        hit(35, 38, bx(30, 24, 88, 18), 42, { group: 3, guard: "low", fx: "pierce", pushX: 0.8, hitstun: 18, hitstop: 4 }),
+        hit(46, 49, bx(30, 46, 88, 18), 42, { group: 4, fx: "pierce", pushX: 0.8, hitstun: 18, hitstop: 4 }),
         // The secret thrust: the one nobody has an answer to, because nobody
         // has seen it. Every fencing master in the period claimed one.
-        hit(62, 68, bx(28, 34, 122, 30), 142, {
+        hit(62, 68, bx(28, 34, 122, 30), 166, {
           group: 5,
           fx: "pierce",
           pushX: 11,
