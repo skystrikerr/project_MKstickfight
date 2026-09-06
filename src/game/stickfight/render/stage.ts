@@ -23,6 +23,7 @@ export type StageTheme =
   | "forge"
   | "skyward"
   | "delta"
+  | "mactan"
   // Painted backdrops rather than built shapes.
   | "postroad"
   | "dryclaim"
@@ -188,6 +189,17 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ground: "#4a5340",
     accent: "#a7d16a",
     ambient: { kind: "rain", count: 80, colors: ["#b7cfa8", "#dfe9cf"], speed: 12, wind: -1.8, size: [1.3, 20], opacity: 0.42 },
+  },
+  mactan: {
+    name: "Mactan Shallows",
+    blurb: "The boats grounded on the reef. They came the last of the way on foot.",
+    sky: ["#2f6f9b", "#cfe6d8"],
+    ground: "#d9c9a2",
+    accent: "#5fb7c9",
+    // Early morning, the sun still low over the water, and enough of it coming
+    // back up off a shallow lagoon that nothing here has a dark side.
+    light: { key: "#fff3d2", fill: "#4e7f96", strength: 0.78, shadow: "#4a6f7a", glow: 0.12 },
+    ambient: { kind: "dust", count: 20, colors: ["#eaf6fb", "#bfe0ea"], speed: -0.08, wind: 0.1, size: [2, 4], opacity: 0.34 },
   },
   aqueduct: {
     // Overcast stone light. Flat, cool, and not much of it.
@@ -447,6 +459,29 @@ function ridge(
   return m;
 }
 
+/**
+ * A closed outline placed at (x, y). `ridge` draws the same thing but always
+ * at the origin, which is right for a skyline and wrong for anything there are
+ * four of at different places along the beach.
+ */
+function poly(
+  x: number,
+  y: number,
+  pts: number[],
+  color: THREE.ColorRepresentation,
+  order: number,
+  opacity = 1,
+): THREE.Mesh {
+  const shape = new THREE.Shape();
+  shape.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) shape.lineTo(pts[i], pts[i + 1]);
+  shape.closePath();
+  const m = new THREE.Mesh(new THREE.ShapeGeometry(shape), mat(color, opacity));
+  m.position.set(x, y, layerZ(order));
+  m.renderOrder = order;
+  return m;
+}
+
 /** Vertical gradient backdrop built from a two-colour vertex-coloured quad. */
 function skyQuad(top: string, bottom: string, order: number): THREE.Mesh {
   const geo = new THREE.PlaneGeometry(2400, 1300);
@@ -600,6 +635,9 @@ export class Stage {
         break;
       case "skyward":
         this.buildSkyward();
+        break;
+      case "mactan":
+        this.buildMactan();
         break;
       case "delta":
         this.buildDelta();
@@ -1102,6 +1140,111 @@ export class Stage {
    * things drawn over it are the floor every stage needs and the ambient
    * weather, both of which each painting already contains and so agrees with.
    */
+  /**
+   * Mactan, the 27th of April 1521.
+   *
+   * The one thing every account agrees on is the water. The ships could not
+   * get in over the reef and the boats grounded well out, so the landing party
+   * waded the last stretch, and the fight happened in the shallows with the
+   * fleet watching from too far away to help. So the stage is built outward
+   * from that: open sea and anchored ships on the horizon, the reef line
+   * breaking, then a lagoon, and a strip of wet sand to stand on.
+   */
+  private buildMactan() {
+    const far = new THREE.Group();
+    // Open water, filling the upper half the way the mountains do on the
+    // Frozen Pass. Stacking everything into low horizontal bands - which is
+    // what the first attempt did - gives a stage with no skyline at all.
+    far.add(rect(0, 150, 1900, 240, "#2f6f9b", 1));
+    far.add(rect(0, 150, 1900, 70, "#4d8db4", 1, 0.75));
+    far.add(rect(0, 372, 1900, 18, "#cfe6ee", 1, 0.45));
+    // The headland closing the bay, big enough to be a horizon rather than a
+    // detail.
+    far.add(ridge(
+      [[-980, 150], [-880, 330], [-740, 262], [-600, 348], [-470, 244], [-380, 300], [-300, 168], [-260, 150]],
+      "#37543f",
+      2,
+      0.95,
+    ));
+    far.add(ridge(
+      [[700, 150], [800, 286], [930, 232], [980, 268], [980, 150]],
+      "#3d5c4a",
+      2,
+      0.9,
+    ));
+    // The fleet, hove to beyond the reef and too far out to help. Small on
+    // purpose: the point of the stage is that they are watching.
+    for (const [x, k] of [[-140, 0.85], [330, 0.7], [560, 0.58]] as [number, number][]) {
+      far.add(rect(x, 214, 84 * k, 15 * k, "#3a2f28", 3));
+      far.add(rect(x, 226, 96 * k, 5 * k, "#4a3c30", 3));
+      far.add(rect(x - 2 * k, 230, 5 * k, 84 * k, "#2b231d", 3));
+      far.add(rect(x + 4 * k, 262, 42 * k, 30 * k, "#efe7d4", 3, 0.95));
+      far.add(rect(x + 4 * k, 234, 32 * k, 24 * k, "#ded3ba", 3, 0.95));
+    }
+    this.addLayer(far, 0.2);
+
+    const mid = new THREE.Group();
+    // The far shore. Everything on land sits on top of this, or the lagoon in
+    // front draws over the bottom of it and the palms hang in the air with no
+    // trunks - which is exactly what the first version did.
+    mid.add(rect(0, 128, 1900, 30, "#c4b48e", 4));
+    mid.add(rect(0, 152, 1900, 10, "#3d7d52", 4, 0.65));
+    // Palms, tall enough to cross the waterline behind them.
+    for (let i = -6; i <= 6; i++) {
+      const x = i * 158 + ((i * 41) % 48);
+      const h = 122 + ((i * 67) % 66);
+      const lean = ((i * 23) % 16) - 8;
+      mid.add(rect(x, 150, 8, h, "#6b5334", 5));
+      const topY = 150 + h;
+      // Fronds droop, so each is a triangle hung off the crown rather than a
+      // fan standing up out of it.
+      for (let f = 0; f < 6; f++) {
+        const a = -78 + f * 31 + lean;
+        const dx = Math.sin((a * Math.PI) / 180) * 32;
+        const dy = Math.cos((a * Math.PI) / 180) * 9;
+        mid.add(tri(x + dx, topY - 14 + dy, 62, 22, f % 2 ? "#2f6b45" : "#3d7d52", 6, 0.95));
+      }
+      mid.add(disc(x, topY - 5, 8, "#5c4a2e", 6));
+    }
+    // Outriggers drawn up on the sand - the defenders came by water too, and
+    // left them where they could get back to them.
+    //
+    // Drawn as a hull with a rising prow and stern rather than as a plank on
+    // legs. A flat box with a bar under it is a picnic table, which is what
+    // these were until the profile was cut properly, and the boom that makes
+    // it a bangka goes behind the hull rather than below it.
+    for (const x of [-620, -180, 300, 700]) {
+      mid.add(poly(x, 150, [-54, 16, -44, 2, 40, 2, 52, 18, 40, 9, -42, 9], "#5c4126", 5, 0.95));
+      mid.add(poly(x, 150, [-42, 12, -34, 5, 32, 5, 42, 13, 32, 9, -34, 9], "#7a5a34", 6, 0.95));
+      mid.add(rect(x + 4, 158, 74, 4, "#6b4a2c", 5, 0.9));
+      mid.add(rect(x - 24, 152, 4, 9, "#4a3220", 5, 0.9));
+      mid.add(rect(x + 30, 152, 4, 9, "#4a3220", 5, 0.9));
+    }
+    this.addLayer(mid, 0.55);
+
+    const near = new THREE.Group();
+    // The lagoon he is standing at the edge of, with the reef breaking white
+    // along its far side.
+    near.add(rect(0, 62, 1900, 74, "#4fa3bd", 7));
+    near.add(rect(0, 128, 1900, 11, "#eaf6fb", 7, 0.9));
+    near.add(rect(0, 62, 1900, 24, "#74bfd2", 7, 0.55));
+    // Wet sand, darker where the water has just been over it.
+    near.add(rect(0, 0, 1900, 62, "#cbba94", 7));
+    near.add(rect(0, 52, 1900, 14, "#a4966f", 7, 0.75));
+    // Coral heads standing out of the shallows.
+    for (let i = -6; i <= 6; i++) {
+      const x = i * 172 + ((i * 53) % 58);
+      near.add(disc(x, 2, 12 + ((i * 29) % 9), "#b3a482", 8, 0.9));
+    }
+    // Fire-hardened stakes driven into the sand. His, and the reason the
+    // Spanish accounts complain about the ground as much as the men on it.
+    for (const [x, h] of [[-640, 46], [-230, 36], [270, 52], [660, 40]] as [number, number][]) {
+      near.add(rect(x, 2, 5, h, "#c8b273", 8));
+      near.add(rect(x, 2 + h - 9, 5, 9, "#2a2018", 8));
+    }
+    this.addLayer(near, 0.9);
+  }
+
   private buildPainted(def: BackdropDef) {
     const g = new THREE.Group();
     const H = def.width / def.aspect; // the painting's own aspect - never letterbox it
@@ -1198,6 +1341,8 @@ export function themeForFighter(id: string): StageTheme {
       return "skyward";
     case "nihang":
       return "forge";
+    case "lapulapu":
+      return "mactan";
     default:
       return "colosseum";
   }

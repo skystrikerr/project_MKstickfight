@@ -399,6 +399,10 @@ export class GameSession {
     let announcement: string | null = null;
     if (m.phase === "intro") {
       announcement = m.phaseFrame < MATCH.introFrames - 24 ? `Round ${m.round}` : "Fight!";
+    } else if (m.phase === "fight" && m.banner) {
+      // Whatever just happened outranks the round call, because it is the
+      // thing the player needs to know about right now.
+      announcement = m.banner.text;
     } else if (m.phase === "fight" && m.phaseFrame < 26) {
       announcement = "Fight!";
     } else if (m.phase === "roundEnd") {

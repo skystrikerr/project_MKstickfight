@@ -12,7 +12,7 @@ import { EMPTY_INPUT, type RawInput } from "./input";
 export type Phase = "intro" | "fight" | "roundEnd" | "matchEnd";
 
 export interface FxEvent {
-  kind: HitFx | "block" | "parry" | "dust" | "smoke" | "spawn" | "super" | "guardBreak" | "ko" | "trail";
+  kind: HitFx | "block" | "parry" | "dust" | "smoke" | "spawn" | "super" | "guardBreak" | "ko" | "trail" | "strip";
   x: number;
   y: number;
   scale?: number;
@@ -123,6 +123,16 @@ export class Match {
   roundsToWin: number;
 
   /**
+   * A short line for the HUD, and how many frames it has left.
+   *
+   * Armour coming off is worth real damage for the rest of the round and the
+   * only sign of it was the prop quietly not being drawn any more - which
+   * reads as a graphical glitch rather than as something you did. A mechanic
+   * with a number attached has to say so.
+   */
+  banner: { text: string; life: number } | null = null;
+
+  /**
    * Extra rules for this fight, used by the towers.
    *
    * The engine deliberately knows nothing about what a rule is called or what
@@ -204,6 +214,7 @@ export class Match {
     this.projectiles = [];
     this.zones = [];
     this.combo = [null, null];
+    this.banner = null;
   }
 
   startRound() {
@@ -260,6 +271,7 @@ export class Match {
         break;
     }
 
+    if (this.banner && --this.banner.life <= 0) this.banner = null;
     for (const banner of this.combo) {
       if (banner && banner.life > 0) banner.life--;
     }
@@ -810,8 +822,10 @@ export class Match {
     if (strip.damageTaken !== undefined) {
       defender.applyGrants(`stripped:${strip.slot}`, [{ damageTaken: strip.damageTaken }]);
     }
-    this.pushFx({ kind: "spark", x: at.x, y: at.y, scale: 1.6 });
+    this.pushFx({ kind: "strip", x: at.x, y: at.y, scale: 1.6 });
     this.shake = Math.max(this.shake, 5);
+    const what = strip.slot === "head" ? "Helm" : strip.slot === "shield" ? "Shield" : "Armour";
+    this.banner = { text: `${what} Struck Off`, life: 90 };
   }
 
   private spawnProjectiles(f: Fighter) {

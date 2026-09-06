@@ -418,6 +418,15 @@ export class FxSystem {
         }
         break;
 
+      // Armour leaving. Not a spark - a spark is a hit that was stopped, and
+      // this is the opposite. A hard ring, a spray of pale metal, and pieces
+      // that fall rather than fly, because they end up on the floor.
+      case "strip":
+        this.spawn({ shape: "ring", x, y, color: "#e8eef4", size: 54, life: 16, scaleRate: 1.16 });
+        this.burst(x, y, 16, "#cdd6de", 5, 9, 26);
+        this.burst(x, y - 6, 8, "#8f9aa4", 2.6, 14, 34);
+        break;
+
       case "guardBreak":
         this.spawn({ shape: "ring", x, y, color: "#ff5c5c", size: 80, life: 18, scaleRate: 1.18 });
         this.burst(x, y, 14, "#ff8a8a", 4.4, 8, 24);
