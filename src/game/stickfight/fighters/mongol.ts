@@ -16,6 +16,7 @@ const DEEL = "#7d5a2e";
 const TRIM = "#c8a24a";
 const HORN = "#3b2a1c";
 const SHAFT = "#d8c79b";
+const STEEL = "#c3ccd6";
 
 const STANCE = {
   torso: 2,
@@ -184,6 +185,22 @@ export const MONGOL: FighterDef = {
       ],
     },
     {
+      id: "knife",
+      attach: "handB",
+      // Every steppe rider carried one and the sources are unanimous that it
+      // was a tool first: eating, harness, butchering, and only then a weapon.
+      // Short, single-edged, slightly curved, in a scabbard on the belt - so
+      // it is on the free hand, because the bow never leaves the other one.
+      parts: [
+        { geo: "box", size: [10, 3.6], pos: [1, 0], color: HORN },
+        { geo: "box", size: [10, 1.2], pos: [1, 1.2], color: "#5a4432", z: 0.1 },
+        { geo: "disc", size: [2], pos: [-4, 0], color: TRIM },
+        { geo: "box", size: [2.4, 6], pos: [7, 0], color: TRIM },
+        { geo: "poly", size: [0, 3.4, 12, 3, 20, 1.2, 24, 0, 19, -2, 9, -3.2, 0, -3.4], pos: [8, 0], color: STEEL },
+        { geo: "poly", size: [0, 1.1, 13, 0.9, 20, 0, 12, 0, 0, 0], pos: [9, 0.8], color: "#eef3f7", z: 0.3 },
+      ],
+    },
+    {
       id: "nocked",
       attach: "handF",
       conditional: true,
@@ -229,7 +246,7 @@ export const MONGOL: FighterDef = {
     },
     {
       id: "5B",
-      name: "Bow Sweep",
+      name: "Belt Knife",
       input: { button: "B", stance: "stand" },
       tags: ["medium"],
       duration: 22,
@@ -239,14 +256,14 @@ export const MONGOL: FighterDef = {
       followUps: [
         { button: "C", move: "4C", from: 8, to: 19, string: "Bow Sweep" },
       ],
-      hits: [hit(8, 12, bx(20, 44, 62, 34), 50, { fx: "blunt", pushX: 4.6, hitstun: 18 })],
-      desc: "Swings the horn limb across at chest height to make room.",
+      hits: [hit(8, 12, bx(20, 44, 62, 34), 50, { fx: "slash", pushX: 4.6, hitstun: 18 })],
+      desc: "Draws the belt knife and cuts across at chest height. What she reaches for the moment the bow is the wrong tool.",
       notation: "B",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(4, { ...STANCE, shoulderF: 146, elbowF: 40, weapon: 60, torso: -10, offX: -3 }),
-        kf(8, { ...STANCE, shoulderF: 60, elbowF: 6, weapon: -50, torso: 20, hipF: 24, offX: 6 }, "out"),
-        kf(15, { ...STANCE, shoulderF: 76, elbowF: 22, torso: 8 }, "inOut"),
+        kf(4, { ...STANCE, shoulderB: 128, elbowB: 46, weaponBack: 74, shoulderF: 22, elbowF: 44, weapon: 30, torso: -12, offX: -4 }),
+        kf(8, { ...STANCE, shoulderB: 30, elbowB: 6, weaponBack: 4, shoulderF: 6, elbowF: 56, weapon: 40, torso: 20, hipF: 24, offX: 7 }, "out"),
+        kf(15, { ...STANCE, shoulderB: 44, elbowB: 54, weaponBack: -10, torso: 8 }, "inOut"),
         kf(22, { ...STANCE }),
       ],
     },
@@ -312,20 +329,20 @@ export const MONGOL: FighterDef = {
     },
     {
       id: "2B",
-      name: "Shin Kick",
+      name: "Hamstring",
       input: { button: "B", stance: "crouch" },
       tags: ["medium", "low"],
       duration: 22,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [9, 20],
-      hits: [hit(8, 11, bx(18, 6, 64, 24), 48, { guard: "low", fx: "blunt", pushX: 4, hitstun: 17 })],
-      desc: "Boot to the ankle. Her low confirm into everything.",
+      hits: [hit(8, 11, bx(18, 6, 64, 24), 48, { guard: "low", fx: "slash", pushX: 4, hitstun: 17 })],
+      desc: "Drops and cuts across the back of the leg. Her low confirm into everything.",
       notation: "↓ + B",
       frames: [
         kf(0, { ...STANCE, crouch: 1, torso: 14, hipF: 32, kneeF: 76, hipB: -24, kneeB: 88 }, "out"),
-        kf(5, { ...STANCE, crouch: 1, torso: 10, hipF: 10, kneeF: 92, hipB: -30, kneeB: 94 }),
-        kf(8, { ...STANCE, crouch: 1, torso: 22, hipF: 76, kneeF: 10, hipB: -32, kneeB: 96, offX: 6 }, "out"),
-        kf(16, { ...STANCE, crouch: 1, torso: 16, hipF: 46, kneeF: 52, hipB: -26, kneeB: 90 }, "inOut"),
+        kf(5, { ...STANCE, crouch: 1, torso: 8, shoulderB: 96, elbowB: 64, weaponBack: 60, hipF: 16, kneeF: 90, hipB: -30, kneeB: 94, offX: -3 }),
+        kf(8, { ...STANCE, crouch: 1, torso: 26, shoulderB: -34, elbowB: 12, weaponBack: -54, hipF: 34, kneeF: 84, hipB: -32, kneeB: 96, offX: 8 }, "out"),
+        kf(16, { ...STANCE, crouch: 1, torso: 16, shoulderB: 18, elbowB: 58, weaponBack: -8, hipF: 34, kneeF: 78, hipB: -26, kneeB: 90 }, "inOut"),
         kf(22, { ...STANCE, crouch: 1, torso: 14, hipF: 32, kneeF: 76, hipB: -24, kneeB: 88 }),
       ],
     },
@@ -350,7 +367,7 @@ export const MONGOL: FighterDef = {
     },
     {
       id: "6B",
-      name: "Horn Strike",
+      name: "Overhand Knife",
       input: { button: "B", dir: "f", stance: "stand" },
       tags: ["command", "overhead"],
       priority: 10,
@@ -359,14 +376,14 @@ export const MONGOL: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 29],
-      hits: [hit(16, 20, bx(18, 38, 54, 44), 56, { guard: "overhead", fx: "blunt", pushX: 4.6, hitstun: 20 })],
-      desc: "Brings the top limb of the bow down over their guard. Overhead.",
+      hits: [hit(16, 20, bx(18, 38, 54, 44), 56, { guard: "overhead", fx: "slash", pushX: 4.6, hitstun: 20 })],
+      desc: "Brings the knife down point-first over their guard. Overhead.",
       notation: "→ + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(8, { ...STANCE, shoulderF: 168, elbowF: 20, weapon: 40, torso: -14, offX: -3 }, "inOut"),
-        kf(16, { ...STANCE, shoulderF: 52, elbowF: 4, weapon: -60, torso: 26, hipF: 26, offX: 6 }, "out"),
-        kf(24, { ...STANCE, shoulderF: 70, elbowF: 20, torso: 10 }, "inOut"),
+        kf(8, { ...STANCE, shoulderB: 176, elbowB: 12, weaponBack: 62, shoulderF: 18, elbowF: 48, weapon: 32, torso: -16, offX: -4 }, "inOut"),
+        kf(16, { ...STANCE, shoulderB: 44, elbowB: -8, weaponBack: -26, shoulderF: 4, elbowF: 58, weapon: 42, torso: 26, hipF: 26, offX: 7 }, "out"),
+        kf(24, { ...STANCE, shoulderB: 46, elbowB: 56, weaponBack: -12, torso: 10 }, "inOut"),
         kf(32, { ...STANCE }),
       ],
     },
@@ -471,7 +488,7 @@ export const MONGOL: FighterDef = {
     },
     {
       id: "4B",
-      name: "Held Draw",
+      name: "Backing Cut",
       input: { button: "B", dir: "b", stance: "stand" },
       tags: ["command", "medium"],
       priority: 12,
@@ -480,15 +497,15 @@ export const MONGOL: FighterDef = {
       friction: 0.88,
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
-      hits: [hit(12, 15, bx(40, 52, 96, 24), 56, { guard: "mid", fx: "blunt", pushX: 7, hitstun: 18, hitstop: 8 })],
-      desc: "Backs away with the bow at full extension and lets the tip do the work.",
+      hits: [hit(12, 15, bx(24, 46, 78, 28), 56, { guard: "mid", fx: "slash", pushX: 7, hitstun: 18, hitstop: 8 })],
+      desc: "Gives ground and opens them up on the way out. Shorter than the bow was, and it actually cuts.",
       notation: "\u2190 + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(6, { ...STANCE, shoulderF: 64, elbowF: 26, weapon: 44, torso: -12, hipB: -28, kneeB: 42, offX: -8 }, "inOut"),
-        kf(12, { ...STANCE, shoulderF: 92, elbowF: -2, weapon: 0, torso: 4, hipF: 24, kneeF: 14, offX: -5 }, "out"),
-        kf(17, { ...STANCE, shoulderF: 90, elbowF: 0, weapon: 0, torso: 2, offX: -6 }),
-        kf(23, { ...STANCE, shoulderF: 80, elbowF: 14, weapon: 18, torso: 0, offX: -4 }, "inOut"),
+        kf(6, { ...STANCE, shoulderB: 118, elbowB: 50, weaponBack: 66, shoulderF: 20, elbowF: 46, weapon: 30, torso: -14, hipB: -28, kneeB: 42, offX: -8 }, "inOut"),
+        kf(12, { ...STANCE, shoulderB: 40, elbowB: 4, weaponBack: 2, shoulderF: 2, elbowF: 58, weapon: 42, torso: 6, hipF: 24, kneeF: 14, offX: -5 }, "out"),
+        kf(17, { ...STANCE, shoulderB: 34, elbowB: 2, weaponBack: -2, shoulderF: 2, elbowF: 58, weapon: 42, torso: 2, offX: -6 }),
+        kf(23, { ...STANCE, shoulderB: 48, elbowB: 56, weaponBack: -6, torso: 0, offX: -4 }, "inOut"),
         kf(30, { ...STANCE }),
       ],
     },
@@ -537,7 +554,7 @@ export const MONGOL: FighterDef = {
     },
     {
       id: "jB",
-      name: "Air Kick",
+      name: "Falling Knife",
       input: { button: "B", stance: "air" },
       tags: ["medium", "air"],
       duration: 24,
@@ -545,14 +562,14 @@ export const MONGOL: FighterDef = {
       landCancel: true,
       landRecovery: 4,
       cancelInto: ["heavy", "special"],
-      hits: [hit(6, 14, bx(16, 16, 54, 42), 52, { fx: "blunt", pushX: 3.8, hitstun: 18 })],
-      desc: "Straight boot out at whoever tried to follow her up.",
+      hits: [hit(6, 14, bx(16, 16, 54, 42), 52, { fx: "slash", pushX: 3.8, hitstun: 18 })],
+      desc: "Knife out at whoever tried to follow her up.",
       notation: "(air) B",
       frames: [
         kf(0, { ...STANCE, free: 1, hipF: 32, kneeF: 42, hipB: -22, kneeB: 40 }, "out"),
-        kf(4, { ...STANCE, free: 1, hipF: 14, kneeF: 88, torso: 10 }),
-        kf(7, { ...STANCE, free: 1, hipF: 88, kneeF: 8, hipB: -30, kneeB: 60, torso: 14 }, "out"),
-        kf(16, { ...STANCE, free: 1, hipF: 54, kneeF: 40, torso: 6 }, "inOut"),
+        kf(4, { ...STANCE, free: 1, shoulderB: 132, elbowB: 40, weaponBack: 68, torso: -8, hipF: 28, kneeF: 62 }),
+        kf(7, { ...STANCE, free: 1, shoulderB: 26, elbowB: 0, weaponBack: -4, torso: 18, hipF: 40, kneeF: 34, hipB: -26, kneeB: 46 }, "out"),
+        kf(16, { ...STANCE, free: 1, shoulderB: 44, elbowB: 56, weaponBack: -8, torso: 6, hipF: 40, kneeF: 44 }, "inOut"),
         kf(24, { ...STANCE, free: 1 }),
       ],
     },

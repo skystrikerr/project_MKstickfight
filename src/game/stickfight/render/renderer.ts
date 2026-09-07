@@ -593,6 +593,22 @@ export class GameRenderer {
         add(loop);
         break;
       }
+      // A hoplite shield in flight: bronze face, the blazon on it, and the
+      // rim picked out so the spin reads.
+      case "hoplon": {
+        const face = new THREE.Mesh(new THREE.CircleGeometry(21, 20), flat(color));
+        add(face);
+        const rim = new THREE.Mesh(new THREE.RingGeometry(18, 21, 20), flat("#8a6a2a"));
+        add(rim, 56);
+        const boss = new THREE.Mesh(new THREE.CircleGeometry(6, 12), flat("#8a6a2a"));
+        add(boss, 56);
+        for (let i = 0; i < 3; i++) {
+          const bar = new THREE.Mesh(new THREE.PlaneGeometry(30, 3.4), flat("#5c4a1c"));
+          bar.rotation.z = (i * Math.PI) / 3;
+          add(bar, 57);
+        }
+        break;
+      }
       // A crossbow bolt: short, thick, square-headed, with stiff leather vanes
       // instead of fletching. Deliberately not the arrow - a quarrel is half
       // the length and twice the section, which is the whole reason it hits

@@ -952,8 +952,29 @@ export class Match {
         p.vx *= 1 - p.spec.drag;
         p.vy *= 1 - p.spec.drag;
       }
+      // A returning shot reverses once, then flies home and is caught. The
+      // owner's current position is the target rather than the launch point:
+      // he has usually moved, and a shield that comes back to where he was
+      // standing looks like a bug.
+      if (p.spec.returnAfter !== undefined && p.age === p.spec.returnAfter) {
+        p.vx = -p.vx;
+        p.facing = -p.facing as 1 | -1;
+        // Coming back it may hurt again, so the cooldown is cleared and the
+        // hit budget topped up by one - the catch is what ends it, not a
+        // hit count that ran out on the way out.
+        p.hitCooldown = 0;
+        p.hitsLeft = Math.max(p.hitsLeft, 1);
+      }
       p.x += p.vx;
       p.y += p.vy;
+      if (p.spec.returnAfter !== undefined && p.age > p.spec.returnAfter) {
+        const owner = this.fighters[p.owner];
+        if (Math.abs(p.x - owner.x) < 34) {
+          this.killProjectile(p, false);
+          this.pushFx({ kind: "spark", x: p.x, y: p.y, scale: 0.7 });
+          continue;
+        }
+      }
 
       // Thrown objects skip off the ground before they come to rest.
       if (p.spec.bounce && p.bouncesLeft > 0 && p.y <= GROUND_Y + 4 && p.vy < 0) {

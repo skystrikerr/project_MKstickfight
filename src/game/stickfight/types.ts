@@ -299,6 +299,17 @@ export interface ProjectileSpawn {
   bounces?: number;
   /** Air resistance per frame, 0..1. */
   drag?: number;
+  /**
+   * Frames after which the shot turns round and comes back to whoever threw
+   * it, disappearing when it reaches them.
+   *
+   * The Nihang's chakram has always *said* he catches it again and never
+   * actually did - it slowed on drag and expired wherever it happened to be.
+   * A thrown shield has to come back or the fighter has given away the thing
+   * he blocks with, so this makes the return real: it reverses, it can hit on
+   * the way home, and it is caught rather than dropped.
+   */
+  returnAfter?: number;
   fx?: HitFx;
   hitstop?: number;
   meterGain?: number;

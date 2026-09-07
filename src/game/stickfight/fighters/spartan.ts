@@ -37,7 +37,7 @@ export const SPARTAN: FighterDef = {
   archetype: "Grappler / Wall",
   difficulty: 2,
   strengths: ["Heaviest fighter", "Armour on almost everything", "Corner carry for days"],
-  weaknesses: ["Slowest walk speed", "No air game", "Aegis runs out"],
+  weaknesses: ["Slowest walk speed", "No air game", "Only five javelins"],
   winQuote: "Good. Now we fight in the shade.",
   // Greek polytheism, a Spartiate of the three hundred, and a defensive war against an invasion.
   factions: ["old-gods", "hellas", "resistance"],
@@ -77,12 +77,15 @@ export const SPARTAN: FighterDef = {
     low: { torso: 10, head: -6, shoulderF: -26, elbowF: 122, shoulderB: 138, elbowB: -92, weaponBack: 40, hipF: 32, kneeF: 74, hipB: -22, kneeB: 84, offX: -3 },
   }),
   resource: {
-    name: "Aegis",
-    max: 100,
-    start: 100,
-    regen: 0.16,
-    regenIdleOnly: true,
+    name: "Javelin",
+    // Five, and that is the lot. No passive regeneration anywhere: the only
+    // way to get one back is to shelter behind the aspis and pick up what
+    // they are throwing at him, which is what the skill is for and what the
+    // one line anybody remembers about him is about.
+    max: 5,
+    start: 5,
     color: BRONZE,
+    pips: true,
   },
   props: [
     {
@@ -682,9 +685,9 @@ export const SPARTAN: FighterDef = {
       duration: 40,
       // Cheaper than hurling the shield was, because it no longer costs him
       // the shield. The old throw's real price was fighting on without an
-      // aspis until the bar came back; this one only costs the Aegis.
-      resourceCost: 26,
-      resourceMin: 26,
+      // aspis until the bar came back; this one only costs a javelin.
+      resourceCost: 1,
+      resourceMin: 1,
       meterGain: 6,
       // The dory goes away and the throwing spear comes out, in the back hand.
       // The shield stays where it is on the front arm - a hoplite throwing
@@ -709,7 +712,7 @@ export const SPARTAN: FighterDef = {
           gravity: 0.028,
           life: 90,
           box: { x: -24, y: -7, w: 48, h: 14 },
-          damage: 62,
+          damage: 118,
           hitstun: 20,
           blockstun: 14,
           chip: 6,
@@ -720,8 +723,8 @@ export const SPARTAN: FighterDef = {
           color: "#d7dee6",
         },
       ],
-      desc: "Throws a javelin from behind the shield. Costs Aegis, and the aspis never leaves his arm.",
-      notation: "\u2193\u2198\u2192 + B",
+      desc: "Throws a javelin from behind the shield. One of five, it hits harder than anything else he can do at range, and the aspis never leaves his arm.",
+      notation: "\u2193\u2198\u2192 + B (1 Javelin)",
       /**
        * An overhand throw, thrown with the whole body rather than the arm.
        *
@@ -747,60 +750,67 @@ export const SPARTAN: FighterDef = {
       ],
     },
     {
-      id: "shieldCharge",
-      name: "Shield Charge",
+      id: "shieldThrow",
+      name: "Cast the Aspis",
       input: { button: "B", motion: "hcf", stance: ["stand", "crouch"] },
-      tags: ["special"],
+      tags: ["special", "projectile"],
       priority: 22,
-      // Was a fifty-six frame march that ground forward through three separate
-      // hits. It armoured well and covered ground, but it never read as a
-      // charge - it read as walking. This is the same idea committed to: one
-      // explosive shove off the back foot, one hit, and it is over in half the
-      // time. The armour is still what makes it a Spartan answer to pressure.
-      duration: 34,
-      armor: [{ from: 4, to: 20, hits: 2, damageScale: 0.3 }],
-      // The whole distance is spent in one burst rather than paid out over
-      // three steps, so it closes from full screen and cannot be walked away
-      // from once it starts.
-      vel: [
-        { at: 4, x: 13.5 },
-        { at: 20, x: 0 },
-      ],
+      // The one shield attack he has at range, and the only one he needs.
+      //
+      // It used to be a charge, and between that, the rising shield, the ram
+      // and the slam he had four shield specials that all did the same job
+      // from different distances. This is the trade the others were missing:
+      // an aspis weighs seven kilos and blocks everything he owns, so throwing
+      // it hits like nothing else on the roster and leaves him holding
+      // nothing until it comes home.
+      duration: 110,
       friction: 0.9,
-      hits: [
-        hit(8, 18, bx(26, 22, 66, 66), 88, {
-          fx: "blunt",
-          pushX: 13,
-          knockdown: "wallbounce",
-          hitstun: 28,
-          hitstop: 7,
-          shake: 2.4,
-        }),
-      ],
-      desc: "Drives off the back foot and rams them with the full aspis. Armoured through the run, and it puts them into the wall.",
+      meterGain: 14,
+      // Gone from his arm the moment it leaves, back when it is caught. His
+      // guard is measurably worse in between and that is the entire cost.
+      propsAt: [{ from: 8, to: 62, hide: ["aspis"] }],
+      projectiles: [{
+        at: 8,
+        kind: "hoplon",
+        x: 26,
+        y: 56,
+        vx: 11,
+        vy: 0,
+        life: 90,
+        box: { x: -20, y: -22, w: 40, h: 44 },
+        damage: 96,
+        hitstun: 24,
+        blockstun: 15,
+        pushX: 10,
+        chip: 10,
+        // Out for twenty frames, then it turns round and comes back to him.
+        // It can hit again on the way home, which is the reward for throwing
+        // it through somebody rather than at them.
+        returnAfter: 20,
+        hits: 1,
+        armAfter: 0,
+        fx: "blunt",
+        hitstop: 11,
+        meterGain: 10,
+        spin: 26,
+        scale: 1,
+        color: BRONZE,
+      }],
+      desc: "Throws the aspis flat, and it comes back to his hand. It hits harder than anything else he has at range and it can catch them again on the way home - but until it does, he is a Spartan with no shield.",
       notation: "\u2190\u2199\u2193\u2198\u2192 + B",
-      /**
-       * A charge is a shove, not a walk.
-       *
-       * The read on it comes from the first four frames: he sinks, turns the
-       * shield square to them and gets his shoulder behind it, and only then
-       * goes. Skipping that load and simply moving is what made the old
-       * version look like walking - there was no moment where he decided.
-       */
       frames: [
-        // Load. Weight drops onto the back leg, shield comes square.
         kf(0, { ...STANCE }, "out"),
-        kf(4, { ...STANCE, torso: 30, crouch: 0.3, shoulderF: 96, elbowF: 6,
-                hipB: -34, kneeB: 54, hipF: 30, kneeF: 26, offX: -7 }, "out"),
-        // Behind the shield, running. Head down, back leg driving.
-        kf(9, { ...STANCE, torso: 38, crouch: 0.16, shoulderF: 100, elbowF: 2,
-                hipF: 44, kneeF: 20, hipB: -40, kneeB: 30, head: 8, offX: 8 }, "linear"),
-        kf(15, { ...STANCE, torso: 40, crouch: 0.12, shoulderF: 102, elbowF: 0,
-                 hipF: 30, kneeF: 40, hipB: -30, kneeB: 20, head: 10, offX: 10 }, "out"),
-        // The impact: everything stops moving forward except the shield.
-        kf(20, { ...STANCE, torso: 26, shoulderF: 84, elbowF: 14,
-                 hipF: 40, kneeF: 26, hipB: -26, kneeB: 48, offX: 6 }, "inOut"),
-        kf(34, { ...STANCE }),
+        kf(5, { ...STANCE, torso: -22, shoulderB: 168, elbowB: -52, weaponBack: 30, hipB: -34, kneeB: 48, offX: -8 }, "out"),
+        kf(8, { ...STANCE, torso: 26, shoulderB: 54, elbowB: -8, weaponBack: -18, hipF: 40, kneeF: 20, hipB: -30, kneeB: 36, offX: 10 }, "linear"),
+        kf(18, { ...STANCE, torso: 12, shoulderB: 30, elbowB: 26, hipF: 26, offX: 3 }, "inOut"),
+        // Shieldless. He fights on with the dory in both hands and no guard
+        // worth the name, which is the whole price of the move.
+        kf(30, { ...STANCE, torso: 6, shoulderB: 8, elbowB: 44, shoulderF: 40, elbowF: 30, hipF: 22, kneeF: 18 }, "inOut"),
+        kf(52, { ...STANCE, torso: -4, shoulderB: 96, elbowB: -14, shoulderF: 44, elbowF: 26, offX: -2 }, "out"),
+        // The catch.
+        kf(62, { ...STANCE, torso: 8, shoulderB: 62, elbowB: 10, hipF: 24, offX: 2 }, "out"),
+        kf(76, { ...STANCE, torso: 4, shoulderB: 40, elbowB: 30 }, "inOut"),
+        kf(110, { ...STANCE }),
       ],
     },
     {
@@ -812,9 +822,13 @@ export const SPARTAN: FighterDef = {
       duration: 46,
       airborne: true,
       invuln: [{ from: 1, to: 9, kind: "strike" }],
+      // Twelve was a hop. This actually leaves the ground - high enough to
+      // take somebody out of the air who thought they were above him, which
+      // is the entire job of an anti-air and was the one thing it could not
+      // do.
       vel: [
-        { at: 1, x: 2, y: 12 },
-        { at: 26, y: -1, mode: "add" },
+        { at: 1, x: 2.4, y: 19 },
+        { at: 30, y: -1, mode: "add" },
       ],
       hits: [
         hit(4, 9, bx(6, 54, 64, 78), 84, { launch: [2, 10.5], knockdown: "launch", fx: "blunt", hitstun: 26, shake: 1.9 }),
@@ -837,7 +851,6 @@ export const SPARTAN: FighterDef = {
       tags: ["special"],
       priority: 22,
       duration: 44,
-      resourceCost: 20,
       vel: [{ at: 8, x: 4 }],
       friction: 0.86,
       armor: [{ from: 6, to: 14, hits: 1, damageScale: 0.35 }],
@@ -853,7 +866,7 @@ export const SPARTAN: FighterDef = {
       ],
       vfx: [{ at: 14, kind: "blunt", x: 60, y: 52, scale: 1.6 }],
       desc: "A full-body boot to the chest. Sends them the length of the pass and bounces them off the far end of it.",
-      notation: "↓↙← + C (20 Aegis)",
+      notation: "↓↙← + C",
       frames: [
         kf(0, { ...STANCE }, "out"),
         // Chamber: knee driven up to the chest, weight settled on the back leg,
@@ -876,7 +889,6 @@ export const SPARTAN: FighterDef = {
       tags: ["special", "low"],
       priority: 20,
       duration: 40,
-      resourceCost: 16,
       friction: 0.9,
       hits: [
         hit(9, 12, bx(28, 4, 96, 28), 46, { group: 1, guard: "low", fx: "pierce", pushX: 3, hitstun: 18 }),
@@ -890,7 +902,7 @@ export const SPARTAN: FighterDef = {
         }),
       ],
       desc: "Two thrusts at the ankles then the throat. The first must be blocked low, the second high.",
-      notation: "↓↙← + B (16 Aegis)",
+      notation: "↓↙← + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(5, { ...STANCE, crouch: 0.8, torso: 16, shoulderB: 46, elbowB: 14, weaponBack: -54, hipF: 34, kneeF: 66 }),
@@ -913,12 +925,12 @@ export const SPARTAN: FighterDef = {
       // Five now, not three, and every one of them pays. Standing behind the
       // aspis under fire is the whole point of the position - the Persian
       // arrows are not a thing he survives, they are the thing that fills the
-      // bar. Eight Aegis a hit and sixteen for an arrow.
-      armor: [{ from: 3, to: 26, hits: 5, damageScale: 0.2, gainPerHit: 8 }],
-      resourceGain: 30,
+      // count. A third of a javelin a hit, two thirds for an arrow.
+      armor: [{ from: 3, to: 26, hits: 5, damageScale: 0.2, gainPerHit: 0.34 }],
+      resourceGain: 1,
       friction: 0.88,
       holdLoop: { from: 12, to: 22, button: "C", maxFrames: 100 },
-      desc: "SKILL. Told the Persian arrows would blot out the sun, Dienekes said good - then we shall fight in the shade. Plants behind the aspis and turns what they throw at him into Aegis, twice as fast if they are shooting. Hold Heavy to stay there.",
+      desc: "SKILL. Told the Persian arrows would blot out the sun, Dienekes said good - then we shall fight in the shade. Plants behind the aspis and picks up what they throw at him. One javelin for planting, and a third of one for every shot that hits the shield - so an archer is feeding him. Hold Heavy to stay there.",
       notation: "A + C (hold C)",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -989,7 +1001,7 @@ export const SPARTAN: FighterDef = {
           color: "#e0b13a",
         },
       ],
-      desc: "EX. Two javelins at two heights, high then low. No Aegis cost.",
+      desc: "EX. Two javelins at two heights, high then low, and neither comes out of the five.",
       notation: "\u2193\u2198\u2192 + S  (50 meter)",
       // The same throw twice, the second one rushed - he does not fully reset
       // between them, which is what makes it a volley rather than two throws.

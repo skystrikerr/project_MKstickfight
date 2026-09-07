@@ -2949,8 +2949,11 @@ function superDamage() {
   };
   const quiet = stand(false);
   const under = stand(true);
-  check("spartan: the shield bank is empty in the quiet", quiet < 1, `${quiet.toFixed(0)}`);
-  check("spartan: arrows fill it", under > 20, `${under.toFixed(0)} Aegis`);
+  // The bank is five javelins now rather than a hundred points of Aegis, so
+  // what "filling" looks like is a fraction of one per arrow rather than
+  // twenty points - the shape of the test is the same, the scale is not.
+  check("spartan: the shield picks nothing up in the quiet", quiet < 0.05, `${quiet.toFixed(2)}`);
+  check("spartan: arrows are picked up", under > 0.6, `${under.toFixed(2)} javelins`);
 
   // And the roster carries no lines from films.
   for (const def of ROSTER) {
