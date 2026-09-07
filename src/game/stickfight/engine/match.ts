@@ -175,15 +175,23 @@ export class Match {
    * engine is handed them rather than looking a stage up, so it stays free of
    * anything to do with drawing.
    */
+  /** Half the playable width. Arcade levels are wider than arenas. */
+  readonly halfWidth: number;
+
   constructor(
     defs: [FighterDef, FighterDef],
     roundsToWin = MATCH.roundsToWin,
     platforms: Platform[] = [],
     rules: MatchRule[] = [],
+    halfWidth = STAGE_HALF_WIDTH,
   ) {
     this.fighters = [new Fighter(defs[0], 0), new Fighter(defs[1], 1)];
     this.roundsToWin = roundsToWin;
-    for (const f of this.fighters) f.platforms = platforms;
+    this.halfWidth = halfWidth;
+    for (const f of this.fighters) {
+      f.platforms = platforms;
+      f.halfWidth = halfWidth;
+    }
     this.rules = rules;
     this.resetPositions();
     // The first round never goes through `startRound` - that only runs between
@@ -470,8 +478,8 @@ export class Match {
     const dir = a.x <= b.x ? -1 : 1;
     const push = Math.min(overlap / 2, COMBAT.pushSpeed);
 
-    const aWall = Math.abs(a.x) >= STAGE_HALF_WIDTH - a.def.stats.width - 1;
-    const bWall = Math.abs(b.x) >= STAGE_HALF_WIDTH - b.def.stats.width - 1;
+    const aWall = Math.abs(a.x) >= this.halfWidth - a.def.stats.width - 1;
+    const bWall = Math.abs(b.x) >= this.halfWidth - b.def.stats.width - 1;
 
     if (aWall && !bWall) {
       b.x -= dir * push * 2;
@@ -756,7 +764,7 @@ export class Match {
     // Corner pushback: the defender has nowhere to go, so the attacker gets
     // moved instead - and a heavy blow into the corner shoves them right back
     // out of their own pressure.
-    const wall = STAGE_HALF_WIDTH - defender.def.stats.width - 2;
+    const wall = this.halfWidth - defender.def.stats.width - 2;
     if (Math.abs(defender.x) >= wall && Math.sign(defender.x) === dirSign) {
       attacker.vx = -dirSign * (hit.pushX ?? 5) * 0.7 * kb;
     } else if (hit.selfPushX) {
@@ -990,7 +998,7 @@ export class Match {
       }
 
       const grounded = p.y <= GROUND_Y + 2 && p.gravity > 0 && p.bouncesLeft <= 0;
-      const expired = p.age >= p.life || Math.abs(p.x) > STAGE_HALF_WIDTH + 60;
+      const expired = p.age >= p.life || Math.abs(p.x) > this.halfWidth + 60;
 
       if (this.roundActive) {
         const target = this.fighters[p.owner === 0 ? 1 : 0];

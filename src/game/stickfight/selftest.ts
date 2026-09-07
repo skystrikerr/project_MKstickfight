@@ -11,7 +11,7 @@
  */
 
 import { AiController, STYLES } from "./engine/ai";
-import { HURTBOX } from "./constants";
+import { HURTBOX, STAGE_HALF_WIDTH } from "./constants";
 import { EMPTY_INPUT, GamepadReader, Keyboard, P1_KEYS, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
 import { Music, TRACKS, type MusicCue } from "./engine/music";
@@ -22,7 +22,7 @@ import { getFighter, ROSTER } from "./fighters";
 import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun, type Run } from "./ladder";
 import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./save";
 import { BINDABLE_ACTIONS, codeLabel, defaultKeyMap, isKeyCode, toKeyBindings } from "./keybinds";
-import { STAGE_THEMES } from "./render/stage";
+import { halfWidthOf, STAGE_THEMES, stagesOfKind } from "./render/stage";
 import { attachTransform } from "./render/rig";
 import { buildSkeleton, sampleClip, sampleFrames } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
@@ -2831,6 +2831,83 @@ function superDamage() {
     `${STAGE_THEMES.tundra.light?.glow}`);
   check("stage: the neon city does", (STAGE_THEMES.neon.light?.glow ?? 0) >= 0.3,
     `${STAGE_THEMES.neon.light?.glow}`);
+}
+
+// ---------------------------------------------------------------------------
+// Stage categories
+// ---------------------------------------------------------------------------
+//
+// An arena is the fighting-game stage: one floor, walls close in, the whole
+// match is the spacing between two people. An arcade stage is the other thing
+// entirely - room to run and somewhere to climb. The category only means
+// something if those two promises are actually kept, so they are asserted
+// rather than left to whoever adds the next one.
+{
+  const arcade = stagesOfKind("arcade");
+  check("arcade: the category is not empty", arcade.length >= 1, `${arcade.length}`);
+
+  for (const id of arcade) {
+    const def = STAGE_THEMES[id];
+    const w = def.halfWidth ?? STAGE_HALF_WIDTH;
+    check(`arcade ${id}: is wider than an arena`, w > STAGE_HALF_WIDTH, `${w} vs ${STAGE_HALF_WIDTH}`);
+    check(`arcade ${id}: has somewhere to climb`, (def.platforms?.length ?? 0) >= 3,
+      `${def.platforms?.length ?? 0}`);
+    check(`arcade ${id}: halfWidthOf agrees`, halfWidthOf(id) === w, `${halfWidthOf(id)}`);
+
+    // Every deck has to sit inside the stage, or it is drawn somewhere the
+    // camera will never take you. Platform.x is the left edge, not the centre.
+    for (const p of def.platforms ?? []) {
+      check(`arcade ${id}: the deck at ${p.x} is inside the walls`,
+        p.x >= -w && p.x + p.w <= w, `${p.x}..${p.x + p.w} in +-${w}`);
+    }
+
+    // More than one storey. A wide stage with all its ledges at one height is
+    // an arena with extra floor, which is not what the category is for.
+    const tiers = new Set((def.platforms ?? []).map((p) => p.y));
+    check(`arcade ${id}: has more than one storey`, tiers.size >= 2, `${tiers.size}`);
+  }
+}
+
+// An arena must not quietly grow. The width is the thing the whole neutral
+// game is tuned around, so a stage widening itself is a balance change.
+{
+  for (const [id, def] of Object.entries(STAGE_THEMES)) {
+    if (def.kind === "arcade") continue;
+    check(`arena ${id}: keeps the standard width`, (def.halfWidth ?? STAGE_HALF_WIDTH) === STAGE_HALF_WIDTH,
+      `${def.halfWidth}`);
+  }
+}
+
+// The storeys have to be reachable. A gantry you cannot jump to is scenery,
+// and the height that makes it scenery is a plausible thing to get wrong by
+// twenty units, which no amount of looking at the file would catch.
+{
+  const ironworks = STAGE_THEMES.ironworks.platforms ?? [];
+  const m = new Match([getFighter("roman"), getFighter("pirate")], 2, ironworks,
+    undefined, halfWidthOf("ironworks"));
+  run(m, 120, () => inp());
+  const f = m.fighters[0];
+  m.fighters[1].x = 700;
+
+  // Start on the ground under the lower deck's left run and climb.
+  f.x = -400;
+  f.y = 0;
+  for (let i = 0; i < 90 && !f.standing; i++) m.step([inp({ up: i < 4 }), inp()]);
+  check("ironworks: the lower deck is one jump up", !!f.standing && Math.abs(f.y - 62) < 2,
+    `y=${f.y.toFixed(0)}`);
+
+  // And from the deck to the gantry above it. Taken at the near end, where a
+  // deck actually runs under the gantry - the middle of the gantry hangs over
+  // the gap on purpose, and that gap is the point of the stage.
+  f.x = -300;
+  f.y = 62;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4 }), inp()]);
+    if (f.grounded && f.y > 100) break;
+  }
+  check("ironworks: the gantry is one jump above the deck", f.grounded && Math.abs(f.y - 140) < 2,
+    `y=${f.y.toFixed(0)}`);
 }
 
 {

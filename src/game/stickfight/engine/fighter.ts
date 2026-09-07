@@ -257,6 +257,14 @@ export class Fighter {
 
   /** Ledges in this stage. Empty on a flat stage, which is the default. */
   platforms: Platform[] = [];
+  /**
+   * Half the playable width of the stage this fighter is standing in.
+   *
+   * Handed over rather than read off a constant, because an arcade level is
+   * wider than an arena and the wall has to be where the stage says it is.
+   * Defaults to the roster-wide number so nothing that never sets it changes.
+   */
+  halfWidth = STAGE_HALF_WIDTH;
   /** The ledge currently underfoot, or null when standing on the floor. */
   standing: Platform | null = null;
   /** Frames left ignoring platforms, after deliberately dropping through one. */
@@ -739,7 +747,7 @@ export class Fighter {
       this.input.consumeDash();
       this.setState("backdash");
       this.vx = -this.facing * s.dashSpeed * 0.85 * this.terrainDash;
-      this.y = GROUND_Y + 0.5;
+      this.y = this.supportY + 0.5;
       this.vy = 3.4;
       return;
     }
@@ -866,7 +874,12 @@ export class Fighter {
     this.vy = s.jumpVel;
     const dir = this.input.holdingForward() ? 1 : this.input.holdingBack() ? -1 : 0;
     this.vx = this.facing * dir * s.jumpFwd;
-    this.y = GROUND_Y + 0.5;
+    // Leave from whatever is underfoot. Reading the floor here instead meant a
+    // jump off a ledge teleported you down to it first, so a storey could only
+    // ever be reached from the ground - fine on a stage with one row of ledges,
+    // and the whole problem on a stage built out of them.
+    this.y = this.supportY + 0.5;
+    this.standing = null;
     this.airJumpsUsed = 0;
     this.airDashUsed = false;
     this.airMovesUsed = 0;
@@ -1077,6 +1090,15 @@ export class Fighter {
       this.standing = null;
     }
 
+    // A ledge holds you up the same way the floor does. Anything that hops in
+    // place - a backdash, a small pop-up - would otherwise sink through the
+    // deck it started on, because the landing pass above only catches a
+    // fighter who is not standing on anything yet.
+    if (this.standing && this.y < this.standing.y && this.vy <= 0) {
+      this.y = this.standing.y;
+      this.vy = 0;
+    }
+
     if (this.y <= GROUND_Y) {
       this.standing = null;
       const impact = this.vy;
@@ -1098,7 +1120,7 @@ export class Fighter {
       }
     }
 
-    const limit = STAGE_HALF_WIDTH - s.width;
+    const limit = this.halfWidth - s.width;
     for (const side of [-1, 1] as const) {
       const wall = side * limit;
       if (side < 0 ? this.x < wall : this.x > wall) {

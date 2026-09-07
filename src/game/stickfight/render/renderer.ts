@@ -12,7 +12,7 @@ import { buildSkeleton } from "../skeleton";
 import { FxSystem } from "./fx";
 import { StickRig } from "./rig";
 import { defaultQuality, PostFx } from "./post";
-import { Stage, STAGE_THEMES, type StageTheme } from "./stage";
+import { halfWidthOf, Stage, STAGE_THEMES, type StageTheme } from "./stage";
 
 /**
  * "Reduced" still lets an impact read, just not as a full camera shake -
@@ -137,6 +137,7 @@ export class GameRenderer {
   private aspect = 16 / 9;
   private post: PostFx | null = null;
   private quality: "high" | "low";
+  private stageHalfWidth = STAGE_HALF_WIDTH;
   /** Extra zoom applied by impacts, eased back out over a few frames. */
   private punch = 0;
   private lastShake = 0;
@@ -166,6 +167,7 @@ export class GameRenderer {
     this.camera.position.z = 100;
 
     this.stage = new Stage(theme);
+    this.stageHalfWidth = halfWidthOf(theme);
     this.scene.add(this.stage.group);
 
     // Both fighters are lit by the stage they are standing in, so a figure
@@ -301,7 +303,11 @@ export class GameRenderer {
     }
 
     const halfView = framed / 2;
-    const clampX = Math.max(-STAGE_HALF_WIDTH + halfView - 60, Math.min(STAGE_HALF_WIDTH - halfView + 60, focusX));
+    // The camera is bounded by the stage it is looking at, not by a constant.
+    // An arcade level is half again as wide as an arena and the camera has to
+    // be allowed to travel that far, or the far end of it is unreachable.
+    const bound = this.stageHalfWidth;
+    const clampX = Math.max(-bound + halfView - 60, Math.min(bound - halfView + 60, focusX));
     this.camX += (clampX - this.camX) * CAMERA.lerp;
     this.updateCamera(framed, this.camX, shake);
     this.stage.update(this.camX, 0);
@@ -914,6 +920,9 @@ export class GameRenderer {
     this.scene.remove(this.stage.group);
     this.stage.dispose();
     this.stage = new Stage(theme);
+    // The camera bound travels with the stage, so swapping to a wider one
+    // mid-session has to move it too or the far end stays unreachable.
+    this.stageHalfWidth = halfWidthOf(theme);
     this.scene.add(this.stage.group);
   }
 

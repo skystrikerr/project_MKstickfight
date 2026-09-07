@@ -6,7 +6,7 @@ import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef } from "../types";
 import type { GameMode } from "../engine/game";
 import menuSelect from "@/assets/menu-select.jpg";
-import { STAGE_LIST, STAGE_THEMES, type StageTheme } from "../render/stage";
+import { stagesOfKind, STAGE_THEMES, type StageTheme } from "../render/stage";
 import { applySkin, getSkin, SKINS } from "../skins";
 import { applyWeapon, weaponsFor } from "../weapons";
 import { unlockLabel, unlockProgress, type ProgressState } from "../progress";
@@ -68,6 +68,11 @@ function StageChip({
       ) : (
         <div className="absolute inset-0 bg-[var(--ink-2)]" />
       )}
+      {def?.kind === "arcade" ? (
+        <span className="absolute right-0 top-0 bg-[var(--accent)] px-1 font-mono text-[8px] uppercase tracking-wider text-black">
+          Arcade
+        </span>
+      ) : null}
       <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-0.5 font-mono text-[9px] uppercase tracking-wider text-[var(--bone)]">
         {def ? def.name : "Random"}
       </span>
@@ -516,9 +521,20 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             {stage === "random" ? "A different arena every match" : STAGE_THEMES[stage].blurb}
           </span>
         </div>
+        <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone-dim)]">
+          Arenas
+        </div>
         <div className="flex gap-2 overflow-x-auto pb-1">
           <StageChip theme="random" selected={stage === "random"} onPick={() => setStage("random")} />
-          {STAGE_LIST.map((t) => (
+          {stagesOfKind("arena").map((t) => (
+            <StageChip key={t} theme={t} selected={stage === t} onPick={() => setStage(t)} />
+          ))}
+        </div>
+        <div className="mb-1 mt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--accent)]">
+          Arcade &mdash; wide, several storeys, room to run
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {stagesOfKind("arcade").map((t) => (
             <StageChip key={t} theme={t} selected={stage === t} onPick={() => setStage(t)} />
           ))}
         </div>
