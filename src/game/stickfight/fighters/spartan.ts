@@ -830,7 +830,7 @@ export const SPARTAN: FighterDef = {
     },
     {
       id: "spartanKick",
-      name: "This Is Sparta",
+      name: "The Hot Gates",
       input: { button: "C", motion: "qcb", stance: ["stand", "crouch"] },
       tags: ["special"],
       priority: 22,
@@ -850,7 +850,7 @@ export const SPARTAN: FighterDef = {
         }),
       ],
       vfx: [{ at: 14, kind: "blunt", x: 60, y: 52, scale: 1.6 }],
-      desc: "A full-body boot to the chest. Sends them the length of the arena and bounces them off the wall.",
+      desc: "A full-body boot to the chest. Sends them the length of the pass and bounces them off the far end of it.",
       notation: "↓↙← + C (20 Aegis)",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -903,16 +903,20 @@ export const SPARTAN: FighterDef = {
     // ----------------------------------------------------------------- skill
     {
       id: "aegisGuard",
-      name: "Hold the Line",
+      name: "Fight in the Shade",
       input: { buttons: ["A", "C"], stance: ["stand", "crouch"] },
       tags: ["skill", "stance"],
       priority: 18,
       duration: 34,
-      armor: [{ from: 3, to: 26, hits: 3, damageScale: 0.2 }],
-      resourceGain: 45,
+      // Five now, not three, and every one of them pays. Standing behind the
+      // aspis under fire is the whole point of the position - the Persian
+      // arrows are not a thing he survives, they are the thing that fills the
+      // bar. Eight Aegis a hit and sixteen for an arrow.
+      armor: [{ from: 3, to: 26, hits: 5, damageScale: 0.2, gainPerHit: 8 }],
+      resourceGain: 30,
       friction: 0.88,
       holdLoop: { from: 12, to: 22, button: "C", maxFrames: 100 },
-      desc: "SKILL. Plants behind the aspis, soaking up to three hits and rebuilding Aegis. Hold Heavy to stay there.",
+      desc: "SKILL. Told the Persian arrows would blot out the sun, Dienekes said good - then we shall fight in the shade. Plants behind the aspis and turns what they throw at him into Aegis, twice as fast if they are shooting. Hold Heavy to stay there.",
       notation: "A + C (hold C)",
       frames: [
         kf(0, { ...STANCE }, "out"),

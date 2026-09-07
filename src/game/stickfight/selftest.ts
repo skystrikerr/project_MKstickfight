@@ -2816,6 +2816,48 @@ function scriptFor(move: MoveDef): RawInput[] {
   );
 }
 
+{
+  // Dienekes is paid for standing in the arrows.
+  //
+  // Herodotus has him told the Persian archery would blot out the sun and
+  // answering that this was good news. Hydarnes' volley is called Blot Out the
+  // Sun, and it is now the thing that fills the Spartan's bar - so the two of
+  // them answer each other across the roster rather than each carrying half a
+  // quotation.
+  const stand = (shoot: boolean) => {
+    const m = new Match([getFighter("spartan"), getFighter("persian")], 1);
+    for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+    const [a, b] = m.fighters;
+    b.x = a.x + 130;
+    if (shoot) {
+      b.resource = b.def.resource?.max ?? 0;
+      b.startMove("volley");
+      run(m, 10, () => inp());
+    }
+    a.resource = 0;
+    a.startMove("aegisGuard");
+    let banked = 0;
+    let prev = a.resource;
+    for (let i = 0; i < 26; i++) {
+      m.step([inp(), inp()]);
+      if (a.resource > prev) banked += a.resource - prev;
+      prev = a.resource;
+    }
+    return banked;
+  };
+  const quiet = stand(false);
+  const under = stand(true);
+  check("spartan: the shield bank is empty in the quiet", quiet < 1, `${quiet.toFixed(0)}`);
+  check("spartan: arrows fill it", under > 20, `${under.toFixed(0)} Aegis`);
+
+  // And the roster carries no lines from films.
+  for (const def of ROSTER) {
+    for (const m of def.moves) {
+      check(`${def.id}.${m.id}: not a screenwriter's line`, m.name !== "This Is Sparta", m.name);
+    }
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);

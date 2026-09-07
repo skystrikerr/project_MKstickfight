@@ -387,6 +387,17 @@ export interface ArmorWindow {
   hits: number;
   /** Fraction of damage still taken while absorbing. */
   damageScale?: number;
+  /**
+   * Resource gained each time this armour absorbs something, doubled for a
+   * projectile.
+   *
+   * Armour has only ever been a cost you pay less of. This lets it be a
+   * position worth taking: standing behind the shield while they shoot at you
+   * is not merely survivable, it is how you get paid. Herodotus has Dienekes
+   * told the Persian arrows would blot out the sun, and answering that it was
+   * good news - they would fight in the shade.
+   */
+  gainPerHit?: number;
 }
 
 export interface VelChange {

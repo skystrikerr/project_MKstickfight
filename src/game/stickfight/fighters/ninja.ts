@@ -4,8 +4,8 @@
  * Built out of mix-ups rather than damage: a kunai to make them block, a
  * teleport to appear on the other side of it, an overhead and a low that look
  * the same for the first six frames. Her Kage bar is the fuel for the
- * disappearing act, and it only refills while she is standing still - so the
- * more she cheats, the more honestly she has to fight.
+ * disappearing act, and it only refills while he is standing still - so the
+ * more he cheats, the more honestly he has to fight.
  */
 
 import type { FighterDef } from "../types";
@@ -29,11 +29,11 @@ const STANCE = {
   shoulderB: 30,
   elbowB: 66,
   crouch: 0.18,
-  // Reverse grip: the blade lies back along her forearm until she swings.
+  // Reverse grip: the blade lies back along his forearm until he swings.
   weaponBack: 168,
 };
 
-/** Arm carriage the universal moves keep so the tanto stays out of her body. */
+/** Arm carriage the universal moves keep so the tanto stays out of his body. */
 const IDLE_ARMS = { shoulderB: 30, elbowB: 66, weaponBack: 168 };
 
 export const NINJA: FighterDef = {
@@ -75,7 +75,7 @@ export const NINJA: FighterDef = {
     scale: 0.975,
   },
   stance: STANCE,
-  // The reverse grip already lays the tanto along her forearm, so guarding
+  // The reverse grip already lays the tanto along his forearm, so guarding
   // is just raising the arm and letting the blade cover it.
   clips: guardClips({
     high: { torso: 0, head: -6, shoulderB: 16, elbowB: 144, weaponBack: 168, shoulderF: 30, elbowF: 122, crouch: 0.1, hipF: 16, kneeF: 24, hipB: -20, kneeB: 34, offX: -2 },
@@ -165,6 +165,26 @@ export const NINJA: FighterDef = {
         { geo: "box", size: [3, 11], pos: [5, 0], color: "#8b7d5c" },
         { geo: "blade", size: [26, 5.5, 0.3], pos: [18, 0], color: "#98a3b2" },
         { geo: "box", size: [22, 1.4], pos: [17, 1.4], color: "#eef2f6" },
+      ],
+    },
+    {
+      id: "yari",
+      attach: "handF",
+      // Yari: a straight-bladed Japanese spear on a lacquered shaft, with the
+      // metal collar and the tassel where the blade is socketed.
+      //
+      // He was called Spear Hanzo - yari no Hanzo - and the shuriken and the
+      // smoke bomb are the ninja of the films. This is the weapon the records
+      // actually put in his hands.
+      conditional: true,
+      parts: [
+        { geo: "cyl", size: [3, 128], pos: [40, 0], rot: 90, color: "#241d18" },
+        { geo: "box", size: [26, 3.4], pos: [-4, 0], color: "#3a2f26" },
+        { geo: "box", size: [6, 8], pos: [104, 0], color: "#b9a06a" },
+        { geo: "poly", size: [0, 4, 6, 5, 10, 3, 10, -3, 6, -5, 0, -4], pos: [100, 0], color: "#8b7d5c" },
+        { geo: "poly", size: [0, 5, 30, 3.4, 40, 0, 30, -3.4, 0, -5], pos: [108, 0], color: "#c3ccd8" },
+        { geo: "poly", size: [0, 2, 28, 1.6, 36, 0, 28, -1.6, 0, -2], pos: [109, 0], color: "#eef2f6", z: 0.3 },
+        { geo: "poly", size: [0, 3, -10, 6, -16, 2, -10, -2], pos: [96, 0], color: "#7f2f2f", behind: true },
       ],
     },
     {
@@ -294,7 +314,7 @@ export const NINJA: FighterDef = {
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 19],
       hits: [hit(7, 10, bx(18, 8, 62, 24), 48, { guard: "low", fx: "slash", pushX: 3.8, hitstun: 17 })],
-      desc: "Blade dragged across the ankle. Blocked low, cancels into everything she has.",
+      desc: "Blade dragged across the ankle. Blocked low, cancels into everything he has.",
       notation: "↓ + B",
       frames: [
         kf(0, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 76, hipB: -22, kneeB: 86 }, "out"),
@@ -335,7 +355,7 @@ export const NINJA: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
       hits: [hit(15, 19, bx(18, 34, 56, 46), 56, { guard: "overhead", fx: "blunt", pushX: 4.6, hitstun: 20 })],
-      desc: "Steps in and chops the heel down. Overhead - it starts exactly like her low cut.",
+      desc: "Steps in and chops the heel down. Overhead - it starts exactly like his low cut.",
       notation: "→ + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -356,7 +376,7 @@ export const NINJA: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [11, 26],
       hits: [hit(9, 13, bx(14, 40, 52, 74), 66, { launch: [2, 12.5], knockdown: "launch", fx: "slash", hitstun: 26 })],
-      desc: "Blade up through the chin. Launches, and she can follow them all the way up.",
+      desc: "Blade up through the chin. Launches, and he can follow them all the way up.",
       notation: "↘ + C",
       frames: [
         kf(0, { ...STANCE, crouch: 0.6, hipF: 24, kneeF: 50 }, "out"),
@@ -526,7 +546,7 @@ export const NINJA: FighterDef = {
       landRecovery: 4,
       cancelInto: ["heavy", "special"],
       hits: [hit(6, 13, bx(16, 18, 52, 42), 52, { fx: "blunt", pushX: 3.8, hitstun: 18 })],
-      desc: "Knee out in front of her on the way in.",
+      desc: "Knee out in front of him on the way in.",
       notation: "(air) B",
       frames: [
         kf(0, { ...STANCE, free: 1, hipF: 32, kneeF: 42, hipB: -22, kneeB: 40 }, "out"),
@@ -665,7 +685,7 @@ export const NINJA: FighterDef = {
           trail: "#8fa4c4",
         },
       ],
-      desc: "The same knife thrown down at an angle. Controls the space she just jumped out of.",
+      desc: "The same knife thrown down at an angle. Controls the space he just jumped out of.",
       notation: "(air) ↓↘→ + B (1 Kage)",
       frames: [
         kf(0, { ...STANCE, free: 1 }, "out"),
@@ -676,15 +696,15 @@ export const NINJA: FighterDef = {
       ],
     },
     {
-      id: "shadowStep",
-      name: "Shadow Step",
+      id: "igaCrossing",
+      name: "The Iga Crossing",
       input: { button: "B", motion: "qcb", stance: ["stand", "crouch"] },
       tags: ["special", "movement"],
       priority: 22,
       duration: 26,
       resourceCost: 1,
       resourceMin: 1,
-      // Fully gone for the middle of it - she can pass straight through a
+      // Fully gone for the middle of it - he can pass straight through a
       // fireball and land on the far side of whoever threw it.
       invuln: [{ from: 4, to: 18, kind: "full" }],
       vel: [
@@ -697,7 +717,7 @@ export const NINJA: FighterDef = {
         { at: 3, kind: "smoke", x: 0, y: 46, scale: 1.3, color: "#7fd4ff" },
         { at: 18, kind: "smoke", x: 0, y: 46, scale: 1.3, color: "#7fd4ff" },
       ],
-      desc: "Vanishes and reappears past them. Invincible through the middle - the cheapest way she has to change sides. Costs one Kage.",
+      desc: "Iga-goe. He took his lord across a province that wanted them both dead, on nothing but men he had grown up with - so this is not an escape, it is a crossing. Untouchable through the middle, and it ends somewhere better. Costs one Kage.",
       notation: "↓↙← + B",
       frames: [
         kf(0, { ...STANCE, crouch: 0.5 }, "out"),
@@ -708,55 +728,39 @@ export const NINJA: FighterDef = {
       ],
     },
     {
-      id: "smokeBomb",
-      name: "Smoke Bomb",
+      id: "spearHanzo",
+      name: "Spear Hanzō",
       input: { button: "A", motion: "qcb", stance: ["stand", "crouch"] },
-      tags: ["special", "projectile"],
-      priority: 18,
-      duration: 34,
-      projectiles: [
-        {
-          at: 9,
-          kind: "smokebomb",
-          armAfter: 0,
-          x: 26,
-          y: 66,
-          vx: 8.5,
-          vy: 4.5,
-          gravity: 0.42,
-          life: 46,
-          box: { x: -7, y: -7, w: 14, h: 14 },
-          damage: 0,
-          hitstun: 0,
-          blockstun: 0,
-          hits: 1,
-          bounce: 0.3,
-          bounces: 1,
-          drag: 0.99,
-          fx: "burn",
-          // Bursts into a cloud that has to be blocked low and buys her the
-          // frames to be somewhere else.
-          detonate: {
-            radius: 54,
-            damage: 46,
-            hitstun: 26,
-            blockstun: 20,
-            knockdown: "none",
-            guard: "low",
-            chip: 5,
-          },
-          scale: 0.9,
-          color: "#8f97a8",
-        },
-      ],
-      desc: "Lobbed short and bursts into a cloud on the floor. Blocked low, and the cloud lasts long enough for her to be behind them.",
-      notation: "↓↙← + A",
+      tags: ["special"],
+      priority: 22,
+      duration: 40,
+      resourceCost: 1,
+      resourceMin: 1,
+      showProps: ["yari"],
+      hideProps: ["tanto", "kunai"],
+      vel: [{ at: 6, x: 4 }, { at: 18, x: 0 }],
+      friction: 0.9,
+      // The longest thrust on the roster, and it should be: he was known for
+      // this and not for anything he threw. The smoke bomb that used to live
+      // on this input was the film ninja, and Kuro already has one - the two
+      // of them were carrying the same kit.
+      hits: [hit(13, 18, bx(30, 44, 152, 26), 78, {
+        fx: "pierce",
+        pushX: 9,
+        hitstun: 22,
+        hitstop: 10,
+        shake: 1.5,
+      })],
+      desc: "Yari no Hanzō. The spear he was actually named for, put out further than anything else on the roster reaches. Costs one Kage.",
+      notation: "↓↙← + A (1 Kage)",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(5, { ...STANCE, shoulderF: 140, elbowF: 110, torso: -10, offX: -3 }),
-        kf(9, { ...STANCE, shoulderF: 66, elbowF: 20, torso: 22, hipF: 24, offX: 5 }, "out"),
-        kf(20, { ...STANCE, shoulderF: 60, elbowF: 54, torso: 8 }, "inOut"),
-        kf(34, { ...STANCE }),
+        // Both hands to the shaft, weight back, point on the line.
+        kf(6, { ...STANCE, shoulderF: 62, elbowF: 44, weapon: 22, shoulderB: 44, elbowB: 58, torso: -12, hipB: -30, kneeB: 44, offX: -6 }, "out"),
+        kf(13, { ...STANCE, shoulderF: 84, elbowF: 2, weapon: -4, shoulderB: 76, elbowB: 10, torso: 22, hipF: 42, kneeF: 10, hipB: -38, kneeB: 16, offX: 10 }, "linear"),
+        kf(18, { ...STANCE, shoulderF: 83, elbowF: -2, weapon: -3, shoulderB: 75, elbowB: 6, torso: 24, hipF: 46, kneeF: 8, offX: 17 }, "out"),
+        kf(28, { ...STANCE, shoulderF: 66, elbowF: 30, weapon: 16, torso: 10, offX: 5 }, "inOut"),
+        kf(40, { ...STANCE }),
       ],
     },
     {
@@ -776,7 +780,7 @@ export const NINJA: FighterDef = {
         hit(3, 9, bx(10, 40, 52, 78), 80, { launch: [2, 10.5], knockdown: "launch", fx: "slash", hitstun: 26, shake: 1.8 }),
         hit(10, 17, bx(8, 54, 48, 66), 32, { group: 2, launch: [1.2, 4.5], fx: "slash" }),
       ],
-      desc: "Invincible on frame one, straight up with the blade leading. Her reversal and her anti-air.",
+      desc: "Invincible on frame one, straight up with the blade leading. His reversal and his anti-air.",
       notation: "→↓↘ + C",
       frames: [
         kf(0, { ...STANCE, crouch: 0.7, hipF: 24, kneeF: 50, shoulderB: 0, elbowB: 90, weaponBack: 80 }, "out"),
@@ -807,7 +811,7 @@ export const NINJA: FighterDef = {
           shake: 1.6,
         }),
       ],
-      desc: "Folds up and drops on a diagonal, blade first. Overhead, and it changes her jump arc mid-air.",
+      desc: "Folds up and drops on a diagonal, blade first. Overhead, and it changes his jump arc mid-air.",
       notation: "(air) ↓↘→ + C",
       frames: [
         kf(0, { ...STANCE, free: 1 }, "out"),
@@ -829,7 +833,7 @@ export const NINJA: FighterDef = {
       friction: 0.82,
       resourceGain: 1,
       vfx: [{ at: 2, kind: "smoke", x: 0, y: 46, scale: 1, color: "#7fd4ff" }],
-      desc: "SKILL. The substitution. Deflects anything that lands in the first frames and hands her a Kage back for it.",
+      desc: "SKILL. The substitution. Deflects anything that lands in the first frames and hands him a Kage back for it.",
       notation: "A + C",
       frames: [
         kf(0, { ...STANCE }, "out"),

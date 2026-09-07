@@ -201,7 +201,8 @@ export class Fighter {
   moveHasBlocked = false;
   private cancelled = false;
   armorLeft = 0;
-  private armorWindow = -1;
+  /** Index of the armour window currently open, so the match can read which. */
+  armorWindow = -1;
 
   /** Set while this fighter is held by the opponent's throw. */
   grabbedBy: Fighter | null = null;

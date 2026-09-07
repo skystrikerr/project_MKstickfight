@@ -604,7 +604,12 @@ export class Match {
     // Armor absorbs the hit but still takes chip-ish damage.
     if (defender.armorLeft > 0 && guard !== "unblockable") {
       defender.armorLeft--;
-      const armorScale = defender.move?.armor?.[0]?.damageScale ?? 0.4;
+      // The window that is actually open, not the first one authored - a move
+      // with two armour phases was being read from the wrong one.
+      const win = defender.move?.armor?.[defender.armorWindow] ?? defender.move?.armor?.[0];
+      const armorScale = win?.damageScale ?? 0.4;
+      // Arrows are worth double, because arrows are the thing this is for.
+      if (win?.gainPerHit) defender.addResource(win.gainPerHit * (fromProjectile ? 2 : 1));
       defender.health = Math.max(1, defender.health - hit.damage * armorScale);
       defender.flash = 6;
       attacker.hitstop = 6;

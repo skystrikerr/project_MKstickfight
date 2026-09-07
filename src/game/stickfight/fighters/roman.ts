@@ -768,23 +768,23 @@ export const ROMAN: FighterDef = {
       ],
     },
     {
-      id: "phalanx",
-      name: "Phalanx Advance",
+      id: "rampart",
+      name: "Beyond the Rampart",
       input: { button: "B", motion: "hcf", stance: ["stand", "crouch"] },
       tags: ["special"],
       priority: 22,
-      duration: 54,
+      duration: 66,
       vel: [
-        { at: 1, x: 3.4 },
-        { at: 14, x: 3.2 },
-        { at: 28, x: 3.6 },
+        { at: 1, x: 4.2 },
+        { at: 14, x: 4 },
+        { at: 28, x: 4.4 },
         { at: 40, x: 0 },
       ],
       friction: 0.94,
       hits: [
         hit(8, 11, bx(30, 50, 76, 22), 34, { group: 1, fx: "pierce", pushX: 1.6, hitstun: 16, hitstop: 5 }),
         hit(20, 23, bx(30, 50, 80, 22), 34, { group: 2, fx: "pierce", pushX: 1.6, hitstun: 16, hitstop: 5 }),
-        hit(32, 36, bx(30, 46, 88, 26), 62, {
+        hit(32, 36, bx(30, 46, 92, 26), 74, {
           group: 3,
           fx: "pierce",
           pushX: 8,
@@ -793,7 +793,7 @@ export const ROMAN: FighterDef = {
           shake: 1.6,
         }),
       ],
-      desc: "Marches forward with three thrusts. The last one knocks down.",
+      desc: "Caesar names Vorenus and Pullo for a feud over which of them was braver, and it ended with the pair of them over the rampart and into the Nervii. Three thrusts, going forward the whole way, and no way of getting back - the recovery is the price of having gone out that far.",
       notation: "←↙↓↘→ + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -807,7 +807,7 @@ export const ROMAN: FighterDef = {
         kf(28, { ...STANCE, shoulderF: 50, elbowF: -36, weapon: 58, torso: 4, hipF: 16, kneeF: 32 }, "inOut"),
         kf(32, { ...STANCE, shoulderF: 88, elbowF: 0, weapon: -2, torso: 28, hipF: 42, kneeF: 22, hipB: -24, kneeB: 50, offX: 9 }, "out"),
         kf(44, { ...STANCE, torso: 14 }, "inOut"),
-        kf(54, { ...STANCE }),
+        kf(66, { ...STANCE }),
       ],
     },
     {
