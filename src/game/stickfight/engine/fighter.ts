@@ -149,6 +149,20 @@ export class Fighter {
   stateFrame = 0;
   move: MoveDef | null = null;
   moveFrame = 0;
+  /**
+   * Which of the current move's projectile spawns have already fired.
+   *
+   * `spec.at === moveFrame` is not on its own a once-only condition. Hitstop
+   * freezes `moveFrame`, and a shot fired at point blank hits on the frame it
+   * appears - so the attacker is frozen *on the spawn frame*, and the instant
+   * the freeze expires the same spawn is satisfied again. It fires, it hits,
+   * it freezes him again, and the move never reaches frame seventeen.
+   *
+   * Measured on Ras Alula's volley at touching range: 753 damage off a super
+   * whose two shots are worth 124 between them, and it would have gone on
+   * until the round timer.
+   */
+  spawned = new Set<number>();
 
   hitstop = 0;
   hitstun = 0;
@@ -413,6 +427,7 @@ export class Fighter {
     this.move = def;
     this.moveFrame = 0;
     this.connected.clear();
+    this.spawned.clear();
     this.moveHasHit = false;
     this.moveHasBlocked = false;
     this.cancelled = false;

@@ -804,7 +804,7 @@ export const PIRATE: FighterDef = {
         },
       ],
       desc: "Throws the hook - on hit it drags them into point-blank range for a mix-up.",
-      notation: "↓↙← + B",
+      notation: "↓↙← + B (1 Powder)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(7, { ...STANCE, shoulderB: -70, elbowB: 30, torso: -14, offX: -4 }, "inOut"),

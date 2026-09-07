@@ -637,7 +637,7 @@ export const ICEMAN: FighterDef = {
       ],
       vfx: [{ at: 22, kind: "dust", x: 44, y: 78, scale: 0.8, color: "#c9c4b6" }],
       desc: "Winds the sling twice and lets a stone go on a high arc. Slow enough to walk under and heavy enough that walking under it is worth doing. Costs one Stone.",
-      notation: "↓↘→ + B",
+      notation: "↓↘→ + B (1 Stones)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderB: 60, elbowB: -20, weaponBack: 40, torso: -10, offX: -4 }, "inOut"),

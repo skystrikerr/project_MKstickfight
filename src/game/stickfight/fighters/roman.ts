@@ -679,7 +679,7 @@ export const ROMAN: FighterDef = {
         },
       ],
       desc: "Hurls a javelin across the screen. Uses one pilum - they come back slowly.",
-      notation: "↓↘→ + B",
+      notation: "↓↘→ + B (1 Pila)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderF: 158, elbowF: -44, weapon: 70, torso: -18, hipB: -28, kneeB: 40, offX: -5 }, "inOut"),
@@ -962,7 +962,7 @@ export const ROMAN: FighterDef = {
       ],
       vfx: [{ at: 14, kind: "dust", x: 30, y: 2, scale: 1.6 }],
       desc: "Drives the spear butt into the ground and sends a shockwave along the floor. Must be blocked low.",
-      notation: "↓↙← + B",
+      notation: "↓↙← + B (1 Pila)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderF: 150, elbowF: -40, weapon: 96, torso: -16, hipB: -26, kneeB: 38, offX: -4 }, "inOut"),

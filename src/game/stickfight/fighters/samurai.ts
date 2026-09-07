@@ -606,7 +606,7 @@ export const SAMURAI: FighterDef = {
       ],
       vfx: [{ at: 12, kind: "slash", x: 70, y: 52, scale: 1.6, color: "#9fe8ff" }],
       desc: "Steps through the opponent and draws in one motion. Enormous range, cuts through fireballs.",
-      notation: "↓↘→ + B",
+      notation: "↓↘→ + B (1 Ki)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, torso: -12, shoulderF: 6, elbowF: 84, shoulderB: -10, elbowB: 70, weapon: -78, offX: -4 }, "inOut"),
@@ -635,7 +635,7 @@ export const SAMURAI: FighterDef = {
         hit(9, 16, bx(6, 64, 58, 72), 43, { group: 2, launch: [1.6, 5], fx: "slash" }),
       ],
       desc: "Invincible rising cut. Reversal, anti-air and juggle starter.",
-      notation: "→↓↘ + C",
+      notation: "→↓↘ + C (1 Ki)",
       frames: [
         kf(0, { ...STANCE, crouch: 0.6, hipF: 24, kneeF: 48 }, "out"),
         kf(3, { ...STANCE, free: 1, torso: -14, shoulderF: 150, elbowF: -16, weapon: 20, hipF: 30, kneeF: 30 }, "out"),
@@ -739,7 +739,7 @@ export const SAMURAI: FighterDef = {
         }),
       ],
       desc: "Air-only dive with the blade leading. Changes her jump arc and crosses people up.",
-      notation: "(air) ↓↙← + B",
+      notation: "(air) ↓↙← + B (1 Ki)",
       frames: [
         kf(0, { ...STANCE, free: 1 }, "out"),
         kf(3, { ...STANCE, free: 1, torso: 30, spin: -14, shoulderF: 40, elbowF: 6, weapon: -60, hipF: 50, kneeF: 20, hipB: -30, kneeB: 44 }, "out"),

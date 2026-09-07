@@ -901,7 +901,7 @@ export const NIHANG: FighterDef = {
         },
       ],
       desc: "A heavy quoit thrown flat, slowing as it goes and hitting twice. He catches it again, so the belt costs him nothing.",
-      notation: "↓↙← + C",
+      notation: "↓↙← + C (2 Chakrams)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderB: 140, elbowB: -34, torso: -18, hipB: -30, kneeB: 44, offX: -6 }, "inOut"),

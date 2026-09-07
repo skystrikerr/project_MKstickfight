@@ -85,10 +85,16 @@ for (const def of ROSTER) {
       if (b !== "S" && !new RegExp(`\\b${b}\\b`).test(m.notation)) tag(m, `notation "${m.notation}" does not name button ${b}`);
     }
 
-    // A quoted resource cost has to be the real one.
-    const quoted = m.notation?.match(/\((\d+)\s+[A-Za-z]/);
+    // A quoted resource cost has to be the real one - found by the resource's
+    // own name, not by "the first number in brackets". A super can cost meter
+    // and a resource both, and "(100 meter, 3 Kage)" is the natural way to
+    // write that; the old rule read the hundred and called the Kage wrong.
+    const resName = def.resource?.name;
+    const quoted = resName
+      ? m.notation?.match(new RegExp(`(\\d+)\\s+${resName}`, "i"))
+      : null;
     if (quoted && m.resourceCost !== undefined && Number(quoted[1]) !== m.resourceCost) {
-      tag(m, `notation says ${quoted[1]} resource but the move costs ${m.resourceCost}`);
+      tag(m, `notation says ${quoted[1]} ${resName} but the move costs ${m.resourceCost}`);
     }
 
     // Meter cost without the ex tag (or vice versa) - the move list groups on it.

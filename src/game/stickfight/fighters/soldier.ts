@@ -739,7 +739,7 @@ export const SOLDIER: FighterDef = {
         },
       ],
       desc: "Lobs a frag in an arc. It skips off the dirt twice, then goes off - blocking only saves you from part of it.",
-      notation: "↓↙← + B",
+      notation: "↓↙← + B (6 Rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(7, { ...STANCE, shoulderF: -84, elbowF: 60, torso: -16, offX: -4 }, "inOut"),

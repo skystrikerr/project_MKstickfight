@@ -685,7 +685,7 @@ export const VIKING: FighterDef = {
         }),
       ],
       desc: "Spins forward with the axe out, hitting on both sides. Absorbs two hits while she turns.",
-      notation: "↓↙← + B",
+      notation: "↓↙← + B (25 Fury)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, spin: -80, torso: 6, shoulderB: 96, elbowB: -10, weaponBack: -70, hipF: 24, kneeF: 20 }, "linear"),
@@ -785,7 +785,7 @@ export const VIKING: FighterDef = {
       ],
       vfx: [{ at: 20, kind: "slash", x: 40, y: 30, scale: 1.5 }],
       desc: "Jumps the gap and brings the axe down on their head. Overhead, and it travels.",
-      notation: "↓↙← + C",
+      notation: "↓↙← + C (15 Fury)",
       frames: [
         kf(0, { ...STANCE, crouch: 0.6, hipF: 24, kneeF: 50 }, "out"),
         kf(6, { ...STANCE, free: 1, torso: -18, shoulderB: 170, elbowB: -24, weaponBack: 36, hipF: 30, kneeF: 60, hipB: -30, kneeB: 50 }, "out"),

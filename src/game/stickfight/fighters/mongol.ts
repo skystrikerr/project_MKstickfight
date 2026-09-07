@@ -281,7 +281,7 @@ export const MONGOL: FighterDef = {
         },
       ],
       desc: "Draws and looses without aiming. Costs an arrow, and at this range it does not miss.",
-      notation: "C",
+      notation: "C (12 Quiver)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(7, { ...STANCE, shoulderF: 88, elbowF: 4, shoulderB: 78, elbowB: 128, torso: -6, offX: -2 }, "inOut"),
@@ -589,7 +589,7 @@ export const MONGOL: FighterDef = {
         },
       ],
       desc: "Shoots down at the floor from the top of the jump. Her air-to-ground answer.",
-      notation: "(air) C",
+      notation: "(air) C (8 Quiver)",
       frames: [
         kf(0, { ...STANCE, free: 1 }, "out"),
         kf(5, { ...STANCE, free: 1, torso: 14, shoulderF: 62, elbowF: 4, shoulderB: 56, elbowB: 126, hipF: 40, kneeF: 56 }, "inOut"),
@@ -660,7 +660,7 @@ export const MONGOL: FighterDef = {
       ],
       vfx: [{ at: 14, kind: "spark", x: 46, y: 62, scale: 1.2, color: "#9be0a0" }],
       desc: "Hold back to draw, then forward to loose. Full-screen, ignores other projectiles and knocks them flat.",
-      notation: "hold ← then → + B",
+      notation: "hold ← then → + B (14 Quiver)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(8, { ...STANCE, shoulderF: 90, elbowF: 0, shoulderB: 84, elbowB: 138, torso: -10, hipB: -30, offX: -3 }, "inOut"),
@@ -785,7 +785,7 @@ export const MONGOL: FighterDef = {
         },
       ],
       desc: "Loosed almost straight up and it lands on them a second later. Overhead - crouching does nothing about it.",
-      notation: "↓↙← + B",
+      notation: "↓↙← + B (10 Quiver)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 150, elbowF: 6, weapon: 30, shoulderB: 130, elbowB: 130, torso: -16 }, "inOut"),
@@ -856,7 +856,7 @@ export const MONGOL: FighterDef = {
         },
       ],
       desc: "Scatters iron on the floor between them. It sits there. Whoever walks into it goes down, and it costs her no arrows.",
-      notation: "↓↙← + A",
+      notation: "↓↙← + A (8 Quiver)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(5, { ...STANCE, crouch: 0.5, torso: 18, shoulderB: 20, elbowB: 100 }),

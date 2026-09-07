@@ -851,7 +851,7 @@ export const SPARTAN: FighterDef = {
       ],
       vfx: [{ at: 14, kind: "blunt", x: 60, y: 52, scale: 1.6 }],
       desc: "A full-body boot to the chest. Sends them the length of the arena and bounces them off the wall.",
-      notation: "↓↙← + C",
+      notation: "↓↙← + C (20 Aegis)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         // Chamber: knee driven up to the chest, weight settled on the back leg,
@@ -888,7 +888,7 @@ export const SPARTAN: FighterDef = {
         }),
       ],
       desc: "Two thrusts at the ankles then the throat. The first must be blocked low, the second high.",
-      notation: "↓↙← + B",
+      notation: "↓↙← + B (16 Aegis)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(5, { ...STANCE, crouch: 0.8, torso: 16, shoulderB: 46, elbowB: 14, weaponBack: -54, hipF: 34, kneeF: 66 }),

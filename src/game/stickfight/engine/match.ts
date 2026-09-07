@@ -574,7 +574,7 @@ export class Match {
       const stun = hit.blockstun;
       defender.blockstun = stun;
       defender.setState("blockstun");
-      defender.guard -= Math.max(4, hit.damage * 0.5);
+      defender.guard -= hit.guardDamage ?? Math.max(4, hit.damage * 0.5);
       const chip = hit.chip ?? 0;
       if (chip > 0) defender.health = Math.max(COMBAT.chipFloor, defender.health - chip);
       defender.vx = dirSign * (hit.pushX ?? 6) * 0.5 * kbBlock;
@@ -834,8 +834,11 @@ export class Match {
 
   private spawnProjectiles(f: Fighter) {
     if (f.state !== "move" || !f.move?.projectiles || f.hitstop > 0) return;
-    for (const spec of f.move.projectiles) {
+    for (let i = 0; i < f.move.projectiles.length; i++) {
+      const spec = f.move.projectiles[i];
       if (spec.at !== f.moveFrame) continue;
+      if (f.spawned.has(i)) continue;
+      f.spawned.add(i);
       this.projectiles.push({
         id: ++projId,
         owner: f.index,

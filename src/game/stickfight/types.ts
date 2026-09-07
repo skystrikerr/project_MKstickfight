@@ -217,6 +217,16 @@ export interface HitDef {
   shake?: number;
   /** Armour this hit takes off the defender permanently. */
   strips?: StripDef;
+  /**
+   * Guard bar taken when this hit is blocked, instead of the usual half its
+   * damage.
+   *
+   * Normally a blocked hit costs guard in proportion to how hard it was, which
+   * is the right default and makes chipping someone down a matter of volume.
+   * It leaves no way to author the other thing: a single blow whose whole
+   * purpose is that the shield does not help. A lance is not a heavier sword.
+   */
+  guardDamage?: number;
 }
 
 export interface ThrowDef {

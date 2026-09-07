@@ -612,7 +612,7 @@ export const WESTERN: FighterDef = {
       ],
       vfx: [{ at: 9, kind: "shot", x: 48, y: 62, scale: 1, color: "#ffcf6b" }],
       desc: "One round, straight and fast. The core of his zoning.",
-      notation: "↓↘→ + B",
+      notation: "↓↘→ + B (1 Rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(5, { ...STANCE, shoulderF: 40, elbowF: 20, weapon: -30, torso: -4 }),
@@ -838,7 +838,7 @@ export const WESTERN: FighterDef = {
         },
       ],
       desc: "Lobs a stick of dynamite in an arc. Explodes on landing - controls the whole midscreen.",
-      notation: "↓↙← + B",
+      notation: "↓↙← + B (2 Rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(7, { ...STANCE, shoulderB: -90, elbowB: 60, torso: -16, offX: -4 }, "inOut"),
@@ -946,7 +946,7 @@ export const WESTERN: FighterDef = {
       ],
       vfx: [{ at: 10, kind: "shot", x: 38, y: 18, scale: 1, color: "#ffcf6b" }],
       desc: "Bounces a round off the dirt into an arc - a bullet that beats jump-ins.",
-      notation: "↓↙← + C",
+      notation: "↓↙← + C (1 Rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, crouch: 0.5, shoulderF: 8, elbowF: 30, weapon: -50, torso: 18 }),
@@ -1017,7 +1017,7 @@ export const WESTERN: FighterDef = {
       ],
       vfx: [{ at: 8, kind: "shot", x: 38, y: 40, scale: 1, color: "#ffcf6b" }],
       desc: "Fires down at an angle from a jump. Great for controlling the ground.",
-      notation: "(air) ↓↘→ + B",
+      notation: "(air) ↓↘→ + B (1 Rounds)",
       frames: [
         kf(0, { ...STANCE, free: 1 }, "out"),
         kf(5, { ...STANCE, free: 1, shoulderF: 60, elbowF: 20, weapon: -40, torso: 14 }),

@@ -228,14 +228,28 @@ function contract(def: FighterDef) {
   // Several notations quote what the move costs. Changing the cost and leaving
   // the printed number behind is silent, and the only way to find out is to be
   // told a move needs 70 and watch it come out at 55.
+  //
+  // Matched by the resource's own name rather than by "the first number in
+  // brackets". A super can cost meter and a resource both, and "(100 meter,
+  // 3 Kage)" is the natural way to write that - under the old rule it read
+  // the hundred and reported the Kage cost as wrong.
+  const resName = def.resource?.name;
   for (const m of moves) {
-    const quoted = m.notation?.match(/\((\d+)\s+[A-Za-z]/);
-    if (!quoted || m.resourceCost === undefined) continue;
+    if (m.resourceCost === undefined || !m.notation || !resName) continue;
+    const quoted = m.notation.match(new RegExp(`(\\d+)\\s+${resName}`, "i"));
+    if (!quoted) continue;
     check(
       `${def.id}.${m.id}: the quoted resource cost is the real one`,
       Number(quoted[1]) === m.resourceCost,
-      `says ${quoted[1]}, costs ${m.resourceCost}`,
+      `says ${quoted[1]} ${resName}, costs ${m.resourceCost}`,
     );
+  }
+  // And a move that costs a resource has to say so somewhere the player can
+  // read it, or the cost is a surprise.
+  for (const m of moves) {
+    if (!m.resourceCost || m.internal || !resName) continue;
+    const said = `${m.notation ?? ""} ${m.desc}`.toLowerCase().includes(resName.toLowerCase());
+    check(`${def.id}.${m.id}: says it costs ${resName}`, said, m.notation ?? "");
   }
 
   const dash = moves.find((m) => m.id === "dashAttack");
@@ -763,6 +777,10 @@ function scriptFor(move: MoveDef): RawInput[] {
     const superMove = def.moves.find((m) => m.tags?.includes("super"))!;
     const m = newMatch(def.id, "roman");
     m.fighters[0].meter = 200;
+    // Supers may cost the fighter's own resource as well as meter. This check
+    // is about whether the move works, not whether it is affordable - what it
+    // costs to reach is usagecheck's question.
+    m.fighters[0].resource = def.resource?.max ?? 0;
     m.fighters[0].x = -60;
     m.fighters[1].x = 30;
     const hp = m.fighters[1].health;
@@ -1451,6 +1469,7 @@ function scriptFor(move: MoveDef): RawInput[] {
     // About the input, not the economy - pay for it, the way the specials
     // check above does.
     f.meter = 200;
+    f.resource = f.def.resource?.max ?? 0;
     let came = false;
     for (const step of scriptFor(dd)) {
       m.step([step, inp()]);
@@ -2756,6 +2775,35 @@ function scriptFor(move: MoveDef): RawInput[] {
       }
     }
   }
+}
+
+{
+  // A projectile spawn fires once, however long the fighter is frozen on the
+  // frame it fires.
+  //
+  // `spec.at === moveFrame` was the whole condition, and it is not a once-only
+  // one: a shot fired at point blank hits on the frame it appears, the hit
+  // freezes the attacker *on that frame*, and the instant the freeze expires
+  // the spawn is satisfied again. Ras Alula's volley, worth 124 between its
+  // two shots, did 753 at touching range and would have gone on until the
+  // round timer ran out.
+  const m = new Match([getFighter("ethiopia"), getFighter("roman")], 1);
+  for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+  const [a, b] = m.fighters;
+  b.x = a.x + 55;
+  a.meter = 100;
+  a.resource = a.def.resource?.max ?? 0;
+  const hp = b.health;
+  a.startMove("super");
+  run(m, 240, () => inp());
+  const dealt = hp - b.health;
+  const authored = (a.def.moves.find((v) => v.id === "super")?.projectiles ?? [])
+    .reduce((t, p) => t + p.damage, 0);
+  check(
+    "a point-blank volley fires once per shot",
+    dealt <= authored + 1,
+    `dealt ${Math.round(dealt)} from ${authored} authored`,
+  );
 }
 
 const failed = results.filter((r) => !r.ok);
