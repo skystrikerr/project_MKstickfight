@@ -29,6 +29,7 @@ interface Props {
     p2Weapon?: string;
   }) => void;
   onShowMoves: (id: string) => void;
+  onShowProfile: (id: string) => void;
 }
 
 /** A tiny painted preview of a stage: sky gradient, horizon and accent. */
@@ -280,7 +281,7 @@ function Card({
   );
 }
 
-export function CharacterSelect({ onStart, onShowMoves }: Props) {
+export function CharacterSelect({ onStart, onShowMoves, onShowProfile }: Props) {
   // Read once. Everything below starts where the last session left it, and
   // writes back as it changes, so the screen never opens cold twice.
   const [saved] = useState(loadSave);
@@ -504,6 +505,17 @@ export function CharacterSelect({ onStart, onShowMoves }: Props) {
             </div>
           </div>
 
+          {/* The profile comes first because it is the one a player who does
+              not know this fighter wants: who they were, what they carry, and
+              how they compare. The move list is the reference you go to once
+              you have already picked them. */}
+          <button
+            type="button"
+            onClick={() => onShowProfile(preview.id)}
+            className="cut-sm border border-[var(--accent)] bg-[var(--accent)]/10 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)] transition hover:bg-[var(--accent)]/20"
+          >
+            Profile &mdash; history, weapons &amp; stats
+          </button>
           <button
             type="button"
             onClick={() => onShowMoves(preview.id)}

@@ -12,6 +12,8 @@
 
 import { AiController, STYLES } from "./engine/ai";
 import { HURTBOX, STAGE_HALF_WIDTH } from "./constants";
+import { DOSSIERS } from "./dossier";
+import { rawStat, statsFor, STAT_LABELS, type StatKey } from "./profile";
 import { EMPTY_INPUT, GamepadReader, Keyboard, P1_KEYS, type RawInput } from "./engine/input";
 import { Match } from "./engine/match";
 import { Music, TRACKS, type MusicCue } from "./engine/music";
@@ -3157,6 +3159,87 @@ function factionTests() {
 
 factionTests();
 superDamage();
+profileTests();
+
+// ---------------------------------------------------------------------------
+// Profiles
+// ---------------------------------------------------------------------------
+function profileTests() {
+  const ids = new Set(ROSTER.map((d) => d.id));
+  for (const id of Object.keys(DOSSIERS)) {
+    check(`dossier ${id}: belongs to somebody`, ids.has(id), id);
+  }
+
+  for (const def of ROSTER) {
+    const d = DOSSIERS[def.id];
+    // Not optional in practice. The page falls back to the blurb so a fighter
+    // added today still has a page that works, but shipping without one is a
+    // fighter whose profile silently says less than their select card.
+    check(`dossier ${def.id}: exists`, !!d);
+    if (!d) continue;
+
+    // Long enough to be the fuller account and short enough to read. Both
+    // ends matter: two lines is the blurb again, and twelve is a wiki page.
+    check(`dossier ${def.id}: the history has something in it`, d.history.length >= 300,
+      `${d.history.length} chars`);
+    check(`dossier ${def.id}: the history is not an essay`, d.history.length <= 1000,
+      `${d.history.length} chars`);
+
+    // The whole reason history is a separate field is that it says more than
+    // the blurb. One that opens with the same sentence is not doing that.
+    check(`dossier ${def.id}: the history is not the blurb again`,
+      d.history.slice(0, 60) !== def.bio.slice(0, 60));
+
+    check(`dossier ${def.id}: carries something`, d.arsenal.length >= 1);
+    check(`dossier ${def.id}: does not carry an armoury`, d.arsenal.length <= 4,
+      `${d.arsenal.length}`);
+    const names = d.arsenal.map((w) => w.name);
+    check(`dossier ${def.id}: no weapon listed twice`, new Set(names).size === names.length);
+    for (const w of d.arsenal) {
+      check(`dossier ${def.id}: ${w.name} says what it is for`, w.role.length > 0 && w.role.length <= 40,
+        w.role);
+      check(`dossier ${def.id}: ${w.name} has a line about it`, w.note.length >= 20, w.note);
+    }
+  }
+
+  // ---- the derived bars ----
+  //
+  // These are computed, so the thing worth asserting is not any one value but
+  // that the measurement still discriminates. A stat where the whole roster
+  // lands on the same number is a formula that has stopped reading anything -
+  // which is exactly what happens when a field it depends on gets renamed,
+  // and it fails silently and looks fine on the page.
+  const keys = Object.keys(STAT_LABELS) as StatKey[];
+  for (const key of keys) {
+    const raws = new Set(ROSTER.map((d) => rawStat(d, key)));
+    check(`profile ${key}: the measurement varies across the roster`, raws.size >= 5, `${raws.size} distinct`);
+
+    const graded = ROSTER.map((d) => statsFor(d).find((s) => s.key === key)!.value);
+    check(`profile ${key}: grades inside 1-10`, graded.every((v) => v >= 1 && v <= 10));
+    // A percentile over 26 fighters should reach both ends. If it does not,
+    // the curve is broken rather than the roster being uniform.
+    check(`profile ${key}: uses the whole scale`, Math.min(...graded) <= 2 && Math.max(...graded) >= 9,
+      `${Math.min(...graded)}..${Math.max(...graded)}`);
+  }
+
+  for (const def of ROSTER) {
+    const bars = statsFor(def);
+    check(`profile ${def.id}: has all eight bars`, bars.length === keys.length, `${bars.length}`);
+  }
+
+  // The two ends of the roster the design is most explicit about, as a check
+  // that the formulas are pointed the right way round. Kuro is built to be
+  // the glass cannon and Otzi is built to be the wall; if either of those
+  // inverts, a sign is wrong somewhere and every other bar is suspect too.
+  const bar = (id: string, key: StatKey) => statsFor(getFighter(id)).find((s) => s.key === key)!.value;
+  check("profile: Kuro hits hardest and breaks easiest",
+    bar("shade", "power") >= 8 && bar("shade", "durability") <= 5,
+    `power ${bar("shade", "power")}, durability ${bar("shade", "durability")}`);
+  check("profile: Otzi is the wall", bar("iceman", "durability") >= 8, `${bar("iceman", "durability")}`);
+  check("profile: the shield fighters are the defensive ones",
+    bar("spartan", "defence") >= 7 && bar("knight", "defence") >= 7,
+    `Dienekes ${bar("spartan", "defence")}, Chandos ${bar("knight", "defence")}`);
+}
 
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);

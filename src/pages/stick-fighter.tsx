@@ -260,6 +260,7 @@ export default function StickFighter() {
 
       {screen === "select" && (
         <CharacterSelect
+          onShowProfile={(id) => setPageFor(id)}
           onStart={(opts) => {
             setConfig(opts);
             setRun(opts.mode === "arcade" ? startRun(opts.p1, opts.aiLevel) : null);
