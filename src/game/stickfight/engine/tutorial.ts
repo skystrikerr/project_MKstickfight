@@ -14,6 +14,7 @@
  * distance travelled.
  */
 
+import type { FighterDef } from "../types";
 import type { Fighter } from "./fighter";
 import type { Match } from "./match";
 
@@ -27,15 +28,21 @@ export type TutorialKind =
   | "blockLow"
   | "dodge"
   | "throw"
-  | "combo";
+  | "combo"
+  | "resource"
+  | "skill"
+  | "signature"
+  | "superMove";
 
 export interface TutorialStep {
   kind: TutorialKind;
   title: string;
   prompt: string;
+  /** The exact move a fighter-specific lesson is asking for. */
+  moveId?: string;
 }
 
-export const TUTORIAL_STEPS: TutorialStep[] = [
+const BASIC_STEPS: TutorialStep[] = [
   { kind: "move", title: "Move", prompt: "Walk around. Hold ← or → to close distance or give yourself room." },
   { kind: "jump", title: "Jump", prompt: "Press ↑ to jump. Everything in the air is punishable, so use it deliberately." },
   { kind: "crouch", title: "Crouch", prompt: "Hold ↓ to crouch. Lows can only be blocked from down here." },
@@ -47,6 +54,75 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   { kind: "throw", title: "Throw", prompt: "Get in close and press A + B together to throw them." },
   { kind: "combo", title: "Combo", prompt: "Chain light into medium into heavy - A, then B, then C, without a gap." },
 ];
+
+/**
+ * The lessons for one fighter: the ten fundamentals, then their own kit.
+ *
+ * The fighter-specific half is derived from the move list rather than written
+ * out twenty-five times. That is the only version of this that survives the
+ * roster growing - a hand-authored tutorial per fighter is a file that has to
+ * be written again for every new one and silently goes stale the first time
+ * somebody renames a special. Everything here reads the move's own name,
+ * notation and tags, so a lesson cannot describe a move that no longer exists.
+ *
+ * A fighter can still override any of it by authoring the same `kind` itself,
+ * which nothing on the roster needs yet.
+ */
+export function stepsFor(def: FighterDef): TutorialStep[] {
+  const steps = [...BASIC_STEPS];
+  const usable = def.moves.filter((m) => !m.internal && !m.variant);
+
+  const skill = usable.find((m) => m.tags?.includes("skill"));
+  if (skill) {
+    steps.push({
+      kind: "skill",
+      title: "Character skill",
+      prompt: `${def.name} has one thing nobody else does: ${skill.name}. Press ${skill.notation ?? "A + C"}.`,
+      moveId: skill.id,
+    });
+  }
+
+  if (def.resource) {
+    // The move that most obviously spends it, so the prompt can name one
+    // rather than telling the player to go and find out.
+    const spender = usable.find((m) => (m.resourceCost ?? 0) > 0);
+    steps.push({
+      kind: "resource",
+      title: def.resource.name,
+      prompt: spender
+        ? `That bar is ${def.resource.name}, and it is finite. Spend some: ${spender.name}, ${spender.notation ?? ""}.`.trim()
+        : `That bar is ${def.resource.name}. Watch what it does while you fight.`,
+      moveId: spender?.id,
+    });
+  }
+
+  // The signature special: the one the fighter is built around, taken as the
+  // highest-priority real special, which is how the input reader already
+  // ranks them.
+  const signature = usable
+    .filter((m) => isRealSpecial(m))
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))[0];
+  if (signature) {
+    steps.push({
+      kind: "signature",
+      title: signature.name,
+      prompt: `${signature.desc.split(". ")[0]}. Throw one: ${signature.notation ?? ""}.`.replace(" .", "."),
+      moveId: signature.id,
+    });
+  }
+
+  const sup = usable.find((m) => m.tags?.includes("super"));
+  if (sup) {
+    steps.push({
+      kind: "superMove",
+      title: "Super",
+      prompt: `A hundred meter buys one of these. ${sup.name}: ${sup.notation ?? ""}.`.trim(),
+      moveId: sup.id,
+    });
+  }
+
+  return steps;
+}
 
 /** A move whose first hit needs the block height this lesson is teaching. */
 function findGuardMove(dummy: Fighter, guard: "low" | "standing"): string | undefined {
@@ -80,6 +156,7 @@ const GAPS: Partial<Record<TutorialKind, number>> = {
 
 export class TutorialRunner {
   index = 0;
+  private steps: TutorialStep[] = BASIC_STEPS;
   stepFrame = 0;
   complete = false;
 
@@ -92,17 +169,21 @@ export class TutorialRunner {
   private sawHit = false;
   private sawBlocked = false;
   private sawDodgeOverlap = false;
+  private resourceAtStart = 0;
+  private spentResource = false;
+  private usedTarget = false;
 
   get step(): TutorialStep {
-    return TUTORIAL_STEPS[this.index];
+    return this.steps[this.index];
   }
 
   get total(): number {
-    return TUTORIAL_STEPS.length;
+    return this.steps.length;
   }
 
   /** Called once, right after the match is created. */
   start(match: Match) {
+    this.steps = stepsFor(match.fighters[0].def);
     this.index = 0;
     this.complete = false;
     this.beginStep(match);
@@ -131,10 +212,13 @@ export class TutorialRunner {
     this.sawHit = false;
     this.sawBlocked = false;
     this.sawDodgeOverlap = false;
+    this.spentResource = false;
+    this.usedTarget = false;
     me.health = me.def.stats.health;
     me.meter = 100;
     if (me.def.resource) me.resource = me.def.resource.max;
     dummy.health = dummy.def.stats.health;
+    this.resourceAtStart = me.resource;
 
     this.dummyMoveId =
       this.step.kind === "blockHigh" || this.step.kind === "dodge"
@@ -166,18 +250,25 @@ export class TutorialRunner {
     if (me.health <= 0) me.health = me.def.stats.health;
     if (dummy.health <= 0) dummy.health = dummy.def.stats.health;
     me.meter = 100;
-    if (me.def.resource) me.resource = me.def.resource.max;
+    // Every other lesson keeps the bar full so the player can experiment.
+    // This one is *about* the bar, so it has to be allowed to go down.
+    if (me.def.resource && this.step.kind !== "resource") me.resource = me.def.resource.max;
+    if (this.step.kind === "resource" && me.def.resource && me.resource < this.resourceAtStart) {
+      this.spentResource = true;
+    }
 
     this.minX = Math.min(this.minX, me.x);
     this.maxX = Math.max(this.maxX, me.x);
     this.crouchFrames = me.stance === "crouch" ? this.crouchFrames + 1 : 0;
+
+    if (this.step.moveId && me.move?.id === this.step.moveId) this.usedTarget = true;
 
     if (["blockHigh", "blockLow", "dodge"].includes(this.step.kind) && this.dummyMoveId) {
       this.driveScriptedAttack(dummy, me);
     }
 
     if (this.checkDone(me, dummy)) {
-      if (this.index + 1 >= TUTORIAL_STEPS.length) {
+      if (this.index + 1 >= this.steps.length) {
         this.complete = true;
       } else {
         this.index++;
@@ -236,6 +327,14 @@ export class TutorialRunner {
         return !!me.move?.internal && (me.move?.tags?.includes("throw") ?? false);
       case "combo":
         return dummy.comboHits >= 2;
+      case "skill":
+      case "signature":
+      case "superMove":
+        return this.usedTarget;
+      case "resource":
+        // Either they spent it, or - for a fighter whose bar only fills - they
+        // did the thing the prompt named.
+        return this.spentResource || this.usedTarget;
       default:
         return false;
     }

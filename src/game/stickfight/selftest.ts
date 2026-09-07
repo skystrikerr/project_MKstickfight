@@ -16,7 +16,7 @@ import { EMPTY_INPUT, GamepadReader, Keyboard, P1_KEYS, type RawInput } from "./
 import { Match } from "./engine/match";
 import { Music, TRACKS, type MusicCue } from "./engine/music";
 import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
-import { TUTORIAL_STEPS, TutorialRunner } from "./engine/tutorial";
+import { stepsFor, TutorialRunner } from "./engine/tutorial";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
 import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun, type Run } from "./ladder";
@@ -2085,14 +2085,41 @@ function superDamage() {
         p1 = hits < 1 ? inp({ A: true }) : inp({ B: true });
         break;
       }
+      // The fighter-specific lessons name an exact move. Driving those through
+      // their motion inputs would be re-testing the input reader, which has
+      // its own tests - what is under test here is that the lesson notices.
+      case "skill":
+      case "resource":
+      case "signature":
+      case "superMove": {
+        const want = runner.step.moveId;
+        if (want && m.fighters[0].state !== "move" && frame % 6 === 0) {
+          m.fighters[0].meter = 200;
+          m.fighters[0].startMove(want, true);
+        }
+        break;
+      }
     }
 
     m.step([p1, inp()]);
     runner.apply(m);
   }
 
-  check("tutorial: every lesson is reachable", seen.length === TUTORIAL_STEPS.length, seen.join(","));
+  const expected = stepsFor(getFighter("roman"));
+  check("tutorial: every lesson is reachable", seen.length === expected.length, `${seen.length} of ${expected.length}: ${seen.join(",")}`);
   check("tutorial: the whole thing can be completed", runner.complete, `stuck on ${runner.step?.kind} at frame ${frame}`);
+
+  // And every fighter gets a lesson in their own kit, not just the ten
+  // fundamentals - the derivation has to actually find their moves.
+  for (const def of ROSTER) {
+    const steps = stepsFor(def);
+    const own = steps.filter((st) => st.moveId);
+    check(`${def.id}: has lessons of its own`, own.length >= 2, `${own.length}`);
+    for (const st of own) {
+      check(`${def.id}/${st.kind}: names a real move`, def.moves.some((mv) => mv.id === st.moveId), st.moveId ?? "");
+      check(`${def.id}/${st.kind}: has a prompt`, st.prompt.length > 12, st.prompt);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

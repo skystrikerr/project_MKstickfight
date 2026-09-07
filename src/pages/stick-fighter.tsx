@@ -211,9 +211,13 @@ export default function StickFighter() {
                 type="button"
                 onClick={() => {
                   setRun(null);
+                  // The tutorial teaches your fighter's own kit now, not just
+                  // the fundamentals, so it opens on whoever you last picked
+                  // rather than always on the centurion.
+                  const saved = loadSave();
                   setConfig({
-                    p1: "roman",
-                    p2: "roman",
+                    p1: saved.p1,
+                    p2: saved.p1,
                     mode: "tutorial",
                     aiLevel: "Rookie",
                     rounds: 1,
