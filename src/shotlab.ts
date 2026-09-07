@@ -22,10 +22,16 @@ import { Match } from "@/game/stickfight/engine/match";
 import { getFighter } from "@/game/stickfight/fighters";
 import { EMPTY_INPUT } from "@/game/stickfight/engine/input";
 import { GameRenderer } from "@/game/stickfight/render/renderer";
+import { setDetail } from "@/game/stickfight/render/detail";
 import { STAGE_THEMES, type StageTheme } from "@/game/stickfight/render/stage";
 
 const q = new URLSearchParams(location.search);
 const num = (k: string, d: number) => Number(q.get(k) ?? d);
+
+// The detail knob is module-level and read when the stage builds its weather,
+// so it has to be set before the renderer is constructed - which is why this
+// sits above the canvas setup rather than with the other per-fighter options.
+if (q.has("detail")) setDetail(q.get("detail") as "full" | "reduced" | "off");
 
 const theme = (q.get("stage") ?? "colosseum") as StageTheme;
 const canvas = document.getElementById("c") as HTMLCanvasElement;

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AiLevel } from "../constants";
 import { music } from "../engine/music";
 import { loadSave, patchSave } from "../save";
+import { setDetail } from "../render/detail";
 import { GameSession, type GameMode, type HudState } from "../engine/game";
 import type { MatchRule } from "../engine/match";
 import { toKeyBindings } from "../keybinds";
@@ -87,6 +88,10 @@ export function GameCanvas({
     if (!canvas || !wrap) return;
 
     const saved = loadSave();
+    // Set before anything renders: the ambient weather is built once when the
+    // stage is constructed, so a later change would not take until the next
+    // match.
+    setDetail(saved.particles);
     const session = new GameSession({
       p1: config.p1,
       p2: config.p2,
@@ -101,6 +106,9 @@ export function GameCanvas({
       p2Weapon: config.p2Weapon,
       p1Keys: toKeyBindings(saved.p1Keys),
       motion: saved.motion,
+      // "auto" means "say nothing and let the renderer probe the context",
+      // which is exactly what passing undefined already did.
+      quality: saved.quality === "auto" ? undefined : saved.quality,
     });
     sessionRef.current = session;
     // The button already reflects the saved setting; the audio has to be told.

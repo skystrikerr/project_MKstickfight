@@ -59,38 +59,6 @@ function spellOut(n: number): string {
   return ones ? `${tens}-${WORDS[ones]}` : tens;
 }
 
-const CONTROLS: { keys: string; label: string }[] = [
-  { keys: "W A S D", label: "Move · W jumps · S crouches" },
-  { keys: "J", label: "Light attack (A)" },
-  { keys: "K", label: "Medium attack (B)" },
-  { keys: "L", label: "Heavy attack (C)" },
-  { keys: "S + J / K / L", label: "Crouching light / medium / heavy" },
-  { keys: "hold U / ;", label: "Block (S) · + ↓ blocks low" },
-  { keys: "← + S", label: "Parry" },
-  { keys: "→ + S", label: "Roll (ducks under the swing, travels past them)" },
-  { keys: "← ←", label: "Backstep (retreats out of range)" },
-  { keys: "J + L", label: "Character skill" },
-  { keys: "J + K", label: "Throw" },
-  { keys: "Esc", label: "Pause" },
-];
-
-const P2_CONTROLS: { keys: string; label: string }[] = [
-  { keys: "Arrow keys", label: "Move / jump / crouch" },
-  { keys: "N / M / ,", label: "Light / Medium / Heavy" },
-  { keys: ". or Numpad 0", label: "Block / skill (S)" },
-];
-
-const PAD_CONTROLS: { keys: string; label: string }[] = [
-  { keys: "D-pad / stick", label: "Move, jump, crouch" },
-  { keys: "✕ / A", label: "Light attack" },
-  { keys: "○ / B", label: "Medium attack" },
-  { keys: "□ / X", label: "Heavy attack" },
-  { keys: "↓ + ✕ / ○ / □", label: "Crouching attacks" },
-  { keys: "△ / Y · L1 · L2", label: "Block / skill" },
-  { keys: "R1", label: "Character skill" },
-  { keys: "R2", label: "Throw" },
-  { keys: "Start", label: "Pause" },
-];
 
 /**
  * Keeps the two sides of a mirror match visibly different. Everywhere else the
@@ -273,37 +241,6 @@ export default function StickFighter() {
             </div>
           </div>
 
-          <div className="relative mt-10 grid w-full max-w-5xl gap-px bg-[var(--rule)] sm:grid-cols-3">
-            {[
-              { label: "Player 1", accent: "var(--accent)", rows: CONTROLS },
-              { label: "Player 2", accent: "var(--p2)", rows: P2_CONTROLS },
-              { label: "Gamepad — plug in, press a button", accent: "#7f9c6b", rows: PAD_CONTROLS },
-            ].map((col) => (
-              <section key={col.label} className="bg-[var(--ink-2)] p-4">
-                <div
-                  className="mb-2 border-b pb-1.5 font-display text-lg font-bold uppercase tracking-[0.15em]"
-                  style={{ color: col.accent, borderColor: "var(--rule)" }}
-                >
-                  {col.label}
-                </div>
-                <ul className="space-y-1 text-xs">
-                  {col.rows.map((c) => (
-                    <li key={c.keys} className="flex justify-between gap-4">
-                      <span className="font-mono text-[11px] text-[var(--bone)]">{c.keys}</span>
-                      <span className="text-right text-[var(--bone-dim)]">{c.label}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-
-          <p className="relative mt-6 max-w-3xl pb-4 text-center text-xs leading-relaxed text-[var(--bone-dim)]">
-            Every fighter has <span className="text-[var(--bone)]">five specials</span>, a light and a heavy attack, a
-            block, two dodges and a jump — plus their own skill, super, and three strings built out of their own
-            weapons, the longest of them five hits. Specials use motion inputs: ↓↘→ + button for quarter circles, →↓↘ for dragon punches. Meter pays
-            for EX specials (50) and supers (100).
-          </p>
         </div>
         </>
       )}

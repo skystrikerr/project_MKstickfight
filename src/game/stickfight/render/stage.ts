@@ -8,6 +8,7 @@
  * registry.
  */
 import type { Platform } from "../types";
+import { detailScale } from "./detail";
 import type { StageLight } from "./shapes";
 
 import * as THREE from "three";
@@ -544,7 +545,10 @@ class Ambient {
   private disposables: (THREE.BufferGeometry | THREE.Material)[] = [];
 
   constructor(private def: AmbientDef) {
-    if (def.kind === "none" || def.count === 0) return;
+    // Weather is the first thing to go: it is pure decoration, it is the
+    // densest particle source in the game, and it is in front of the fight.
+    const count = Math.round(def.count * detailScale());
+    if (def.kind === "none" || count === 0) return;
 
     const [w, h] = def.size;
     const geo =
@@ -555,7 +559,7 @@ class Ambient {
           : new THREE.CircleGeometry(Math.max(w, h) / 2, 8);
     this.disposables.push(geo);
 
-    for (let i = 0; i < def.count; i++) {
+    for (let i = 0; i < count; i++) {
       const color = def.colors[i % def.colors.length];
       const material = mat(color, def.opacity);
       this.disposables.push(material);

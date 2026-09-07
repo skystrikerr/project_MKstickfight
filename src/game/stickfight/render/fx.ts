@@ -4,6 +4,7 @@
  */
 
 import * as THREE from "three";
+import { detailScale } from "./detail";
 import type { FxEvent } from "../engine/match";
 
 type Shape = "dot" | "shard" | "ring" | "arc" | "star" | "puff" | "glow";
@@ -212,8 +213,23 @@ export class FxSystem {
     p.active = true;
   }
 
+  /**
+   * The debris thrown off an impact, and the only place the detail setting
+   * touches the effects system.
+   *
+   * Scaling here rather than in `spawn` is deliberate. Every effect on the
+   * roster is one or two shaped particles - the arc of a slash, the ring of a
+   * block - followed by a burst of anonymous debris, and the shaped ones are
+   * what tells a player their hit landed. Thinning `spawn` would randomly
+   * delete those and make the fight unreadable; thinning the debris takes out
+   * the bulk of the particle count and none of the information.
+   *
+   * At "off" one particle survives per burst rather than none, for the same
+   * reason: a hit still has to look like a hit.
+   */
   private burst(x: number, y: number, count: number, color: string, speed: number, size: number, life: number) {
-    for (let i = 0; i < count; i++) {
+    const n = detailScale() === 1 ? count : Math.max(1, Math.round(count * (detailScale() || 0.25)));
+    for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const s = speed * (0.4 + Math.random() * 0.9);
       this.spawn({

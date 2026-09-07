@@ -38,6 +38,26 @@ export interface SaveData {
   sfxVolume: number;
   /** Camera shake intensity - "off" removes it entirely. */
   motion: "full" | "reduced" | "off";
+  /**
+   * Effects quality.
+   *
+   * "auto" is what the game did before this was settable: probe the context
+   * and drop to low on a software renderer. It stays the default and stays
+   * honest - the in-match FX button still overrides for that session - but a
+   * player who wants bloom on a machine the probe was pessimistic about, or
+   * off on one it was optimistic about, now gets to say so once instead of
+   * every match.
+   */
+  quality: "auto" | "high" | "low";
+  /**
+   * Weather and impact particles.
+   *
+   * Separate from `quality` because they cost different things: quality is a
+   * full-frame bloom pass on the GPU, this is particle count on the CPU. A
+   * weak machine often wants one and not the other, and some people just do
+   * not want snow in front of the fight.
+   */
+  particles: "full" | "reduced" | "off";
   /** Brightens secondary text and hairline rules throughout the interface. */
   highContrast: boolean;
   /** Player 1's key map. Player 2 stays on the fixed arrow-key layout. */
@@ -83,6 +103,8 @@ export const DEFAULT_SAVE: SaveData = {
   musicVolume: 0.4,
   sfxVolume: 0.5,
   motion: "full",
+  quality: "auto",
+  particles: "full",
   highContrast: false,
   p1Keys: defaultKeyMap(),
   inputScheme: "keyboard",
@@ -107,6 +129,9 @@ const isStage = (v: unknown): v is StageTheme | "random" =>
  */
 const isVolume = (v: unknown): v is number => typeof v === "number" && v >= 0 && v <= 1;
 const isMotion = (v: unknown): v is SaveData["motion"] => v === "full" || v === "reduced" || v === "off";
+const isQuality = (v: unknown): v is SaveData["quality"] => v === "auto" || v === "high" || v === "low";
+const isParticles = (v: unknown): v is SaveData["particles"] =>
+  v === "full" || v === "reduced" || v === "off";
 
 /**
  * A key map is rebuilt action by action, same as `cleared` is rebuilt fighter
@@ -188,6 +213,8 @@ function coerce(raw: unknown): SaveData {
     musicVolume: isVolume(o.musicVolume) ? o.musicVolume : DEFAULT_SAVE.musicVolume,
     sfxVolume: isVolume(o.sfxVolume) ? o.sfxVolume : DEFAULT_SAVE.sfxVolume,
     motion: isMotion(o.motion) ? o.motion : DEFAULT_SAVE.motion,
+    quality: isQuality(o.quality) ? o.quality : DEFAULT_SAVE.quality,
+    particles: isParticles(o.particles) ? o.particles : DEFAULT_SAVE.particles,
     highContrast: typeof o.highContrast === "boolean" ? o.highContrast : DEFAULT_SAVE.highContrast,
     p1Keys: coerceKeyMap(o.p1Keys),
     inputScheme: isInputScheme(o.inputScheme) ? o.inputScheme : DEFAULT_SAVE.inputScheme,

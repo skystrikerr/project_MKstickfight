@@ -31,6 +31,7 @@ import type { FighterDef, MoveDef } from "./types";
 import { INPUT_SCHEMES, renderNotation } from "./inputscheme";
 import { applyClear, applyMatch, isUnlocked, unlockLabel, unlockProgress, type ProgressState } from "./progress";
 import { CUES as SCORE_CUES, Score, type ScoreCue } from "./engine/score";
+import { detailScale, getDetail, setDetail } from "./render/detail";
 import { stringsFor as declaredStrings } from "./strings";
 import {
   advanceTower,
@@ -1881,6 +1882,32 @@ function scriptFor(move: MoveDef): RawInput[] {
   check("save: high contrast round-trips", loadSave().highContrast === true);
   patchSave({ motion: "wandering" as never });
   check("save: a garbled motion value falls back", loadSave().motion === DEFAULT_SAVE.motion, loadSave().motion);
+
+  // Graphics settings, same treatment. These are the two that decide whether
+  // the game runs at all on a weak machine, so a migration quietly dropping
+  // one puts a player back on a setting they already rejected.
+  check("save: quality defaults to auto", loadSave().quality === "auto", loadSave().quality);
+  check("save: particles default to full", loadSave().particles === "full", loadSave().particles);
+  patchSave({ quality: "low", particles: "off" });
+  check("save: quality round-trips", loadSave().quality === "low", loadSave().quality);
+  check("save: particles round-trip", loadSave().particles === "off", loadSave().particles);
+  patchSave({ quality: "ultra" as never, particles: "some" as never });
+  check("save: a garbled quality falls back", loadSave().quality === DEFAULT_SAVE.quality, loadSave().quality);
+  check("save: a garbled particle setting falls back", loadSave().particles === DEFAULT_SAVE.particles, loadSave().particles);
+  patchSave({ quality: DEFAULT_SAVE.quality, particles: DEFAULT_SAVE.particles });
+
+  // And the knob those settings drive. The scale is what the ambient weather
+  // and the impact debris both multiply by, so if it stops responding the
+  // settings become two rows of buttons that do nothing.
+  const wasDetail = getDetail();
+  setDetail("full");
+  check("detail: full draws everything", detailScale() === 1, `${detailScale()}`);
+  setDetail("reduced");
+  check("detail: reduced halves it", detailScale() === 0.5, `${detailScale()}`);
+  setDetail("off");
+  check("detail: off drops the weather", detailScale() === 0, `${detailScale()}`);
+  check("detail: off is readable back", getDetail() === "off", getDetail());
+  setDetail(wasDetail);
 
   // Weapon choices are stored per fighter and rebuilt entry by entry, so one
   // variant this build no longer ships costs that fighter their weapon rather
