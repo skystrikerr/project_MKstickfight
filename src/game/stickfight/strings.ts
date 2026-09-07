@@ -43,11 +43,34 @@ export interface FighterString {
 // selftest.ts rather than trusted.
 // ---------------------------------------------------------------------------
 
+// Every family now carries eight shapes rather than three, in the same five
+// roles, so that what a fighter can actually do reads as a vocabulary instead
+// of one long chain and two stubs:
+//
+//   1  the long confirm          the bread-and-butter
+//   2  advancing                 the forward-button chain
+//   3  retreating                the back-button chain
+//   4  the quick one             light into heavy, no detours
+//   5  the guess                 opens crouching, ends on the overhead
+//   6  the heavy one             big into big, for a whiff punish
+//   7  the short exit            two moves, and he is out of there
+//   8  the low reset             low into a heavy that starts it again
+//
+// The hard constraint is that a move can hold one follow-up per button, so
+// every (source move, target button) pair across a family has to be unique -
+// two strings that both leave 5A on B would leave the second unreachable.
+// selftest.ts checks it rather than trusting the arithmetic here.
+
 /** Fast, and it keeps switching height - the opponent has to guess twice. */
 const RUSHDOWN = [
   ["5A", "2A", "5B", "2B", "2C"],
   ["6A", "6B", "6C"],
   ["4A", "4B", "4C"],
+  ["5A", "5B", "5C"],
+  ["2A", "6A", "3C"],
+  ["5C", "6C", "2C"],
+  ["4A", "4C"],
+  ["2B", "2A", "5C"],
 ];
 
 /** Slower and heavier, and the long one ends on the biggest thing they have. */
@@ -55,6 +78,11 @@ const BRUISER = [
   ["5A", "6A", "5B", "6B", "5C"],
   ["2A", "2B", "2C", "4C"],
   ["4A", "4B", "3C"],
+  ["5A", "5B", "2C"],
+  ["2A", "6A", "3C"],
+  ["5C", "6C", "2C"],
+  ["4A", "4C"],
+  ["2B", "2A", "6C"],
 ];
 
 /** Built around reach: it starts at range and pushes them further out. */
@@ -62,6 +90,11 @@ const ZONER = [
   ["5B", "5C", "6C", "4C"],
   ["5A", "6A", "6B", "3C"],
   ["2A", "2B", "2C"],
+  ["5A", "4B", "3C"],
+  ["2A", "6A", "2C"],
+  ["2C", "3C"],
+  ["4A", "4C"],
+  ["2B", "2A", "6C"],
 ];
 
 /** Patient: one long confirm, one that goes low, one that gives ground. */
@@ -69,6 +102,11 @@ const FOOTSIES = [
   ["5A", "5B", "6B", "6C", "4C"],
   ["6A", "2A", "2B", "2C"],
   ["4A", "4B", "3C"],
+  ["5A", "2A", "5C"],
+  ["6A", "5B", "3C"],
+  ["2B", "5A", "2C"],
+  ["4A", "4C"],
+  ["3C", "2C"],
 ];
 
 /**
@@ -85,6 +123,11 @@ const MACTAN = [
   ["5A", "5B", "2B", "2C", "3C"],
   ["2A", "6A", "6B", "6C"],
   ["4A", "4B", "4C"],
+  ["5A", "2A", "5C"],
+  ["6A", "5C", "6C"],
+  ["2B", "5A", "2C"],
+  ["4A", "4C"],
+  ["6B", "5B", "3C"],
 ];
 
 /**
@@ -112,41 +155,57 @@ const CAUSEWAY = [
   ["5A", "5B", "5C", "2C", "6C"],
   ["6A", "2A", "2B", "3C"],
   ["4A", "4B", "4C"],
+  ["5A", "2A", "6C"],
+  ["6A", "6B", "6C"],
+  ["2B", "5A", "3C"],
+  ["4A", "4C"],
+  ["3C", "2C"],
 ];
 
 const WATLING = [
   ["5A", "5B", "5C", "2B", "6C"],
   ["6A", "6B", "2A", "2C", "6C"],
   ["4A", "4B", "4C"],
+  ["5A", "6A", "3C"],
+  ["2A", "6B", "3C"],
+  ["3C", "5C"],
+  ["4A", "4C"],
+  ["2B", "5A", "5C"],
 ];
 
 /** Names per fighter, in the order their family lists the shapes. */
-const NAMES: Record<string, [string, string, string]> = {
-  roman: ["Pilum Drill", "Testudo", "Trench Work"],
-  spartan: ["Aspis Work", "Dory Drill", "Give Ground"],
-  viking: ["Shield and Axe", "Leg Work", "Hewing Line"],
-  pirate: ["Cutlass Flurry", "Boarding Party", "Backswing"],
-  samurai: ["Kesa Line", "Ankle Cut", "Iai Retreat"],
-  muaythai: ["Eight Limbs", "Long Range", "Clinch Exit"],
-  ninja: ["Tanto Rhythm", "Kunai Line", "Falling Leaf"],
-  mongol: ["Bow and Stave", "Horn Work", "Stirrup Cut"],
-  western: ["Gunhand", "Bar Brawl", "Backstep Right"],
-  soldier: ["Butt-Stroke Drill", "Bayonet Rush", "Fall Back"],
-  knight: ["Zornhau Line", "Halfsword Low", "Winding Line"],
-  jaguar: ["Obsidian Rhythm", "Rending Charge", "Raking Retreat"],
-  zulu: ["Horn and Iklwa", "Ankle Work", "Chest Line"],
-  shaolin: ["Staff Rhythm", "Crown to Ankle", "Sweeping Staff"],
-  nihang: ["Quoit and Tulwar", "Quoit Work", "Heel Work"],
-  shade: ["Twin Kunai", "Kunai Rush", "Vanishing Line"],
-  maori: ["Rau Rhythm", "Reaping Line", "Give Ground"],
-  ethiopia: ["Curved Line", "Hooking Low", "Backing Hook"],
-  duelist: ["Lunge Line", "Foot Work", "Retreat and Point"],
-  iceman: ["Fell the Tree", "Ground Work", "Backhand Line"],
-  celt: ["Long Cut Rhythm", "Lifting Line", "Backhand Line"],
-  persian: ["Wicker and Spear", "Rank Work", "Low Ranks"],
-  lapulapu: ["Below the Knee", "Back to My Range", "Give Ground"],
-  iceni: ["Spear Rhythm", "Shield and Drive", "Turning Retreat"],
-  conquistador: ["Shield and Steel", "Down the Guard", "Covered Retreat"],
+/**
+ * Eight names per fighter, in the order the family lists its shapes. Written
+ * per fighter rather than per family: the shapes are shared, the words are not,
+ * and a generic label over a specific chain is how a move list stops being
+ * worth reading.
+ */
+const NAMES: Record<string, string[]> = {
+  roman: ["Pilum Drill", "Testudo", "Trench Work", "Gladius Line", "Shield Feint", "Low and Over", "Half a Pace", "Low Line"],
+  spartan: ["Aspis Work", "Dory Drill", "Give Ground", "Othismos", "Under the Rim", "Spear Break", "Two Paces Back", "Ankle Line"],
+  viking: ["Shield and Axe", "Leg Work", "Hewing Line", "Axe Rhythm", "Over the Rim", "Splitting Blow", "Half a Step", "Shin Work"],
+  pirate: ["Cutlass Flurry", "Boarding Party", "Backswing", "Powder Burn", "Deck Sweep", "Broadside Rhythm", "Cutting Away", "Bilge Work"],
+  samurai: ["Kesa Line", "Ankle Cut", "Iai Retreat", "Kiriotoshi", "Suriage", "Two Cuts", "Zanshin", "Low Guard"],
+  muaythai: ["Eight Limbs", "Long Range", "Clinch Exit", "Teep and Elbow", "Knee Line", "Round Rhythm", "Break Away", "Low Kick Line"],
+  ninja: ["Tanto Rhythm", "Kunai Line", "Falling Leaf", "Kunai Feint", "Shadowless", "Two Blades", "Withdrawing", "Ankle Sweep"],
+  mongol: ["Bow and Stave", "Horn Work", "Stirrup Cut", "Parthian Line", "Quiver Work", "Under the Guard", "Give Rein", "Hamstring Line"],
+  western: ["Gunhand", "Bar Brawl", "Backstep Right", "Fanning", "Hip Shot", "Gut and Head", "Step Off", "Boot Work"],
+  soldier: ["Butt-Stroke Drill", "Bayonet Rush", "Fall Back", "Fire and Move", "Suppressing Line", "Low and High", "Break Contact", "Low Crawl"],
+  knight: ["Zornhau Line", "Halfsword Low", "Winding Line", "Oberhau Line", "Krumphau", "Two Hands", "Abzug", "Nachreisen"],
+  jaguar: ["Obsidian Rhythm", "Rending Charge", "Raking Retreat", "Glass Rhythm", "Stone Line", "Two Edges", "Stepping Away", "Ankle Glass"],
+  zulu: ["Horn and Iklwa", "Ankle Work", "Chest Line", "Bull Horn", "Stabbing Line", "Two Spears", "Falling Back", "Low Iklwa"],
+  shaolin: ["Staff Rhythm", "Crown to Ankle", "Sweeping Staff", "Staff Line", "Turning Wheel", "Root and Crown", "Retiring Step", "Low Staff"],
+  nihang: ["Quoit and Tulwar", "Quoit Work", "Heel Work", "Chakra Line", "Tulwar Rhythm", "Ankle and Crown", "Withdrawing", "Heel Line"],
+  shade: ["Twin Kunai", "Kunai Rush", "Vanishing Line", "Smoke Line", "Two Shadows", "Nowhere Blade", "Fading", "Low Shadow"],
+  maori: ["Rau Rhythm", "Reaping Line", "Give Ground", "Taiaha Rhythm", "Whakarehu", "Two Ends", "Stepping Wide", "Low Rau"],
+  ethiopia: ["Curved Line", "Hooking Low", "Backing Hook", "Shotel Line", "Hooking Rhythm", "Two Curves", "Giving Way", "Low Hook"],
+  duelist: ["Lunge Line", "Foot Work", "Retreat and Point", "Coulé", "Coupé Line", "Double Thrust", "Rompre", "Low Line"],
+  iceman: ["Fell the Tree", "Ground Work", "Backhand Line", "Copper Line", "Flint Rhythm", "Two Hafts", "Stepping Off", "Low Flint"],
+  celt: ["Long Cut Rhythm", "Lifting Line", "Backhand Line", "Long Blade Line", "Rising Rhythm", "Two Cuts", "Giving Ground", "Low Iron"],
+  persian: ["Wicker and Spear", "Rank Work", "Low Ranks", "Spara Line", "Rank Rhythm", "Under the Wicker", "Falling In", "Low Wicker"],
+  lapulapu: ["Below the Knee", "Back to My Range", "Give Ground", "Kampilan Line", "Sand Rhythm", "Two Edges", "Wading Back", "Shin Line"],
+  iceni: ["Spear Rhythm", "Shield and Drive", "Turning Retreat", "Level Line", "Ferrule Rhythm", "Two Ends", "Giving a Pace", "Low Iron"],
+  conquistador: ["Shield and Steel", "Down the Guard", "Covered Retreat", "Toledo Line", "Cutting Down", "Two Steels", "A Pace Back", "Low Steel"],
 };
 
 const FAMILY: Record<string, string[][]> = {

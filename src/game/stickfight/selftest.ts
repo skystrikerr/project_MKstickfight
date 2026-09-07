@@ -2285,8 +2285,23 @@ function scriptFor(move: MoveDef): RawInput[] {
       if (!opener) continue;
       const stance = opener.input.stance;
       const crouch = stance === "crouch" || (Array.isArray(stance) && stance.length === 1 && stance[0] === "crouch");
+      // The diagonal matters. A string that opens on a command normal - 3C is
+      // down-forward on every fighter that has one - was unreachable here
+      // because the harness only knew "f", "b" and crouch, so it held nothing,
+      // pressed C, and got 5C. It then reported the string as unperformable
+      // when the only thing that could not perform it was the test.
       const held: Partial<RawInput> =
-        opener.input.dir === "f" ? { right: true } : opener.input.dir === "b" ? { left: true } : crouch ? { down: true } : {};
+        opener.input.dir === "df"
+          ? { right: true, down: true }
+          : opener.input.dir === "db"
+            ? { left: true, down: true }
+            : opener.input.dir === "f"
+              ? { right: true }
+              : opener.input.dir === "b"
+                ? { left: true }
+                : crouch
+                  ? { down: true }
+                  : {};
       const seen: string[] = [];
       let at = 0;
       for (let f = 0; f < 400 && at < st.steps.length - 1; f++) {
