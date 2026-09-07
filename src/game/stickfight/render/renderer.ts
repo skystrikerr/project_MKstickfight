@@ -426,9 +426,19 @@ export class GameRenderer {
         if (!m || Array.isArray(m)) return;
         m.opacity = (m.userData.baseOpacity ??= m.opacity) * fade;
       });
-      // A slow swell across the surface, so it is visibly water and not a mat.
+      // A slow swell across the surface, so it is visibly water and not a mat -
+      // and a quicker, smaller one for fire, so the tongues lick rather than
+      // roll. Added to each piece's own position rather than replacing it:
+      // fire is built out of tongues that each sit at their own x, and
+      // overwriting that stacked the whole patch on the centre line.
+      const fire = z.kind === "fire";
+      const rate = fire ? 0.16 : 0.045;
       mesh.children.forEach((c, i) => {
-        c.position.x = Math.sin(z.age * 0.045 + i * 1.7) * (2 + i);
+        const baseX = (c.userData.baseX ??= c.position.x);
+        const baseY = (c.userData.baseY ??= c.position.y);
+        c.position.x = baseX + Math.sin(z.age * rate + i * 1.7) * (fire ? 1.5 : 2 + i);
+        if (fire) c.scale.y = 1 + Math.sin(z.age * 0.21 + i * 2.3) * 0.14;
+        else c.position.y = baseY;
       });
     }
     const stale: number[] = [];
@@ -453,6 +463,49 @@ export class GameRenderer {
       m.material.userData.baseOpacity = opacity;
       g.add(m);
     };
+    // Fire is the same three-strip construction read upwards instead of
+    // downwards: a dark scorch lying flat on the stage, then the body of the
+    // flame above it, then a pale core. The swell `syncZones` puts through the
+    // strips reads as water when it is wide and low and as flame when it is
+    // tall and bright, so the two share it.
+    // Fire needs a silhouette, not a stack of translucent bands. Three strips
+    // of flame drawn as triangles along a scorch line read as burning ground
+    // from the first frame; the same three-rectangle construction the water
+    // uses read as a beige box lying on the road.
+    if (z.kind === "fire") {
+      const tongue = (x: number, w: number, h: number, color: string, opacity: number, order: number) => {
+        const shape = new THREE.Shape();
+        shape.moveTo(-w / 2, 0);
+        shape.lineTo(-w * 0.34, h * 0.36);
+        shape.lineTo(-w * 0.14, h * 0.72);
+        shape.lineTo(0, h);
+        shape.lineTo(w * 0.18, h * 0.68);
+        shape.lineTo(w * 0.38, h * 0.32);
+        shape.lineTo(w / 2, 0);
+        const m = new THREE.Mesh(
+          shape ? new THREE.ShapeGeometry(shape) : new THREE.PlaneGeometry(w, h),
+          new THREE.MeshBasicMaterial({ color: new THREE.Color(color), transparent: true, opacity, depthWrite: false }),
+        );
+        m.position.set(x, 2, order);
+        m.material.userData.baseOpacity = opacity;
+        g.add(m);
+      };
+      // The scorch it is standing on. Dark and thin, so the ground under the
+      // fire is visibly burnt rather than tinted orange.
+      layer(z.w, 7, 0, "#2a1a14", 0.8);
+      // Overlapping tongues rather than a row of them: spaced closer than they
+      // are wide, so the patch reads as one body of fire with a broken top
+      // edge instead of a line of separate triangles.
+      const n = Math.max(5, Math.round(z.w / 13));
+      for (let i = 0; i < n; i++) {
+        const x = -z.w / 2 + ((i + 0.5) * z.w) / n;
+        const h = 34 + ((i * 37) % 30);
+        tongue(x, 26, h, "#c2401a", 0.85, 0.1);
+        tongue(x + 2, 17, h * 0.72, base, 0.85, 0.2);
+        tongue(x + 3, 9, h * 0.4, "#ffd98a", 0.9, 0.3);
+      }
+      return g;
+    }
     layer(z.w, 26, 11, shade(base, 0.55), 0.42);
     layer(z.w * 0.94, 16, 14, base, 0.34);
     layer(z.w * 0.82, 7, 19, "#e8f6fa", 0.30);
@@ -538,6 +591,30 @@ export class GameRenderer {
         const loop = new THREE.Mesh(new THREE.PlaneGeometry(6, 8), flat("#5a3d22"));
         loop.position.x = -6;
         add(loop);
+        break;
+      }
+      // A hare, at a dead run: body, haunch, the two ears laid back along it.
+      // Nothing else in the game is alive, so it is drawn small and low and
+      // left to bounce along the floor on its own physics.
+      case "hare": {
+        const body = new THREE.Mesh(new THREE.CircleGeometry(9, 12), flat(color));
+        body.scale.set(1.25, 0.78, 1);
+        add(body);
+        const haunch = new THREE.Mesh(new THREE.CircleGeometry(6, 10), flat(shade(color, 0.82)));
+        haunch.position.set(-6, -1, 0);
+        add(haunch);
+        const head = new THREE.Mesh(new THREE.CircleGeometry(4.6, 10), flat(color));
+        head.position.set(9, 2, 0);
+        add(head);
+        for (const [dx, dy, rot] of [[10, 8, 0.25], [8, 8, 0.55]] as const) {
+          const ear = new THREE.Mesh(new THREE.PlaneGeometry(3, 12), flat(shade(color, 0.88)));
+          ear.position.set(dx, dy, 0);
+          ear.rotation.z = rot;
+          add(ear);
+        }
+        const eye = new THREE.Mesh(new THREE.CircleGeometry(1.1, 8), flat("#2a2018"));
+        eye.position.set(11, 3, 0);
+        add(eye, 56);
         break;
       }
       // A length of bamboo cut on the slant and fire-hardened - no head, no

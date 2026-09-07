@@ -87,6 +87,12 @@ const RIVALS: Record<string, string> = {
   // he is the fighter Lapulapu can take the most off: helm, shield and harness,
   // all three slots, one man.
   lapulapu: "knight",
+  // The centurion. Not because they ever met - Vorenus was in Gaul a
+  // generation earlier - but because he is the institution: the man who does
+  // this for a living, standing in the line she spent a year burning her way
+  // toward. Everyone else on the roster is a person she is fighting. He is
+  // the thing she is fighting.
+  iceni: "roman",
 };
 
 /** The last one standing. Tomoe is the only difficulty five on the roster. */
@@ -196,6 +202,8 @@ export const ENDINGS: Record<string, string> = {
     "Herodotus hands him the ten thousand, hands him the march over the Anopaea path that decided Thermopylae, and then simply stops. There is no death, no later command, no return. The best-known unit of the ancient world and the man who led it, and the record keeps the corps and loses the commander - which is more or less what being an Immortal meant.",
   lapulapu:
     "Pigafetta, who was in the water and lived, put the date at the 27th of April 1521 and the numbers at forty-nine Spaniards against something like fifteen hundred. He records that they went for the legs because the legs were unarmoured, that Magellan's helmet was struck off twice, and that the ships sailed without recovering the body because Lapulapu would not give it back for any price offered. What happened to him afterwards is not written down anywhere - he simply stops appearing, which in this company counts as getting away with it.",
+  iceni:
+    "Tacitus gives her two endings and does not choose between them: she took poison rather than be taken, or she fell ill and died. Dio says the Britons gave her a rich burial, and nobody has ever found it. What is certain is underneath three modern cities - a layer of burnt red clay at Colchester, London and St Albans, a foot thick in places, with the shop stock still on the floor where it fell. It is the only thing she left that can be measured, and it is still there.",
   shade:
     "There is no register that carries his name, because he was never written down in the first place - only repeated, in enough places and enough centuries that somebody eventually started calling all of them the same man. Ask who he really was and the honest answer is that the question does not have the kind of ending the other fourteen do.",
 };

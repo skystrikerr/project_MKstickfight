@@ -130,6 +130,9 @@ export const STYLES: Record<string, Style> = {
   // then nothing, so holding the far range is holding an empty hand. High poke
   // and high patience, at mid.
   lapulapu: { aggression: 0.8, special: 1.15, throw: 0.9, poke: 1.55, patience: 1.35, range: "mid" },
+  // Zoner / Momentum: burns the ground, holds it with the longest spear on the
+  // roster, and only closes when the charge is the answer.
+  iceni: { aggression: 0.65, special: 1.3, throw: 0.7, poke: 1.35, patience: 1.3, range: "far" },
 };
 
 const MOTION_DIRS: Record<Motion, number[]> = {

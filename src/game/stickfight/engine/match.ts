@@ -825,6 +825,16 @@ export class Match {
         if (Math.abs(f.x - z.x) > z.w / 2) continue;
         f.terrainDash = Math.min(f.terrainDash, z.spec.dashScale ?? 1);
         if (z.spec.noBackdash) f.terrainNoBackdash = true;
+        // Ground that hurts. Floored at the chip floor so a burning patch of
+        // stage can never actually finish somebody - standing in a fire is
+        // meant to be a reason to move, not a way to win by leaving one lit.
+        const dmg = z.spec.damage ?? 0;
+        if (dmg <= 0) continue;
+        if (z.spec.ownerImmune && f.index === z.owner) continue;
+        if (z.age % (z.spec.every ?? 30) !== 0) continue;
+        if (f.health <= COMBAT.chipFloor) continue;
+        f.health = Math.max(COMBAT.chipFloor, f.health - dmg);
+        this.pushFx({ kind: "spark", x: f.x, y: f.y + 20, scale: 1, color: z.spec.color });
       }
     }
   }

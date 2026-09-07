@@ -56,6 +56,12 @@ for (let i = 0; i < num("frames", 90); i++) match.step(idle());
 
 if (q.get("gap")) match.fighters[1].x = match.fighters[0].x + num("gap", 150);
 
+// Supers and resource moves refuse to start without the bar to pay for them,
+// and a harness that silently draws an idle stance instead of the move you
+// asked for is worse than one that cannot show it at all.
+if (q.has("meter")) for (const f of match.fighters) f.meter = num("meter", 100);
+if (q.has("res")) for (const f of match.fighters) f.resource = num("res", 3);
+
 // Put either side into a move and run it to the requested frame. Stepping the
 // match rather than posing the rig means the props, effects, projectiles and
 // zones that move produces are all really there.

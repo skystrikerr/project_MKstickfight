@@ -87,6 +87,23 @@ const MACTAN = [
   ["4A", "4B", "4C"],
 ];
 
+/**
+ * And one for the queen, for the opposite reason.
+ *
+ * Every other shape on this list is about getting a hit. Hers is about getting
+ * her distance back: the long one starts at the end of the spear, is dragged
+ * inward as they close, and finishes on the shield shove that puts them where
+ * she wanted them in the first place. The second is the one she has when
+ * somebody is already inside - all shield, no spear - and it also ends on the
+ * shove. The third gives ground and ends on the turn, which covers the
+ * retreat.
+ */
+const WATLING = [
+  ["5A", "5B", "5C", "2B", "6C"],
+  ["6A", "6B", "2A", "2C", "6C"],
+  ["4A", "4B", "4C"],
+];
+
 /** Names per fighter, in the order their family lists the shapes. */
 const NAMES: Record<string, [string, string, string]> = {
   roman: ["Pilum Drill", "Testudo", "Trench Work"],
@@ -112,6 +129,7 @@ const NAMES: Record<string, [string, string, string]> = {
   celt: ["Long Cut Rhythm", "Lifting Line", "Backhand Line"],
   persian: ["Wicker and Spear", "Rank Work", "Low Ranks"],
   lapulapu: ["Below the Knee", "Back to My Range", "Give Ground"],
+  iceni: ["Spear Rhythm", "Shield and Drive", "Turning Retreat"],
 };
 
 const FAMILY: Record<string, string[][]> = {
@@ -128,6 +146,8 @@ const FAMILY: Record<string, string[][]> = {
   samurai: FOOTSIES, duelist: FOOTSIES, maori: FOOTSIES,
   // A shape of his own - see MACTAN.
   lapulapu: MACTAN,
+  // A shape of her own - see WATLING.
+  iceni: WATLING,
 };
 
 /**

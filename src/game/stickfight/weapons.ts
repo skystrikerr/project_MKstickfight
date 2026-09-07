@@ -717,6 +717,42 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       },
     },
   ],
+  iceni: [
+    {
+      id: "snettisham",
+      name: "Snettisham Pattern",
+      blurb:
+        "The hoards ploughed up at Snettisham in Norfolk - Iceni ground - held the finest Iron Age gold anywhere in Britain: torcs of twisted electrum rope finished in hollow ring terminals. Dio says she wore a great golden one. This is what that actually looked like, with a La Tene spearhead to match.",
+      unlock: { kind: "wins", count: 4 },
+      parts: {
+        // The Great Torc: eight twisted ropes of alloy, ending in cast
+        // terminals rather than plain knobs.
+        torc: [
+          { geo: "ring", size: [10.5, 2.2], pos: [0, -1], color: "#e8c96a" },
+          { geo: "ring", size: [10.5, 1.2], pos: [0, -1.8], color: "#a37d2c", z: 0.15 },
+          { geo: "ring", size: [9, 1.6], pos: [0, -0.4], color: "#c9a94a", z: 0.2 },
+          { geo: "disc", size: [4.2, 4.2], pos: [-7.5, -5], color: "#e8c96a" },
+          { geo: "disc", size: [4.2, 4.2], pos: [7.5, -5], color: "#e8c96a" },
+          { geo: "ring", size: [4.2, 1.4], pos: [-7.5, -5], color: "#8f6a22", z: 0.35 },
+          { geo: "ring", size: [4.2, 1.4], pos: [7.5, -5], color: "#8f6a22", z: 0.35 },
+          { geo: "disc", size: [1.5], pos: [-7.5, -5], color: "#f4e2a8", z: 0.5 },
+          { geo: "disc", size: [1.5], pos: [7.5, -5], color: "#f4e2a8", z: 0.5 },
+        ],
+        // Longer head, a proper midrib, and a decorated socket - the La Tene
+        // III form, which is what an Iceni spear of this date actually was.
+        spear: [
+          { geo: "cyl", size: [3, 138], pos: [42, 0], rot: 90, color: "#8a6238" },
+          { geo: "box", size: [12, 5.4], pos: [-16, 0], color: "#c9a94a" },
+          { geo: "box", size: [3, 6], pos: [-11, 0], color: "#8f6a22" },
+          { geo: "box", size: [14, 7], pos: [102, 0], color: "#aab4bf" },
+          { geo: "box", size: [2.4, 8], pos: [96, 0], color: "#c9a94a", z: 0.2 },
+          { geo: "box", size: [2.4, 8], pos: [107, 0], color: "#c9a94a", z: 0.2 },
+          { geo: "poly", size: [0, 9, 18, 8, 44, 0, 18, -8, 0, -9], pos: [110, 0], color: "#c7d0da" },
+          { geo: "poly", size: [0, 2.4, 20, 1.8, 38, 0, 20, -1.8, 0, -2.4], pos: [112, 0], color: "#eef3f7", z: 0.3 },
+        ],
+      },
+    },
+  ],
 };
 
 /** Every variant a fighter has, default excluded. Empty for most of the roster. */

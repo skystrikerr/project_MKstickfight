@@ -24,6 +24,7 @@ export type StageTheme =
   | "skyward"
   | "delta"
   | "mactan"
+  | "watling"
   // Painted backdrops rather than built shapes.
   | "postroad"
   | "dryclaim"
@@ -200,6 +201,19 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     // back up off a shallow lagoon that nothing here has a dark side.
     light: { key: "#fff3d2", fill: "#4e7f96", strength: 0.78, shadow: "#4a6f7a", glow: 0.12 },
     ambient: { kind: "dust", count: 20, colors: ["#eaf6fb", "#bfe0ea"], speed: -0.08, wind: 0.1, size: [2, 4], opacity: 0.34 },
+  },
+  watling: {
+    name: "Watling Street",
+    blurb: "A defile off the road, woods on both flanks, and a city burning behind.",
+    sky: ["#2a2028", "#a86a48"],
+    ground: "#6a6250",
+    accent: "#ff9440",
+    // The only light in it that is not the sky is the fire on the horizon, so
+    // the key is low and orange and everything picks up a warm edge from the
+    // wrong direction. The glow is the highest on the roster - a stage lit by
+    // something burning should bloom.
+    light: { key: "#ffb267", fill: "#3a2e34", strength: 0.85, shadow: "#3d2c2a", glow: 0.2 },
+    ambient: { kind: "ember", count: 30, colors: ["#ff9440", "#d8702a", "#8a4318"], speed: 0.22, wind: 0.35, size: [2, 5], opacity: 0.55 },
   },
   aqueduct: {
     // Overcast stone light. Flat, cool, and not much of it.
@@ -638,6 +652,9 @@ export class Stage {
         break;
       case "mactan":
         this.buildMactan();
+        break;
+      case "watling":
+        this.buildWatling();
         break;
       case "delta":
         this.buildDelta();
@@ -1245,6 +1262,116 @@ export class Stage {
     this.addLayer(near, 0.9);
   }
 
+  /**
+   * Watling Street, AD 61 - the last battle, and the one she lost.
+   *
+   * Tacitus is unusually specific about the ground, because the ground is his
+   * whole explanation: Suetonius took a position with a defile at his back and
+   * woods on the flanks, so nothing could come at him except from the front
+   * and across open country. Ten thousand men beat something the Romans
+   * counted in hundreds of thousands, and they did it by choosing where.
+   *
+   * So the stage is that choice, seen from her side of it: the woods closing
+   * in on both flanks, the Roman road running out through the gap, the British
+   * wagons drawn up across the back where the families were watching - and the
+   * glow of a burnt city on the horizon behind all of it, because by the time
+   * anybody stood here she had already done the thing she is remembered for.
+   */
+  private buildWatling() {
+    const far = new THREE.Group();
+    // The burning on the horizon, kept low and narrow. The camera sees about
+    // three hundred units of height, so a horizon put at the height a horizon
+    // feels like fills the sky and stops being a horizon - measured against
+    // the Mactan build, the whole distance has to live under y 160.
+    far.add(rect(0, 74, 1900, 46, "#4a2c26", 1, 0.95));
+    far.add(rect(0, 88, 1900, 22, "#a8532a", 1, 0.8));
+    far.add(rect(0, 88, 1900, 8, "#ff9440", 1, 0.75));
+    // The town, small and far off - Camulodunum or Verulamium, take your pick,
+    // she burned both. Roof gone on every one of them, so the fire shows
+    // through the top.
+    for (const [x, k] of [[-560, 1], [-330, 0.7], [-90, 0.85], [180, 0.62], [430, 0.9], [720, 0.7]] as [number, number][]) {
+      const h = 34 * k;
+      far.add(rect(x, 92, 54 * k, h, "#2e2026", 2, 0.95));
+      far.add(tri(x, 92 + h, 62 * k, 18 * k, "#2e2026", 2, 0.95));
+      far.add(rect(x, 92 + h * 0.45, 34 * k, 9 * k, "#ff9440", 2, 0.5));
+      // Smoke, going straight up and widening. Tacitus gives this battle no
+      // weather, and a still column reads as a fire that has been burning a
+      // while rather than one that has just caught.
+      for (let i = 0; i < 3; i++) {
+        far.add(rect(x + i * 5 * k, 92 + h + 6 * k + i * 34, (16 + i * 12) * k, 40, "#513f3c", 2, 0.22 - i * 0.06));
+      }
+    }
+    this.addLayer(far, 0.18);
+
+    const mid = new THREE.Group();
+    // The woods on both flanks. Tacitus is specific that the position had them
+    // on the flanks and a defile behind, and that is the whole reason ten
+    // thousand men won - so the gap between these two is the stage's one real
+    // piece of storytelling and it is deliberately narrow.
+    mid.add(rect(0, 44, 1900, 8, "#3a4030", 3, 0.9));
+    mid.add(ridge(
+      [[-980, 44], [-940, 150], [-800, 122], [-660, 176], [-500, 138], [-360, 182], [-250, 128], [-190, 44]],
+      "#26331f",
+      3,
+      0.95,
+    ));
+    mid.add(ridge(
+      [[190, 44], [250, 132], [380, 178], [520, 134], [660, 180], [800, 126], [940, 152], [980, 44]],
+      "#26331f",
+      3,
+      0.95,
+    ));
+    // Individual trees along the inner edge of each wood, so the treeline is a
+    // line of trees and not a green wall with a wavy top.
+    for (const [from, to] of [[-960, -200], [200, 960]] as [number, number][]) {
+      for (let x = from; x <= to; x += 76) {
+        const jitter = ((x * 37) % 30) - 15;
+        const h = 96 + ((x * 61) % 62);
+        mid.add(rect(x + jitter, 42, 7, h * 0.36, "#1f1a16", 4));
+        mid.add(tri(x + jitter, 42 + h * 0.3, 56, h * 0.66, "#2f4228", 4, 0.95));
+        mid.add(tri(x + jitter, 42 + h * 0.46, 40, h * 0.46, "#3b5230", 5, 0.9));
+      }
+    }
+    // The wagon line drawn up across the back. Tacitus says the families came
+    // to watch from them, and that when the line broke the wagons were what
+    // stopped anybody getting away. They are behind her here, which is the
+    // whole of the story and needs no caption.
+    for (const x of [-620, -300, 30, 360, 690]) {
+      mid.add(rect(x, 46, 62, 18, "#5c4126", 6, 0.95));
+      mid.add(rect(x, 62, 68, 4, "#7a5a34", 6, 0.95));
+      mid.add(poly(x, 66, [-30, 0, -25, 17, 0, 24, 25, 17, 30, 0], "#b3a483", 6, 0.9));
+      mid.add(poly(x, 66, [-30, 0, -25, 17, -20, 17, -24, 0], "#8f8163", 7, 0.9));
+      mid.add(disc(x - 22, 46, 11, "#3d2b19", 7, 0.95));
+      mid.add(disc(x + 22, 46, 11, "#3d2b19", 7, 0.95));
+      mid.add(disc(x - 22, 46, 2.6, "#8a6238", 8, 0.95));
+      mid.add(disc(x + 22, 46, 2.6, "#8a6238", 8, 0.95));
+    }
+    this.addLayer(mid, 0.55);
+
+    const near = new THREE.Group();
+    // Turf, then the road. Kept close in value to the stage floor so the two
+    // read as one surface running back rather than as a wall behind the
+    // fighters - the road is what they are standing on, not scenery.
+    near.add(rect(0, 0, 1900, 40, "#4e5138", 7));
+    near.add(rect(0, 0, 1900, 26, "#6a6250", 7));
+    near.add(rect(0, 24, 1900, 5, "#7b7360", 7, 0.8));
+    // The ditch cut along the near side of the agger.
+    near.add(rect(0, 0, 1900, 6, "#565044", 8, 0.7));
+    // Set stones. Irregular, because the surfacing on a British road is rammed
+    // gravel over flint and not a mosaic - the variation is the point.
+    for (let i = -16; i <= 16; i++) {
+      const x = i * 62 + ((i * 43) % 26);
+      near.add(rect(x, 7 + ((i * 17) % 12), 34 + ((i * 29) % 18), 7, i % 2 ? "#777059" : "#6d6650", 8, 0.8));
+    }
+    // Dropped on the way past and not picked up again: a shield face down in
+    // the verge, and a spear stuck where somebody put it.
+    near.add(poly(-430, 3, [-22, 0, -16, 11, 16, 11, 22, 0, 16, -6, -16, -6], "#7a2f38", 8, 0.95));
+    near.add(disc(-430, 6, 5, "#aab4bf", 9, 0.95));
+    near.add(rect(520, 2, 3, 62, "#7a5a34", 8, 0.95));
+    near.add(poly(520, 62, [-5, 0, 0, 18, 5, 0], "#c7d0da", 9, 0.95));
+    this.addLayer(near, 0.9);
+  }
+
   private buildPainted(def: BackdropDef) {
     const g = new THREE.Group();
     const H = def.width / def.aspect; // the painting's own aspect - never letterbox it
@@ -1343,6 +1470,8 @@ export function themeForFighter(id: string): StageTheme {
       return "forge";
     case "lapulapu":
       return "mactan";
+    case "iceni":
+      return "watling";
     default:
       return "colosseum";
   }

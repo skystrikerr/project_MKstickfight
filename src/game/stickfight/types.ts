@@ -346,6 +346,19 @@ export interface ZoneSpawn {
   dashScale?: number;
   /** Backdashing out is not possible from inside it. */
   noBackdash?: boolean;
+  /**
+   * Damage a fighter standing in it takes on each tick.
+   *
+   * Floored the same way chip is, so ground can never finish anybody: burning
+   * a patch of stage is pressure, not a win condition you set once and walk
+   * away from. Blocking does not help - the point of it is that the place
+   * itself is the problem and the answer is to leave.
+   */
+  damage?: number;
+  /** Frames between damage ticks. Defaults to 30 - twice a second. */
+  every?: number;
+  /** The fighter who laid it is not hurt by it. */
+  ownerImmune?: boolean;
   color?: string;
 }
 
