@@ -734,40 +734,42 @@ export const MUAYTHAI: FighterDef = {
     },
     {
       id: "cartwheel",
-      name: "Cartwheel Kick",
+      name: "Ten Bouts",
       input: { button: "B", motion: "qcb", stance: ["stand", "crouch"] },
       tags: ["special", "overhead"],
-      priority: 20,
-      duration: 42,
+      priority: 24,
+      duration: 40,
+      resourceCost: 1,
+      resourceMin: 1,
       airborne: true,
-      // He is upside down and off the ground, so nothing at chest height is
-      // where he is. This is the one tool he has that can cross a gap through
-      // something rather than around it, and without the invulnerability it
-      // was a slow overhead that traded with everything on the way in.
-      invuln: [{ from: 5, to: 18, kind: "strike" }],
-      vel: [
-        { at: 4, x: 7.4, y: 9.5 },
-        { at: 22, y: -0.8, mode: "add" },
-      ],
-      hits: [
-        hit(12, 22, bx(8, 8, 62, 62), 76, {
-          guard: "overhead",
-          fx: "blunt",
-          pushX: 6,
-          knockdown: "hard",
-          hitstun: 24,
-          shake: 1.7,
-        }),
-      ],
-      desc: "Flips over and brings the heel down. Overhead, and it travels the gap.",
-      notation: "↓↙← + B",
+      // A cartwheel kick is capoeira. This is kradot sok - the jumping elbow -
+      // which is the thing he would actually have thrown.
+      //
+      // Ava, 1774: taken prisoner, put in front of Hsinbyushin, and made to
+      // fight the king's men one after another. The accounts disagree about
+      // whether it was nine or ten; they agree he beat all of them without
+      // leaving the ring. So this gets better every time he throws it, and it
+      // costs Rhythm, because a bout you have not earned is not a bout.
+      grants: [{ damageDealt: 1.045, stacks: 9 }],
+      vel: [{ at: 4, x: 5, y: 9 }, { at: 20, y: -1, mode: "add" }],
+      hits: [hit(12, 17, bx(16, 30, 62, 56), 62, {
+        guard: "overhead",
+        fx: "blunt",
+        pushX: 7,
+        knockdown: "soft",
+        hitstun: 22,
+        hitstop: 10,
+        shake: 1.5,
+      })],
+      desc: "Kradot sok - up off both feet and the elbow comes down. Overhead. Every one he throws makes the next of them a little worse, up to nine, the way they came at him in Ava. Costs one Rhythm.",
+      notation: "↓↙← + B (1 Rhythm)",
       frames: [
-        kf(0, { ...STANCE, crouch: 0.5, hipF: 24, kneeF: 46 }, "out"),
-        kf(6, { ...STANCE, free: 1, spin: -80, torso: -10, hipF: 60, kneeF: 30, hipB: -60, kneeB: 30, shoulderF: -40, elbowF: 20, shoulderB: -50, elbowB: 20 }, "linear"),
-        kf(14, { ...STANCE, free: 1, spin: -200, hipF: 40, kneeF: 20, hipB: -70, kneeB: 20 }, "linear"),
-        kf(24, { ...STANCE, free: 1, spin: -330, hipF: 70, kneeF: 20, hipB: -30, kneeB: 40 }, "linear"),
-        kf(32, { ...STANCE, free: 1, spin: -360, torso: 12, hipF: 40, kneeF: 40 }, "inOut"),
-        kf(42, { ...STANCE, free: 1, spin: -360 }),
+        kf(0, { ...STANCE, crouch: 0.5 }, "out"),
+        kf(4, { ...STANCE, free: 1, crouch: 0.2, torso: -8, hipF: 66, kneeF: 74, hipB: -20, kneeB: 54, shoulderF: 40, elbowF: 122, offY: 4 }, "out"),
+        kf(12, { ...STANCE, free: 1, torso: 26, head: 8, shoulderF: 152, elbowF: 132, shoulderB: 30, elbowB: 108, hipF: 44, kneeF: 62, hipB: -16, kneeB: 40, offX: 6 }, "out"),
+        kf(17, { ...STANCE, free: 1, torso: 34, head: 10, shoulderF: 96, elbowF: 128, hipF: 30, kneeF: 44, offX: 8 }, "out"),
+        kf(28, { ...STANCE, crouch: 0.4, torso: 14, shoulderF: 40, elbowF: 116, hipF: 24, kneeF: 34 }, "inOut"),
+        kf(40, { ...STANCE }),
       ],
     },
 

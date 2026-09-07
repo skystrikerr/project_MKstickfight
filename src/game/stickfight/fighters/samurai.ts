@@ -123,6 +123,37 @@ export const SAMURAI: FighterDef = {
       ],
     },
     {
+      id: "yumi",
+      attach: "handF",
+      // Yumi: the asymmetric Japanese longbow, gripped a third of the way up
+      // rather than in the middle, so the lower limb is much the shorter. The
+      // Heike Monogatari puts a bow in her hands as readily as a sword -
+      // "she was a match for a thousand, and ready to meet god or demon,
+      // mounted or on foot" - and she had none.
+      conditional: true,
+      parts: [
+        { geo: "poly", size: [0, 0, -5, 26, -6, 58, -2, 88, 4, 104], pos: [0, 30], color: "#4a3520" },
+        { geo: "poly", size: [0, 0, -4, -20, -4, -40, 0, -54], pos: [0, 30], color: "#4a3520" },
+        { geo: "poly", size: [0, 0, -2, 26, -3, 58, 0, 88], pos: [1, 30], color: "#6b4f2e", z: 0.2 },
+        { geo: "box", size: [2.4, 9], pos: [-1, 44], rot: 8, color: "#2a2018" },
+        { geo: "box", size: [2.4, 9], pos: [-2, 14], rot: -6, color: "#2a2018" },
+        // The string, from nock to nock.
+        { geo: "box", size: [1.4, 150], pos: [3, 26], color: "#d8cdb4", z: 0.3 },
+      ],
+    },
+    {
+      id: "ya",
+      attach: "handF",
+      // The arrow on the string, with the bamboo shaft and the hawk fletching.
+      conditional: true,
+      parts: [
+        { geo: "cyl", size: [1.5, 86], pos: [30, 0], rot: 90, color: "#c8b273" },
+        { geo: "poly", size: [0, 4, 14, 2.6, 20, 0, 14, -2.6, 0, -4], pos: [70, 0], color: "#c3ccd8" },
+        { geo: "poly", size: [0, 5, -14, 7, -18, 0, -14, -7, 0, -5], pos: [-8, 0], color: "#6b5a3c" },
+        { geo: "box", size: [4, 3], pos: [-14, 0], color: "#2a2018" },
+      ],
+    },
+    {
       id: "saya",
       attach: "pelvis",
       parts: [
@@ -694,26 +725,64 @@ export const SAMURAI: FighterDef = {
     },
     {
       id: "shadowStep",
-      name: "Shadow Step",
+      name: "Loose from the Saddle",
       input: { button: "B", motion: "qcb", stance: ["stand", "crouch"] },
-      tags: ["special", "movement"],
+      tags: ["special", "projectile"],
       priority: 20,
-      duration: 30,
-      invuln: [{ from: 3, to: 16, kind: "strike" }],
-      noTurn: true,
-      vel: [
-        { at: 2, x: 13 },
-        { at: 18, x: 0 },
+      duration: 46,
+      resourceCost: 1,
+      resourceMin: 1,
+      showProps: ["yumi", "ya"],
+      hideProps: ["katana"],
+      // The arrow leaves on the frame it is loosed rather than at the end of
+      // the animation.
+      propsAt: [{ from: 22, to: 46, hide: ["ya"] }],
+      friction: 0.9,
+      // She had a teleport called Shadow Step, which the ninja also had, and
+      // no bow - despite kyuba no michi, the way of horse and bow, being the
+      // thing a samurai of the Genpei war was for. The Heike has her as a
+      // rider and an archer first.
+      projectiles: [
+        {
+          at: 22,
+          kind: "arrow",
+          x: 44,
+          y: 62,
+          vx: 24,
+          vy: 0.4,
+          gravity: 0.04,
+          life: 54,
+          box: { x: -22, y: -3, w: 44, h: 6 },
+          damage: 74,
+          hitstun: 20,
+          blockstun: 13,
+          pushX: 5,
+          chip: 9,
+          fx: "pierce",
+          hitstop: 8,
+          meterGain: 9,
+          scale: 1,
+          color: "#c8b273",
+          trail: "#e8dcae",
+        },
       ],
-      friction: 0.8,
-      desc: "Slides straight through the opponent, untouchable. No damage - it is entirely about where you end up.",
-      notation: "↓↙← + B",
+      vfx: [{ at: 22, kind: "spark", x: 52, y: 62, scale: 0.7, color: "#e8dcae" }],
+      desc: "Kyūba no michi - the way of horse and bow, which is what a samurai of the Genpei war was for. Draws past the ear and looses. Costs one Ki.",
+      notation: "↓↙← + B (1 Ki)",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(3, { ...STANCE, torso: 30, squash: 0.9, hipF: 40, kneeF: 30, hipB: -40, kneeB: 60, shoulderF: -20, elbowF: 70, shoulderB: -30, elbowB: 60, offY: 2 }, "out"),
-        kf(14, { ...STANCE, torso: 26, squash: 0.92, hipF: 30, kneeF: 40, hipB: -30, kneeB: 50 }),
-        kf(22, { ...STANCE, torso: 10 }, "inOut"),
-        kf(30, { ...STANCE }),
+        // Bow up, arrow on the string, the draw taken past the ear the way a
+        // yumi is shot rather than to the chin.
+        // Bow arm out level at the target, string hand coming back.
+        kf(10, { ...STANCE, shoulderF: 84, elbowF: 8, weapon: 0, shoulderB: 74, elbowB: 40, torso: -4, offX: -3 }, "out"),
+        // Full draw: the hand is past the ear, not at the chin - that is how a
+        // yumi is shot and it is why the draw looks so long.
+        kf(20, { ...STANCE, shoulderF: 88, elbowF: 2, weapon: 0, shoulderB: 116, elbowB: 76, head: -5, torso: -6, offX: -4 }, "inOut"),
+        kf(22, { ...STANCE, shoulderF: 88, elbowF: 2, weapon: 0, shoulderB: 108, elbowB: 62, head: -5, torso: -4, offX: -3 }, "out"),
+        // Follow-through: the string hand carries on back and the bow turns in
+        // the front hand, which is what a yumi does when it is shot properly.
+        kf(30, { ...STANCE, shoulderF: 80, elbowF: 14, weapon: 30, shoulderB: 140, elbowB: 40, torso: 2 }, "inOut"),
+        kf(46, { ...STANCE }),
       ],
     },
     {

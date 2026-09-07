@@ -980,32 +980,42 @@ export const PIRATE: FighterDef = {
       ],
     },
     {
-      id: "diveKick",
-      name: "Plunder Dive",
-      input: { button: "B", motion: "qcb", stance: "air" },
-      tags: ["special", "air", "overhead"],
-      priority: 26,
-      duration: 40,
-      airborne: true,
-      landCancel: true,
-      landRecovery: 8,
-      vel: [{ at: 3, x: 8, y: -11 }],
-      hits: [
-        hit(5, 30, bx(14, 6, 54, 46), 62, {
-          guard: "overhead",
-          fx: "blunt",
-          pushX: 4,
-          hitstun: 22,
-          knockdown: "soft",
-        }),
+      id: "pleadBelly",
+      name: "Plead the Belly",
+      input: { button: "C", motion: "qcb", stance: ["stand", "crouch"] },
+      tags: ["special"],
+      priority: 20,
+      duration: 44,
+      // Priced in her own powder rather than in meter: a special that costs
+      // meter and is neither EX nor super is a shape nothing else on the
+      // roster has, and this is a better trade anyway. She gives up both
+      // charges - every shot she has - to keep her neck.
+      resourceCost: 2,
+      resourceMin: 2,
+      friction: 0.86,
+      // Condemned at St Jago de la Vega in 1720 and hanged with the rest of
+      // them - except she was not. She declared herself pregnant, which stayed
+      // the sentence, and then she simply stops appearing in the record.
+      // Nobody knows how she died.
+      //
+      // Nothing else on the roster cheats a loss. It is spent the moment it
+      // saves her, it leaves her on one point of health rather than healing
+      // anything, and re-arming it costs both her charges.
+      //
+      // It replaced a dive kick, which is a thing pirates do in films.
+      grants: [{ survive: true }],
+      vfx: [
+        { at: 6, kind: "aura", x: 0, y: 44, scale: 1.5, color: "#e8c46a" },
+        { at: 26, kind: "spark", x: 4, y: 40, scale: 0.8, color: "#e8c46a" },
       ],
-      desc: "Air-only diagonal dive kick. Changes your jump arc and crosses people up.",
-      notation: "(air) ↓↙← + B",
+      desc: "They hanged Calico Jack and let her go, because she said she was carrying. The next blow that would finish her leaves her on one instead - once, and then it is gone.",
+      notation: "↓↙← + C (2 Powder)",
       frames: [
-        kf(0, { ...STANCE, free: 1 }, "out"),
-        kf(3, { ...STANCE, free: 1, torso: 24, hipF: 74, kneeF: 4, hipB: -30, kneeB: 40, shoulderF: -30, elbowF: 50, shoulderB: -40, elbowB: 40 }, "out"),
-        kf(30, { ...STANCE, free: 1, torso: 26, hipF: 78, kneeF: 2, hipB: -32, kneeB: 38 }),
-        kf(40, { ...STANCE, free: 1 }),
+        kf(0, { ...STANCE }, "out"),
+        kf(8, { ...STANCE, torso: 12, head: 6, shoulderB: 20, elbowB: 86, shoulderF: 42, elbowF: 68, crouch: 0.26, offX: -3 }, "out"),
+        kf(22, { ...STANCE, torso: 18, head: 10, shoulderB: 12, elbowB: 94, shoulderF: 36, elbowF: 76, crouch: 0.32, offX: -2 }, "inOut"),
+        kf(34, { ...STANCE, torso: 4, head: 2, shoulderB: 30, elbowB: 70, crouch: 0.12 }, "inOut"),
+        kf(44, { ...STANCE }),
       ],
     },
     {

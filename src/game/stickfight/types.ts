@@ -360,6 +360,23 @@ export interface ZoneSpawn {
  */
 export interface GrantDef {
   /**
+   * The next blow that would finish this fighter leaves them on 1 instead,
+   * and the grant is spent.
+   *
+   * Anne Bonny was condemned at St Jago de la Vega and escaped the rope by
+   * declaring she was pregnant - "pleading the belly". It is the most
+   * documented thing about her and the reason nobody knows how she died.
+   * Nothing else on the roster cheats a loss.
+   */
+  survive?: boolean;
+  /**
+   * How many copies of this grant may be held at once. Grants normally
+   * refresh - pressing the move again re-arms it rather than doubling it,
+   * which is right for a stance and wrong for a thing you are supposed to
+   * accumulate.
+   */
+  stacks?: number;
+  /**
    * Only counts while the user is at or below this fraction of their maximum
    * health. Omitted means it applies the whole time.
    */

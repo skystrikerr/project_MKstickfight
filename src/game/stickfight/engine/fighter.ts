@@ -511,10 +511,32 @@ export class Fighter {
    * new ones. Tagging them by move id is what makes re-use a refresh.
    */
   applyGrants(source: string, defs: GrantDef[]) {
-    this.grants = this.grants.filter((g) => g.source !== source);
+    // Clear this move's old non-stacking grants once, before adding any - not
+    // per grant. A move with two tiers (Forty-Nine has one at half health and
+    // another at a quarter) had its first tier filtered out by the second.
+    if (defs.some((d) => !d.stacks)) {
+      this.grants = this.grants.filter((g) => g.source !== source || g.def.stacks);
+    }
     for (const def of defs) {
+      if (def.stacks) {
+        // Accumulating rather than refreshing: keep what is there and add one
+        // more, up to the cap.
+        const held = this.grants.filter((g) => g.source === source).length;
+        if (held >= def.stacks) continue;
+      }
       this.grants.push({ def, source, left: def.frames ?? -1 });
     }
+  }
+
+  /**
+   * Spends a `survive` grant, if one is held. Returns whether a blow that
+   * would have finished them was survived.
+   */
+  cheatDeath(): boolean {
+    const i = this.grants.findIndex((g) => g.def.survive);
+    if (i < 0) return false;
+    this.grants.splice(i, 1);
+    return true;
   }
 
   private tickGrants() {
@@ -1269,6 +1291,12 @@ export class Fighter {
   private moveScore(move: MoveDef): number {
     let score = move.priority ?? 0;
     if (move.input.motion && move.input.motion !== "none") score += 100;
+    // A half circle contains a quarter circle, so the two always match the
+    // same input and the tie was going to declaration order - which meant a
+    // fighter's half-circle special could be silently unreachable behind a
+    // quarter-circle one on the same button, depending on which was typed
+    // first. The longer motion is the more deliberate one and wins.
+    if (move.input.motion === "hcf" || move.input.motion === "hcb") score += 20;
     if (move.input.buttons?.length) score += 60;
     if (move.input.dir && move.input.dir !== "n") score += 30;
     // Enough to outrank the 6C it shares a button with. Only reachable at all

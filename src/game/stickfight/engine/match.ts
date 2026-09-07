@@ -631,7 +631,16 @@ export class Match {
       ),
     );
 
-    defender.health = Math.max(0, defender.health - damage);
+    // The one thing on the roster that cheats a loss. Spent, not permanent,
+    // and it leaves them on a single point of health rather than healing them.
+    if (defender.health - damage <= 0 && defender.cheatDeath()) {
+      defender.health = 1;
+      this.banner = { text: "Pleaded the Belly", life: 90 };
+      this.pushFx({ kind: "aura", x: defender.x, y: defender.y + 46, scale: 1.6, color: "#e8c46a" });
+      this.shake = Math.max(this.shake, 5);
+    } else {
+      defender.health = Math.max(0, defender.health - damage);
+    }
     this.lastHitTaken[defender.index] = { move: name, damage };
     // Only a clean hit takes armour off. Blocked and absorbed hits have both
     // already returned above, which is the point: getting your guard up is

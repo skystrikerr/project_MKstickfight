@@ -2858,6 +2858,42 @@ function scriptFor(move: MoveDef): RawInput[] {
   }
 }
 
+{
+  // Anne Bonny gets off the gallows exactly once.
+  const m = new Match([getFighter("pirate"), getFighter("roman")], 1);
+  for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+  const [a, b] = m.fighters;
+  a.resource = a.def.resource?.max ?? 0;
+  a.startMove("pleadBelly");
+  run(m, 50, () => inp());
+  a.health = 40;
+  b.x = a.x + 50;
+  b.startMove("5C");
+  run(m, 40, () => inp());
+  check("pirate: the belly saves her once", a.health === 1, `${Math.round(a.health)}`);
+  // And not twice - it is spent, not a passive.
+  a.health = 40;
+  b.x = a.x + 50;
+  b.startMove("5C");
+  run(m, 40, () => inp());
+  check("pirate: and only once", a.health <= 0 || a.health < 1, `${Math.round(a.health)}`);
+}
+
+{
+  // A stacking grant accumulates to its cap and stops.
+  const m = new Match([getFighter("muaythai"), getFighter("roman")], 1);
+  for (let i = 0; i < 80; i++) m.step([inp(), inp()]);
+  const nai = m.fighters[0];
+  const cap = (nai.def.moves.find((v) => v.id === "cartwheel")?.grants ?? [])[0]?.stacks ?? 0;
+  for (let i = 0; i < cap + 6; i++) {
+    nai.resource = nai.def.resource?.max ?? 0;
+    nai.startMove("cartwheel");
+    run(m, 44, () => inp());
+  }
+  check("muaythai: the bouts stack", nai.grants.length > 1, `${nai.grants.length}`);
+  check("muaythai: and stop at the cap", nai.grants.length <= cap, `${nai.grants.length} of ${cap}`);
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);
 for (const f of failed) console.log(`FAIL  ${f.name}${f.detail ? " :: " + f.detail : ""}`);
