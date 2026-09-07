@@ -197,6 +197,29 @@ export class Fighter {
 
   /** Hit groups from the current move that already connected. */
   private connected = new Set<number>();
+
+  /**
+   * How many distinct hits of the current move have landed.
+   *
+   * Read by the damage path so a super can decay across its own hits. Exposed
+   * as a count rather than the set because that is the only thing anybody
+   * outside this class has any business knowing about it.
+   */
+  get landedHits(): number {
+    return this.connected.size;
+  }
+
+  /**
+   * How many times the current super has landed, counting its projectiles.
+   *
+   * One counter for the whole activation rather than one per hitbox or one per
+   * shot. The per-shot version was the second attempt and it did nothing for
+   * exactly the fighter it most needed to: Subutai's super is a volley of six
+   * separate arrows, each a projectile with its own counter starting at zero,
+   * so every arrow in it was billed as the first hit and the volley decayed
+   * not at all.
+   */
+  superHits = 0;
   moveHasHit = false;
   moveHasBlocked = false;
   private cancelled = false;
@@ -437,6 +460,7 @@ export class Fighter {
     // Refreshed, not stacked: pressing the button again re-arms the same buff
     // rather than doubling it, so nothing here rewards mashing a stance move
     // in the corner.
+    if (def.tags?.includes("super")) this.superHits = 0;
     if (def.grants) this.applyGrants(def.id, def.grants);
     if (!keepMomentum && this.grounded) {
       this.vx = 0;

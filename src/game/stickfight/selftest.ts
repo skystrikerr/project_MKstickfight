@@ -1895,6 +1895,64 @@ function scriptFor(move: MoveDef): RawInput[] {
   check("save: a garbled quality falls back", loadSave().quality === DEFAULT_SAVE.quality, loadSave().quality);
   check("save: a garbled particle setting falls back", loadSave().particles === DEFAULT_SAVE.particles, loadSave().particles);
   patchSave({ quality: DEFAULT_SAVE.quality, particles: DEFAULT_SAVE.particles });
+}
+
+/**
+ * What a super is allowed to be worth, and how a shot is allowed to hit.
+ *
+ * Both of these were measured problems rather than suspected ones: across six
+ * hundred AI rounds the worst exchange containing a super took seventy-odd
+ * per cent of a health bar, and the reason was that `hits` on a projectile -
+ * documented as how many opponents it passes through - had no guard against
+ * re-hitting the same one, so a multi-hit shot landed every frame it
+ * overlapped. Subutai's Arrow Storm could put twenty-four hits on one person
+ * inside a second.
+ */
+function superDamage() {
+  // A shot cannot hit the same fighter on consecutive frames.
+  {
+    const m = newMatch("mongol", "roman");
+    const me = m.fighters[0];
+    const foe = m.fighters[1];
+    for (let f = 0; f < 120; f++) m.step([inp(), inp()]);
+    me.x = -40;
+    foe.x = 40;
+    me.meter = 200;
+    if (me.def.resource) me.resource = me.def.resource.max;
+    const sup = me.def.moves.find((mv) => mv.tags?.includes("super"))!;
+    const before = foe.health;
+    let frames = 0;
+    me.startMove(sup.id);
+    for (let f = 0; f < 400 && foe.health > 1; f++) {
+      m.step([inp(), inp()]);
+      frames++;
+    }
+    const dealt = before - foe.health;
+    check(
+      "super: a volley cannot delete a health bar",
+      dealt < foe.def.stats.health * 0.3,
+      `${Math.round(dealt)} of ${foe.def.stats.health} in ${frames} frames`,
+    );
+  }
+
+  // Every super, against a dummy that never blocks, on the same measure.
+  for (const def of ROSTER) {
+    const sup = def.moves.find((mv) => mv.tags?.includes("super"));
+    if (!sup) continue;
+    const m = newMatch(def.id, "roman");
+    const me = m.fighters[0];
+    const foe = m.fighters[1];
+    for (let f = 0; f < 120; f++) m.step([inp(), inp()]);
+    me.x = -60;
+    foe.x = 20;
+    me.meter = 200;
+    if (def.resource) me.resource = def.resource.max;
+    const before = foe.health;
+    me.startMove(sup.id);
+    for (let f = 0; f < 400 && foe.health > 1; f++) m.step([inp(), inp()]);
+    const pct = ((before - foe.health) / foe.def.stats.health) * 100;
+    check(`${def.id}/${sup.id}: is not most of a health bar`, pct < 30, `${pct.toFixed(1)}%`);
+  }
 
   // And the knob those settings drive. The scale is what the ambient weather
   // and the impact debris both multiply by, so if it stops responding the
@@ -2935,6 +2993,8 @@ function scriptFor(move: MoveDef): RawInput[] {
   check("muaythai: the bouts stack", nai.grants.length > 1, `${nai.grants.length}`);
   check("muaythai: and stop at the cap", nai.grants.length <= cap, `${nai.grants.length} of ${cap}`);
 }
+
+superDamage();
 
 const failed = results.filter((r) => !r.ok);
 console.log(`${results.length - failed.length} passed, ${failed.length} failed`);

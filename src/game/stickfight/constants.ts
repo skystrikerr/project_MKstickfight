@@ -38,6 +38,30 @@ export const COMBAT = {
   /** Damage scaling per combo hit, clamped by minScale. */
   scaleStep: 0.9,
   minScale: 0.28,
+  /**
+   * Extra decay applied *within* a single super, per hit of that super that
+   * has already landed.
+   *
+   * The ordinary combo scaling above is far too gentle for a move that lands
+   * six times on its own: measured across six hundred AI rounds, the worst
+   * exchange containing a super took sixty-two per cent of a health bar, and
+   * a super's own hits were most of it. That is a move that ends the round on
+   * its own, which is not what a hundred meter is supposed to buy.
+   *
+   * Applied per hit rather than as a flat cut on purpose, because the problem
+   * is specifically the multi-hit ones. A super that lands once - a counter, a
+   * command grab, one enormous blow - is untouched by this; a six-hit super
+   * has its last hit worth about a third of its first.
+   */
+  superScaleStep: 0.8,
+  superMinScale: 0.3,
+  /**
+   * Frames before one shot may hurt the same fighter again. See
+   * `Projectile.hitCooldown` - without it a `hits: 3` projectile hit the same
+   * person on three consecutive frames rather than passing through three
+   * people.
+   */
+  projectileRehit: 10,
   /** Hitstun decays over a long combo so juggles end. */
   juggleDecay: 0.9,
   minHitstun: 8,

@@ -49,6 +49,34 @@ export interface Projectile {
   spawnX: number;
   /** The move that spawned it, for attributing a hit back to a move name. */
   sourceMove: string;
+  /**
+   * Whether a super fired it.
+   *
+   * Carried on the shot because a projectile outlives the move that fired it -
+   * a summoned rank walks up the screen for seconds after the animation has
+   * finished - so reading the attacker's *current* move when it lands says
+   * "not a super" and skips the decay entirely. The count itself lives on the
+   * fighter, so a volley of six arrows decays as one super rather than as six
+   * first hits.
+   */
+  fromSuper: boolean;
+  /**
+   * Frames until this shot may hurt the same fighter again.
+   *
+   * `hits` is documented as how many *opponents* a shot can pass through, and
+   * in a one-on-one game there is only ever one - so without a cooldown the
+   * only thing it could count was how many consecutive frames the shot spent
+   * inside the same hurtbox. Every multi-hit projectile on the roster was
+   * therefore landing all of its hits in three or four frames: Subutai's
+   * Arrow Storm is six arrows at `hits: 3` and a seventh at `hits: 6`, which
+   * is up to twenty-four hits inside about a second, and it read on screen
+   * exactly as it was - a health bar disappearing.
+   *
+   * With a cooldown a fast shot passes through and hits once, which is what
+   * the field always said it did, and a slow or lingering one still hits
+   * repeatedly - just spaced far enough apart to see.
+   */
+  hitCooldown: number;
 }
 
 /**
@@ -534,6 +562,7 @@ export class Match {
     contact: { x: number; y: number },
     fromProjectile = false,
     moveName?: string,
+    shot?: Projectile,
   ) {
     // A direct strike names itself from the attacker's own active move; a
     // projectile has to say so explicitly, because by the time it lands the
@@ -620,7 +649,31 @@ export class Match {
     }
 
     const counter = defender.inStartup && !fromProjectile;
-    const scale = Math.max(COMBAT.minScale, defender.scaling);
+    /**
+     * How much of a hit's authored damage survives scaling.
+     *
+     * A super uses its own curve *instead of* the ordinary combo curve, not on
+     * top of it. Multiplying the two was the first attempt and it was wrong in
+     * a way the numbers made obvious: a six-hit super ate 0.9^n and 0.8^n at
+     * once, so Lapu-Lapu's 368 authored damage came out at 125 while Wyatt
+     * Earp's 240, authored as three big hits, came out at 294. Two decays
+     * multiplying is not a design, it is an accident, and it punished authors
+     * for writing a super as several blows rather than one.
+     *
+     * Taking the stronger of the two keeps the intent - a move that lands six
+     * times falls off faster than a chain of six separate moves - without
+     * charging twice for it.
+     *
+     * A direct hit counts against the move's own landed hits; a shot counts
+     * against its own, because the move is usually long over by the time a
+     * summoned rank reaches anybody.
+     */
+    const isSuper = shot ? shot.fromSuper : !!attacker.move?.tags?.includes("super");
+    const comboScale = Math.max(COMBAT.minScale, defender.scaling);
+    const scale = isSuper
+      ? Math.min(comboScale, Math.max(COMBAT.superMinScale, Math.pow(COMBAT.superScaleStep, attacker.superHits)))
+      : comboScale;
+    if (isSuper) attacker.superHits++;
     const damage = Math.max(
       1,
       Math.round(
@@ -883,6 +936,8 @@ export class Match {
         spin: spec.spin ?? 0,
         dead: false,
         sourceMove: f.move.name,
+        fromSuper: !!f.move.tags?.includes("super"),
+        hitCooldown: 0,
       });
       this.pushFx({ kind: "spawn", x: f.x + f.facing * spec.x, y: f.y + spec.y, scale: spec.scale ?? 1 });
     }
@@ -923,7 +978,8 @@ export class Match {
         // through. It is not destroyed and it is not blocked - as far as
         // anyone standing this close is concerned, it simply is not a weapon
         // yet. See `armAfter`.
-        if (projectileArmed(p) && !target.hasInvuln("projectile") && !target.hasInvuln("strike")) {
+        if (p.hitCooldown > 0) p.hitCooldown--;
+        if (p.hitCooldown <= 0 && projectileArmed(p) && !target.hasInvuln("projectile") && !target.hasInvuln("strike")) {
           const hurt = target.hurtboxes();
           if (hurt.some((h) => boxesOverlap(box, h))) {
             const hitDef: HitDef = {
@@ -942,7 +998,8 @@ export class Match {
               meterGain: p.spec.meterGain,
             };
             const owner = this.fighters[p.owner];
-            this.applyHit(owner, target, hitDef, { x: p.x, y: p.y }, true, p.sourceMove);
+            this.applyHit(owner, target, hitDef, { x: p.x, y: p.y }, true, p.sourceMove, p);
+            p.hitCooldown = COMBAT.projectileRehit;
             p.hitsLeft--;
             if (p.hitsLeft <= 0) this.killProjectile(p, false);
           }
@@ -1003,7 +1060,7 @@ export class Match {
       const dir = target.x >= p.x ? 1 : -1;
       const saved = owner.x;
       owner.x = p.x - dir * 10;
-      this.applyHit(owner, target, hitDef, { x: target.x, y: target.y + 40 }, true, p.sourceMove);
+      this.applyHit(owner, target, hitDef, { x: target.x, y: target.y + 40 }, true, p.sourceMove, p);
       owner.x = saved;
     }
   }
