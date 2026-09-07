@@ -150,6 +150,7 @@ export const SPARTAN: FighterDef = {
     },
     {
       id: "javelin",
+      thrown: true,
       attach: "handB",
       // Conditional: only on screen for the throw. He fights with the dory,
       // which is hidden for those frames - a hoplite carried a throwing spear

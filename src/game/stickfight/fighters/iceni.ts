@@ -223,6 +223,7 @@ export const ICENI: FighterDef = {
     },
     {
       id: "hare",
+      thrown: true,
       attach: "handB",
       // Dio: before the battle she let a hare go from the fold of her dress,
       // and the army roared when it ran the way they wanted. It is the

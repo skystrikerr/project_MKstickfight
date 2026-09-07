@@ -150,6 +150,7 @@ export const NIHANG: FighterDef = {
     },
     {
       id: "chakram",
+      thrown: true,
       attach: "handB",
       // A quoit held ready in the off hand, spun on one finger. Hidden while
       // he is throwing it.

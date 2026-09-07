@@ -450,6 +450,11 @@ export class Fighter {
     if (def.meterCost && this.meter < def.meterCost) return false;
     if (def.resourceMin !== undefined && this.resource < def.resourceMin) return false;
     if (def.resourceCost && this.resource < def.resourceCost) return false;
+    // Reloading a full magazine spends a spare for nothing, so it simply does
+    // not happen - the same way the weapon refuses rather than the player
+    // having to remember.
+    if (def.resourceRefill && this.resource >= (this.def.resource?.max ?? 0)) return false;
+    if (def.resourceRefill && this.def.resource?.spares !== undefined && this.spares <= 0) return false;
 
     if (def.meterCost) this.meter -= def.meterCost;
     if (def.resourceCost) this.resource = Math.max(0, this.resource - def.resourceCost);
@@ -1228,11 +1233,12 @@ export class Fighter {
    * is in the weapon is only the part of it you can see.
    */
   private applyResourceGain(move: MoveDef) {
-    if (!move.resourceGain) return;
+    if (!move.resourceGain && !move.resourceRefill) return;
+    const max = this.def.resource?.max ?? 0;
     const spares = this.def.resource?.spares !== undefined;
     if (spares && this.spares <= 0) return;
     if (spares) this.spares--;
-    this.resource = Math.min(this.def.resource?.max ?? 0, this.resource + move.resourceGain);
+    this.resource = move.resourceRefill ? max : Math.min(max, this.resource + move.resourceGain!);
   }
 
   /**
@@ -1251,15 +1257,19 @@ export class Fighter {
         this.stanceAllows(m, this.stance) &&
         // Net gain only. A quoit that costs one and returns one is a boomerang,
         // not a reload: picking it on an empty quiver leaves the player with
-        // nothing, because it cannot pay its own cost either.
-        (m.resourceGain ?? 0) - (m.resourceCost ?? 0) > 0 &&
+        // nothing, because it cannot pay its own cost either. A refill always
+        // counts - filling the container is the largest gain there is.
+        (m.resourceRefill || (m.resourceGain ?? 0) - (m.resourceCost ?? 0) > 0) &&
         (m.resourceMin === undefined || this.resource >= m.resourceMin),
     );
     if (!gains.length) return null;
     return (
       gains.find((m) => m.input.buttons?.length === 2) ??
       gains.reduce((a, b) =>
-        (b.resourceGain ?? 0) - (b.resourceCost ?? 0) > (a.resourceGain ?? 0) - (a.resourceCost ?? 0) ? b : a,
+        (b.resourceRefill ? Infinity : (b.resourceGain ?? 0) - (b.resourceCost ?? 0)) >
+        (a.resourceRefill ? Infinity : (a.resourceGain ?? 0) - (a.resourceCost ?? 0))
+          ? b
+          : a,
       )
     );
   }
@@ -1312,7 +1322,15 @@ export class Fighter {
         continue;
       }
       // Out of magazines: there is nothing to reload with.
-      if (move.resourceGain && this.def.resource?.spares !== undefined && this.spares <= 0) continue;
+      if (
+        (move.resourceGain || move.resourceRefill) &&
+        this.def.resource?.spares !== undefined &&
+        this.spares <= 0
+      ) {
+        continue;
+      }
+      // ...and a full magazine is nothing to reload into.
+      if (move.resourceRefill && this.resource >= (this.def.resource?.max ?? 0)) continue;
       // A backstep is a hop off the floor, and there is no floor to hop off
       // in the shallows. Identified by the input rather than by name: the
       // back-back motion *is* what a backstep is, on any fighter.

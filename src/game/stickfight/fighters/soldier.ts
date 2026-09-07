@@ -78,11 +78,16 @@ export const SOLDIER: FighterDef = {
   }),
   resource: {
     name: "Rounds",
-    // Three magazines of thirty. One in the rifle, two on the belt - when
+    // Three twenty-round magazines. One in the rifle, two on the belt - when
     // those are gone the rifle is a club, which is what the butt-strokes and
-    // the knife are for.
-    max: 30,
-    start: 30,
+    // the bayonet are for.
+    //
+    // Twenty rather than thirty because that is what an M16A1 came with in
+    // 1965; the thirty-round magazine is a later war. It also makes the number
+    // on the bar mean something, now that every round on it is a round that
+    // leaves the barrel.
+    max: 20,
+    start: 20,
     spares: 2,
     spareName: "Mags",
     color: BRASS,
@@ -108,26 +113,66 @@ export const SOLDIER: FighterDef = {
     {
       id: "rifle",
       attach: "handB",
-      // M16A1: slab receiver, triangular handguard, carry handle with the rear
-      // sight on it, twenty-round mag and an A1 birdcage.
+      /**
+       * M16A1.
+       *
+       * Redrawn to read at the size it is actually seen. The first pass had
+       * the right parts in the right places and they all ran together into one
+       * dark bar, because every piece was within a shade of every other and
+       * the masses were the same depth. This one separates it the way the real
+       * rifle separates: black furniture, grey alloy receiver, and a thin
+       * barrel with daylight above it - so the carry handle, the magazine and
+       * the birdcage are three different silhouettes rather than one blur.
+       */
       parts: [
-        { geo: "poly", size: [-14, 4, 14, 4, 14, -4, -14, -4], pos: [-2, 2], color: GUNMETAL },
-        // Triangular handguard.
-        { geo: "poly", size: [-11, 4.5, 12, 3.5, 12, -3.5, -11, -4.5], pos: [22, 2], color: "#2f353a" },
-        { geo: "box", size: [22, 1.5], pos: [22, 4], color: "#4a5158" },
-        // Carry handle and rear sight.
-        { geo: "poly", size: [-11, 0, -9, 5, 9, 5, 11, 0], pos: [-2, 6], color: "#2f353a" },
-        { geo: "box", size: [5, 4], pos: [-11, 9], color: "#22262a" },
-        // Barrel, front sight post and flash hider.
-        { geo: "cyl", size: [1.6, 22], pos: [44, 2], rot: 90, color: "#22262a" },
-        { geo: "poly", size: [-2.5, 0, -2, 7, 2, 7, 2.5, 0], pos: [37, 4], color: "#2f353a" },
-        { geo: "poly", size: [-5, 2.8, 5, 3.4, 5, -3.4, -5, -2.8], pos: [58, 2], color: "#3f454b" },
-        // Magazine and pistol grip.
-        { geo: "poly", size: [-3.5, 7, 3.5, 6, 4.5, -7, -2.5, -7], pos: [4, -8], rot: -6, color: "#2b3036" },
-        { geo: "poly", size: [3, 4, -2, 3, -5, -7, 0, -8], pos: [-6, -6], color: "#22262a" },
-        // Stock.
-        { geo: "poly", size: [-9, 5, 9, 6, 9, -3, -9, -5], pos: [-24, 0], color: "#2b3036" },
-        { geo: "box", size: [4, 9], pos: [-33, 0], color: "#1c2024" },
+        // ---- black furniture: stock, grip, handguard ----
+        { geo: "poly", size: [-11, 6, 10, 7, 10, -4, -11, -6], pos: [-26, 0], color: "#20242a" },
+        { geo: "box", size: [4.5, 12], pos: [-37, 0], color: "#15181c" },
+        { geo: "box", size: [17, 1.6], pos: [-26, 5.4], color: "#3a4048" },
+        // Pistol grip, raked back the way an A1 grip is.
+        { geo: "poly", size: [4, 5, -3, 4, -6, -9, 1, -9], pos: [-8, -7], rot: -4, color: "#20242a" },
+        // Triangular handguard: fat at the back, tapering forward, with the
+        // rib line along the top that says "handguard" and not "barrel".
+        { geo: "poly", size: [-13, 6, 13, 4.2, 13, -4.2, -13, -6], pos: [22, 1], color: "#22272d" },
+        { geo: "box", size: [25, 1.8], pos: [22, 4.4], color: "#3d434b" },
+        { geo: "box", size: [25, 1.2], pos: [22, -3.6], color: "#15181c" },
+        // ---- grey alloy receiver ----
+        { geo: "poly", size: [-13, 5, 11, 5, 11, -5, -13, -5], pos: [-2, 2], color: GUNMETAL },
+        { geo: "box", size: [10, 3], pos: [2, 0], color: "#20242a" },
+        // Carry handle, raised clear of the receiver so it breaks the outline.
+        { geo: "poly", size: [-12, -1, -10, 6, 10, 6, 12, -1], pos: [-2, 7], color: "#3f454d" },
+        { geo: "box", size: [20, 2], pos: [-2, 10], color: "#2a2f35" },
+        { geo: "box", size: [4.5, 5], pos: [-12, 11], color: "#15181c" },
+        // ---- barrel group ----
+        { geo: "cyl", size: [1.5, 20], pos: [45, 1], rot: 90, color: "#191d21" },
+        { geo: "poly", size: [-2.6, -1, -2.2, 8, 2.2, 8, 2.6, -1], pos: [39, 4], color: "#2a2f35" },
+        { geo: "poly", size: [-5.5, 3.2, 5.5, 3.8, 5.5, -3.8, -5.5, -3.2], pos: [59, 1], color: "#454b53" },
+        { geo: "box", size: [9, 1.4], pos: [59, 2.4], color: "#15181c" },
+        // ---- twenty-round magazine, straight and slightly forward-raked ----
+        { geo: "poly", size: [-4, 8, 4, 7, 5, -8, -3, -8], pos: [6, -10], rot: -5, color: "#20242a" },
+        { geo: "box", size: [8, 1.6], pos: [6.6, -17], rot: -5, color: "#3d434b" },
+      ],
+    },
+    {
+      id: "bayonet",
+      attach: "handB",
+      conditional: true,
+      /**
+       * M7, fixed to the lug under the front sight.
+       *
+       * Drawn as its own prop rather than as part of the rifle, and only shown
+       * on the moves that use it. Fixing bayonets is a thing a man does on
+       * purpose and not a thing he walks around having done - and a blade
+       * hanging off the muzzle through every butt-stroke and every burst would
+       * say the opposite on every frame of the match.
+       *
+       * It attaches at the same hand and rides the same angle as the rifle, so
+       * the two line up wherever the weapon is pointed.
+       */
+      parts: [
+        { geo: "box", size: [9, 5], pos: [63, 1], color: "#2a2f35" },
+        { geo: "blade", size: [26, 4.6, 0.3], pos: [80, 1], color: "#b9c2cc" },
+        { geo: "box", size: [22, 1], pos: [80, 2.2], color: "#e6ecf2" },
       ],
     },
     {
@@ -213,25 +258,30 @@ export const SOLDIER: FighterDef = {
     },
     {
       id: "5B",
-      name: "Rifle Butt",
+      name: "Bayonet Thrust",
       input: { button: "B", stance: "stand" },
       tags: ["medium"],
-      duration: 21,
+      duration: 22,
       cancelInto: ["heavy", "special", "super"],
-      cancelWindow: [8, 19],
+      cancelWindow: [9, 20],
+      showProps: ["bayonet"],
       // Butt-Strokes string continues into 6C.
       followUps: [
-        { button: "C", move: "6C", from: 8, to: 18, string: "Butt-Strokes" },
+        { button: "C", move: "6C", from: 9, to: 19, string: "Butt-Strokes" },
       ],
-      hits: [hit(8, 11, bx(20, 46, 58, 34), 54, { fx: "blunt", pushX: 4.6, hitstun: 17 })],
-      desc: "Swings the stock into their jaw. Solid confirm into a shot.",
+      hits: [hit(9, 12, bx(38, 52, 66, 22), 56, { fx: "pierce", pushX: 5, hitstun: 18 })],
+      desc: "Fixes and drives the point in on one step. Long for a medium, and it confirms into a shot.",
       notation: "B",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(4, { ...STANCE, shoulderB: -20, elbowB: 84, weaponBack: 40, torso: -8, offX: -3 }),
-        kf(8, { ...STANCE, shoulderB: 84, elbowB: 10, weaponBack: -46, torso: 20, hipF: 28, offX: 6 }, "out"),
-        kf(14, { ...STANCE, shoulderB: 58, elbowB: 32, weaponBack: -24, torso: 12 }, "inOut"),
-        kf(21, { ...STANCE }),
+        // Draws the rifle back across the body first, so there is a visible
+        // load before the point goes out - a thrust with no wind-up reads as
+        // the weapon growing rather than the man pushing it.
+        kf(5, { ...STANCE, shoulderB: 24, elbowB: 70, weaponBack: -22, shoulderF: 46, elbowF: 52, torso: -8, offX: -5 }, "inOut"),
+        kf(9, { ...STANCE, shoulderB: 82, elbowB: 4, weaponBack: -4, shoulderF: 90, elbowF: -6, torso: 12, hipF: 30, kneeF: 16, offX: 9 }, "out"),
+        kf(13, { ...STANCE, shoulderB: 80, elbowB: 6, weaponBack: -4, shoulderF: 88, elbowF: -4, torso: 10, hipF: 28, offX: 8 }),
+        kf(18, { ...STANCE, shoulderB: 54, elbowB: 38, weaponBack: -14, torso: 4, offX: 3 }, "inOut"),
+        kf(22, { ...STANCE }),
       ],
     },
     {
@@ -239,41 +289,35 @@ export const SOLDIER: FighterDef = {
       name: "Aimed Shot",
       input: { button: "C", stance: "stand" },
       tags: ["heavy", "projectile"],
-      duration: 28,
-      resourceCost: 4,
-      resourceMin: 4,
+      duration: 34,
+      // Three rounds, three fired, three off the bar. The whole point of
+      // reworking this was that the number should be literal - it used to cost
+      // four rounds to fire one bullet, which made the bar an abstraction
+      // wearing ammunition's clothes.
+      resourceCost: 3,
+      resourceMin: 3,
       cancelInto: ["special", "super"],
-      cancelWindow: [12, 24],
+      cancelWindow: [18, 30],
       projectiles: [
-        {
-          at: 9,
-          kind: "rifle",
-          x: 48,
-          y: 66,
-          vx: 26,
-          vy: 0,
-          life: 50,
-          box: { x: -12, y: -4, w: 24, h: 8 },
-          damage: 60,
-          hitstun: 20,
-          blockstun: 13,
-          chip: 5,
-          pushX: 5,
-          clashes: true,
-          fx: "shot",
-          color: "#fff0c0",
-          trail: "#ffcf6b",
-        },
+        { at: 9, kind: "tracer", x: 48, y: 66, vx: 26, vy: 0, life: 50, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 26, hitstun: 16, blockstun: 11, chip: 2, pushX: 1.5, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 12, kind: "tracer", x: 48, y: 68, vx: 26, vy: 0, life: 50, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 20, hitstun: 16, blockstun: 11, chip: 2, pushX: 1.5, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 15, kind: "tracer", x: 48, y: 70, vx: 26, vy: 0, life: 50, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 20, blockstun: 13, chip: 3, pushX: 6, clashes: true, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
       ],
-      vfx: [{ at: 9, kind: "shot", x: 52, y: 66, scale: 1.1, color: "#fff0c0" }],
-      desc: "Shoulders the rifle and puts one round downrange. Heavy button, and it costs a real bite of the magazine.",
-      notation: "C  (4 rounds)",
+      vfx: [
+        { at: 9, kind: "shot", x: 52, y: 66, scale: 1, color: "#fff0c0" },
+        { at: 12, kind: "shot", x: 52, y: 68, scale: 1, color: "#fff0c0" },
+        { at: 15, kind: "shot", x: 52, y: 70, scale: 1.1, color: "#fff6dd" },
+      ],
+      desc: "A controlled burst of three, climbing as it goes. Costs three rounds because it fires three.",
+      notation: "C  (3 Rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 84, elbowF: 6, shoulderB: 74, elbowB: 10, weaponBack: -4, torso: 4, head: 2 }, "out"),
         kf(9, { ...STANCE, shoulderF: 86, elbowF: 4, shoulderB: 76, elbowB: 8, weaponBack: -2, torso: 2, offX: -2 }),
-        kf(14, { ...STANCE, shoulderF: 90, elbowF: 2, shoulderB: 80, elbowB: 4, weaponBack: 6, torso: -4, offX: -4 }, "inOut"),
-        kf(28, { ...STANCE }),
+        kf(12, { ...STANCE, shoulderF: 88, elbowF: 3, shoulderB: 78, elbowB: 6, weaponBack: 2, torso: 0, offX: -3 }),
+        kf(15, { ...STANCE, shoulderF: 91, elbowF: 1, shoulderB: 81, elbowB: 4, weaponBack: 7, torso: -3, offX: -4 }),
+        kf(22, { ...STANCE, shoulderF: 86, elbowF: 5, shoulderB: 76, elbowB: 9, weaponBack: 0, torso: 1, offX: -2 }, "inOut"),
+        kf(34, { ...STANCE }),
       ],
     },
     {
@@ -300,40 +344,44 @@ export const SOLDIER: FighterDef = {
       name: "Crouch Shot",
       input: { button: "B", stance: "crouch" },
       tags: ["medium", "projectile"],
-      duration: 26,
-      resourceCost: 3,
-      resourceMin: 3,
+      duration: 30,
+      resourceCost: 2,
+      resourceMin: 2,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [10, 24],
       projectiles: [
         {
           at: 8,
-          kind: "rifle",
+          kind: "tracer",
           x: 46,
           y: 36,
           vx: 25,
           vy: 0,
           life: 50,
           box: { x: -12, y: -4, w: 24, h: 8 },
-          damage: 46,
-          hitstun: 18,
-          blockstun: 12,
-          chip: 4,
-          pushX: 4,
+          damage: 26,
+          hitstun: 16,
+          blockstun: 11,
+          chip: 2,
+          pushX: 1.5,
           clashes: true,
           fx: "shot",
           color: "#fff0c0",
           trail: "#ffcf6b",
         },
+        { at: 12, kind: "tracer", x: 46, y: 38, vx: 25, vy: 0, life: 50, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 24, hitstun: 18, blockstun: 12, chip: 3, pushX: 5, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
       ],
-      vfx: [{ at: 8, kind: "shot", x: 50, y: 36, scale: 1, color: "#fff0c0" }],
-      desc: "Fires from a knee, under the usual jump-in arc.",
-      notation: "↓ + B  (3 rounds)",
+      vfx: [
+        { at: 8, kind: "shot", x: 50, y: 36, scale: 1, color: "#fff0c0" },
+        { at: 12, kind: "shot", x: 50, y: 38, scale: 1, color: "#fff0c0" },
+      ],
+      desc: "A pair from a knee, under the usual jump-in arc.",
+      notation: "↓ + B  (2 Rounds)",
       frames: [
         kf(0, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }, "out"),
         kf(6, { ...STANCE, crouch: 1, torso: 12, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 78, elbowF: 10, shoulderB: 70, elbowB: 14, weaponBack: -6 }, "out"),
         kf(12, { ...STANCE, crouch: 1, torso: 8, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 82, elbowF: 6, shoulderB: 74, elbowB: 10, weaponBack: 2, offX: -3 }, "inOut"),
-        kf(26, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }),
+        kf(30, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }),
       ],
     },
     {
@@ -495,7 +543,8 @@ export const SOLDIER: FighterDef = {
       cancelInto: ["special", "super"],
       cancelWindow: [16, 27],
       hits: [hit(12, 15, bx(42, 50, 100, 22), 56, { guard: "mid", fx: "pierce", pushX: 7, hitstun: 18, hitstop: 8 })],
-      desc: "Gives ground and holds the muzzle out at full stretch. His longest melee.",
+      showProps: ["bayonet"],
+      desc: "Gives ground and holds the point out at full stretch. His longest melee.",
       notation: "\u2190 + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
@@ -630,19 +679,19 @@ export const SOLDIER: FighterDef = {
       tags: ["special", "projectile"],
       priority: 20,
       duration: 52,
-      resourceCost: 10,
-      resourceMin: 10,
+      resourceCost: 8,
+      resourceMin: 8,
       friction: 0.9,
       vel: [{ at: 10, x: -1.2 }],
       projectiles: [
-        { at: 8, kind: "rifle", x: 46, y: 68, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 26, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
-        { at: 12, kind: "rifle", x: 46, y: 64, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 24, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
-        { at: 16, kind: "rifle", x: 46, y: 60, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 24, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
-        { at: 20, kind: "rifle", x: 46, y: 56, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
-        { at: 24, kind: "rifle", x: 46, y: 54, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
-        { at: 28, kind: "rifle", x: 46, y: 52, vx: 26, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
-        { at: 32, kind: "rifle", x: 46, y: 50, vx: 26, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 15, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
-        { at: 36, kind: "rifle", x: 46, y: 48, vx: 26, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 34, hitstun: 24, blockstun: 13, chip: 4, pushX: 9, knockdown: "soft", clashes: true, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 8, kind: "tracer", x: 46, y: 68, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 26, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 12, kind: "tracer", x: 46, y: 64, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 24, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 16, kind: "tracer", x: 46, y: 60, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 24, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 20, kind: "tracer", x: 46, y: 56, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 24, kind: "tracer", x: 46, y: 54, vx: 25, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 28, kind: "tracer", x: 46, y: 52, vx: 26, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 14, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 32, kind: "tracer", x: 46, y: 50, vx: 26, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 22, hitstun: 15, blockstun: 10, chip: 2, pushX: 1.2, clashes: true, fx: "shot", color: "#fff0c0", trail: "#ffcf6b" },
+        { at: 36, kind: "tracer", x: 46, y: 48, vx: 26, vy: 0, life: 46, box: { x: -12, y: -4, w: 24, h: 8 }, damage: 34, hitstun: 24, blockstun: 13, chip: 4, pushX: 9, knockdown: "soft", clashes: true, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
       ],
       vfx: [
         { at: 8, kind: "shot", x: 50, y: 68, scale: 1, color: "#fff0c0" },
@@ -652,7 +701,7 @@ export const SOLDIER: FighterDef = {
         { at: 36, kind: "shot", x: 50, y: 48, scale: 1.3, color: "#fff6dd" },
       ],
       desc: "Empties the magazine on the trigger. The muzzle climbs as it goes, so the burst walks upward - the last shot knocks down.",
-      notation: "↓↘→ + C  (10 rounds)",
+      notation: "↓↘→ + C  (8 rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(6, { ...STANCE, shoulderF: 82, elbowF: 8, shoulderB: 72, elbowB: 12, weaponBack: -6, torso: 8 }, "out"),
@@ -725,8 +774,16 @@ export const SOLDIER: FighterDef = {
       input: { button: "B", motion: "qcb", stance: ["stand", "crouch"] },
       tags: ["special", "projectile"],
       priority: 18,
-      duration: 40,
-      resourceCost: 6,
+      // A hundred frames, and he cannot do anything for any of them.
+      //
+      // This used to cost six rounds, which is what stopped him throwing three
+      // a second - but a grenade does not come out of the rifle magazine, and
+      // once the ammunition became literal the cost had to go. So the price is
+      // the thing it always should have been for a hundred-and-eighteen point
+      // blast with a ninety-unit radius that beats blocking: he stands there
+      // and throws it, and if he was wrong about the distance he wears
+      // whatever they do to him for a second and a half.
+      duration: 100,
       projectiles: [
         {
           at: 12,
@@ -764,7 +821,13 @@ export const SOLDIER: FighterDef = {
         kf(7, { ...STANCE, shoulderF: -84, elbowF: 60, torso: -16, offX: -4 }, "inOut"),
         kf(12, { ...STANCE, shoulderF: 128, elbowF: -18, torso: 18, hipF: 30, kneeF: 20, offX: 5 }, "out"),
         kf(22, { ...STANCE, shoulderF: 70, elbowF: 22, torso: 8 }, "inOut"),
-        kf(40, { ...STANCE }),
+        // The long tail: he watches it land. Standing in the open doing
+        // nothing is the whole cost of the move, so it has to be visible as
+        // that rather than as a fighter frozen mid-recovery.
+        kf(38, { ...STANCE, shoulderF: 40, elbowF: 30, torso: 2, head: 4 }, "inOut"),
+        kf(58, { ...STANCE, shoulderF: 46, elbowF: 34, torso: 4, head: 6 }),
+        kf(78, { ...STANCE, shoulderF: 50, elbowF: 38, torso: 5, head: 2 }, "inOut"),
+        kf(100, { ...STANCE }),
       ],
     },
     {
@@ -801,6 +864,7 @@ export const SOLDIER: FighterDef = {
       tags: ["special"],
       priority: 22,
       duration: 50,
+      showProps: ["bayonet"],
       armor: [{ from: 3, to: 26, hits: 1, damageScale: 0.35 }],
       vel: [
         { at: 2, x: 7.5 },
@@ -839,19 +903,40 @@ export const SOLDIER: FighterDef = {
       input: { buttons: ["A", "C"], stance: ["stand", "crouch"] },
       tags: ["skill"],
       priority: 18,
-      duration: 54,
-      resourceGain: 30,
+      duration: 56,
+      // Fills the magazine rather than adding a fixed number to it. A magazine
+      // holds thirty whether you seat it with two rounds left or twenty-nine,
+      // and the old fixed +30 meant reloading at 28 burned a whole spare to
+      // buy two. It also refuses to start on a full magazine, so the button
+      // can never quietly cost you one.
+      resourceRefill: true,
       meterGain: 10,
       friction: 0.9,
-      desc: "SKILL. Drops the magazine and seats a fresh one - all twenty rounds. Long enough that they will make you pay if they are close.",
+      desc: "SKILL. Drops the magazine, seats a fresh one and releases the bolt - a full thirty. Costs a spare, will not fire on a full magazine, and is long enough that they will make you pay for it up close.",
       notation: "A + C",
+      /**
+       * Four beats, because that is what a reload is and a single sweep of the
+       * arms reads as nothing at all: hit the catch and the magazine drops,
+       * the support hand goes to the pouch, the fresh one goes up into the
+       * well, then the left hand comes over the top for the bolt release and
+       * the rifle comes back to the shoulder.
+       */
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(10, { ...STANCE, shoulderF: 20, elbowF: 84, shoulderB: 40, elbowB: 56, weaponBack: -30, torso: 12, head: 6 }, "inOut"),
-        kf(22, { ...STANCE, shoulderF: 8, elbowF: 96, shoulderB: 44, elbowB: 60, weaponBack: -36, torso: 16, head: 8 }),
-        kf(34, { ...STANCE, shoulderF: 30, elbowF: 72, shoulderB: 38, elbowB: 52, weaponBack: -26, torso: 10, head: 4 }, "inOut"),
-        kf(44, { ...STANCE, shoulderF: 48, elbowF: 48, weaponBack: -18, torso: 6 }, "inOut"),
-        kf(54, { ...STANCE }),
+        // Magazine out: rifle rolls over to the left, support hand off the
+        // fore-end and down to the well.
+        kf(8, { ...STANCE, shoulderF: 6, elbowF: 74, shoulderB: 30, elbowB: 62, weaponBack: -28, torso: 12, head: 6 }, "inOut"),
+        // Hand down to the belt pouch for the fresh one - the lowest the
+        // support hand goes, and the frame that says what he is doing.
+        kf(18, { ...STANCE, shoulderF: -34, elbowF: 40, shoulderB: 28, elbowB: 64, weaponBack: -32, torso: 18, head: 10, hipF: 22, kneeF: 22 }),
+        // Up and in: the magazine goes into the well and gets seated.
+        kf(30, { ...STANCE, shoulderF: 2, elbowF: 88, shoulderB: 30, elbowB: 62, weaponBack: -30, torso: 14, head: 7 }, "out"),
+        kf(34, { ...STANCE, shoulderF: 10, elbowF: 92, shoulderB: 32, elbowB: 60, weaponBack: -28, torso: 12, head: 6 }),
+        // Left hand over the top of the receiver for the bolt release.
+        kf(42, { ...STANCE, shoulderF: 44, elbowF: 62, shoulderB: 34, elbowB: 56, weaponBack: -22, torso: 8, head: 2 }, "inOut"),
+        // Back up on the shoulder.
+        kf(50, { ...STANCE, shoulderF: 58, elbowF: 36, shoulderB: 38, elbowB: 50, weaponBack: -16, torso: 6 }, "inOut"),
+        kf(56, { ...STANCE }),
       ],
     },
 
@@ -864,16 +949,18 @@ export const SOLDIER: FighterDef = {
       priority: 26,
       duration: 54,
       meterCost: 50,
+      resourceCost: 8,
+      resourceMin: 8,
       friction: 0.9,
       projectiles: [
-        { at: 6, kind: "rifle", x: 46, y: 70, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 24, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
-        { at: 10, kind: "rifle", x: 46, y: 64, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
-        { at: 14, kind: "rifle", x: 46, y: 58, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
-        { at: 18, kind: "rifle", x: 46, y: 52, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
-        { at: 22, kind: "rifle", x: 46, y: 48, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
-        { at: 26, kind: "rifle", x: 46, y: 44, vx: 28, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
-        { at: 30, kind: "rifle", x: 46, y: 40, vx: 28, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 24, hitstun: 16, blockstun: 11, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
-        { at: 34, kind: "rifle", x: 46, y: 38, vx: 28, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 40, hitstun: 26, blockstun: 14, chip: 5, pushX: 11, knockdown: "hard", hits: 2, fx: "shot", color: "#ffffff", trail: "#fff2c9" },
+        { at: 6, kind: "tracer", x: 46, y: 70, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 24, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 10, kind: "tracer", x: 46, y: 64, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 14, kind: "tracer", x: 46, y: 58, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 18, kind: "tracer", x: 46, y: 52, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 22, kind: "tracer", x: 46, y: 48, vx: 27, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 26, kind: "tracer", x: 46, y: 44, vx: 28, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 22, hitstun: 15, blockstun: 10, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 30, kind: "tracer", x: 46, y: 40, vx: 28, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 24, hitstun: 16, blockstun: 11, chip: 3, pushX: 1, hits: 2, fx: "shot", color: "#fff6dd", trail: "#ffcf6b" },
+        { at: 34, kind: "tracer", x: 46, y: 38, vx: 28, vy: 0, life: 50, box: { x: -13, y: -5, w: 26, h: 10 }, damage: 40, hitstun: 26, blockstun: 14, chip: 5, pushX: 11, knockdown: "hard", hits: 2, fx: "shot", color: "#ffffff", trail: "#fff2c9" },
       ],
       vfx: [
         { at: 6, kind: "shot", x: 50, y: 70, scale: 1.2, color: "#fff6dd" },
@@ -882,7 +969,7 @@ export const SOLDIER: FighterDef = {
         { at: 34, kind: "shot", x: 50, y: 38, scale: 1.5, color: "#ffffff" },
       ],
       desc: "EX. Eight rounds that punch through anything in the air, and no magazine cost.",
-      notation: "↓↘→ + S  (50 meter)",
+      notation: "↓↘→ + S  (50 meter, 8 rounds)",
       frames: [
         kf(0, { ...STANCE }, "out"),
         kf(5, { ...STANCE, shoulderF: 84, elbowF: 6, shoulderB: 74, elbowB: 10, weaponBack: -4, torso: 6 }, "out"),

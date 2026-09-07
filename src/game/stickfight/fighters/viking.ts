@@ -118,6 +118,7 @@ export const VIKING: FighterDef = {
     },
     {
       id: "axe",
+      thrown: true,
       attach: "handB",
       // Bearded axe (skeggox): a one-handed hand axe, not a war axe. Short
       // haft, and a head small enough that the weight sits in her wrist - the

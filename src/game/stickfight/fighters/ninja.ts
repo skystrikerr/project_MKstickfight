@@ -191,6 +191,7 @@ export const NINJA: FighterDef = {
     },
     {
       id: "kunai",
+      thrown: true,
       attach: "handF",
       conditional: true,
       parts: [

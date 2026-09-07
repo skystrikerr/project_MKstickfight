@@ -555,6 +555,17 @@ export interface MoveDef {
   resourceCost?: number;
   /** Resource restored at the end of the move. */
   resourceGain?: number;
+  /**
+   * This move fills the resource to its maximum instead of adding to it, and
+   * refuses to start when it is already full.
+   *
+   * For a resource that is a container rather than a running total. A magazine
+   * holds thirty rounds whether you seat it with two left in the old one or
+   * twenty-nine; `resourceGain` could only ever add a fixed number and then
+   * clamp, so reloading at 28/30 quietly burned a whole spare magazine to buy
+   * two rounds, and the player had no way to see that coming.
+   */
+  resourceRefill?: boolean;
   /** Requires at least this much resource to come out. */
   resourceMin?: number;
   /** Tags this move may be cancelled into once it has connected. */
@@ -729,6 +740,20 @@ export interface PropDef {
    * a hit carrying a matching `strips`, and stay off for the round.
    */
   armour?: ArmourSlot;
+  /**
+   * This prop IS the projectile of the same id, so it leaves the body while
+   * one of them is in the air and comes back when it lands.
+   *
+   * Opt-in on purpose. The renderer used to infer this from the names alone -
+   * any projectile whose kind matched a prop id hid that prop - which is right
+   * for a thrown axe and catastrophically wrong for a rifle, because the
+   * Trooper's bullets are `kind: "rifle"` and his weapon is `id: "rifle"`, so
+   * the gun vanished out of his hands the instant he fired it and stayed gone
+   * until the bullet expired. Every fighter who shoots something rather than
+   * throwing it would have hit the same thing; a self-test now holds the rest
+   * of the roster to declaring it.
+   */
+  thrown?: boolean;
 }
 
 // ---------------------------------------------------------------------------

@@ -296,17 +296,22 @@ export class FxSystem {
         break;
 
       case "shot":
+        // A muzzle flash is a small, brief, directional thing at the end of the
+        // barrel. This used to open at 34 units and grow 20% a frame for six
+        // frames, which finishes about a hundred units across - wider than the
+        // fighter, and it swallowed the rifle and both hands on every shot, so
+        // you could never see what the man was holding while he used it.
         this.spawn({
           shape: "star",
           x: x + dir * 6,
           y,
           color: e.color ?? "#ffe9a8",
-          size: 34 * s,
-          life: 6,
-          scaleRate: 1.2,
-          stretch: 1.6,
+          size: 15 * s,
+          life: 4,
+          scaleRate: 1.07,
+          stretch: 2.1,
         });
-        this.burst(x, y, 5, e.color ?? "#ffcf6b", 3.6, 5, 10);
+        this.burst(x, y, 5, e.color ?? "#ffcf6b", 3.6, 4, 8);
         break;
 
       case "explode":

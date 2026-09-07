@@ -325,6 +325,7 @@ export class GameRenderer {
       }
       const visible = new Set(f.move?.showProps ?? []);
       const hidden = new Set(f.move?.hideProps ?? []);
+      const thrownProps = new Set(f.def.props.filter((p) => p.thrown).map((p) => p.id));
       // Frame-ranged overrides, so a thrown weapon can actually leave the hand
       // on the frame it is thrown rather than for the whole move.
       for (const win of f.move?.propsAt ?? []) {
@@ -347,10 +348,13 @@ export class GameRenderer {
       // strip: the helmet is not in a status bar somewhere, it is simply not
       // on his head any more for the rest of the round.
       for (const id of f.stripped) hidden.add(id);
-      // A prop that is currently flying around as a projectile (the Spartan's
-      // aspis) stays off the fighter until it is gone.
+      // A prop that is currently flying around as a projectile stays off the
+      // fighter until it is gone - but only if the prop says it is the thing
+      // being thrown. Matching on the name alone took the Trooper's rifle out
+      // of his hands every time he fired it.
       for (const p of match.projectiles) {
-        if (p.owner === i) hidden.add(p.kind);
+        if (p.owner !== i) continue;
+        if (thrownProps.has(p.kind)) hidden.add(p.kind);
       }
       // Whoever is swinging renders in front, so weapons never disappear
       // inside the other fighter.
@@ -734,8 +738,13 @@ export class GameRenderer {
         add(beard, 56);
         break;
       }
-      case "rifle": {
-        // Tracer: a bright core with a long thin streak behind it.
+      case "tracer": {
+        // A bright core with a long thin streak behind it.
+        //
+        // Called "tracer" rather than "rifle" because a projectile that shares
+        // a name with a prop is a projectile that can be mistaken for it, and
+        // this one was: the renderer took the rifle out of the Trooper's hands
+        // every time a bullet named after it was in the air.
         const core = new THREE.Mesh(new THREE.CircleGeometry(3.4, 10), flat(color));
         add(core, 57);
         const streak = new THREE.Mesh(new THREE.PlaneGeometry(46, 2.2), flat(color, 0.6));

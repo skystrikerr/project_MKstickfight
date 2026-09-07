@@ -1310,9 +1310,10 @@ function scriptFor(move: MoveDef): RawInput[] {
 
     // The reload is the skill on A+C where there is one; some fighters also
     // gain resource off a special, which is not the same thing.
+    const gives = (mv: MoveDef) => (mv.resourceGain ?? 0) > 0 || !!mv.resourceRefill;
     const reload =
-      def.moves.find((mv) => (mv.resourceGain ?? 0) > 0 && mv.input.buttons?.length === 2) ??
-      def.moves.find((mv) => (mv.resourceGain ?? 0) > 0);
+      def.moves.find((mv) => gives(mv) && mv.input.buttons?.length === 2) ??
+      def.moves.find(gives);
     // Every shooter needs a move that rearms, not just passive regeneration -
     // without one, firing on empty has nothing to fall back to.
     check(`${def.id}: has a move that puts ammunition back`, !!reload, reload?.id ?? "regen only");
@@ -1396,7 +1397,12 @@ function scriptFor(move: MoveDef): RawInput[] {
 
   // The numbers the roster is meant to carry.
   const trooper = getFighter("soldier").resource!;
-  check("trooper: three thirty-round magazines", trooper.max === 30 && trooper.spares === 2, `${trooper.max}x${(trooper.spares ?? 0) + 1}`);
+  // Twenty, not thirty: the M16A1 issued in 1965 came with twenty-round
+  // magazines, and the thirty-round magazine is a later war. It also has to be
+  // a number the fighter can actually spend - every round on his bar is now a
+  // round that leaves the barrel, so the magazine is the rate limit rather
+  // than a made-up per-shot price.
+  check("trooper: three twenty-round magazines", trooper.max === 20 && trooper.spares === 2, `${trooper.max}x${(trooper.spares ?? 0) + 1}`);
   check("Earp: a six-round cylinder he can keep refilling", getFighter("western").resource!.max === 6 && getFighter("western").resource!.spares === undefined);
   check("Subutai: a hundred arrows", getFighter("mongol").resource!.max === 100);
 }
@@ -3160,6 +3166,51 @@ function factionTests() {
 factionTests();
 superDamage();
 profileTests();
+thrownPropTests();
+
+// ---------------------------------------------------------------------------
+// Thrown props
+// ---------------------------------------------------------------------------
+//
+// A projectile whose kind matches a prop id used to hide that prop for as long
+// as it was in the air, inferred from the names alone. Right for a thrown axe;
+// wrong for a rifle, whose bullets are `kind: "rifle"` while the weapon is
+// `id: "rifle"` - so the Trooper's rifle left his hands the instant he fired
+// and did not come back until the bullet expired. Every fighter who shoots
+// rather than throws would have hit it.
+//
+// It is declared now, and this is the test that keeps it declared: any future
+// fighter whose names collide has to say which of the two things they meant.
+function thrownPropTests() {
+  for (const def of ROSTER) {
+    const props = new Map(def.props.map((p) => [p.id, p]));
+    const kinds = new Set<string>();
+    for (const m of def.moves) for (const p of m.projectiles ?? []) kinds.add(p.kind);
+
+    for (const kind of kinds) {
+      const prop = props.get(kind);
+      if (!prop) continue;
+      // The names collide, so the intent has to be written down. Setting it
+      // means "this object leaves the hand"; leaving it unset means "this is
+      // ammunition and the weapon stays where it is".
+      check(`${def.id}: prop and projectile both called "${kind}" - says which`,
+        prop.thrown !== undefined, kind);
+    }
+
+    // The other direction: a prop that claims to be thrown and never is would
+    // simply never disappear, which is silent rather than wrong - but it means
+    // somebody renamed a projectile and left the flag behind.
+    for (const p of def.props) {
+      if (!p.thrown) continue;
+      check(`${def.id}: ${p.id} is marked thrown and something throws it`, kinds.has(p.id), p.id);
+    }
+  }
+
+  // The specific regression. The Trooper fires his rifle; he does not throw it.
+  const trooper = getFighter("soldier");
+  check("trooper: the rifle is not a thrown prop",
+    !trooper.props.find((p) => p.id === "rifle")?.thrown);
+}
 
 // ---------------------------------------------------------------------------
 // Profiles

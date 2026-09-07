@@ -194,6 +194,7 @@ export const PIRATE: FighterDef = {
     },
     {
       id: "hook",
+      thrown: true,
       attach: "handB",
       conditional: true,
       parts: [

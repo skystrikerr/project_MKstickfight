@@ -123,6 +123,7 @@ export const WESTERN: FighterDef = {
     },
     {
       id: "dynamite",
+      thrown: true,
       attach: "handB",
       conditional: true,
       parts: [

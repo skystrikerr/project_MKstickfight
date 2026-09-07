@@ -164,6 +164,7 @@ export const SHADE: FighterDef = {
     },
     {
       id: "shuriken",
+      thrown: true,
       attach: "handF",
       conditional: true,
       parts: [
@@ -173,6 +174,7 @@ export const SHADE: FighterDef = {
     },
     {
       id: "hook",
+      thrown: true,
       attach: "handB",
       conditional: true,
       parts: [

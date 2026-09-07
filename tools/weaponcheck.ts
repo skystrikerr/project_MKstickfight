@@ -56,9 +56,19 @@ function weaponFor(def: FighterDef, move: MoveDef, hit: { from: number; to: numb
     (p) => (p.attach === "handF" || p.attach === "handB") && !hidden.has(p.id) && (!p.conditional || shown.has(p.id)),
   );
   if (!held.length) return null;
+
+  // A move that names a conditional prop in showProps is telling you which
+  // weapon it uses. Take it at its word rather than measuring every held prop
+  // and picking whichever geometry happens to land nearest the box: the
+  // Trooper's knife jabs were all being attributed to the rifle, because a
+  // rifle is long enough to reach a box the knife makes, and then reported as
+  // a rifle whose point barely moves - true, and about the wrong weapon.
+  const declared = held.filter((p) => p.conditional && shown.has(p.id));
+  const candidates = declared.length ? declared : held;
+
   let best: PropDef | null = null;
   let bestDist = Infinity;
-  for (const prop of held) {
+  for (const prop of candidates) {
     let near = Infinity;
     for (let f = hit.from; f <= hit.to; f++) {
       const pose = sampleFrames(move.frames, f, def.stance);
