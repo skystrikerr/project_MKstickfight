@@ -40,6 +40,8 @@ export const MUAYTHAI: FighterDef = {
   strengths: ["Fastest normals in the roster", "Clinch converts anywhere", "Rhythm rewards pressure"],
   weaknesses: ["Shortest reach", "No projectile at all", "Must earn every inch"],
   winQuote: "That was one. Line up the other nine.",
+  // A Theravada Buddhist of Ayutthaya, made to fight for his freedom in the capital that had taken him.
+  factions: ["dharma", "thrones", "resistance"],
   palette: {
     body: "#f2e5d0",
     outline: "#191310",

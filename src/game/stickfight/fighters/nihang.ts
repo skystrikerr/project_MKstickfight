@@ -50,6 +50,8 @@ export const NIHANG: FighterDef = {
   strengths: ["Controls the whole screen", "Thrown quoits come back", "Strong wake-up pressure"],
   weaknesses: ["Helpless once the quoits are gone", "Mediocre close-range normals", "Slow to recover them"],
   winQuote: "The quoits return to me. You do not have to.",
+  // The Akali Nihang - an order and a standing army at once - holding the Punjab.
+  factions: ["khalsa", "thrones", "resistance"],
   palette: {
     body: "#a9764c",
     outline: "#12131a",

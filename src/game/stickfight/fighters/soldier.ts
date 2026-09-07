@@ -41,6 +41,8 @@ export const SOLDIER: FighterDef = {
   strengths: ["Controls midscreen with rounds", "Grenade beats blocking", "Fast knife pressure"],
   weaknesses: ["Twenty rounds and no more", "Reload is a commitment", "Weak once you are inside"],
   winQuote: "We held the LZ. That was the whole job.",
+  // Nominal faith, a conscript's war, and the invading side of somebody else's country.
+  factions: ["christendom", "america", "conquest"],
   palette: {
     body: "#e6dcc6",
     outline: "#171913",

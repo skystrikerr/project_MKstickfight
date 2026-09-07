@@ -58,6 +58,8 @@ export const PERSIAN: FighterDef = {
   strengths: ["An answer at every range", "Ranks come back on their own", "The wicker holds a line he can shoot from"],
   weaknesses: ["Nothing he has ends a round on its own", "Spending Ranks faster than they fill leaves him empty", "Loses the pure close-range fight"],
   winQuote: "There are ten thousand of us. You have met one.",
+  // The Wise Lord, the Immortals, and an invasion of Greece.
+  factions: ["zoroastrian", "achaemenid", "conquest"],
   palette: {
     body: "#c99a6e",
     outline: "#150f0a",

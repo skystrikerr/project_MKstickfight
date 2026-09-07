@@ -38,6 +38,8 @@ export const WESTERN: FighterDef = {
   strengths: ["Screen-long bullets", "Dynamite controls space", "Huge punish damage"],
   weaknesses: ["Ammo is finite", "Reload leaves him open", "Mediocre normals"],
   winQuote: "Fast is fine. Accurate is final.",
+  // A lawman only sometimes, and paid either way.
+  factions: ["christendom", "america", "sellswords"],
   palette: {
     body: "#e9dfcd",
     outline: "#191512",

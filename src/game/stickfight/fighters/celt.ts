@@ -56,6 +56,8 @@ export const CELT: FighterDef = {
   strengths: ["Longest swings on the roster", "Onset turns pressure into more pressure", "The gaesum makes them come to him"],
   weaknesses: ["Onset drains the moment he stops", "Everything is committal", "Nothing safe once he has been backed up"],
   winQuote: "You should have come to the field. I would have been there.",
+  // Gaulish polytheism, the confederation he talked into existence, and the war it lost.
+  factions: ["celtic", "peoples", "resistance"],
   palette: {
     body: "#dcc4a2",
     outline: "#161009",

@@ -66,6 +66,8 @@ export const ICENI: FighterDef = {
   strengths: ["Long spear and a chariot", "Fights better the angrier she gets", "Leaves the ground burning"],
   weaknesses: ["Slow to start", "Andraste runs out", "Nothing quick up close"],
   winQuote: "You made a desert of my house. I have made one of three of your cities.",
+  // Andraste by name, the Iceni, and a revolt against an annexation.
+  factions: ["celtic", "peoples", "resistance"],
   palette: {
     body: SKIN,
     outline: "#17110b",

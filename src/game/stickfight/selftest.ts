@@ -32,6 +32,8 @@ import { INPUT_SCHEMES, renderNotation } from "./inputscheme";
 import { applyClear, applyMatch, isUnlocked, unlockLabel, unlockProgress, type ProgressState } from "./progress";
 import { CUES as SCORE_CUES, Score, type ScoreCue } from "./engine/score";
 import { detailScale, getDetail, setDetail } from "./render/detail";
+import { BOSSES } from "./bosses";
+import { FACTIONS, factionsFor, membersOf } from "./factions";
 import { stringsFor as declaredStrings } from "./strings";
 import {
   advanceTower,
@@ -2994,6 +2996,59 @@ function superDamage() {
   check("muaythai: and stop at the cap", nai.grants.length <= cap, `${nai.grants.length} of ${cap}`);
 }
 
+/**
+ * Factions.
+ *
+ * Membership is computed from what each fighter declares, which is the right
+ * way round for a roster meant to grow - but it means a typo in one fighter
+ * file produces a faction that silently has nobody in it rather than an
+ * error, and an empty chip on the select screen is worse than no chip.
+ */
+function factionTests() {
+  const known = new Set(FACTIONS.map((f) => f.id));
+
+  for (const f of FACTIONS) {
+    check(`faction ${f.id}: has members`, membersOf(f.id).length > 0, "0");
+    check(`faction ${f.id}: has a blurb`, f.blurb.length > 0);
+    check(`faction ${f.id}: has a colour`, /^#[0-9a-f]{6}$/i.test(f.color), f.color);
+  }
+
+  const ids = FACTIONS.map((f) => f.id);
+  check("factions: no duplicate ids", new Set(ids).size === ids.length);
+
+  for (const def of ROSTER) {
+    const mine = def.factions ?? [];
+    check(`${def.id}: declares factions`, mine.length > 0, `${mine.length}`);
+    for (const id of mine) {
+      check(`${def.id}: faction "${id}" exists`, known.has(id), id);
+    }
+    check(`${def.id}: no repeated faction`, new Set(mine).size === mine.length, mine.join(" "));
+    // At most one of each kind. Two faiths or two flags is a data error, not
+    // a nuance - the fighter page and the campaign both assume one apiece.
+    for (const kind of ["faith", "power", "creed"] as const) {
+      const n = factionsFor(def.id).filter((f) => f.kind === kind).length;
+      check(`${def.id}: at most one ${kind}`, n <= 1, `${n}`);
+    }
+    // Everyone fought for somebody or nobody, and everyone had a reason.
+    check(
+      `${def.id}: has a power and a creed`,
+      factionsFor(def.id).some((f) => f.kind === "power") && factionsFor(def.id).some((f) => f.kind === "creed"),
+      factionsFor(def.id).map((f) => f.kind).join(" "),
+    );
+  }
+
+  // Bosses are opponents, never roster entries. The whole point of the type
+  // being separate is that this can never stop being true by accident.
+  for (const b of BOSSES) {
+    check(`boss ${b.id}: is not in the roster`, !ROSTER.some((d) => d.id === b.id), b.id);
+    check(`boss ${b.id}: borrows a real fighter`, ROSTER.some((d) => d.id === b.base), b.base);
+    check(`boss ${b.id}: ends a real faction`, known.has(b.faction), b.faction);
+  }
+  const bossed = BOSSES.map((b) => b.faction);
+  check("bosses: at most one to a faction", new Set(bossed).size === bossed.length);
+}
+
+factionTests();
 superDamage();
 
 const failed = results.filter((r) => !r.ok);

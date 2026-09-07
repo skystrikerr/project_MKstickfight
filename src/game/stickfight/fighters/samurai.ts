@@ -40,6 +40,8 @@ export const SAMURAI: FighterDef = {
   strengths: ["Enormous sword reach", "Counter stance beats anything", "Highest single-hit damage"],
   weaknesses: ["Ki-hungry specials", "Punishable whiffs", "No real projectile"],
   winQuote: "He told me to go. He did not tell me to stop.",
+  // Shinto and Buddhist by default, in service to a Minamoto branch, in a war between two of them.
+  factions: ["kami", "thrones", "sellswords"],
   palette: {
     body: "#f0ece2",
     outline: "#161a20",

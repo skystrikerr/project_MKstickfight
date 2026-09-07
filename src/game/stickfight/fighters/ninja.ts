@@ -47,6 +47,8 @@ export const NINJA: FighterDef = {
   strengths: ["Teleport crosses up anything", "Fastest walk speed", "Overhead and low off the same startup"],
   weaknesses: ["Lowest health in the roster", "Damage needs three correct guesses", "Kage only refills while idle"],
   winQuote: "You never saw the road we took. That was the point of it.",
+  // Iga was a self-governing league that hired itself out, which is the whole of his politics.
+  factions: ["kami", "peoples", "sellswords"],
   palette: {
     body: "#e6d8c0",
     outline: "#0f1220",

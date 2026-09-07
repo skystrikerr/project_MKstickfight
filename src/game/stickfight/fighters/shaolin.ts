@@ -50,6 +50,8 @@ export const SHAOLIN: FighterDef = {
   strengths: ["Longest reach in the roster", "Staff spin swats projectiles", "Chi regenerates for free"],
   weaknesses: ["Almost nothing up close", "Low damage per hit", "Stances take real execution"],
   winQuote: "I have not killed you. Consider carefully what that cost me.",
+  // A Chan monk under the Ming, fighting pirate raids on his own coast.
+  factions: ["dharma", "thrones", "resistance"],
   palette: {
     body: "#d8ab7c",
     outline: "#171410",

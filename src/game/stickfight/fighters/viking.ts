@@ -41,6 +41,8 @@ export const VIKING: FighterDef = {
   strengths: ["Huge damage on every button", "Fury feeds on taking hits", "Best corner pressure"],
   weaknesses: ["No projectile without Fury", "Slow recovery", "Nothing safe on block"],
   winQuote: "They ran from me once already. You had your chance.",
+  // The last generation to sail west believing in the old gods, and a private venture under nobody's flag.
+  factions: ["norse", "outlaws", "sellswords"],
   palette: {
     body: "#eee6d6",
     outline: "#17140f",

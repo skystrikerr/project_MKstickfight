@@ -53,6 +53,8 @@ export const ETHIOPIA: FighterDef = {
   strengths: ["The shotel goes round a shield, not through it", "One rifle answer so zoners cannot sit on him", "Punishes anyone who blocks and waits"],
   weaknesses: ["Cartridges are finite and slow to replace", "Nothing quick enough to check a rushdown", "The hook is committal - whiffing it is a free turn for them"],
   winQuote: "You held the shield exactly where I needed it.",
+  // Ethiopian Orthodox, the Ethiopian Empire, and the man who beat an Italian invasion at Dogali.
+  factions: ["christendom", "thrones", "resistance"],
   palette: {
     body: "#8a5a34",
     outline: "#130d09",

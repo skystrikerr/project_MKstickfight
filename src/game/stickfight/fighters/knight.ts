@@ -60,6 +60,8 @@ export const KNIGHT: FighterDef = {
   strengths: ["Armour on half his kit", "Huge damage per hit", "Gets stronger while losing"],
   weaknesses: ["Slowest walk in the roster", "No projectile", "Enormous recovery on whiffs"],
   winQuote: "Nobly done. Now yield, and be ransomed like a Christian.",
+  // A Catholic knight of the Garter, prosecuting the English crown's claim to France.
+  factions: ["christendom", "crown", "conquest"],
   palette: {
     body: "#e6e2db",
     outline: "#16151a",

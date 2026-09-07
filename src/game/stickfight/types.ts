@@ -816,4 +816,33 @@ export interface FighterDef {
   weaknesses: string[];
   /** Line shown when the fighter wins a round. */
   winQuote: string;
+  /**
+   * Which factions this fighter belongs to - see `factions.ts`.
+   *
+   * Declared on the fighter rather than listed on the faction, so a faction's
+   * roster assembles itself. With twenty-five fighters either direction works;
+   * at the size this roster is aiming for, a hand-maintained membership list
+   * is a file every single new fighter has to be threaded into and eventually
+   * forgets somebody.
+   *
+   * A fighter is normally in several: one faith, one polity, sometimes a
+   * creed. Boudica is Celtic Polytheism, the Iceni, and the Resistance.
+   */
+  factions?: string[];
+  /**
+   * Character art for the fighter's own page, as an imported asset URL.
+   *
+   * Optional. Without it the page draws the in-game rig large instead, which
+   * is a real picture of the fighter rather than a placeholder box - so a
+   * fighter with no art yet still has a page worth opening.
+   */
+  art?: string;
+  /**
+   * Flag or standard of where they are from, as an imported asset URL.
+   *
+   * Not always a national flag and often anachronistic if it were - Otzi has
+   * no polity and Kuro has no century. Optional for that reason as much as
+   * for the missing files.
+   */
+  flag?: string;
 }

@@ -86,6 +86,8 @@ export const CONQUISTADOR: FighterDef = {
   strengths: ["Fills his bar by blocking", "Steel cuts through a guard", "Can trade retreat for damage"],
   weaknesses: ["Slow, and no faster once committed", "Wears three pieces of armour to lose", "Needs the bar for anything decisive"],
   winQuote: "I wrote the account of this. You did not.",
+  // Latin Christendom, the Crown of Castile, and the taking of Tenochtitlan.
+  factions: ["christendom", "crown", "conquest"],
   palette: {
     body: SKIN,
     outline: "#171310",

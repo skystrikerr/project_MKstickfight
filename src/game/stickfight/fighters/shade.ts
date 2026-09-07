@@ -48,6 +48,8 @@ export const SHADE: FighterDef = {
   strengths: ["Full kit of ways to not be where he was", "Threatens from touching range and full screen both", "The hook ends a guessing game outright"],
   weaknesses: ["Ash runs out fast and only refills standing still", "No reversal - has to guess right on wakeup", "Lowest health alongside the rest of the shinobi"],
   winQuote: "You were fighting a rumor. Rumors don't lose.",
+  // No faith anybody recorded, no state, and no fixed century. The only fighter with two factions.
+  factions: ["outlaws", "sellswords"],
   palette: {
     body: "#d8c9b0",
     outline: "#100c14",

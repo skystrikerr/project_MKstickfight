@@ -57,6 +57,8 @@ export const ICEMAN: FighterDef = {
   strengths: ["Walks through a hit to land his own", "Heaviest normals in the game", "Nothing about him is fragile"],
   weaknesses: ["Slow to start and slower to stop", "Stones run out and have to be replaced", "Loses any race to the button"],
   winQuote: "You get one. I only need one.",
+  // Copper Age belief we can only guess at, no state at all, and a fight nobody wrote down.
+  factions: ["old-gods", "peoples", "sellswords"],
   palette: {
     body: "#c08b60",
     outline: "#140e08",

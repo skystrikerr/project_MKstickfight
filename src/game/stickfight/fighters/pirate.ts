@@ -37,6 +37,8 @@ export const PIRATE: FighterDef = {
   strengths: ["Fastest walk speed", "Double jump and dive kick", "Rekka pressure"],
   weaknesses: ["Low health", "Short normals", "Needs powder for zoning"],
   winQuote: "The rest of them were below decks with the rum. As usual.",
+  // Nominally Christian, actually stateless - she took a pardon and went straight back on the account.
+  factions: ["christendom", "outlaws", "sellswords"],
   palette: {
     body: "#efe7d8",
     outline: "#17181c",

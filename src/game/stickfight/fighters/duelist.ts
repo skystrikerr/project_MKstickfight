@@ -50,6 +50,8 @@ export const DUELIST: FighterDef = {
   strengths: ["Reaches further than anything that thin should", "The riposte turns their turn into hers", "Fastest recovery on the roster"],
   weaknesses: ["Almost nothing hurts without a counter behind it", "Lowest health in the game", "Loses the exchange outright if she guesses wrong"],
   winQuote: "You were fighting the sword. I was fighting you.",
+  // Catholic France by birth and nothing much by conduct - she was pardoned twice.
+  factions: ["christendom", "outlaws", "sellswords"],
   palette: {
     body: "#e8cdb4",
     outline: "#140f18",

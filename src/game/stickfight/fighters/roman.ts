@@ -40,6 +40,8 @@ export const ROMAN: FighterDef = {
   strengths: ["Longest normals in the roster", "Shield armour", "Strong anti-airs"],
   weaknesses: ["Slow walk speed", "Weak up close", "Long recovery on whiffs"],
   winQuote: "Pullo would have gone first. That is the only thing he ever beat me at.",
+  // Republican Rome's state cult, a centurion of the Eleventh, and a war of conquest Caesar wrote up himself.
+  factions: ["old-gods", "rome", "conquest"],
   palette: {
     body: "#e8e6e3",
     outline: "#1c1a17",

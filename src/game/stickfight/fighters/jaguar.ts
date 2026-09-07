@@ -50,6 +50,8 @@ export const JAGUAR: FighterDef = {
   strengths: ["Fastest walk in the roster", "Brutal overhead/low mix-up", "Cancels everything into everything"],
   weaknesses: ["Fragile", "Heavies run on a resource", "Nothing to do at full screen"],
   winQuote: "Tomorrow I wear another face. You will not find me either.",
+  // Mexica religion, the Triple Alliance, and the defence of a city already burning.
+  factions: ["mesoamerican", "thrones", "resistance"],
   palette: {
     body: "#c99562",
     outline: "#1a1414",

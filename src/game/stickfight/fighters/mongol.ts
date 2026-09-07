@@ -46,6 +46,8 @@ export const MONGOL: FighterDef = {
   strengths: ["Controls the full screen", "Charged arrow goes through projectiles", "Caltrops make the floor hers"],
   weaknesses: ["Almost nothing up close", "Six arrows and no more", "Must hold back to threaten"],
   winQuote: "You went where I wanted. You always were going to.",
+  // Tengri, the Horde, and the largest contiguous conquest in history.
+  factions: ["tengri", "steppe", "conquest"],
   palette: {
     body: "#e8d5b4",
     outline: "#161009",

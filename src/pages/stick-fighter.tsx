@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { CharacterSelect } from "@/game/stickfight/ui/CharacterSelect";
 import { GameCanvas, type MatchConfig } from "@/game/stickfight/ui/GameCanvas";
+import { FighterPage } from "@/game/stickfight/ui/FighterPage";
 import { MoveList } from "@/game/stickfight/ui/MoveList";
 import { FighterPortrait } from "@/game/stickfight/ui/Portrait";
 import { ROSTER } from "@/game/stickfight/fighters";
@@ -76,6 +77,7 @@ export default function StickFighter() {
   // player acknowledges it or starts another fight.
   const [earned, setEarned] = useState<{ fighter: string; items: WeaponVariant[] } | null>(null);
   const [moveListFor, setMoveListFor] = useState<string | null>(null);
+  const [pageFor, setPageFor] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [touch, setTouch] = useState(false);
   const [run, setRun] = useState<Run | null>(null);
@@ -223,6 +225,13 @@ export default function StickFighter() {
                 className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
               >
                 [ Tutorial ]
+              </button>
+              <button
+                type="button"
+                onClick={() => setPageFor(ROSTER[0].id)}
+                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
+              >
+                [ Fighters ]
               </button>
               <button
                 type="button"
@@ -489,6 +498,13 @@ export default function StickFighter() {
         </div>
       )}
 
+      {pageFor && !moveListFor && (
+        <FighterPage
+          id={pageFor}
+          onClose={() => setPageFor(null)}
+          onShowMoves={(id) => setMoveListFor(id)}
+        />
+      )}
       {moveListFor && <MoveList fighterId={moveListFor} onClose={() => setMoveListFor(null)} />}
       {showSettings && <Settings onClose={() => setShowSettings(false)} />}
     </div>

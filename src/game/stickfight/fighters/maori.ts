@@ -51,6 +51,8 @@ export const MAORI: FighterDef = {
   strengths: ["Controls a range most of the roster cannot enter", "The mere makes close range a trap, not a loss", "Every heavy leaves him facing them"],
   weaknesses: ["Slow to start once he has been backed up", "Mana only fills while he holds his ground", "No answer to anything thrown at him"],
   winQuote: "You came inside the reach. That was the whole decision.",
+  // Ngati Toa atua, and a rangatira fighting to keep his people's ground.
+  factions: ["ancestors", "peoples", "resistance"],
   palette: {
     body: "#c98f63",
     outline: "#140d08",

@@ -45,6 +45,8 @@ export const ZULU: FighterDef = {
   strengths: ["Relentless forward pressure", "Shield hooks break guards", "Excellent normals"],
   weaknesses: ["No projectile at all", "Short reach on everything", "Loses badly to zoning"],
   winQuote: "The horns close. There was never anywhere to go.",
+  // Shaka's regiments were expanding, and Gqokli Hill was a war of conquest he was winning.
+  factions: ["ancestors", "thrones", "conquest"],
   palette: {
     body: "#7a5236",
     outline: "#141210",

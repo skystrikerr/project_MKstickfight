@@ -11,6 +11,7 @@ import { applySkin, getSkin, SKINS } from "../skins";
 import { applyWeapon, weaponsFor } from "../weapons";
 import { unlockLabel, unlockProgress, type ProgressState } from "../progress";
 import { loadSave, patchSave } from "../save";
+import { FactionMarks } from "./FactionEmblem";
 import { FighterPortrait } from "./Portrait";
 
 interface Props {
@@ -243,7 +244,11 @@ function Card({
           glow behind them - it reads as a file tab, and it does not wash the
           portrait out. */}
       <span className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: def.palette.accent }} />
-      <span className="absolute left-2 top-1.5 font-mono text-[10px] text-[var(--bone-dim)]">{index}</span>
+      {/* The faction marks sit in the top-left corner, with the roster number
+          moved under them - the corner is the first place the eye lands on a
+          card and the number is the least interesting thing on it. */}
+      <FactionMarks fighterId={def.id} size={17} kinds={["faith", "power"]} className="absolute left-1.5 top-1.5 z-10" />
+      <span className="absolute left-2 top-[26px] font-mono text-[10px] text-[var(--bone-dim)]">{index}</span>
       {clearedAt && (
         <span
           className="absolute left-2 bottom-2.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[var(--accent)]"

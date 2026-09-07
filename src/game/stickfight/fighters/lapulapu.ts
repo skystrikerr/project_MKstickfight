@@ -61,6 +61,8 @@ export const LAPULAPU: FighterDef = {
   strengths: ["Longest lows in the game", "Knocks armour off and keeps it off", "Stronger the worse it gets"],
   weaknesses: ["Fragile", "One stake, and it has to be fetched", "Nothing fast up close"],
   winQuote: "The water was always going to be here. You chose to walk into it.",
+  // Pre-Islamic Visayan belief we have no reliable account of, on ground he already held.
+  factions: ["peoples", "resistance"],
   palette: {
     body: SKIN,
     outline: "#17120d",

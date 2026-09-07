@@ -39,6 +39,8 @@ export const SPARTAN: FighterDef = {
   strengths: ["Heaviest fighter", "Armour on almost everything", "Corner carry for days"],
   weaknesses: ["Slowest walk speed", "No air game", "Aegis runs out"],
   winQuote: "Good. Now we fight in the shade.",
+  // Greek polytheism, a Spartiate of the three hundred, and a defensive war against an invasion.
+  factions: ["old-gods", "hellas", "resistance"],
   palette: {
     body: "#e6e2d8",
     outline: "#191713",
