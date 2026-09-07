@@ -427,6 +427,27 @@ export class FxSystem {
         this.burst(x, y - 6, 8, "#8f9aa4", 2.6, 14, 34);
         break;
 
+      // A buff coming on. `aura` existed as a method the whole time - the
+      // renderer calls it every third frame after a successful parry - but it
+      // was never a case in here, so six moves across the roster asked for one
+      // by name and silently got nothing: the knight's oath, the Zulu war cry,
+      // Yuekong's stance, and every buff super written since.
+      case "aura": {
+        const n = Math.round(10 * (e.scale ?? 1));
+        for (let i = 0; i < n; i++) this.aura(x, y - 10, e.color ?? "#ffe9a8");
+        this.spawn({
+          shape: "ring",
+          x,
+          y,
+          color: e.color ?? "#ffe9a8",
+          size: 40 * (e.scale ?? 1),
+          life: 20,
+          scaleRate: 1.1,
+          opacity: 0.5,
+        });
+        break;
+      }
+
       case "guardBreak":
         this.spawn({ shape: "ring", x, y, color: "#ff5c5c", size: 80, life: 18, scaleRate: 1.18 });
         this.burst(x, y, 14, "#ff8a8a", 4.4, 8, 24);

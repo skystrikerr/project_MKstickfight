@@ -515,6 +515,19 @@ export interface MoveDef {
   hurtboxAt?: { from: number; to: number; box: Box }[];
   /** Frames during which an incoming strike is parried instead of blocked. */
   parryWindow?: [number, number];
+  /**
+   * Move to switch into the instant this one parries something.
+   *
+   * The existing counters are hold-and-release: you read the attack, then you
+   * press the button for the answer. That is right for a stance you can sit
+   * in. It is wrong for a move that costs a hundred meter and is over in half
+   * a second - a super has to pay out on the read itself, or the read is not
+   * what you spent the meter on.
+   *
+   * Whiffing is the price. A counter super that catches nothing has no hitbox
+   * anywhere in it and a recovery long enough to be punished for guessing.
+   */
+  parryInto?: string;
   /** Skips the normal turn-to-face check during the move. */
   noTurn?: boolean;
   frames: Keyframe[];

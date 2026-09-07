@@ -12,7 +12,7 @@ import { EMPTY_INPUT, type RawInput } from "./input";
 export type Phase = "intro" | "fight" | "roundEnd" | "matchEnd";
 
 export interface FxEvent {
-  kind: HitFx | "block" | "parry" | "dust" | "smoke" | "spawn" | "super" | "guardBreak" | "ko" | "trail" | "strip";
+  kind: HitFx | "block" | "parry" | "dust" | "smoke" | "spawn" | "super" | "guardBreak" | "ko" | "trail" | "strip" | "aura";
   x: number;
   y: number;
   scale?: number;
@@ -550,6 +550,10 @@ export class Match {
       defender.parrySuccess = 20;
       this.freeze = 6;
       this.pushFx({ kind: "parry", x: contact.x, y: contact.y, scale: 1.2 });
+      // A move that answers its own parry. Read before the switch, because
+      // `startMove` replaces the move this is asking about.
+      const answer = defender.move?.parryInto;
+      if (answer) defender.startMove(answer, true);
       return;
     }
 

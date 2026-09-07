@@ -771,6 +771,12 @@ function scriptFor(move: MoveDef): RawInput[] {
     for (let i = 0; i < 220; i++) {
       m.step([script[i] ?? inp(), inp()]);
       if (m.fighters[0].move?.id === superMove.id) fired = true;
+      // A counter super has no hitbox of its own and pays out only on what it
+      // catches, so a dummy that never swings proves nothing about it. Feed it
+      // something to read once the stance is up.
+      if (superMove.parryInto && m.fighters[0].move?.id === superMove.id && m.fighters[0].moveFrame === 8) {
+        m.fighters[1].startMove("5B");
+      }
     }
     check(`${def.id}: super activates`, fired, superMove.notation ?? "");
     check(`${def.id}: super deals damage`, m.fighters[1].health < hp, `lost=${hp - m.fighters[1].health}`);
@@ -2715,6 +2721,41 @@ function scriptFor(move: MoveDef): RawInput[] {
     (roll?.followUps ?? []).some((f) => f.move === "dashAttack"),
     JSON.stringify(roll?.followUps ?? []),
   );
+}
+
+{
+  // A counter super pays out on a read, so the read has to be the whole move:
+  // no hitbox of its own, a move to answer with, and a window to catch it in.
+  // A counter that also just hits people is not a gamble, it is a bonus.
+  for (const def of ROSTER) {
+    const sup = def.moves.find((m) => m.tags?.includes("super"));
+    if (!sup?.parryInto) continue;
+    check(`${def.id}: the counter super has no hitbox of its own`, !sup.hits?.length);
+    check(`${def.id}: it has a window to catch in`, !!sup.parryWindow);
+    const answer = def.moves.find((m) => m.id === sup.parryInto);
+    check(`${def.id}: its answer exists`, !!answer, sup.parryInto);
+    check(`${def.id}: the answer actually hits`, !!answer?.hits?.length);
+  }
+}
+
+{
+  // Every effect a move asks for by name has to be one the renderer draws.
+  //
+  // Six moves asked for an "aura" that the effect system had no case for, so
+  // the buff supers and the war cries fired in silence. Nothing catches that
+  // by playing: a missing effect looks exactly like a subtle one.
+  const drawn = new Set([
+    "slash", "pierce", "blunt", "shot", "explode", "burn", "smoke", "block",
+    "parry", "spark", "dust", "spawn", "trail", "super", "strip", "guardBreak",
+    "ko", "aura",
+  ]);
+  for (const def of ROSTER) {
+    for (const m of def.moves) {
+      for (const v of m.vfx ?? []) {
+        check(`${def.id}.${m.id}: the renderer draws "${v.kind}"`, drawn.has(v.kind), v.kind);
+      }
+    }
+  }
 }
 
 const failed = results.filter((r) => !r.ok);
