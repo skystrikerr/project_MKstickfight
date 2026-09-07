@@ -137,6 +137,9 @@ export const STYLES: Record<string, Style> = {
   // personality here - it is the economy. He holds guard, takes the pip, and
   // spends it on the horse.
   conquistador: { aggression: 0.85, special: 1.2, throw: 0.9, poke: 1.1, patience: 1.45, range: "mid" },
+  // Grappler / Wall: he cannot chase anybody, so he waits where he is and
+  // grabs whatever comes close enough.
+  shanidar: { aggression: 1.05, special: 0.85, throw: 1.9, poke: 0.8, patience: 1.1, range: "close" },
 };
 
 const MOTION_DIRS: Record<Motion, number[]> = {

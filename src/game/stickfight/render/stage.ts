@@ -1598,6 +1598,10 @@ export function themeForFighter(id: string): StageTheme {
       return "watling";
     case "conquistador":
       return "causeway";
+    // No stage of his own yet - the frozen pass is the closest thing on the
+    // list to a Zagros winter, and it is where the other dug-up man fights.
+    case "shanidar":
+      return "tundra";
     default:
       return "colosseum";
   }

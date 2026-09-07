@@ -206,6 +206,7 @@ const NAMES: Record<string, string[]> = {
   lapulapu: ["Below the Knee", "Back to My Range", "Give Ground", "Kampilan Line", "Sand Rhythm", "Two Edges", "Wading Back", "Shin Line"],
   iceni: ["Spear Rhythm", "Shield and Drive", "Turning Retreat", "Level Line", "Ferrule Rhythm", "Two Ends", "Giving a Pace", "Low Iron"],
   conquistador: ["Shield and Steel", "Down the Guard", "Covered Retreat", "Toledo Line", "Cutting Down", "Two Steels", "A Pace Back", "Low Steel"],
+  shanidar: ["One Arm", "Shoulder Work", "Giving Ground", "Haft to Point", "Under the Guard", "Two Ends", "A Pace Off", "Low Wood"],
 };
 
 const FAMILY: Record<string, string[][]> = {
@@ -226,6 +227,9 @@ const FAMILY: Record<string, string[][]> = {
   iceni: WATLING,
   // And one for the captain - see CAUSEWAY.
   conquistador: CAUSEWAY,
+  // Bruisers, grapplers and anyone who fights behind armour - he has none,
+  // but he is the only one who fights like the shape assumes.
+  shanidar: BRUISER,
 };
 
 /**

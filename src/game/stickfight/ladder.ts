@@ -102,6 +102,11 @@ const RIVALS: Record<string, string> = {
   // at the other end of them. Both directions, because for once it is a real
   // fight and not a thematic one.
   conquistador: "jaguar",
+  // Forty thousand years apart and the two oldest people here, both dug up
+  // rather than written down, both identified entirely by what their injuries
+  // say about how they died. Otzi has an arrowhead in his shoulder and a cut
+  // across his hand; this one has a face that was caved in and healed.
+  shanidar: "iceman",
 };
 
 /** The last one standing. Tomoe is the only difficulty five on the roster. */
@@ -215,6 +220,8 @@ export const ENDINGS: Record<string, string> = {
     "Tacitus gives her two endings and does not choose between them: she took poison rather than be taken, or she fell ill and died. Dio says the Britons gave her a rich burial, and nobody has ever found it. What is certain is underneath three modern cities - a layer of burnt red clay at Colchester, London and St Albans, a foot thick in places, with the shop stock still on the floor where it fell. It is the only thing she left that can be measured, and it is still there.",
   conquistador:
     "He got the city and then spent twenty-six years losing the argument about who it belonged to. The crown sent officials to audit him, took the government off him, gave him a marquisate and an estate and no authority, and let the lawsuits run until he died near Seville in 1547 still petitioning for money he said he was owed. The five Cartas de Relacion are his own case, written to a king who never once ruled in his favour - and they are still the account most people have read, which was the point of writing them.",
+  shanidar:
+    "Solecki's team took him out of the cave in 1957 and the arguments have not stopped since - about whether the flower pollen in the soil meant a burial or a burrowing rodent, about whether the arm was amputated or withered, about how much of what looks like care really was. What nobody argues about is the healing. Those injuries knitted, which takes years, and years is not something a blind one-armed man in that landscape gets on his own. Whatever else the cave says, it says somebody stayed.",
   shade:
     "There is no register that carries his name, because he was never written down in the first place - only repeated, in enough places and enough centuries that somebody eventually started calling all of them the same man. Ask who he really was and the honest answer is that the question does not have the kind of ending the other fourteen do.",
 };
