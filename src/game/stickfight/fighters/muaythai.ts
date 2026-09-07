@@ -107,22 +107,42 @@ export const MUAYTHAI: FighterDef = {
       id: "handwrapF",
       attach: "handF",
       parts: [
-        // Taped fist: rounded over the knuckles, with the wrap crossing it.
-        { geo: "poly", size: [-6, 3, -4, 6, 3, 6.5, 7, 3, 7, -3, 3, -6.5, -4, -6, -6, -3], pos: [1, 0], color: ROPE },
-        { geo: "box", size: [2, 12], pos: [-1, 0], rot: 8, color: "#d6c9ab" },
-        { geo: "box", size: [2, 12], pos: [3, 0], rot: 8, color: "#d6c9ab" },
-        { geo: "poly", size: [-3, 5, 3, 4, 3, -4, -3, -5], pos: [-5, 0], color: "#c8bb9c" },
+        /**
+         * Kaad chuek: hemp cord wound over the knuckles and up the wrist.
+         *
+         * Narrower and darker than it was. The old shape was a thirteen-unit
+         * near-circle in near-white, which at the size a fist is actually seen
+         * read as a boxing glove - and a boxing glove is the one thing this
+         * fighter is specifically not wearing.
+         */
+        { geo: "poly", size: [-5, 2.5, -3, 5, 3, 5.5, 6, 2.5, 6, -2.5, 3, -5.5, -3, -5, -5, -2.5], pos: [1, 0], color: ROPE },
+        { geo: "box", size: [1.6, 10], pos: [0, 0], rot: 10, color: "#b8a882" },
+        { geo: "box", size: [1.6, 10], pos: [3.4, 0], rot: 10, color: "#b8a882" },
+        // The wrap running back over the wrist, which is what makes it cord
+        // and not a mitt.
+        { geo: "poly", size: [-6, 3.6, 2, 4, 2, -4, -6, -3.6], pos: [-7, 0], color: "#a89774" },
+        { geo: "box", size: [8, 1.4], pos: [-7, 1.6], rot: -6, color: "#c8bb9c" },
       ],
     },
     {
       id: "handwrapB",
       attach: "handB",
       parts: [
-        // Taped fist: rounded over the knuckles, with the wrap crossing it.
-        { geo: "poly", size: [-6, 3, -4, 6, 3, 6.5, 7, 3, 7, -3, 3, -6.5, -4, -6, -6, -3], pos: [1, 0], color: "#dcd3bd" },
-        { geo: "box", size: [2, 12], pos: [-1, 0], rot: 8, color: "#d6c9ab" },
-        { geo: "box", size: [2, 12], pos: [3, 0], rot: 8, color: "#d6c9ab" },
-        { geo: "poly", size: [-3, 5, 3, 4, 3, -4, -3, -5], pos: [-5, 0], color: "#c8bb9c" },
+        /**
+         * Kaad chuek: hemp cord wound over the knuckles and up the wrist.
+         *
+         * Narrower and darker than it was. The old shape was a thirteen-unit
+         * near-circle in near-white, which at the size a fist is actually seen
+         * read as a boxing glove - and a boxing glove is the one thing this
+         * fighter is specifically not wearing.
+         */
+        { geo: "poly", size: [-5, 2.5, -3, 5, 3, 5.5, 6, 2.5, 6, -2.5, 3, -5.5, -3, -5, -5, -2.5], pos: [1, 0], color: "#cbc0a6" },
+        { geo: "box", size: [1.6, 10], pos: [0, 0], rot: 10, color: "#b8a882" },
+        { geo: "box", size: [1.6, 10], pos: [3.4, 0], rot: 10, color: "#b8a882" },
+        // The wrap running back over the wrist, which is what makes it cord
+        // and not a mitt.
+        { geo: "poly", size: [-6, 3.6, 2, 4, 2, -4, -6, -3.6], pos: [-7, 0], color: "#a89774" },
+        { geo: "box", size: [8, 1.4], pos: [-7, 1.6], rot: -6, color: "#c8bb9c" },
       ],
     },
     {
@@ -198,13 +218,26 @@ export const MUAYTHAI: FighterDef = {
         { button: "A", move: "5A", from: 3, to: 8, string: "Hands" },
         { button: "B", move: "5B", from: 3, to: 8, string: "Hands" },
       ],
-      hits: [hit(3, 5, bx(16, 56, 42, 20), 28, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 2.6 })],
+      hits: [hit(3, 5, bx(24, 54, 54, 22), 28, { fx: "blunt", hitstun: 14, blockstun: 10, pushX: 2.6 })],
       desc: "The fastest button in the game. Three frames, cancels into everything.",
       notation: "A",
+      /**
+       * A punch is a body, not an arm.
+       *
+       * These used to be the arm straightening on its own out of a stationary
+       * torso, which is why they read as a fist appearing rather than as
+       * someone hitting: no shoulder behind it, no rotation, no step. The lead
+       * shoulder now turns over with the hips, the rear hand stays up where a
+       * fighter keeps it, and the whole body travels an inch into the shot -
+       * which is also where the extra reach comes from.
+       */
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(3, { ...STANCE, shoulderF: 96, elbowF: 4, torso: 10, offX: 3 }),
-        kf(7, { ...STANCE, shoulderF: 118, elbowF: 62, torso: 6 }, "inOut"),
+        // Load: weight shifts back a hair before it goes forward.
+        kf(1, { ...STANCE, torso: 0, offX: -1 }, "out"),
+        kf(3, { ...STANCE, shoulderF: 92, elbowF: 2, elbowB: 124, torso: 18, hipF: 20, kneeF: 8, offX: 6 }),
+        kf(5, { ...STANCE, shoulderF: 90, elbowF: 4, elbowB: 124, torso: 16, hipF: 18, offX: 5 }),
+        kf(8, { ...STANCE, shoulderF: 60, elbowF: 84, torso: 8, offX: 2 }, "inOut"),
         kf(11, { ...STANCE }),
       ],
     },
@@ -266,32 +299,36 @@ export const MUAYTHAI: FighterDef = {
       duration: 12,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [3, 11],
-      hits: [hit(3, 5, bx(14, 14, 42, 20), 26, { guard: "low", fx: "blunt", hitstun: 13, blockstun: 10, pushX: 2.4 })],
-      desc: "Quick low from a crouch. Her opener.",
+      hits: [hit(3, 5, bx(22, 12, 52, 22), 26, { guard: "low", fx: "blunt", hitstun: 13, blockstun: 10, pushX: 2.4 })],
+      desc: "Straight to the body from a crouch. Her opener.",
       notation: "↓ + A",
       frames: [
         kf(0, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }, "out"),
-        kf(3, { ...STANCE, crouch: 1, torso: 22, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 92, elbowF: 38, offX: 4 }),
-        kf(8, { ...STANCE, crouch: 1, torso: 18, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 116, elbowF: 84 }, "inOut"),
+        kf(3, { ...STANCE, crouch: 1, torso: 26, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 88, elbowF: 4, elbowB: 124, offX: 6 }),
+        kf(5, { ...STANCE, crouch: 1, torso: 24, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 86, elbowF: 6, elbowB: 124, offX: 5 }),
+        kf(9, { ...STANCE, crouch: 1, torso: 18, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 60, elbowF: 92 }, "inOut"),
         kf(12, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }),
       ],
     },
     {
       id: "2B",
-      name: "Low Kick",
+      name: "Low Elbow",
       input: { button: "B", stance: "crouch" },
       tags: ["medium", "low"],
       duration: 22,
       cancelInto: ["heavy", "special", "super"],
       cancelWindow: [8, 20],
-      hits: [hit(8, 11, bx(18, 6, 66, 26), 52, { guard: "low", fx: "blunt", pushX: 4.2, hitstun: 17 })],
-      desc: "Shin to the thigh. Must be blocked low and it chips away at their stance.",
+      hits: [hit(8, 11, bx(16, 6, 56, 28), 52, { guard: "low", fx: "blunt", pushX: 4.2, hitstun: 17 })],
+      desc: "Drops the point of the elbow onto the thigh from a crouch. Must be blocked low.",
       notation: "↓ + B",
+      // Elbow leads and the hand stays tight to the head, the same shape as
+      // her standing elbow turned downward - the arm never opens out.
       frames: [
         kf(0, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }, "out"),
-        kf(5, { ...STANCE, crouch: 1, torso: 12, hipF: 10, kneeF: 92, hipB: -30, kneeB: 92 }),
-        kf(8, { ...STANCE, crouch: 1, torso: 24, hipF: 74, kneeF: 12, hipB: -32, kneeB: 96, offX: 6 }, "out"),
-        kf(16, { ...STANCE, crouch: 1, torso: 18, hipF: 46, kneeF: 52, hipB: -26, kneeB: 88 }, "inOut"),
+        kf(5, { ...STANCE, crouch: 1, torso: 4, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 118, elbowF: 136 }),
+        kf(8, { ...STANCE, crouch: 1, torso: 34, hipF: 38, kneeF: 78, hipB: -22, kneeB: 84, shoulderF: 32, elbowF: 128, offX: 5 }, "out"),
+        kf(12, { ...STANCE, crouch: 1, torso: 30, hipF: 36, kneeF: 76, hipB: -22, kneeB: 84, shoulderF: 30, elbowF: 126, offX: 4 }),
+        kf(17, { ...STANCE, crouch: 1, torso: 20, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84, shoulderF: 40, elbowF: 124 }, "inOut"),
         kf(22, { ...STANCE, crouch: 1, torso: 16, hipF: 34, kneeF: 74, hipB: -22, kneeB: 84 }),
       ],
     },
@@ -339,22 +376,26 @@ export const MUAYTHAI: FighterDef = {
     },
     {
       id: "3C",
-      name: "Rising Knee",
+      name: "Rising Kick",
       input: { button: "C", dir: "df", stance: ["stand", "crouch"] },
       tags: ["command", "launcher"],
       priority: 14,
       duration: 30,
       cancelInto: ["special", "super"],
       cancelWindow: [11, 26],
-      hits: [hit(8, 12, bx(12, 46, 54, 70), 70, { launch: [2, 12], knockdown: "launch", fx: "blunt", hitstun: 26 })],
-      desc: "Drives the knee up through their chin. Launches into a juggle.",
+      hits: [hit(8, 12, bx(16, 44, 60, 74), 70, { launch: [2, 12], knockdown: "launch", fx: "blunt", hitstun: 26 })],
+      desc: "Swings the shin up through their chin. Launches into a juggle.",
       notation: "↘ + C",
+      // The knee chambers and then the shin snaps out and up, so the leg
+      // finishes near straight overhead rather than folded - that is the
+      // difference between this and the knee it used to be.
       frames: [
         kf(0, { ...STANCE, crouch: 0.5, hipF: 24, kneeF: 46 }, "out"),
-        kf(5, { ...STANCE, crouch: 0.7, hipF: 10, kneeF: 70, torso: 10 }),
-        kf(8, { ...STANCE, torso: -14, hipF: 118, kneeF: 118, hipB: -14, kneeB: 20, shoulderF: 150, elbowF: 60, offY: 5 }, "out"),
-        kf(16, { ...STANCE, torso: -8, hipF: 96, kneeF: 100 }),
-        kf(24, { ...STANCE, torso: 2, hipF: 40, kneeF: 44 }, "inOut"),
+        kf(5, { ...STANCE, crouch: 0.7, hipF: 34, kneeF: 96, torso: 12 }),
+        kf(8, { ...STANCE, torso: -18, hipF: 132, kneeF: 26, hipB: -12, kneeB: 16, shoulderF: 150, elbowF: 60, offY: 4 }, "out"),
+        kf(12, { ...STANCE, torso: -20, hipF: 140, kneeF: 12, hipB: -10, kneeB: 14, shoulderF: 152, elbowF: 58, offY: 5 }),
+        kf(19, { ...STANCE, torso: -8, hipF: 92, kneeF: 54 }),
+        kf(25, { ...STANCE, torso: 2, hipF: 40, kneeF: 44 }, "inOut"),
         kf(30, { ...STANCE }),
       ],
     },
@@ -362,7 +403,7 @@ export const MUAYTHAI: FighterDef = {
       // Forward and back sets. Forward takes space, back gives it up to buy
       // range or a hard read.
       id: "6A",
-      name: "Teep",
+      name: "Cross",
       input: { button: "A", dir: "f", stance: "stand" },
       tags: ["command", "light"],
       priority: 12,
@@ -371,19 +412,25 @@ export const MUAYTHAI: FighterDef = {
       friction: 0.88,
       cancelInto: ["light", "medium", "heavy", "special", "super"],
       cancelWindow: [6, 18],
-      // Long Legs string continues into 6C.
+      // Cross and Kick string continues into 6C.
       followUps: [
-        { button: "C", move: "6C", from: 6, to: 17, string: "Long Legs" },
+        { button: "C", move: "6C", from: 6, to: 17, string: "Cross and Kick" },
       ],
-      hits: [hit(6, 8, bx(24, 44, 56, 26), 28, { guard: "high", fx: "blunt", pushX: 14, hitstun: 13, hitstop: 6 })],
-      desc: "Push kick to the belly. Not damage - it stops them walking in and resets the round.",
+      hits: [hit(6, 8, bx(30, 50, 66, 24), 34, { fx: "blunt", pushX: 7, hitstun: 15, hitstop: 6 })],
+      desc: "The rear hand, all the way through. Her longest punch, and it steps in behind itself.",
       notation: "\u2192 + A",
+      /**
+       * The rear hand, so the whole body turns over: back hip drives, the
+       * torso rotates past square, the lead shoulder comes back to guard as
+       * the rear one goes out. Everything that makes a cross longer than a jab
+       * is in the rotation rather than in the arm.
+       */
       frames: [
         kf(0, { ...STANCE }, "out"),
-        // Knee chambered to the chest, then the leg locks out flat.
-        kf(3, { ...STANCE, hipF: 76, kneeF: 108, torso: -8, offX: -2 }, "out"),
-        kf(6, { ...STANCE, hipF: 104, kneeF: 8, hipB: -28, kneeB: 22, torso: -20, head: 8, offX: 5 }, "out"),
-        kf(11, { ...STANCE, hipF: 58, kneeF: 52, torso: -6, offX: 3 }, "inOut"),
+        kf(3, { ...STANCE, torso: -6, shoulderB: 8, elbowB: 130, hipB: -22, kneeB: 34, offX: -2 }, "out"),
+        kf(6, { ...STANCE, shoulderB: 88, elbowB: 2, shoulderF: 40, elbowF: 128, torso: 26, hipF: 24, kneeF: 10, hipB: -8, kneeB: 14, offX: 8 }, "out"),
+        kf(9, { ...STANCE, shoulderB: 86, elbowB: 5, shoulderF: 40, elbowF: 128, torso: 24, hipF: 22, offX: 7 }),
+        kf(14, { ...STANCE, shoulderB: 44, elbowB: 96, torso: 10, offX: 3 }, "inOut"),
         kf(20, { ...STANCE }),
       ],
     },
@@ -414,7 +461,7 @@ export const MUAYTHAI: FighterDef = {
     },
     {
       id: "4A",
-      name: "Check Elbow",
+      name: "Lead Hook",
       input: { button: "A", dir: "b", stance: "stand" },
       tags: ["command", "light"],
       priority: 12,
@@ -423,19 +470,26 @@ export const MUAYTHAI: FighterDef = {
       friction: 0.86,
       cancelInto: ["medium", "heavy", "special", "super"],
       cancelWindow: [8, 20],
-      // Elbow Chain string continues into 5B.
+      // Hands to Elbow string continues into 5B.
       followUps: [
-        { button: "B", move: "5B", from: 8, to: 19, string: "Elbow Chain" },
+        { button: "B", move: "5B", from: 8, to: 19, string: "Hands to Elbow" },
       ],
-      hits: [hit(8, 10, bx(16, 52, 42, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
-      desc: "Steps out and cuts back with the taped point of the elbow. Short and it opens skin.",
+      hits: [hit(8, 10, bx(26, 50, 48, 30), 36, { guard: "mid", fx: "blunt", pushX: 6, hitstun: 15, hitstop: 6 })],
+      desc: "Steps out and comes back round the side of the guard. Short, and it goes where a straight cannot.",
       notation: "\u2190 + A",
+      /**
+       * A hook is a horizontal punch: the elbow stays bent at about a right
+       * angle the whole way and the arc comes from the torso turning, not from
+       * the arm opening. Written as elbowF held near 90 while the shoulder and
+       * torso sweep - the moment the elbow straightens it stops being a hook
+       * and becomes a slap.
+       */
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(4, { ...STANCE, torso: -8, shoulderF: 20, elbowF: 140, hipB: -26, kneeB: 40, offX: -6 }, "out"),
-        // Elbow leads, hand stays tight to the head.
-        kf(8, { ...STANCE, torso: 10, shoulderF: 96, elbowF: 132, hipF: 22, kneeF: 16, offX: -3 }, "out"),
-        kf(14, { ...STANCE, torso: 2, shoulderF: 52, elbowF: 128, offX: -4 }, "inOut"),
+        kf(4, { ...STANCE, torso: -10, shoulderF: 6, elbowF: 96, hipB: -26, kneeB: 40, offX: -6 }, "out"),
+        kf(8, { ...STANCE, torso: 20, shoulderF: 74, elbowF: 88, elbowB: 124, hipF: 22, kneeF: 16, offX: -2 }, "out"),
+        kf(11, { ...STANCE, torso: 18, shoulderF: 78, elbowF: 90, elbowB: 124, offX: -3 }),
+        kf(16, { ...STANCE, torso: 4, shoulderF: 46, elbowF: 112, offX: -4 }, "inOut"),
         kf(22, { ...STANCE }),
       ],
     },
@@ -465,24 +519,34 @@ export const MUAYTHAI: FighterDef = {
     },
     {
       id: "4C",
-      name: "Downward Elbow",
+      name: "Axe Kick",
       input: { button: "C", dir: "b", stance: "stand" },
       tags: ["command", "heavy", "overhead"],
       priority: 12,
       duration: 44,
       cancelInto: ["special", "super"],
       cancelWindow: [26, 40],
-      hits: [hit(20, 23, bx(12, 20, 58, 86), 98, { guard: "overhead", fx: "slash", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
-      desc: "Steps back, then drops the wrapped elbow through the top of their guard. Blocked standing only.",
+      hits: [hit(20, 23, bx(18, 18, 60, 90), 98, { guard: "overhead", fx: "blunt", pushX: 9, hitstun: 28, hitstop: 13, knockdown: "hard", shake: 2.4 })],
+      desc: "Steps back, swings the leg up past their guard and drops the heel through the top of it. Blocked standing only.",
       notation: "\u2190 + C",
+      /**
+       * Up straight, then down straight. The leg goes above the head with the
+       * knee locked and comes down on the same line - if it comes down bent it
+       * is a stamp, and if it comes down at an angle it is a roundhouse, and
+       * neither of those is a move that has to be blocked standing.
+       */
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(8, { ...STANCE, shoulderF: 120, elbowF: 130, torso: -12, offX: -5 }, "inOut"),
-        // Elbow lifted above the head, forearm folded flat.
-        kf(15, { ...STANCE, shoulderF: 172, elbowF: 138, torso: -20, hipB: -26, kneeB: 38, offY: 3, offX: -3 }, "out"),
-        kf(20, { ...STANCE, shoulderF: 88, elbowF: 126, torso: 34, hipF: 34, kneeF: 16, hipB: -12, kneeB: 32, offX: 6 }, "out"),
-        kf(26, { ...STANCE, shoulderF: 80, elbowF: 124, torso: 26, offX: 4 }),
-        kf(36, { ...STANCE, shoulderF: 46, elbowF: 122, torso: 8 }, "inOut"),
+        kf(8, { ...STANCE, hipF: 44, kneeF: 62, torso: -10, offX: -5 }, "inOut"),
+        // Leg at the top of the swing, knee locked out overhead.
+        kf(15, { ...STANCE, hipF: 152, kneeF: 6, hipB: -20, kneeB: 30, torso: -24, head: 10, offY: 3, offX: -3 }, "out"),
+        // The active window is the descent, so the leg has to still be up when
+        // it opens. Dropping it to the floor by frame 20 put the whole hit in
+        // the recovery and made an overhead read as a lunge.
+        kf(20, { ...STANCE, hipF: 116, kneeF: 4, hipB: -16, kneeB: 26, torso: 8, head: 8, offX: 4 }, "out"),
+        kf(23, { ...STANCE, hipF: 70, kneeF: 6, hipB: -14, kneeB: 24, torso: 26, head: 4, offX: 5 }),
+        kf(28, { ...STANCE, hipF: 34, kneeF: 14, torso: 24, offX: 4 }),
+        kf(36, { ...STANCE, hipF: 22, kneeF: 26, torso: 8 }, "inOut"),
         kf(44, { ...STANCE }),
       ],
     },
@@ -497,13 +561,14 @@ export const MUAYTHAI: FighterDef = {
       landRecovery: 2,
       cancelInto: ["medium", "heavy", "special"],
       cancelWindow: [4, 15],
-      hits: [hit(4, 9, bx(14, 34, 44, 28), 30, { fx: "blunt", hitstun: 14, pushX: 2.4 })],
+      hits: [hit(4, 9, bx(22, 32, 54, 30), 30, { fx: "blunt", hitstun: 14, pushX: 2.4 })],
       desc: "Quick air punch to stuff anyone rising into her.",
       notation: "(air) A",
       frames: [
         kf(0, { ...STANCE, free: 1, hipF: 32, kneeF: 42, hipB: -22, kneeB: 40 }, "out"),
-        kf(4, { ...STANCE, free: 1, shoulderF: 100, elbowF: 8, torso: 12 }),
-        kf(11, { ...STANCE, free: 1, shoulderF: 124, elbowF: 74, torso: 6 }, "inOut"),
+        kf(4, { ...STANCE, free: 1, shoulderF: 96, elbowF: 2, elbowB: 124, torso: 20, hipF: 24, kneeF: 36 }),
+        kf(9, { ...STANCE, free: 1, shoulderF: 94, elbowF: 6, elbowB: 124, torso: 18, hipF: 26, kneeF: 38 }),
+        kf(13, { ...STANCE, free: 1, shoulderF: 62, elbowF: 88, torso: 8 }, "inOut"),
         kf(17, { ...STANCE, free: 1, hipF: 32, kneeF: 42, hipB: -22, kneeB: 40 }),
       ],
     },
@@ -530,7 +595,7 @@ export const MUAYTHAI: FighterDef = {
     },
     {
       id: "jC",
-      name: "Falling Elbow",
+      name: "Falling Kick",
       input: { button: "C", stance: "air" },
       tags: ["heavy", "air", "overhead"],
       duration: 28,
@@ -547,13 +612,14 @@ export const MUAYTHAI: FighterDef = {
           shake: 1.5,
         }),
       ],
-      desc: "Drops elbow-first out of the sky. Her jump-in.",
+      desc: "Drops heel-first out of the sky. Her jump-in.",
       notation: "(air) C",
       frames: [
         kf(0, { ...STANCE, free: 1 }, "out"),
-        kf(5, { ...STANCE, free: 1, torso: -20, shoulderB: 178, elbowB: 100, hipF: 40, kneeF: 56 }),
-        kf(8, { ...STANCE, free: 1, torso: 32, shoulderB: 40, elbowB: 128, hipF: 16, kneeF: 20 }, "out"),
-        kf(28, { ...STANCE, free: 1, torso: 26, shoulderB: 44, elbowB: 124 }),
+        // Knee up to the chest, then the heel goes down through them.
+        kf(5, { ...STANCE, free: 1, torso: -16, hipF: 96, kneeF: 104, hipB: -30, kneeB: 44 }),
+        kf(8, { ...STANCE, free: 1, torso: 26, hipF: 34, kneeF: 4, hipB: -18, kneeB: 30 }, "out"),
+        kf(28, { ...STANCE, free: 1, torso: 22, hipF: 30, kneeF: 8 }),
       ],
     },
     {
