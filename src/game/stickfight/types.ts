@@ -390,6 +390,18 @@ export interface GrantDef {
    */
   stacks?: number;
   /**
+   * The fighter can no longer back away: the backdash is gone and the backward
+   * walk is halved, for as long as the grant is held.
+   *
+   * Every other grant on the roster gives a fighter something. This one takes
+   * an option off them permanently, and it exists because Cortes ran his ships
+   * aground at Veracruz in 1519 so that nobody under his command could argue
+   * for going home. A buff that costs a movement option is a different kind of
+   * decision from a buff that costs a bar, and there is nothing else here that
+   * makes it.
+   */
+  noRetreat?: boolean;
+  /**
    * Only counts while the user is at or below this fraction of their maximum
    * health. Omitted means it applies the whole time.
    */
@@ -735,6 +747,16 @@ export interface ResourceDef {
   gainOnTakeHit?: number;
   /** Gained when one of this fighter's attacks is blocked. */
   gainOnBlocked?: number;
+  /**
+   * Gained each time this fighter blocks an attack.
+   *
+   * The mirror of `gainOnBlocked`, and a different idea: that one pays a
+   * fighter for being answered, this one pays a fighter for standing it. Every
+   * other resource on the roster fills by attacking, taking punishment, or
+   * simply waiting - none of them fill by holding guard, which is the one
+   * thing a fighter does when the plan is to still be there afterwards.
+   */
+  gainOnGuard?: number;
   color: string;
   /** Rendered as discrete pips (bullets) instead of a bar. */
   pips?: boolean;

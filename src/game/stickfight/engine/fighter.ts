@@ -571,6 +571,24 @@ export class Fighter {
   }
 
   /**
+   * Whether this fighter has given up the option of backing off.
+   *
+   * Read the same way the terrain flag is - recomputed from the live grants
+   * every time it is asked rather than latched when the move fires - so a
+   * timed no-retreat grant expiring gives the backdash back on its own,
+   * instead of leaving a fighter walled in by a buff that ran out.
+   */
+  get noRetreat(): boolean {
+    for (const g of this.grants) if (this.grantLive(g.def) && g.def.noRetreat) return true;
+    return false;
+  }
+
+  /** Backward walk speed multiplier. Halved once retreat has been given up. */
+  get retreatScale(): number {
+    return this.noRetreat ? 0.5 : 1;
+  }
+
+  /**
    * Knocks a piece of armour off, if there is one of that kind still on.
    *
    * Returns whether anything actually came off, because the caller only pays
@@ -693,7 +711,7 @@ export class Fighter {
       this.vx = this.facing * s.dashSpeed * this.terrainDash;
       return;
     }
-    if (this.input.hasMotion("bb") && !this.terrainNoBackdash) {
+    if (this.input.hasMotion("bb") && !this.terrainNoBackdash && !this.noRetreat) {
       this.input.consumeDash();
       this.setState("backdash");
       this.vx = -this.facing * s.dashSpeed * 0.85 * this.terrainDash;
@@ -741,7 +759,7 @@ export class Fighter {
 
     if (guarding || (holdingBack && this.threatened(opponent))) {
       this.setState("block");
-      if (holdingBack) this.accelerate(-this.facing * s.walkB);
+      if (holdingBack) this.accelerate(-this.facing * s.walkB * this.retreatScale);
       else this.vx *= PHYSICS.groundDrag;
       return;
     }
@@ -753,7 +771,7 @@ export class Fighter {
       this.accelerate(this.facing * s.walkF);
     } else if (holdingBack) {
       this.setState("walkB");
-      this.accelerate(-this.facing * s.walkB);
+      this.accelerate(-this.facing * s.walkB * this.retreatScale);
     } else {
       this.setState("idle");
       this.vx *= PHYSICS.groundDrag;
@@ -1252,7 +1270,7 @@ export class Fighter {
       // A backstep is a hop off the floor, and there is no floor to hop off
       // in the shallows. Identified by the input rather than by name: the
       // back-back motion *is* what a backstep is, on any fighter.
-      if (this.terrainNoBackdash && move.input.motion === "bb") continue;
+      if ((this.terrainNoBackdash || this.noRetreat) && move.input.motion === "bb") continue;
       if (!this.inputMatches(move)) continue;
 
       const score = this.moveScore(move);

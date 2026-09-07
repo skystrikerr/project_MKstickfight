@@ -593,6 +593,25 @@ export class GameRenderer {
         add(loop);
         break;
       }
+      // A crossbow bolt: short, thick, square-headed, with stiff leather vanes
+      // instead of fletching. Deliberately not the arrow - a quarrel is half
+      // the length and twice the section, which is the whole reason it hits
+      // the way it does.
+      case "quarrel": {
+        add(new THREE.Mesh(new THREE.PlaneGeometry(30, 5), flat(color)));
+        const head = new THREE.Mesh(new THREE.PlaneGeometry(11, 8), flat("#8e99a6"));
+        head.position.x = 19;
+        add(head);
+        const tip = new THREE.Mesh(new THREE.PlaneGeometry(7, 4), flat("#dfe6ee"));
+        tip.position.x = 26;
+        add(tip);
+        for (const dy of [-4.5, 4.5]) {
+          const vane = new THREE.Mesh(new THREE.PlaneGeometry(11, 4), flat("#4a3220"));
+          vane.position.set(-12, dy, 0);
+          add(vane);
+        }
+        break;
+      }
       // A hare, at a dead run: body, haunch, the two ears laid back along it.
       // Nothing else in the game is alive, so it is drawn small and low and
       // left to bounce along the floor on its own physics.

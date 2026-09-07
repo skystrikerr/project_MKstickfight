@@ -58,6 +58,12 @@ const ALIASES: Record<string, string[]> = {
   // Persian: spear with an apple counterweight, wicker pavise, bow, akinakes.
   spara: ["spara", "wicker", "pavise"],
   akinakes: ["akinakes", "blade", "cut"],
+  // Cortes names none of his props in flavour text - the sword is "the blade",
+  // the buckler is "the target". Without these the tool reported fourteen of
+  // his normals as bare-handed punches.
+  toledo: ["toledo", "sword", "blade", "point", "steel", "cut"],
+  rodela: ["rodela", "target", "shield", "boss"],
+  crossbow: ["crossbow", "bolt", "ballestero"],
 };
 
 function usesTool(move: MoveDef, tool: string): boolean {

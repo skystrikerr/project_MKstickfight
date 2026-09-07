@@ -118,6 +118,10 @@ const rows = ids
   .sort((x, y) => y.rate - x.rate);
 
 console.log(`\n${total} rounds at ${LEVEL}, ${REPS} per ordered pair, ${secs}s\n`);
+if (REPS < 6) {
+  console.log("  note: at this rep count a fighter's number moves ~10 points run to run.");
+  console.log("        use --reps 10 before tuning anyone off it.\n");
+}
 console.log("  win%   fighter                    W/played  draws");
 for (const r of rows) {
   const pct = (r.rate * 100).toFixed(1).padStart(5);
@@ -127,8 +131,20 @@ for (const r of rows) {
   );
 }
 
-// An even roster sits at 50%. Flagging is deliberately generous - with this
-// many rounds the noise is a couple of points, not fifteen.
+// An even roster sits at 50%. Flagging is deliberately generous, because the
+// numbers move more than they look like they should.
+//
+// Measured: two consecutive default runs put Vercingetorix at 76% and then at
+// 63.5%, and moved John Chandos the other way by eight. At the default two
+// reps each fighter plays 96 rounds, and run-to-run swings of ten to twelve
+// points are ordinary - which is wide enough to invent a balance problem that
+// is not there, or to hide one that is. This comment used to claim the noise
+// was "a couple of points, not fifteen". That was wrong, and reading single
+// default runs as though it were true is how a fighter gets tuned for a
+// result that was noise.
+//
+// At --reps 10 (480 rounds each) the ordering is stable to about a point or
+// two. Use that before changing anybody's numbers.
 const HI = 0.65;
 const LO = 0.35;
 const hot = rows.filter((r) => r.rate >= HI);

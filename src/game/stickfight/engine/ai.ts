@@ -133,6 +133,10 @@ export const STYLES: Record<string, Style> = {
   // Zoner / Momentum: burns the ground, holds it with the longest spear on the
   // roster, and only closes when the charge is the answer.
   iceni: { aggression: 0.65, special: 1.3, throw: 0.7, poke: 1.35, patience: 1.3, range: "far" },
+  // Commander / Commitment: his bar fills by blocking, so patience is not a
+  // personality here - it is the economy. He holds guard, takes the pip, and
+  // spends it on the horse.
+  conquistador: { aggression: 0.85, special: 1.2, throw: 0.9, poke: 1.1, patience: 1.45, range: "mid" },
 };
 
 const MOTION_DIRS: Record<Motion, number[]> = {

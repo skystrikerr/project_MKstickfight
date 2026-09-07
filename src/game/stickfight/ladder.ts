@@ -44,9 +44,12 @@ const RIVALS: Record<string, string> = {
   // Legion against phalanx: the two disciplined shield walls of the ancient world.
   roman: "spartan",
   spartan: "roman",
-  // Two people who turned back a landing on their own ground.
+  // Two people who turned back a landing on their own ground. One-directional
+  // now: Freydis still gets Tzilacatzin, but Tzilacatzin gets the man who was
+  // demonstrably at the other end of his causeway, which beats a thematic
+  // pairing however good it is.
   viking: "jaguar",
-  jaguar: "viking",
+  jaguar: "conquistador",
   // The outlaw and the lawman.
   pirate: "western",
   western: "pirate",
@@ -93,6 +96,12 @@ const RIVALS: Record<string, string> = {
   // toward. Everyone else on the roster is a person she is fighting. He is
   // the thing she is fighting.
   iceni: "roman",
+  // The only pair on this roster who were demonstrably in the same place at
+  // the same time. The Florentine Codex has Tzilacatzin holding the Tlatelolco
+  // causeways against Spanish advances in the summer of 1521; this is the man
+  // at the other end of them. Both directions, because for once it is a real
+  // fight and not a thematic one.
+  conquistador: "jaguar",
 };
 
 /** The last one standing. Tomoe is the only difficulty five on the roster. */
@@ -204,6 +213,8 @@ export const ENDINGS: Record<string, string> = {
     "Pigafetta, who was in the water and lived, put the date at the 27th of April 1521 and the numbers at forty-nine Spaniards against something like fifteen hundred. He records that they went for the legs because the legs were unarmoured, that Magellan's helmet was struck off twice, and that the ships sailed without recovering the body because Lapulapu would not give it back for any price offered. What happened to him afterwards is not written down anywhere - he simply stops appearing, which in this company counts as getting away with it.",
   iceni:
     "Tacitus gives her two endings and does not choose between them: she took poison rather than be taken, or she fell ill and died. Dio says the Britons gave her a rich burial, and nobody has ever found it. What is certain is underneath three modern cities - a layer of burnt red clay at Colchester, London and St Albans, a foot thick in places, with the shop stock still on the floor where it fell. It is the only thing she left that can be measured, and it is still there.",
+  conquistador:
+    "He got the city and then spent twenty-six years losing the argument about who it belonged to. The crown sent officials to audit him, took the government off him, gave him a marquisate and an estate and no authority, and let the lawsuits run until he died near Seville in 1547 still petitioning for money he said he was owed. The five Cartas de Relacion are his own case, written to a king who never once ruled in his favour - and they are still the account most people have read, which was the point of writing them.",
   shade:
     "There is no register that carries his name, because he was never written down in the first place - only repeated, in enough places and enough centuries that somebody eventually started calling all of them the same man. Ask who he really was and the honest answer is that the question does not have the kind of ending the other fourteen do.",
 };

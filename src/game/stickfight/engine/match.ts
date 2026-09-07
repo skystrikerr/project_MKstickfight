@@ -582,6 +582,7 @@ export class Match {
       defender.addMeter(COMBAT.meterOnBlock);
       attacker.addMeter(COMBAT.meterOnBlock * 0.6);
       attacker.addResource(attacker.def.resource?.gainOnBlocked ?? 0);
+      defender.addResource(defender.def.resource?.gainOnGuard ?? 0);
       attacker.hitstop = Math.max(2, (hit.hitstop ?? 6) - 2);
       defender.hitstop = Math.max(2, (hit.hitstop ?? 6) - 2);
       defender.guardShove = Math.min(

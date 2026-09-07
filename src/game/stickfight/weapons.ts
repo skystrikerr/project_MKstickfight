@@ -753,6 +753,36 @@ export const WEAPONS: Record<string, WeaponVariant[]> = {
       },
     },
   ],
+  conquistador: [
+    {
+      id: "bilbo",
+      name: "Bilbao Pattern",
+      blurb:
+        "Toledo had the reputation and Bilbao had the volume - the shipped, working sword of the period, with a full swept hilt of side rings and a knuckle bow rather than a plain cross. English took the town's name for the weapon and kept it: a bilbo.",
+      unlock: { kind: "wins", count: 4 },
+      parts: {
+        toledo: [
+          // Wire-bound grip and a chiselled pommel.
+          { geo: "box", size: [16, 5], pos: [4, 0], color: "#3b2a1e" },
+          { geo: "box", size: [16, 1.4], pos: [4, 1.4], color: "#6b4a2c", z: 0.1 },
+          { geo: "box", size: [16, 1.4], pos: [4, -1.4], color: "#6b4a2c", z: 0.1 },
+          { geo: "poly", size: [-5, 4.6, 0, 5.4, 5, 4.6, 6, 0, 5, -4.6, 0, -5.4, -5, -4.6], pos: [-7, 0], color: "#8e99a6" },
+          { geo: "disc", size: [1.7], pos: [-7, 0], color: "#5c6672", z: 0.3 },
+          // The full hilt: cross, knuckle bow forward to the pommel, and two
+          // side rings standing off the blade.
+          { geo: "box", size: [3.2, 26], pos: [13, 0], color: "#8e99a6" },
+          { geo: "poly", size: [0, 0, 8, 5, 14, 2, 18, -8, 20, -19, 16, -20, 12, -10, 7, -3, 2, -3], pos: [13, 12], color: "#8e99a6", z: 0.2 },
+          { geo: "ring", size: [8, 2.2], pos: [20, 6], color: "#8e99a6", z: 0.15 },
+          { geo: "ring", size: [8, 2.2], pos: [20, -6], color: "#8e99a6", z: 0.15 },
+          { geo: "poly", size: [0, 0, 5, -6, 11, -3], pos: [13, -12], color: "#8e99a6", z: 0.2 },
+          // A narrower, longer blade than the arming sword, with the fuller
+          // running most of its length.
+          { geo: "poly", size: [0, 6, 70, 5, 94, 3, 101, 0, 94, -3, 70, -5, 0, -6], pos: [16, 0], color: "#c3ccd6" },
+          { geo: "poly", size: [0, 1.8, 66, 1.4, 66, 0, 0, 0], pos: [20, 0.6], color: "#eef3f7", z: 0.3 },
+        ],
+      },
+    },
+  ],
 };
 
 /** Every variant a fighter has, default excluded. Empty for most of the roster. */

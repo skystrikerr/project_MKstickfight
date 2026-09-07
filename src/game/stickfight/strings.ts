@@ -98,6 +98,22 @@ const MACTAN = [
  * shove. The third gives ground and ends on the turn, which covers the
  * retreat.
  */
+/**
+ * One more, for the man whose whole game is the guard bar.
+ *
+ * His heavies take an unusual bite out of a block, so the long shape is built
+ * to land as many of them as possible in a row rather than to catch anybody
+ * out: light, light, heavy, heavy, and the shove at the end. The second is the
+ * one that switches height, because he needs exactly one that does. The third
+ * gives ground behind the rodela, which is the only string on the roster whose
+ * point is to end further away than it started.
+ */
+const CAUSEWAY = [
+  ["5A", "5B", "5C", "2C", "6C"],
+  ["6A", "2A", "2B", "3C"],
+  ["4A", "4B", "4C"],
+];
+
 const WATLING = [
   ["5A", "5B", "5C", "2B", "6C"],
   ["6A", "6B", "2A", "2C", "6C"],
@@ -130,6 +146,7 @@ const NAMES: Record<string, [string, string, string]> = {
   persian: ["Wicker and Spear", "Rank Work", "Low Ranks"],
   lapulapu: ["Below the Knee", "Back to My Range", "Give Ground"],
   iceni: ["Spear Rhythm", "Shield and Drive", "Turning Retreat"],
+  conquistador: ["Shield and Steel", "Down the Guard", "Covered Retreat"],
 };
 
 const FAMILY: Record<string, string[][]> = {
@@ -148,6 +165,8 @@ const FAMILY: Record<string, string[][]> = {
   lapulapu: MACTAN,
   // A shape of her own - see WATLING.
   iceni: WATLING,
+  // And one for the captain - see CAUSEWAY.
+  conquistador: CAUSEWAY,
 };
 
 /**

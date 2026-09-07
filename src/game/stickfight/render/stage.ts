@@ -25,6 +25,7 @@ export type StageTheme =
   | "delta"
   | "mactan"
   | "watling"
+  | "causeway"
   // Painted backdrops rather than built shapes.
   | "postroad"
   | "dryclaim"
@@ -214,6 +215,17 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     // something burning should bloom.
     light: { key: "#ffb267", fill: "#3a2e34", strength: 0.85, shadow: "#3d2c2a", glow: 0.2 },
     ambient: { kind: "ember", count: 30, colors: ["#ff9440", "#d8702a", "#8a4318"], speed: 0.22, wind: 0.35, size: [2, 5], opacity: 0.55 },
+  },
+  causeway: {
+    name: "The Causeway",
+    blurb: "A stone road across the lake, the city at the end of it, and the water on both sides.",
+    sky: ["#2c4a6b", "#8f9aa0"],
+    ground: "#847d70",
+    accent: "#5fa9c4",
+    // High-altitude morning light with a great deal of smoke in it: a clean
+    // key off the lake, a cool fill, and a warm shadow where the burning is.
+    light: { key: "#fff2da", fill: "#5c7d9a", strength: 0.8, shadow: "#6a5548", glow: 0.14 },
+    ambient: { kind: "dust", count: 26, colors: ["#d8cbb8", "#a89a86"], speed: 0.14, wind: 0.5, size: [2, 5], opacity: 0.4 },
   },
   aqueduct: {
     // Overcast stone light. Flat, cool, and not much of it.
@@ -655,6 +667,9 @@ export class Stage {
         break;
       case "watling":
         this.buildWatling();
+        break;
+      case "causeway":
+        this.buildCauseway();
         break;
       case "delta":
         this.buildDelta();
@@ -1372,6 +1387,111 @@ export class Stage {
     this.addLayer(near, 0.9);
   }
 
+  /**
+   * Tenochtitlan, August 1521 - one of the causeways, near the end.
+   *
+   * The city was built on an island in a shallow lake and reached by three
+   * raised stone roads, and that is the whole military story of the siege: as
+   * long as the causeways and the canoes were open the city could be fed, and
+   * once the brigantines took the water it could not. So the stage is one of
+   * those roads seen from the mainland end - water on both sides at the same
+   * height, the ships that closed it out on the lake, and the city at the far
+   * end with the Templo Mayor over it and a great deal of smoke.
+   *
+   * Everything is measured against the three hundred units the camera actually
+   * sees, the same as the Watling Street build.
+   */
+  private buildCauseway() {
+    const far = new THREE.Group();
+    // The two volcanoes that close the valley. They are the reason a picture
+    // of this city is placeable at a glance, and they are the first thing
+    // every account mentions on coming over the pass.
+    far.add(ridge(
+      [[-980, 60], [-820, 148], [-700, 196], [-640, 232], [-580, 198], [-470, 150], [-380, 104], [-300, 60]],
+      "#44576e",
+      3,
+      0.95,
+    ));
+    far.add(poly(-640, 232, [-42, 0, 0, 16, 40, -2, 0, 6], "#dfe7ef", 3.2, 0.95));
+    far.add(ridge(
+      [[120, 60], [260, 132], [420, 178], [560, 142], [700, 168], [860, 120], [980, 60]],
+      "#4e6178",
+      3,
+      0.9,
+    ));
+    // The city on the island: stepped platforms, and over them the twin-shrine
+    // pyramid - two staircases up one face and two temples side by side on the
+    // top, which is the one silhouette the Templo Mayor is known by.
+    const plat = (x: number, w: number, h: number, color: string) => {
+      far.add(poly(x, 74, [-w / 2, 0, -w / 2 + 6, h, w / 2 - 6, h, w / 2, 0], color, 3.6, 0.96));
+    };
+    plat(-190, 130, 26, "#9c8f76");
+    plat(210, 150, 20, "#91846c");
+    plat(430, 96, 32, "#9c8f76");
+    for (let i = 0; i < 4; i++) {
+      const w = 168 - i * 30;
+      far.add(poly(20, 74 + i * 26, [-w / 2, 0, -w / 2 + 8, 26, w / 2 - 8, 26, w / 2, 0], i % 2 ? "#a89a7f" : "#9b8e73", 4.2, 0.97));
+    }
+    far.add(poly(-2, 74, [-15, 0, -11, 104, 11, 104, 15, 0], "#857a62", 4.6, 0.97));
+    far.add(poly(42, 74, [-15, 0, -11, 104, 11, 104, 15, 0], "#857a62", 4.6, 0.97));
+    far.add(rect(-14, 178, 46, 30, "#8f3229", 5, 0.98));
+    far.add(tri(-14, 208, 52, 22, "#8f3229", 5, 0.98));
+    far.add(rect(52, 178, 46, 30, "#2f5470", 5, 0.98));
+    far.add(tri(52, 208, 52, 22, "#2f5470", 5, 0.98));
+    // Burning, and the smoke standing over the whole island.
+    for (const [x, k] of [[-190, 1], [210, 0.8], [430, 0.9], [20, 1.2]] as [number, number][]) {
+      far.add(rect(x, 88, 30 * k, 8 * k, "#e07a34", 5.2, 0.6));
+      // Tapered and leaning, not stacked rectangles - the first pass drew two
+      // grey bars either side of the pyramid that read as factory chimneys.
+      for (let i = 0; i < 4; i++) {
+        far.add(tri(x + i * 11 * k, 96 + i * 40, (30 + i * 20) * k, 62, "#7a6e66", 5.2, 0.2 - i * 0.04));
+      }
+    }
+    this.addLayer(far, 0.18);
+
+    const mid = new THREE.Group();
+    // The lake, and the brigantines on it - thirteen small ships built sixty
+    // miles inland, carried over the mountains in pieces and launched here,
+    // which is the decision the whole siege turned on.
+    mid.add(rect(0, 44, 1900, 34, "#2c5c7c", 6));
+    mid.add(rect(0, 44, 1900, 12, "#3d7ba0", 6, 0.7));
+    mid.add(rect(0, 74, 1900, 4, "#9fc4d4", 6, 0.5));
+    for (const [x, k] of [[-700, 1], [-330, 0.8], [140, 0.92], [560, 0.74], [880, 0.86]] as [number, number][]) {
+      mid.add(poly(x, 48, [-40, 0, -32, -7, 32, -7, 42, 0, 34, 8, -32, 8], "#5c4126", 7, 0.96));
+      mid.add(rect(x + 2, 56, 3, 62 * k, "#4a3220", 7, 0.96));
+      mid.add(poly(x + 4, 60, [0, 0, 42 * k, 5, 42 * k, 52 * k, 0, 58 * k], "#e6ded0", 7, 0.94));
+      mid.add(poly(x - 2, 60, [0, 0, -26 * k, 4, -26 * k, 34 * k, 0, 40 * k], "#d2c8b6", 7, 0.9));
+    }
+    // Canoes, low and dark, in among them.
+    for (const x of [-520, -120, 320, 720]) {
+      mid.add(poly(x, 46, [-26, 0, -20, 5, 20, 5, 26, 0, 18, -4, -18, -4], "#3f3024", 8, 0.95));
+    }
+    this.addLayer(mid, 0.55);
+
+    const near = new THREE.Group();
+    // Near water, then the causeway: cut stone with a kerb down each side,
+    // wide enough for about eight men abreast, which the accounts complain
+    // about at length.
+    near.add(rect(0, 30, 1900, 20, "#27536f", 8));
+    near.add(rect(0, 44, 1900, 4, "#7fa8bd", 8, 0.5));
+    near.add(rect(0, 0, 1900, 32, "#8c8578", 8));
+    near.add(rect(0, 28, 1900, 6, "#a39a89", 8, 0.9));
+    near.add(rect(0, 0, 1900, 7, "#736c60", 9, 0.7));
+    for (let i = -16; i <= 16; i++) {
+      const x = i * 60 + ((i * 41) % 22);
+      near.add(rect(x, 8 + ((i * 19) % 14), 38 + ((i * 23) % 14), 7, i % 2 ? "#978f81" : "#8a8375", 9, 0.8));
+    }
+    // The gap where a bridge has been lifted out. On the night of the 30th of
+    // June 1520 the Spanish tried to leave the city and found the causeway cut
+    // exactly like this, and most of them drowned in it - the one night this
+    // campaign nearly ended the other way.
+    near.add(rect(-300, 0, 74, 32, "#27536f", 9));
+    near.add(rect(-300, 26, 74, 4, "#7fa8bd", 9, 0.5));
+    near.add(rect(-338, 0, 5, 34, "#6f6759", 9));
+    near.add(rect(-262, 0, 5, 34, "#6f6759", 9));
+    this.addLayer(near, 0.9);
+  }
+
   private buildPainted(def: BackdropDef) {
     const g = new THREE.Group();
     const H = def.width / def.aspect; // the painting's own aspect - never letterbox it
@@ -1472,6 +1592,8 @@ export function themeForFighter(id: string): StageTheme {
       return "mactan";
     case "iceni":
       return "watling";
+    case "conquistador":
+      return "causeway";
     default:
       return "colosseum";
   }
