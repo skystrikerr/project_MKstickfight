@@ -1001,17 +1001,17 @@ export const KNIGHT: FighterDef = {
         // Blocking this is not an answer. A hundred is the whole guard bar,
         // so it breaks on contact and everything after arrives on a man with
         // his arms down.
-        hit(18, 24, bx(24, 26, 104, 62), 62, {
+        hit(18, 24, bx(24, 26, 104, 62), 48, {
           group: 1,
           fx: "pierce",
           pushX: 4,
           hitstun: 22,
           hitstop: 10,
-          guardDamage: 100,
+          guardDamage: 58,
           shake: 2,
         }),
-        hit(36, 41, bx(20, 22, 92, 66), 58, { group: 2, fx: "slash", pushX: 3, hitstun: 20, hitstop: 8 }),
-        hit(52, 60, bx(16, 14, 96, 82), 158, {
+        hit(36, 41, bx(20, 22, 92, 66), 44, { group: 2, fx: "slash", pushX: 3, hitstun: 20, hitstop: 8 }),
+        hit(52, 60, bx(16, 14, 96, 82), 124, {
           group: 3,
           fx: "slash",
           pushX: 16,

@@ -764,8 +764,8 @@ export const ETHIOPIA: FighterDef = {
       duration: 78,
       meterCost: 100,
       // Two cartridges. He does not do this on an empty rifle.
-      resourceMin: 2,
-      resourceCost: 2,
+      resourceMin: 1,
+      resourceCost: 1,
       superFreeze: 38,
       invuln: [{ from: 1, to: 14, kind: "strike" }],
       friction: 0.86,
@@ -777,14 +777,14 @@ export const ETHIOPIA: FighterDef = {
       projectiles: [
         {
           at: 16, kind: "shot", x: 40, y: 58, vx: 21, vy: 0, life: 46,
-          box: { x: -8, y: -3, w: 16, h: 6 }, damage: 62, hitstun: 18, blockstun: 12,
-          armAfter: 0, pushX: 5, chip: 8, fx: "shot", hitstop: 7, meterGain: 0,
+          box: { x: -8, y: -3, w: 16, h: 6 }, damage: 96, hitstun: 18, blockstun: 12,
+          armAfter: 0, pushX: 5, chip: 12, fx: "shot", hitstop: 7, meterGain: 0,
           scale: 1, color: "#ffd9a0", trail: "#ffb469",
         },
         {
           at: 30, kind: "shot", x: 40, y: 44, vx: 21, vy: 0, life: 46,
-          box: { x: -8, y: -3, w: 16, h: 6 }, damage: 62, hitstun: 18, blockstun: 12,
-          armAfter: 0, pushX: 5, chip: 8, fx: "shot", hitstop: 7, meterGain: 0,
+          box: { x: -8, y: -3, w: 16, h: 6 }, damage: 96, hitstun: 18, blockstun: 12,
+          armAfter: 0, pushX: 5, chip: 12, fx: "shot", hitstop: 7, meterGain: 0,
           scale: 1, color: "#ffd9a0", trail: "#ffb469",
         },
       ],
@@ -794,7 +794,7 @@ export const ETHIOPIA: FighterDef = {
         { at: 30, kind: "shot", x: 46, y: 44, scale: 1.3 },
       ],
       desc: "SUPER. Two rounds into the column, and the rest of it is a confirm - land the volley and this cancels straight into anything he has. Miss and it is two cartridges and a hundred meter for nothing.",
-      notation: "\u2193\u2193 + S (100 meter, 2 Cartridges)",
+      notation: "\u2193\u2193 + S (100 meter, 1 Cartridges)",
       frames: [
         kf(0, { ...STANCE, crouch: 0.44, torso: -8 }, "out"),
         kf(10, { ...STANCE, crouch: 0.5, torso: -4, shoulderB: 76, elbowB: 26, weaponBack: 6, shoulderF: 54, elbowF: 44, hipF: 22, kneeF: 44, hipB: -30, kneeB: 54, offX: -3 }, "out"),

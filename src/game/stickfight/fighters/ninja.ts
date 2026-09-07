@@ -974,12 +974,12 @@ export const NINJA: FighterDef = {
       input: { button: "S", motion: "dd", stance: ["stand", "crouch"] },
       tags: ["super"],
       priority: 60,
-      duration: 76,
+      duration: 66,
       meterCost: 100,
       // Every shadow he has. The meter is only half the price - a Hanzo who
       // has been spending Kage on kunai cannot also have this.
-      resourceMin: 3,
-      resourceCost: 3,
+      resourceMin: 1,
+      resourceCost: 1,
       superFreeze: 40,
       invuln: [{ from: 1, to: 34, kind: "full" }],
       // The first version of this crossed through them and finished from
@@ -988,12 +988,12 @@ export const NINJA: FighterDef = {
       // their head. The idea survives in the axis the engine does have -
       // one guard cannot cover all three of these, and they arrive too fast
       // to change it twice.
-      vel: [{ at: 8, x: 9 }, { at: 26, x: 0 }],
+      vel: [{ at: 6, x: 13 }, { at: 24, x: 5 }, { at: 38, x: 0 }],
       friction: 0.9,
       hits: [
-        hit(14, 18, bx(18, 44, 74, 56), 46, { group: 1, guard: "overhead", fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(26, 30, bx(16, 0, 78, 26), 46, { group: 2, guard: "low", fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
-        hit(40, 48, bx(14, 30, 84, 76), 168, {
+        hit(14, 18, bx(18, 44, 74, 56), 58, { group: 1, guard: "overhead", fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
+        hit(26, 30, bx(16, 0, 78, 26), 58, { group: 2, guard: "low", fx: "slash", pushX: 1, hitstun: 20, hitstop: 5 }),
+        hit(40, 48, bx(14, 30, 84, 76), 226, {
           group: 3,
           guard: "overhead",
           fx: "pierce",
@@ -1012,7 +1012,7 @@ export const NINJA: FighterDef = {
         { at: 40, kind: "explode", x: 52, y: 44, scale: 1.3, color: "#b9a6f0" },
       ],
       desc: "SUPER. High, then along the floor, then high again, out of the smoke and faster than a guard can be changed twice. Costs three Kage as well as the meter.",
-      notation: "\u2193\u2193 + S (100 meter, 3 Kage)",
+      notation: "\u2193\u2193 + S (100 meter, 1 Kage)",
       frames: [
         kf(0, { ...STANCE, crouch: 0.5, torso: -8 }, "out"),
         kf(8, { ...STANCE, free: 1, crouch: 0.3, torso: 30, hipF: 60, kneeF: 70, hipB: 20, kneeB: 60, shoulderB: 96, elbowB: 20, weaponBack: 120, offY: 6 }, "linear"),
@@ -1021,7 +1021,7 @@ export const NINJA: FighterDef = {
         // Turned, and the real one.
         kf(40, { ...STANCE, torso: 28, shoulderB: 150, elbowB: -34, weaponBack: 122, shoulderF: 96, elbowF: 6, hipF: 38, kneeF: 12, hipB: -34, kneeB: 26, offX: 9 }, "out"),
         kf(48, { ...STANCE, torso: 16, shoulderB: 96, elbowB: 20, weaponBack: 150, offX: 4 }, "inOut"),
-        kf(76, { ...STANCE }),
+        kf(66, { ...STANCE }),
       ],
     },
   ],

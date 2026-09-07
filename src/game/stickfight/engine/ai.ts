@@ -320,6 +320,17 @@ export class AiController {
     const style = this.style(self);
     const threat = opponent.state === "move" && dist < 210;
     if (threat && Math.random() < Math.min(0.98, p.block * style.patience)) {
+      // The whole point of a counter super is that it is pressed *now* - while
+      // they are committed to something - and the super branch below fires on
+      // a distance check in neutral, which is the one moment it cannot work.
+      // Julie spent a hundred meter on an empty stance every time.
+      const readSuper = this.pickMove(
+        self,
+        (mv) => (mv.tags?.includes("super") ?? false) && !!mv.parryInto,
+      );
+      if (readSuper && self.meter >= (readSuper.meterCost ?? 100) && Math.random() < p.block * 0.5) {
+        return this.queueMove(self, readSuper);
+      }
       // Sometimes read it instead of eating it. The parry is the one universal
       // move nothing in the AI had ever pressed - on any fighter, at any
       // difficulty - so a player who committed to a heavy was never once
@@ -391,8 +402,22 @@ export class AiController {
     }
 
     // Super when it is available and they are close enough to connect.
-    if (self.meter >= 100 && dist < 260 && Math.random() < Math.min(0.95, p.special * style.special * 0.7)) {
-      const sup = this.pickMove(self, (m) => m.tags?.includes("super") ?? false);
+    if (self.meter >= 100 && Math.random() < Math.min(0.95, p.special * style.special * 0.7)) {
+      // Not a flat 260 for everyone. A super that travels, grabs or shoots can
+      // be thrown from range; one that is six passes at touching distance is a
+      // hundred meter donated to whoever is standing there. Read the move's
+      // own reach and its own approach instead of assuming.
+      const sup = this.pickMove(self, (m) => {
+        if (!m.tags?.includes("super")) return false;
+        // A counter is not thrown in neutral - it has its own branch above.
+        if (m.parryInto) return false;
+        if (m.projectiles?.length) return true;
+        const travel = (m.vel ?? []).reduce((t, v) => t + Math.max(0, v.x ?? 0) * 6, 0);
+        const reach = m.throwDef
+          ? m.throwDef.range
+          : Math.max(0, ...(m.hits ?? []).map((h) => h.box.x + h.box.w));
+        return dist <= reach + travel + 30;
+      });
       if (sup) return this.queueMove(self, sup);
     }
 

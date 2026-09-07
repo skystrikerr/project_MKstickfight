@@ -850,15 +850,23 @@ export const SAMURAI: FighterDef = {
       input: { button: "S", motion: "dd", stance: ["stand", "crouch"] },
       tags: ["super"],
       priority: 60,
-      duration: 62,
+      duration: 50,
       meterCost: 100,
       superFreeze: 34,
       // No hitbox anywhere in it. She does not attack; she waits, and if
       // nothing comes she has spent a hundred meter standing still with a
       // forty-frame recovery for anyone who noticed.
-      parryWindow: [6, 30],
+      parryWindow: [5, 40],
+      // And if nothing came, she cuts anyway. Worth a quarter of the read.
       parryInto: "superAwazu",
       friction: 0.86,
+      hits: [hit(44, 48, bx(20, 26, 104, 60), 82, {
+        fx: "slash",
+        pushX: 8,
+        hitstun: 20,
+        hitstop: 10,
+        shake: 1.4,
+      })],
       vfx: [
         { at: 2, kind: "super", x: 0, y: 50, scale: 2.3, color: "#dfe6ee" },
         { at: 8, kind: "spark", x: 26, y: 54, scale: 0.8, color: "#dfe6ee" },
@@ -869,10 +877,10 @@ export const SAMURAI: FighterDef = {
         kf(0, { ...STANCE, crouch: 0.3 }, "out"),
         kf(6, { ...STANCE, crouch: 0.44, torso: -12, head: 4, shoulderF: 30, elbowF: 54, shoulderB: 22, elbowB: 58, weapon: 40, hipF: 16, kneeF: 34, hipB: -24, kneeB: 48, offX: -4 }, "out"),
         kf(20, { ...STANCE, crouch: 0.46, torso: -14, head: 5, shoulderF: 28, elbowF: 56, shoulderB: 20, elbowB: 60, weapon: 42, offX: -5 }, "inOut"),
-        kf(30, { ...STANCE, crouch: 0.44, torso: -12, head: 4, shoulderF: 30, elbowF: 54, weapon: 40, offX: -4 }, "inOut"),
+        kf(40, { ...STANCE, crouch: 0.44, torso: -12, head: 4, shoulderF: 30, elbowF: 54, weapon: 40, offX: -4 }, "inOut"),
         // Nothing came. She straightens up, slowly, and it costs her.
-        kf(46, { ...STANCE, crouch: 0.2, torso: -4, weapon: 30 }, "inOut"),
-        kf(62, { ...STANCE }),
+        kf(44, { ...STANCE, crouch: 0.2, torso: -4, weapon: 30 }, "inOut"),
+        kf(50, { ...STANCE }),
       ],
     },
     {
@@ -886,7 +894,7 @@ export const SAMURAI: FighterDef = {
       friction: 0.9,
       // One cut. It is unblockable because she has already beaten the guard -
       // the parry was the guess, and this is what winning the guess is worth.
-      hits: [hit(6, 11, bx(20, 20, 130, 76), 248, {
+      hits: [hit(6, 11, bx(20, 20, 130, 76), 320, {
         guard: "unblockable",
         fx: "slash",
         pushX: 14,

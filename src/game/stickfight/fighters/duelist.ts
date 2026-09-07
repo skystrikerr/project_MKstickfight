@@ -747,13 +747,21 @@ export const DUELIST: FighterDef = {
       input: { button: "S", motion: "dd", stance: ["stand", "crouch"] },
       tags: ["super"],
       priority: 60,
-      duration: 56,
+      duration: 46,
       meterCost: 100,
       superFreeze: 32,
       // She invites it. There is no hitbox in this at all.
-      parryWindow: [5, 26],
+      parryWindow: [4, 36],
+      // The same: a thrust she was going to make anyway.
       parryInto: "superBotte",
       friction: 0.84,
+      hits: [hit(40, 44, bx(24, 34, 122, 28), 78, {
+        fx: "pierce",
+        pushX: 7,
+        hitstun: 20,
+        hitstop: 10,
+        shake: 1.3,
+      })],
       vfx: [
         { at: 2, kind: "super", x: 0, y: 50, scale: 2.3, color: "#e8c46a" },
         { at: 6, kind: "spark", x: 34, y: 56, scale: 0.7, color: "#e8c46a" },
@@ -764,9 +772,9 @@ export const DUELIST: FighterDef = {
         kf(0, { ...STANCE }, "out"),
         kf(5, { ...STANCE, torso: -6, shoulderF: 86, elbowF: 26, weapon: 4, shoulderB: -34, elbowB: 70, hipF: 26, kneeF: 20, hipB: -40, kneeB: 50, offX: -5 }, "out"),
         kf(16, { ...STANCE, torso: -8, shoulderF: 88, elbowF: 24, weapon: 2, hipB: -42, kneeB: 52, offX: -6 }, "inOut"),
-        kf(26, { ...STANCE, torso: -6, shoulderF: 86, elbowF: 26, weapon: 4, offX: -5 }, "inOut"),
-        kf(42, { ...STANCE, torso: -2, shoulderF: 82, elbowF: 24, weapon: 4 }, "inOut"),
-        kf(56, { ...STANCE }),
+        kf(36, { ...STANCE, torso: -6, shoulderF: 86, elbowF: 26, weapon: 4, offX: -5 }, "inOut"),
+        kf(41, { ...STANCE, torso: -2, shoulderF: 82, elbowF: 24, weapon: 4 }, "inOut"),
+        kf(46, { ...STANCE }),
       ],
     },
     {
@@ -778,7 +786,7 @@ export const DUELIST: FighterDef = {
       duration: 50,
       vel: [{ at: 2, x: 11 }, { at: 14, x: 0 }],
       friction: 0.9,
-      hits: [hit(5, 10, bx(26, 34, 150, 30), 244, {
+      hits: [hit(5, 10, bx(26, 34, 150, 30), 316, {
         guard: "unblockable",
         fx: "pierce",
         pushX: 10,

@@ -909,7 +909,7 @@ export const VIKING: FighterDef = {
       // appreciably harder and takes appreciably more, and there is no way to
       // turn it off - the trade is the move, and pressing it while ahead is a
       // worse idea than pressing it while behind.
-      grants: [{ damageDealt: 1.32, damageTaken: 1.22 }],
+      grants: [{ damageDealt: 1.18, damageTaken: 1.24 }],
       // One hit, at the end, and it is a shove rather than a finisher: what
       // she has bought is the next thirty seconds, not this exchange.
       hits: [hit(30, 36, bx(16, 20, 92, 84), 76, {

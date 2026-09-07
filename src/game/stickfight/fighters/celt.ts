@@ -799,7 +799,7 @@ export const CELT: FighterDef = {
       // He is not stopping. Four hits of armour through the whole run, and
       // the run is long - the further it goes the more of the stage it has
       // eaten, which is the only reason Caesar lost this one.
-      armor: [{ from: 12, to: 58, hits: 4, damageScale: 0.14 }],
+      armor: [{ from: 12, to: 58, hits: 2, damageScale: 0.18 }],
       // Measured: at twelve a frame with a light friction he covered a
       // hundred and sixty units before the first hitbox opened, ran clean
       // through the man he was charging - separation cannot hold against that
@@ -816,7 +816,7 @@ export const CELT: FighterDef = {
         // Three men wide. The clipping hits are small and the last one is not.
         hit(15, 21, bx(18, 22, 108, 66), 44, { group: 1, fx: "slash", pushX: 3, hitstun: 18, hitstop: 5 }),
         hit(28, 34, bx(18, 22, 110, 66), 44, { group: 2, fx: "slash", pushX: 3, hitstun: 18, hitstop: 5 }),
-        hit(46, 54, bx(12, 10, 122, 86), 168, {
+        hit(46, 54, bx(12, 10, 122, 86), 132, {
           group: 3,
           fx: "slash",
           pushX: 20,
@@ -826,7 +826,7 @@ export const CELT: FighterDef = {
           hitstop: 22,
           shake: 3.6,
           // A line that has been shoved this far is not holding anything.
-          guardDamage: 62,
+          guardDamage: 34,
         }),
       ],
       vfx: [

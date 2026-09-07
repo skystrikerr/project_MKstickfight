@@ -2749,7 +2749,17 @@ function scriptFor(move: MoveDef): RawInput[] {
   for (const def of ROSTER) {
     const sup = def.moves.find((m) => m.tags?.includes("super"));
     if (!sup?.parryInto) continue;
-    check(`${def.id}: the counter super has no hitbox of its own`, !sup.hits?.length);
+    // Not "no hitbox" - that was the first guess and it made a missed read
+    // cost the whole meter, which measured as Tomoe's super contributing zero
+    // per cent of her damage across the roster. The rule that matters is that
+    // reading correctly is worth far more than swinging blind.
+    const whiff = Math.max(0, ...(sup.hits ?? []).map((h) => h.damage));
+    const paid = Math.max(0, ...(def.moves.find((m) => m.id === sup.parryInto)?.hits ?? []).map((h) => h.damage));
+    check(
+      `${def.id}: the read is worth much more than the guess`,
+      paid >= whiff * 3,
+      `read ${paid} vs guess ${whiff}`,
+    );
     check(`${def.id}: it has a window to catch in`, !!sup.parryWindow);
     const answer = def.moves.find((m) => m.id === sup.parryInto);
     check(`${def.id}: its answer exists`, !!answer, sup.parryInto);
