@@ -484,10 +484,20 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     fall: { from: 90, per100: 5, max: 20 },
     // Bright desert daylight rather than another night stage - long shadows,
     // a hard sun, and a horizon lost in heat haze rather than in dark.
-    sky: ["#b9dcec", "#f2c98a"],
-    ground: "#c9a876",
+    /**
+     * A real blue, not a tinted white.
+     *
+     * The first pass used #b9dcec, which is already nearly white - and the
+     * camera on a stage this wide only ever sees the lower three quarters of
+     * the gradient, so what reached the screen was that pale blue mixed most
+     * of the way into the sand. Sky, dune, stone and fighters all landed
+     * inside one narrow band of beige, and the only thing with any contrast
+     * on screen was the fighters' own paint.
+     */
+    sky: ["#3f96e2", "#e8eef2"],
+    ground: "#b08a5c",
     accent: "#e0b866",
-    light: { key: "#fff4d6", fill: "#7a8fae", strength: 0.85, shadow: "#a9764a", glow: 0.06 },
+    light: { key: "#fff4d6", fill: "#6d86ab", strength: 0.85, shadow: "#8a5f37", glow: 0.06 },
     ambient: { kind: "dust", count: 26, colors: ["#e8d2a0", "#d8b878"], speed: -0.05, wind: 0.4, size: [2, 5], opacity: 0.4 },
     /**
      * Four steps rather than the towers' five or eight - this stage spends
@@ -2437,33 +2447,65 @@ export class Stage {
     // darkening - the one built stage on the roster lit like midday.
     far.add(disc(-680, 500, 60, "#fff6df", 1, 0.95));
     far.add(disc(-680, 500, 90, "#fff6df", 1, 0.16));
-    // Heat haze: soft horizontal bands low over the desert.
-    for (let i = 0; i < 3; i++) {
-      far.add(rect(0, 60 + i * 10, 2800, 8, "#f2ddb0", 1, 0.12));
+    // Heat haze, low and thin. It was one 300-unit slab, which at the widest
+    // zoom covered most of the visible sky and put a hard horizontal seam
+    // across it - a band of haze has to stop somewhere the eye is not
+    // looking, which means near the ground.
+    for (let i = 0; i < 7; i++) {
+      far.add(rect(0, 30 + i * 26, 2800, 30, "#f4ecdc", 1, 0.14 - i * 0.017));
     }
-    // Distant dunes, rolling rather than jagged.
+    // Distant dunes, rolling rather than jagged. Almost sky-coloured: they
+    // are far enough away to be a shape rather than a surface.
     for (const [x, w, h] of [[-1300, 700, 60], [-500, 900, 90], [500, 800, 70], [1300, 700, 60]] as [
       number,
       number,
       number,
     ][]) {
-      far.add(tri(x, 40, w, h, "#e0bd82", 1, 0.85));
+      far.add(tri(x, 40, w, h, "#e2caa0", 1, 0.9));
     }
     // Two smaller pyramids further off, so the one being fought on reads as
-    // the largest of three rather than the only one there is.
-    far.add(tri(-980, 60, 260, 200, "#d9b384", 2, 0.9));
-    far.add(tri(-980, 60, 210, 160, "#c9a06e", 2, 0.5));
-    far.add(tri(1120, 60, 220, 170, "#d9b384", 2, 0.9));
-    far.add(tri(1120, 60, 175, 135, "#c9a06e", 2, 0.5));
+    // the largest of three rather than the only one there is. Each gets a lit
+    // face and a shaded one, because a flat triangle at this size is a tent.
+    for (const [x, w, h] of [[-980, 260, 200], [1120, 220, 170]] as [number, number, number][]) {
+      far.add(tri(x, 60, w, h, "#d9bf92", 2, 0.95));
+      far.add(poly(x, 60, [0, 0, w / 2, 0, 0, h], "#c0a273", 2, 0.95));
+    }
     // The Sphinx, reclining off to one side - the single silhouette that
     // says "Giza" before the pyramid behind it has to.
+    /**
+     * The Sphinx. It is the one silhouette that says Giza before the pyramid
+     * behind it has to, so it gets two things the first pass did not give it:
+     * a full step of value below the dunes it sits against, and a place to
+     * sit where the causeway does not cover it.
+     *
+     * It stood at y = 60 in the middle of the base terrace's span, and the
+     * terrace runs from the floor up to 72 - so everything below the neck was
+     * behind a wall and what reached the screen was a head on a plinth. It
+     * sits up on the higher ground behind the causeway now.
+     */
     {
-      const sx = -560;
-      far.add(rect(sx, 60, 260, 34, "#c2955f", 3, 0.92));
-      far.add(poly(sx - 130, 90, [0, 0, 40, 0, 30, 20, 0, 14], "#c2955f", 3, 0.92));
-      far.add(poly(sx + 90, 90, [0, 0, 46, 60, 30, 64, -10, 26], "#c2955f", 3, 0.92));
-      far.add(rect(sx + 108, 150, 26, 20, "#b98a54", 3, 0.92));
-      far.add(poly(sx + 96, 170, [0, 0, 40, 0, 34, 14, 6, 14], "#a97c4a", 3, 0.9));
+      const sx = -640;
+      const sy = 96;
+      const body = "#9a744c";
+      const shade = "#77593a";
+      // The rise it stands on, so it is on ground rather than hovering over
+      // the dune line.
+      far.add(poly(sx, 40, [-260, 0, 300, 0, 250, 58, -210, 56], "#d6bb8e", 3, 0.95));
+      // Couchant body, with the forelegs running out ahead of it.
+      far.add(rect(sx, sy, 250, 38, body, 3, 0.95));
+      far.add(rect(sx - 40, sy, 170, 20, body, 3, 0.95));
+      far.add(rect(sx, sy, 250, 8, shade, 3, 0.6));
+      // Haunch at the back.
+      far.add(poly(sx + 96, sy, [0, 0, 34, 0, 30, 46, -4, 40], body, 3, 0.95));
+      // Chest rising to the neck, then the head.
+      far.add(poly(sx - 118, sy + 36, [0, 0, 52, 0, 46, 34, 6, 30], body, 3, 0.95));
+      // Nemes headdress - the flared lappets either side are the reason the
+      // head reads as a head and not a boulder.
+      far.add(poly(sx - 132, sy + 66, [0, 0, 62, 0, 70, 40, 52, 52, 10, 52, -8, 40], body, 3, 0.95));
+      far.add(poly(sx - 132, sy + 66, [0, 0, 14, 0, 8, 44, -8, 40], shade, 3, 0.9));
+      far.add(poly(sx - 76, sy + 66, [0, 0, 14, 0, 8, 40, -6, 44], shade, 3, 0.9));
+      // Face, held lighter so it catches the sun against the headdress.
+      far.add(poly(sx - 118, sy + 66, [0, 0, 34, 0, 30, 26, 4, 26], "#b8895a", 3, 0.95));
     }
     this.addLayer(far, 0.2);
 
@@ -2490,30 +2532,113 @@ export class Stage {
     palm(1050, 76);
     // A fallen, broken obelisk half-buried in sand - background flavour,
     // separate from the two standing ones a fighter can actually land on.
-    mid.add(rect(-260, 0, 120, 22, "#c2955f", 4, 0.9));
-    mid.add(poly(-140, 0, [0, 0, 20, 0, 26, 11, 0, 22], "#c2955f", 4, 0.9));
+    mid.add(rect(-260, 0, 120, 22, "#b8895a", 4, 0.9));
+    mid.add(poly(-140, 0, [0, 0, 20, 0, 26, 11, 0, 22], "#b8895a", 4, 0.9));
+
+    /**
+     * The pyramid itself, standing behind the four terraces a fighter climbs.
+     *
+     * Without it the playable courses read as a stepped platform with a small
+     * gold triangle balanced on the top - a wedding cake, not a pyramid. The
+     * mass goes in the mid layer so it parallaxes behind the fighting ground
+     * and the terraces sit on its face rather than in front of a gap.
+     *
+     * Drawn as two faces rather than one triangle. A single flat shape at
+     * this size has no volume; a lit south-east face against a shaded one is
+     * the whole reason a pyramid looks like a solid object in a photograph.
+     */
+    {
+      const apex = 470;
+      const half = 620;
+      // The sun sits off to the left of this stage, so the left face is the
+      // lit one and the right is in its own shadow. Drawn the other way round
+      // first, which looks wrong before you can say why - the shading and the
+      // one light source on screen were disagreeing.
+      mid.add(poly(0, -20, [-half, 0, half, 0, 0, apex], "#d8b177", 3, 1));
+      mid.add(poly(0, -20, [0, 0, half, 0, 0, apex], "#a8804a", 3, 1));
+      // The pyramidion. Gilded, the way the very tip of a real one was - and
+      // it belongs up here on the apex of the mass, not down on the top
+      // terrace, where a second small gold pyramid in front of a big stone
+      // one just read as two pyramids.
+      mid.add(poly(0, apex - 96, [-66, 0, 66, 0, 0, 96], "#e6bd6c", 4, 1));
+      mid.add(poly(0, apex - 96, [0, 0, 66, 0, 0, 96], "#c99a48", 4, 1));
+      mid.add(disc(0, apex + 6, 9, "#fff2c9", 5, 0.95));
+      mid.add(disc(0, apex + 6, 26, "#fff2c9", 4, 0.2));
+      // Casing courses, faint, running parallel to the slope.
+      for (let i = 1; i < 9; i++) {
+        const t = i / 9;
+        const y = -20 + apex * t;
+        const w = half * (1 - t) * 2;
+        mid.add(rect(0, y, w, 2, "#8a6840", 3, 0.16));
+      }
+      // The entrance: a black notch high on the north face. It is the only
+      // genuinely dark thing on a stage made of sand, which is exactly what
+      // the eye needs to rest on - and it reads "pyramid" on its own.
+      // It has to sit ON the face. The slope narrows to nothing at the apex,
+      // so a notch placed by eye at head height ended up hanging in the sky
+      // beside the pyramid: at y the face only spans half*(1 - (y+20)/apex)
+      // either side of centre, which at y=310 is 185 units, and the notch was
+      // at 252.
+      const doorY = 170;
+      const doorHalf = half * (1 - (doorY + 20) / apex);
+      const doorX = -doorHalf * 0.62;
+      mid.add(poly(doorX, doorY, [0, 0, 44, 0, 44, 54, 22, 70, 0, 54], "#241a12", 4, 0.95));
+      mid.add(poly(doorX, doorY, [0, 0, 44, 0, 44, 10, 0, 10], "#4a3722", 4, 0.9));
+      // Spoil heaped below it, the way every opened tomb has.
+      mid.add(poly(doorX + 22, doorY, [-46, 0, 46, 0, 20, -30, -20, -30], "#b8925e", 4, 0.55));
+    }
     this.addLayer(mid, 0.55);
 
     const near = new THREE.Group();
-    const stone = "#c9a876";
-    const stoneLit = "#e0c090";
-    const stoneDark = "#9a7a52";
+    /**
+     * The near layer is the darkest thing on the stage, and that is the whole
+     * trick of it.
+     *
+     * Distance in a desert is haze: the further off a thing is, the closer to
+     * the sky it gets. So the dunes are nearly white, the pyramid behind is a
+     * step down, and the courses a fighter actually stands on are two steps
+     * down again. The first pass had all three inside about fifteen per cent
+     * of each other and the whole screen turned to one beige field.
+     */
+    const stone = "#a8845a";
+    const stoneLit = "#cfa970";
+    const stoneDark = "#6d5133";
     const gold = "#e0b866";
 
     // ---- the plaza floor ----
-    near.add(rect(0, -110, 2800, 110, "#d9bd8c", 10, 1));
-    for (let x = -W - 60; x <= W + 60; x += 90) {
-      near.add(rect(x, -110, 4, 110, "#c2a06e", 10, 0.6));
+    // Below the fighting line, going darker with depth - the foundation
+    // courses are in their own shadow, and it stops the bottom third of a
+    // wide shot being a flat lit wall.
+    // Five courses down, each darker than the last. The widest zoom shows a
+    // long way below the fighting line, and that was a single flat band of
+    // ground colour taking up the bottom quarter of the screen.
+    const COURSES: [number, number, string][] = [
+      [-110, 110, "#8e6d45"],
+      [-190, 80, "#775a3b"],
+      [-262, 72, "#614831"],
+      [-326, 64, "#4d3927"],
+      [-440, 114, "#3a2b1e"],
+    ];
+    for (const [y, h, color] of COURSES) {
+      near.add(rect(0, y, 2800, h, color, 10, 1));
+      // The joint line along the top of each course, so they read as laid
+      // blocks rather than as a gradient.
+      near.add(rect(0, y + h - 3, 2800, 3, "#43301f", 10, 0.35));
+      for (let x = -W - 60; x <= W + 60; x += 90) {
+        near.add(rect(x + (y % 180 === 0 ? 45 : 0), y, 4, h, "#43301f", 10, 0.28));
+      }
     }
-    near.add(rect(0, -8, 2800, 8, "#b9986a", 10, 0.85));
+    near.add(rect(0, -8, 2800, 8, "#7a5e3c", 10, 0.9));
     // Causeway paving down the middle - large flagstones underfoot rather
     // than bare sand, the way the real approach to Giza is a built road.
     for (let x = -W; x <= W; x += 130) {
-      near.add(rect(x, -8, 110, 6, stoneLit, 10, 0.6));
+      near.add(rect(x, -8, 110, 6, stoneLit, 10, 0.55));
     }
-    // Drifts of sand banked against everything at ground level.
+    // Drifts of sand banked against everything at ground level. Lighter than
+    // the stone, because blown sand is the one thing down here catching the
+    // sun square on.
     for (const [x, w] of [[-900, 220], [-400, 260], [140, 240], [640, 260]] as [number, number][]) {
-      near.add(poly(x, 0, [-w / 2, 0, w / 2, 0, w / 3, 20, -w / 3, 18], "#e0c592", 9, 0.55));
+      near.add(poly(x, 0, [-w / 2, 0, w / 2, 0, w / 3, 20, -w / 3, 18], "#d8bd8c", 9, 0.6));
     }
 
     /**
@@ -2538,10 +2663,40 @@ export class Stage {
 
     // ---- the riser faces between terraces, so the pyramid reads as a solid
     // mass rather than four boards floating over each other ----
+    /**
+     * The riser under one terrace.
+     *
+     * This is the wall directly behind the fighters for most of a round, so
+     * it gets carved rather than left as a flat slab of one colour - that is
+     * where the eye spends the fight, and a bare face made the whole middle
+     * of the screen dead.
+     *
+     * Recessed panels, a sunk relief band across them, and the batter every
+     * Egyptian wall has: the face leans back as it rises, so the top edge is
+     * inset from the bottom.
+     */
     const face = (p: { x: number; y: number; w: number }, below: number) => {
       const cx = p.x + p.w / 2;
-      near.add(rect(cx, below, p.w - 20, p.y - below - 14, stone, 6, 0.96));
-      near.add(rect(cx, below, p.w - 20, 4, stoneDark, 6, 0.4));
+      const h = p.y - below - 14;
+      const w = p.w - 20;
+      near.add(poly(cx - w / 2, below, [0, 0, w, 0, w - 9, h, 9, h], stone, 6, 0.96));
+      near.add(rect(cx, below, w, 4, stoneDark, 6, 0.4));
+      // Panels, sunk a shade darker than the wall, with a lit top edge so
+      // they read as cut into it rather than painted on.
+      const panels = Math.max(1, Math.round(w / 150));
+      const pw = Math.min(112, (w - 30) / panels - 22);
+      for (let i = 0; i < panels; i++) {
+        const px = cx - w / 2 + (w / panels) * (i + 0.5);
+        near.add(rect(px, below + h * 0.18, pw, h * 0.58, "#9a7850", 6, 0.9));
+        near.add(rect(px, below + h * 0.76, pw, 3, stoneLit, 6, 0.5));
+        near.add(rect(px, below + h * 0.18, pw, 3, "#5c4429", 6, 0.5));
+        // A column of glyph blocks down the middle of each panel.
+        for (let g = 0; g < 3; g++) {
+          near.add(rect(px, below + h * (0.28 + g * 0.16), 12, 9, "#6d5133", 6, 0.42));
+          near.add(rect(px + 16, below + h * (0.28 + g * 0.16), 6, 9, "#6d5133", 6, 0.3));
+          near.add(rect(px - 16, below + h * (0.28 + g * 0.16), 6, 9, "#6d5133", 6, 0.3));
+        }
+      }
     };
     face(baseL, 0);
     face(baseR, 0);
@@ -2550,12 +2705,21 @@ export class Stage {
 
     // ---- the capstone itself: gilded, the way the very tip of a real
     // pyramid once was, and the brightest thing on the stage after the sun ----
+    // A gilded shrine on the top terrace. It used to be a small gold pyramid,
+    // which stopped working the moment a large stone one was standing behind
+    // it - the tip is up on the real apex now, and what is left up here is
+    // the thing you would climb to, rather than a copy of what you climbed.
     {
       const cx = capstone.x + capstone.w / 2;
-      near.add(poly(cx, capstone.y - 6, [-70, 0, 70, 0, 0, 130], gold, 12, 0.95));
-      near.add(poly(cx, capstone.y - 6, [-50, 0, 50, 0, 0, 100], "#f0d494", 12, 0.5));
-      near.add(disc(cx, capstone.y + 128, 8, "#fff2c9", 12, 0.9));
-      near.add(disc(cx, capstone.y + 128, 20, "#fff2c9", 11, 0.22));
+      near.add(rect(cx, capstone.y - 4, 96, 8, stoneDark, 12, 0.9));
+      near.add(rect(cx, capstone.y + 4, 80, 54, gold, 12, 0.95));
+      near.add(rect(cx, capstone.y + 4, 80, 10, "#c99a48", 12, 0.6));
+      // Cavetto cornice - the outward-flaring lip every Egyptian doorway has.
+      near.add(poly(cx - 52, capstone.y + 58, [0, 0, 104, 0, 96, 18, 8, 18], "#f0d494", 12, 0.95));
+      // The dark of the shrine's doorway.
+      near.add(rect(cx, capstone.y + 4, 26, 40, "#2b1f14", 12, 0.9));
+      near.add(disc(cx, capstone.y + 88, 7, "#fff2c9", 12, 0.9));
+      near.add(disc(cx, capstone.y + 88, 20, "#fff2c9", 11, 0.22));
     }
 
     /** One obelisk: a tapering shaft, hieroglyph bands, and its own small
