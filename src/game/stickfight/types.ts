@@ -229,6 +229,24 @@ export interface HitDef {
   guardDamage?: number;
 }
 
+/** A window during which thrown things are sent back the way they came. */
+export interface DeflectWindow {
+  from: number;
+  to: number;
+  /**
+   * The deflecting surface, in facing space. Defaults to the fighter's own
+   * hurtboxes, which is right for a body-sized shield and wrong for anything
+   * that only catches what comes at head height.
+   */
+  box?: Box;
+  /** Multiplier on the speed of the returned shot. */
+  speed?: number;
+  /** Multiplier on the damage of the returned shot. */
+  damage?: number;
+  /** Meter awarded for taking one. */
+  meterGain?: number;
+}
+
 export interface ThrowDef {
   from: number;
   to: number;
@@ -293,6 +311,18 @@ export interface ProjectileSpawn {
   hits?: number;
   /** Destroyed when it collides with an enemy projectile. */
   clashes?: boolean;
+  /**
+   * Whether a deflect window can take this shot and turn it around.
+   *
+   * Defaults to true, because almost everything on the roster is a thrown
+   * object and a shield is a reasonable answer to a thrown object. It is set
+   * false for the things that are not really projectiles at all - a summoned
+   * rank of legionaries is a projectile only because that is the one thing in
+   * the engine that advances on its own, and catching a formation of men on
+   * your shield and sending them back the other way is not a fight, it is a
+   * joke.
+   */
+  deflectable?: boolean;
   /** Energy kept when it hits the floor (0 = no bounce). */
   bounce?: number;
   /** How many times it may bounce before it settles or detonates. */
@@ -600,6 +630,22 @@ export interface MoveDef {
   hurtboxAt?: { from: number; to: number; box: Box }[];
   /** Frames during which an incoming strike is parried instead of blocked. */
   parryWindow?: [number, number];
+  /**
+   * Frames during which an enemy projectile is turned around rather than
+   * merely survived.
+   *
+   * The roster already had two moves whose descriptions said they deflected
+   * things thrown at them, and both of them were `invuln: "projectile"` - the
+   * shot passed through the fighter and carried on across the screen. That is
+   * a dodge. It reads as nothing happening, and against a zoner it changes
+   * who is winning the exchange not at all: he throws again immediately and
+   * you are still the one standing there.
+   *
+   * A deflect takes the shot. It changes hands, reverses, re-arms from where
+   * it turned, and the man who threw it now has to deal with it - which is
+   * the only version of the move that gives a zoner a reason to stop.
+   */
+  deflect?: DeflectWindow;
   /**
    * Move to switch into the instant this one parries something.
    *

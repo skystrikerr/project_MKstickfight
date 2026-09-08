@@ -42,7 +42,7 @@ export const DOSSIERS: Record<string, Dossier> = {
     history:
       "Caesar names Vorenus and Titus Pullo in Book V of the Gallic War, in the middle of an account of the Nervii siege, purely to tell a story about two centurions who could not stand each other. Each went over the rampart to outdo the other, each got into trouble alone, and each had to be pulled out by the man he was trying to beat. It is a strange thing to find in a campaign report, and it is the only reason either name survives. Everything else about him - the century he held, where he died, whether he lived through the winter - is gone.",
     arsenal: [
-      { name: "Scutum", role: "Wall and weapon", note: "Curved plywood body shield, faced in linen and hide, iron boss at the centre. Heavy enough to be swung." },
+      { name: "Scutum", role: "Wall, weapon, and answer", note: "Curved plywood body shield, faced in linen and hide, iron boss at the centre. Heavy enough to be swung, and square enough to put a thrown thing back where it came from." },
       { name: "Pilum", role: "Thrown, once", note: "Soft iron shank behind a hardened point: it bends on impact so it cannot be thrown back, and fouls whatever it hits." },
       { name: "Gladius", role: "Close work behind the shield", note: "Short, wide, and made for the half-metre of space a shield wall leaves you." },
     ],

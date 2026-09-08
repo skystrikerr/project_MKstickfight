@@ -471,6 +471,13 @@ export class Fighter {
     this.state = state;
     this.stateFrame = 0;
     if (state !== "move") {
+      // Whatever the fighter was holding is let go here rather than only on
+      // the clean end of a throw. `applyThrowPayload` releases when the throw
+      // pays out, and the duration branch releases when it runs out - but any
+      // other way out of the move (landing, being knocked out of it, the round
+      // ending) left the opponent parked in `grabbed` with nobody holding
+      // them, which is a state they never come back from.
+      if (this.holding) this.releaseHold();
       this.move = null;
       this.moveFrame = 0;
       this.connected.clear();
@@ -1222,7 +1229,11 @@ export class Fighter {
     }
     if (this.state === "move") {
       if (this.move?.landCancel) return;
-      if (this.move?.airborne) {
+      // An air move is over the moment it touches down - except when it is
+      // carrying the opponent, where the landing is the whole move. Cutting
+      // those short dropped the held fighter in mid-air and skipped the
+      // payload that was supposed to arrive on impact.
+      if (this.move?.airborne && !this.holding) {
         this.setState("land");
       }
       return;

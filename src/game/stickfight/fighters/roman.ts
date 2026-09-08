@@ -37,8 +37,8 @@ export const ROMAN: FighterDef = {
   bio: "Named by Caesar in the Gallic War for the running feud with Titus Pullo that sent them both over the rampart at the Nervii siege. Holds the line with a scutum and punishes everything that steps inside it.",
   archetype: "Zoner / Wall",
   difficulty: 2,
-  strengths: ["Longest normals in the roster", "Shield armour", "Strong anti-airs"],
-  weaknesses: ["Slow walk speed", "Weak up close", "Long recovery on whiffs"],
+  strengths: ["Longest normals in the roster", "Sends thrown weapons back", "Charge and grab both cross ground"],
+  weaknesses: ["Slow walk speed", "Weak up close", "No invincible reversal", "Long recovery on whiffs"],
   winQuote: "Pullo would have gone first. That is the only thing he ever beat me at.",
   // Republican Rome's state cult, a centurion of the Eleventh, and a war of conquest Caesar wrote up himself.
   factions: ["old-gods", "rome", "conquest"],
@@ -692,188 +692,354 @@ export const ROMAN: FighterDef = {
     },
     {
       id: "pilumEx",
-      name: "Pilum Volley",
+      name: "Rain of Iron",
       input: { button: "S", motion: "qcf", stance: ["stand", "crouch"] },
       tags: ["special", "ex", "projectile"],
       priority: 20,
-      duration: 52,
+      duration: 62,
       meterCost: 50,
+      /**
+       * A legion never threw pila one at a time at one man. The front ranks
+       * threw together on a word, and what arrived was weather.
+       *
+       * So this one does not leave his hand at all - he calls for it, and it
+       * falls: five shafts walking away from him down the ground in front,
+       * each arriving from above and therefore hitting overhead. Crouching is
+       * not an answer to it. Being somewhere else is.
+       *
+       * `armAfter: 0` on every one of them and it is not optional. Arming
+       * distance is measured horizontally, and something coming almost
+       * straight down never travels far enough sideways to arm at all - the
+       * whole volley would have fallen through him harmlessly.
+       */
       projectiles: [
-        {
-          at: 10,
-          kind: "pilum",
-          x: 40,
-          y: 76,
-          vx: 13,
-          vy: -0.5,
-          gravity: 0.02,
-          life: 90,
-          box: { x: -26, y: -7, w: 52, h: 14 },
-          damage: 46,
-          hitstun: 18,
-          blockstun: 12,
-          chip: 4,
-          pushX: 4,
-          clashes: true,
-          fx: "pierce",
-        },
-        {
-          at: 18,
-          kind: "pilum",
-          x: 40,
-          y: 60,
-          vx: 14,
-          vy: 0,
-          gravity: 0.02,
-          life: 90,
-          box: { x: -26, y: -7, w: 52, h: 14 },
-          damage: 42,
-          hitstun: 18,
-          blockstun: 12,
-          chip: 4,
-          pushX: 4,
-          clashes: true,
-          fx: "pierce",
-        },
-        {
-          at: 26,
-          kind: "pilum",
-          x: 40,
-          y: 44,
-          vx: 15,
-          vy: 0.3,
-          gravity: 0.02,
-          life: 90,
-          box: { x: -26, y: -7, w: 52, h: 14 },
-          damage: 52,
-          hitstun: 22,
-          blockstun: 14,
-          chip: 5,
-          pushX: 7,
-          knockdown: "soft",
-          clashes: true,
-          fx: "pierce",
-        },
+        { at: 8, kind: "pilum", armAfter: 0, x: 90, y: 250, vx: 1.2, vy: -7, gravity: 0.5, life: 46,
+          box: { x: -7, y: -34, w: 14, h: 68 }, damage: 48, hitstun: 20, blockstun: 13,
+          guard: "overhead", chip: 4, pushX: 4, clashes: true, fx: "pierce", color: "#c9d1d9" },
+        { at: 12, kind: "pilum", armAfter: 0, x: 152, y: 250, vx: 1.2, vy: -7, gravity: 0.5, life: 46,
+          box: { x: -7, y: -34, w: 14, h: 68 }, damage: 48, hitstun: 20, blockstun: 13,
+          guard: "overhead", chip: 4, pushX: 4, clashes: true, fx: "pierce", color: "#c9d1d9" },
+        { at: 16, kind: "pilum", armAfter: 0, x: 214, y: 250, vx: 1.2, vy: -7, gravity: 0.5, life: 46,
+          box: { x: -7, y: -34, w: 14, h: 68 }, damage: 48, hitstun: 20, blockstun: 13,
+          guard: "overhead", chip: 4, pushX: 4, clashes: true, fx: "pierce", color: "#c9d1d9" },
+        { at: 20, kind: "pilum", armAfter: 0, x: 276, y: 250, vx: 1.2, vy: -7, gravity: 0.5, life: 46,
+          box: { x: -7, y: -34, w: 14, h: 68 }, damage: 48, hitstun: 20, blockstun: 13,
+          guard: "overhead", chip: 4, pushX: 4, clashes: true, fx: "pierce", color: "#c9d1d9" },
+        { at: 24, kind: "pilum", armAfter: 0, x: 338, y: 250, vx: 1.2, vy: -7, gravity: 0.5, life: 46,
+          box: { x: -7, y: -34, w: 14, h: 68 }, damage: 48, hitstun: 22, blockstun: 14,
+          guard: "overhead", chip: 4, pushX: 6, knockdown: "soft", clashes: true, fx: "pierce", color: "#c9d1d9" },
       ],
-      desc: "EX. Three javelins at three heights - a wall the opponent has to jump into.",
+      vfx: [{ at: 6, kind: "super", x: 40, y: 120, scale: 1.5, color: "#d9b45a" }],
+      desc: "EX. Calls the volley instead of throwing it. Five pila fall in a line walking away from him - they come out of the sky, so crouching under them does nothing.",
       notation: "↓↘→ + S  (50 meter)",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        kf(6, { ...STANCE, shoulderF: 154, elbowF: -40, weapon: 66, torso: -16, offX: -5 }, "inOut"),
-        kf(10, { ...STANCE, shoulderF: 84, elbowF: -6, weapon: 30, torso: 24, offX: 7 }, "out"),
-        kf(14, { ...STANCE, shoulderF: 150, elbowF: -38, weapon: 62, torso: -12, offX: -3 }, "inOut"),
-        kf(18, { ...STANCE, shoulderF: 80, elbowF: -6, weapon: 32, torso: 22, offX: 7 }, "out"),
-        kf(22, { ...STANCE, shoulderF: 150, elbowF: -38, weapon: 62, torso: -12, offX: -3 }, "inOut"),
-        kf(26, { ...STANCE, shoulderF: 72, elbowF: -2, weapon: 36, torso: 28, hipF: 38, kneeF: 24, offX: 9 }, "out"),
-        kf(38, { ...STANCE, torso: 12 }, "inOut"),
-        kf(52, { ...STANCE }),
+        kf(6, { ...STANCE, shoulderF: 158, elbowF: -30, weapon: 60, torso: -18, head: -12, hipB: -28, kneeB: 40, offX: -6 }, "inOut"),
+        kf(12, { ...STANCE, shoulderF: 172, elbowF: -6, weapon: 46, torso: -22, head: -16, offX: -8 }, "out"),
+        kf(28, { ...STANCE, shoulderF: 116, elbowF: 12, weapon: 30, torso: 6, head: -6, hipF: 30, kneeF: 20, offX: 4 }, "inOut"),
+        kf(44, { ...STANCE, shoulderF: 86, elbowF: -14, torso: 10, offX: 2 }, "inOut"),
+        kf(62, { ...STANCE }),
       ],
     },
     {
-      id: "rampart",
+      id: "charge",
       name: "Beyond the Rampart",
       input: { button: "B", motion: "hcf", stance: ["stand", "crouch"] },
       tags: ["special"],
       priority: 22,
-      duration: 66,
+      duration: 64,
+      /**
+       * Caesar names Vorenus and Pullo for a feud over which of them was the
+       * braver, and it was settled by the pair of them going over the rampart
+       * and into the Nervii on their own.
+       *
+       * It used to be three thrusts on the spot. A charge is the truer read of
+       * that story and the better move: one shoulder behind a levelled spear,
+       * two hundred and fifty units of ground - more than the gap the round
+       * opens on - one hit taken on the way in, and no way of stopping once he
+       * has started, which is the price of having gone out that far.
+       */
       vel: [
-        { at: 1, x: 4.2 },
-        { at: 14, x: 4 },
-        { at: 28, x: 4.4 },
-        { at: 40, x: 0 },
+        { at: 5, x: 13.5 },
+        { at: 16, x: 12.5 },
+        { at: 28, x: 11 },
+        { at: 38, x: 5 },
+        { at: 44, x: 0 },
       ],
-      friction: 0.94,
+      friction: 0.9,
+      armor: [{ from: 4, to: 38, hits: 1, damageScale: 0.45 }],
       hits: [
-        hit(8, 11, bx(30, 50, 76, 22), 34, { group: 1, fx: "pierce", pushX: 1.6, hitstun: 16, hitstop: 5 }),
-        hit(20, 23, bx(30, 50, 80, 22), 34, { group: 2, fx: "pierce", pushX: 1.6, hitstun: 16, hitstop: 5 }),
-        hit(32, 36, bx(30, 46, 92, 26), 74, {
-          group: 3,
+        hit(9, 36, bx(30, 44, 100, 30), 94, {
           fx: "pierce",
-          pushX: 8,
+          pushX: 9,
           knockdown: "hard",
-          hitstun: 24,
-          shake: 1.6,
+          hitstun: 26,
+          shake: 2,
         }),
       ],
-      desc: "Caesar names Vorenus and Pullo for a feud over which of them was braver, and it ended with the pair of them over the rampart and into the Nervii. Three thrusts, going forward the whole way, and no way of getting back - the recovery is the price of having gone out that far.",
+      desc: "Levels the spear and runs. Crosses more ground than the round opens with, eats one hit on the way in, and knocks down hard - but he cannot stop, and the recovery is where he pays for it.",
       notation: "←↙↓↘→ + B",
       frames: [
         kf(0, { ...STANCE }, "out"),
-        // Recock keeps the elbow tucked rather than winding it wide, and the
-        // weapon angle unwinds against the shoulder/elbow opening on the way
-        // to full extension - the shaft holds its line instead of swinging.
-        kf(5, { ...STANCE, shoulderF: 52, elbowF: -32, weapon: 54, torso: 4 }),
-        kf(8, { ...STANCE, shoulderF: 80, elbowF: -4, weapon: 4, torso: 20, hipF: 34, kneeF: 20, offX: 5 }, "out"),
-        kf(16, { ...STANCE, shoulderF: 52, elbowF: -32, weapon: 54, torso: 6, hipF: 18, kneeF: 30 }, "inOut"),
-        kf(20, { ...STANCE, shoulderF: 82, elbowF: -4, weapon: 4, torso: 22, hipF: 36, kneeF: 20, offX: 5 }, "out"),
-        kf(28, { ...STANCE, shoulderF: 50, elbowF: -36, weapon: 58, torso: 4, hipF: 16, kneeF: 32 }, "inOut"),
-        kf(32, { ...STANCE, shoulderF: 88, elbowF: 0, weapon: -2, torso: 28, hipF: 42, kneeF: 22, hipB: -24, kneeB: 50, offX: 9 }, "out"),
-        kf(44, { ...STANCE, torso: 14 }, "inOut"),
-        kf(66, { ...STANCE }),
+        // Sets the shaft under the arm and gets low behind the shield.
+        kf(5, { ...STANCE, torso: 14, shoulderF: 58, elbowF: -34, weapon: 58, shoulderB: 62, elbowB: 60, hipB: -32, kneeB: 48, offX: -4 }, "out"),
+        // Levelled and running. Through the whole active window the shaft
+        // holds its line and the point goes forward - which is what makes it
+        // a thrust rather than a swing, and what weaponcheck measures.
+        kf(9, { ...STANCE, torso: 24, shoulderF: 74, elbowF: -10, weapon: 22, shoulderB: 66, elbowB: 54, hipF: 34, kneeF: 22, hipB: -28, kneeB: 52, offX: 3 }, "out"),
+        kf(20, { ...STANCE, torso: 26, shoulderF: 80, elbowF: -6, weapon: 16, shoulderB: 68, elbowB: 52, hipF: 40, kneeF: 20, hipB: -30, kneeB: 56, offX: 9 }),
+        kf(32, { ...STANCE, torso: 28, shoulderF: 86, elbowF: -2, weapon: 12, shoulderB: 70, elbowB: 50, hipF: 44, kneeF: 18, hipB: -30, kneeB: 58, offX: 15 }, "out"),
+        // He has run himself out. Spear down, weight forward, wide open.
+        kf(44, { ...STANCE, torso: 32, shoulderF: 52, elbowF: 26, weapon: -28, hipF: 30, kneeF: 44, hipB: -22, kneeB: 40, offX: 8 }, "inOut"),
+        kf(64, { ...STANCE }),
       ],
     },
     {
-      id: "skyward",
-      name: "Skyward Spear",
+      id: "impale",
+      name: "Spear of the Eleventh",
+      input: { button: "B", motion: "qcb", stance: ["stand", "crouch"] },
+      tags: ["special", "throw"],
+      priority: 30,
+      duration: 48,
+      vel: [{ at: 4, x: 5.4 }, { at: 14, x: 0 }],
+      friction: 0.88,
+      /**
+       * A grab on the end of a spear, which is a strange thing to build and
+       * the only honest way to express what was asked for: it has to catch
+       * them and keep them, because everything interesting happens after.
+       *
+       * Long reach, because it is a spear and the shaft is the grab. Forty-
+       * eight frames of nothing if it catches air, because an unblockable
+       * that reaches this far has to be a real guess.
+       */
+      throwDef: { from: 9, to: 15, range: 84, success: "impaleRide" },
+      desc: "Runs the spear through them and keeps hold. A guard is no answer to it - but at this reach it has to be a guess, and a wrong guess is forty-eight frames in the open.",
+      notation: "↓↙← + B",
+      frames: [
+        kf(0, { ...STANCE }, "out"),
+        kf(4, { ...STANCE, torso: 6, shoulderF: 50, elbowF: -38, weapon: 62, hipB: -32, kneeB: 50, offX: -5 }, "out"),
+        kf(9, { ...STANCE, torso: 26, shoulderF: 82, elbowF: -4, weapon: 8, hipF: 40, kneeF: 20, hipB: -26, kneeB: 54, offX: 8 }, "out"),
+        kf(15, { ...STANCE, torso: 30, shoulderF: 90, elbowF: 2, weapon: 2, hipF: 44, kneeF: 18, offX: 13 }),
+        kf(28, { ...STANCE, torso: 18, shoulderF: 64, elbowF: 20, weapon: 30, offX: 4 }, "inOut"),
+        kf(48, { ...STANCE }),
+      ],
+    },
+    {
+      id: "impaleRide",
+      name: "Planted",
+      input: { stance: "stand" },
+      tags: ["throw"],
+      internal: true,
+      duration: 82,
+      airborne: true,
+      /**
+       * They are on the shaft, held out in front of him, and `updateGrabbed`
+       * parks them at `holder.y + grabOffset[1]` - so when he leaves the
+       * ground they go up with him and there is nothing further to write for
+       * it. The pound is the landing.
+       */
+      grabOffset: [62, 18],
+      vel: [{ at: 14, x: 1.4, y: 13.4 }],
+      throwPayload: {
+        at: 60,
+        damage: 108,
+        hitstop: 18,
+        launch: [2.4, 2.6],
+        knockdown: "hard",
+        shake: 3.2,
+        fx: "pierce",
+        // Two turns of the shaft on the way up, while they can do nothing
+        // about it. Small numbers - the ground is what does the damage.
+        ticks: [
+          { at: 22, damage: 13, fx: "pierce" },
+          { at: 38, damage: 13, fx: "pierce" },
+        ],
+      },
+      vfx: [
+        { at: 14, kind: "dust", x: 6, y: 4, scale: 1.2 },
+        { at: 60, kind: "dust", x: 44, y: 4, scale: 2.2 },
+      ],
+      desc: "Lifts them off the ground on the end of it, jumps, and puts them back into the floor from the top of the arc.",
+      notation: "(automatic)",
+      /**
+       * The shaft stays level the whole way up. That is not a stylistic
+       * choice: `grabOffset` is one fixed point for the entire move, so the
+       * man is pinned at the same place in front of him from the catch to the
+       * landing, and the only way he stays on the point is if the point does
+       * not go anywhere. Wave the spear around and he reads as somebody
+       * standing next to it.
+       *
+       * So the jump is the body, and the pound is the landing plus the one
+       * rotation at the end - by then the payload has fired and it no longer
+       * matters where the shaft is pointing.
+       */
+      frames: [
+        // Both hands on it, weight forward, the man taken off his feet.
+        kf(0, { ...STANCE, torso: 30, shoulderF: 90, elbowF: 2, weapon: 2, shoulderB: 66, elbowB: 30, offX: 13 }, "out"),
+        kf(8, { ...STANCE, crouch: 0.45, torso: 18, shoulderF: 92, elbowF: 0, weapon: 4, shoulderB: 74, elbowB: 20, hipF: 40, kneeF: 64, hipB: -28, kneeB: 72, offX: 6 }, "out"),
+        // Off the ground. Shaft held out level, him still on the end of it.
+        kf(14, { ...STANCE, free: 1, torso: 10, shoulderF: 94, elbowF: 0, weapon: 4, shoulderB: 82, elbowB: 14, hipF: 40, kneeF: 52, hipB: -32, kneeB: 58 }, "out"),
+        kf(34, { ...STANCE, free: 1, torso: 4, shoulderF: 96, elbowF: -2, weapon: 6, shoulderB: 86, elbowB: 10, hipF: 30, kneeF: 34, hipB: -26, kneeB: 42 }, "inOut"),
+        kf(50, { ...STANCE, free: 1, torso: 16, shoulderF: 94, elbowF: 0, weapon: 2, shoulderB: 84, elbowB: 12, hipF: 42, kneeF: 32, hipB: -30, kneeB: 44 }, "out"),
+        // Down. Everything he has goes through the shaft into the floor.
+        kf(60, { ...STANCE, crouch: 0.72, torso: 54, squash: 0.94, shoulderF: 58, elbowF: 12, weapon: -56, shoulderB: 52, elbowB: 34, head: 20, hipF: 46, kneeF: 84, hipB: -32, kneeB: 90, offX: 10 }, "out"),
+        kf(70, { ...STANCE, crouch: 0.4, torso: 34, shoulderF: 52, elbowF: 28, weapon: -38, head: 10, offX: 5 }, "inOut"),
+        kf(82, { ...STANCE }),
+      ],
+    },
+    {
+      id: "slam",
+      name: "Aquila Slam",
+      input: { button: "C", motion: "qcb", stance: ["stand", "crouch"] },
+      tags: ["special", "overhead"],
+      priority: 22,
+      duration: 74,
+      airborne: true,
+      /**
+       * The big jump. He gets higher off the ground than his own jump takes
+       * him and comes down spear-first, which is the one thing in the set
+       * that arrives from above - so it is an overhead, and crouch-blocking
+       * loses to it.
+       */
+      vel: [{ at: 6, x: 3.9, y: 16 }],
+      hits: [
+        hit(44, 58, bx(2, 0, 78, 104), 104, {
+          guard: "overhead",
+          fx: "pierce",
+          pushX: 7,
+          knockdown: "hard",
+          hitstun: 28,
+          hitstop: 12,
+          shake: 2.4,
+        }),
+      ],
+      vfx: [
+        { at: 6, kind: "dust", x: 0, y: 4, scale: 1.3 },
+        { at: 50, kind: "dust", x: 26, y: 4, scale: 2 },
+      ],
+      desc: "Jumps higher than he can otherwise get and brings the whole spear down through the top of them. Overhead - it cannot be crouched under.",
+      notation: "↓↙← + C",
+      frames: [
+        kf(0, { ...STANCE, crouch: 0.55, hipF: 26, kneeF: 50, hipB: -22, kneeB: 58, shoulderF: 46, elbowF: -20, weapon: 60 }, "out"),
+        // Off the floor, spear cocked high behind the head.
+        kf(12, { ...STANCE, free: 1, torso: -14, shoulderF: 146, elbowF: -34, weapon: -30, shoulderB: 60, elbowB: 50, hipF: 40, kneeF: 56, hipB: -34, kneeB: 62 }, "out"),
+        kf(30, { ...STANCE, free: 1, torso: -20, shoulderF: 162, elbowF: -26, weapon: -40, shoulderB: 56, elbowB: 54, hipF: 30, kneeF: 40, hipB: -28, kneeB: 46 }, "inOut"),
+        // The swing is finished before the point is dangerous. From frame 42
+        // the shaft is locked pointing down and the arm angles never change
+        // again; what carries the point through them is the body falling,
+        // and all that moves in the rig is the lean.
+        //
+        // That ordering is the difference between a slam and a wild swipe.
+        // With the turnover inside the active window this read as a
+        // seventy-eight degree cut with a spear, which is not what a man
+        // dropping out of the air onto a point is doing.
+        kf(42, { ...STANCE, free: 1, torso: 6, shoulderF: 128, elbowF: 14, weapon: -104, shoulderB: 60, elbowB: 44, hipF: 26, kneeF: 30, hipB: -22, kneeB: 36 }, "out"),
+        kf(52, { ...STANCE, free: 1, torso: 16, shoulderF: 128, elbowF: 14, weapon: -104, shoulderB: 54, elbowB: 46, hipF: 38, kneeF: 34, hipB: -26, kneeB: 42, offX: 4 }),
+        kf(58, { ...STANCE, free: 1, torso: 24, shoulderF: 128, elbowF: 14, weapon: -104, shoulderB: 50, elbowB: 48, hipF: 44, kneeF: 40, hipB: -28, kneeB: 46, offX: 6 }, "out"),
+        // Landing. The arm folds only once the spear is already home.
+        kf(66, { ...STANCE, crouch: 0.68, torso: 40, squash: 0.95, shoulderF: 78, elbowF: 26, weapon: -92, head: 14, hipF: 46, kneeF: 82, hipB: -30, kneeB: 88, offX: 5 }, "out"),
+        kf(74, { ...STANCE }),
+      ],
+    },
+    {
+      id: "wall",
+      name: "Scutum Wall",
       input: { button: "C", motion: "dp", stance: ["stand", "crouch"] },
-      tags: ["special", "launcher"],
+      tags: ["special"],
       priority: 24,
       duration: 46,
-      airborne: true,
-      invuln: [{ from: 1, to: 8, kind: "strike" }],
-      vel: [
-        { at: 1, x: 2.4, y: 12.6 },
-        { at: 26, y: -1, mode: "add" },
-      ],
+      friction: 0.86,
+      /**
+       * The answer to being thrown at, and his reversal.
+       *
+       * Two moves on this roster already claimed in their own descriptions to
+       * deflect what was thrown at them, and both were `invuln: "projectile"`
+       * - the shot went through and carried on across the screen. Nothing
+       * happened, and the man who threw it simply threw again.
+       *
+       * This one takes it. The shot changes hands and goes back, which is the
+       * only version that gives a zoner a reason to stop throwing. The window
+       * is longer than the strike invulnerability on purpose: the shield stays
+       * up for shots long after it has stopped saving him from a sword.
+       */
+      invuln: [{ from: 1, to: 9, kind: "strike" }],
+      deflect: {
+        from: 3,
+        to: 30,
+        // Knee height to over the head, out in front of him - the size and
+        // place of an actual scutum. Anything skimming the floor goes under.
+        box: bx(4, 16, 54, 84),
+        speed: 1.35,
+        damage: 1.15,
+        meterGain: 18,
+      },
+      vel: [{ at: 16, x: 4.4 }],
       hits: [
-        hit(4, 8, bx(6, 60, 62, 76), 82, {
-          launch: [2, 11],
-          knockdown: "launch",
-          fx: "pierce",
-          hitstun: 26,
+        hit(18, 22, bx(20, 24, 62, 66), 76, {
+          fx: "blunt",
+          pushX: 8,
+          knockdown: "hard",
+          hitstun: 24,
           shake: 1.8,
         }),
-        hit(9, 16, bx(4, 70, 56, 66), 40, { group: 2, launch: [1.6, 6], fx: "pierce", hitstun: 18 }),
       ],
-      desc: "Invincible rising thrust. Your reversal and your anti-air of last resort.",
+      desc: "Plants the scutum. Invincible to strikes on the way up, and anything thrown into it for the next half-second is sent back faster and harder than it arrived - then he shoves out of it.",
       notation: "→↓↘ + C",
       frames: [
-        kf(0, { ...STANCE, crouch: 0.6, hipF: 24, kneeF: 50, hipB: -20, kneeB: 54 }, "out"),
-        kf(3, { ...STANCE, free: 1, torso: -16, shoulderF: 156, elbowF: -22, weapon: -30, hipF: 30, kneeF: 30, hipB: -26, kneeB: 40 }, "out"),
-        kf(12, { ...STANCE, free: 1, torso: -22, shoulderF: 172, elbowF: -4, weapon: -34, hipF: 26, kneeF: 26, hipB: -22, kneeB: 34 }),
-        kf(30, { ...STANCE, free: 1, torso: -4, shoulderF: 120, elbowF: -20, weapon: 48, hipF: 30, kneeF: 40, hipB: -20, kneeB: 40 }, "inOut"),
-        kf(46, { ...STANCE, free: 1 }),
+        kf(0, { ...STANCE, crouch: 0.4, hipF: 24, kneeF: 46, hipB: -20, kneeB: 52 }, "out"),
+        // Shield across and braced, spear withdrawn behind it.
+        kf(3, { ...STANCE, torso: -6, shoulderB: 96, elbowB: 4, shoulderF: 24, elbowF: 34, weapon: 96, hipF: 26, kneeF: 34, hipB: -24, kneeB: 44, offX: -3 }, "out"),
+        kf(12, { ...STANCE, torso: -10, shoulderB: 102, elbowB: -2, shoulderF: 20, elbowF: 38, weapon: 100, hipF: 24, kneeF: 30, hipB: -26, kneeB: 40, offX: -5 }),
+        // Shoves off the brace.
+        kf(18, { ...STANCE, torso: 28, shoulderB: 94, elbowB: -4, shoulderF: 30, elbowF: 26, weapon: 84, hipF: 40, kneeF: 22, hipB: -22, kneeB: 48, offX: 9 }, "out"),
+        kf(30, { ...STANCE, torso: 14, shoulderB: 86, elbowB: 14, shoulderF: 40, elbowF: 14, weapon: 70, offX: 4 }, "inOut"),
+        kf(46, { ...STANCE }),
       ],
     },
     {
-      id: "skywardEx",
-      name: "Skyward Spear EX",
+      id: "wallEx",
+      name: "Scutum Wall EX",
       input: { button: "S", motion: "dp", stance: ["stand", "crouch"] },
       tags: ["special", "ex", "launcher"],
       priority: 30,
-      duration: 52,
+      duration: 54,
       meterCost: 50,
-      airborne: true,
-      invuln: [{ from: 1, to: 14, kind: "strike" }],
-      vel: [
-        { at: 1, x: 3, y: 14 },
-        { at: 30, y: -1, mode: "add" },
+      friction: 0.86,
+      invuln: [
+        { from: 1, to: 18, kind: "strike" },
+        { from: 1, to: 18, kind: "throw" },
       ],
+      deflect: {
+        from: 3,
+        to: 38,
+        box: bx(2, 8, 62, 100),
+        speed: 1.8,
+        damage: 1.6,
+        meterGain: 10,
+      },
+      vel: [{ at: 20, x: 5 }],
       hits: [
-        hit(3, 8, bx(6, 58, 68, 84), 74, { launch: [2, 12], knockdown: "launch", fx: "pierce", hitstun: 28, shake: 2 }),
-        hit(10, 18, bx(4, 70, 62, 78), 34, { group: 2, launch: [1.4, 5], fx: "pierce" }),
-        hit(19, 26, bx(4, 80, 60, 70), 46, { group: 3, launch: [2, 4], fx: "pierce", knockdown: "hard" }),
+        hit(22, 28, bx(18, 22, 66, 78), 86, {
+          launch: [2.2, 11],
+          knockdown: "launch",
+          fx: "blunt",
+          hitstun: 26,
+          shake: 2.1,
+        }),
       ],
-      desc: "EX. Fully invincible, higher, and it carries them up with you.",
+      desc: "EX. Longer shell, invincible to strikes and throws, and what comes back off it comes back at half again the speed and damage. The shove launches.",
       notation: "→↓↘ + S  (50 meter)",
       frames: [
-        kf(0, { ...STANCE, crouch: 0.6, hipF: 24, kneeF: 50 }, "out"),
-        kf(3, { ...STANCE, free: 1, torso: -18, shoulderF: 160, elbowF: -20, weapon: 38, spin: -6 }, "out"),
-        kf(14, { ...STANCE, free: 1, torso: -26, shoulderF: 172, elbowF: -14, weapon: 32, spin: -16 }),
-        kf(34, { ...STANCE, free: 1, torso: -6, shoulderF: 124, elbowF: -18, weapon: 46, spin: 0 }, "inOut"),
-        kf(52, { ...STANCE, free: 1 }),
+        kf(0, { ...STANCE, crouch: 0.4, hipF: 24, kneeF: 46 }, "out"),
+        kf(3, { ...STANCE, torso: -8, shoulderB: 100, elbowB: 0, shoulderF: 22, elbowF: 36, weapon: 98, hipF: 26, kneeF: 34, hipB: -24, kneeB: 44, offX: -4 }, "out"),
+        kf(16, { ...STANCE, torso: -14, shoulderB: 108, elbowB: -8, shoulderF: 18, elbowF: 42, weapon: 104, hipF: 22, kneeF: 28, hipB: -28, kneeB: 38, offX: -7 }),
+        kf(22, { ...STANCE, torso: 24, shoulderB: 108, elbowB: -10, shoulderF: 28, elbowF: 28, weapon: 88, hipF: 42, kneeF: 20, hipB: -22, kneeB: 46, offX: 10 }, "out"),
+        kf(36, { ...STANCE, torso: 12, shoulderB: 88, elbowB: 12, shoulderF: 42, elbowF: 12, weapon: 68, offX: 4 }, "inOut"),
+        kf(54, { ...STANCE }),
       ],
     },
+
+    // ----------------------------------------------------------------- skill
     {
       id: "testudo",
       name: "Testudo",
@@ -928,84 +1094,6 @@ export const ROMAN: FighterDef = {
       ],
     },
 
-    {
-      id: "stomp",
-      name: "Aquila Stomp",
-      input: { button: "B", motion: "qcb", stance: ["stand", "crouch"] },
-      tags: ["special", "projectile", "low"],
-      priority: 20,
-      duration: 42,
-      resourceCost: 1,
-      resourceMin: 1,
-      friction: 0.9,
-      projectiles: [
-        {
-          at: 14,
-          kind: "shock",
-          armAfter: 0,
-          x: 34,
-          y: 8,
-          vx: 8.5,
-          vy: 0,
-          life: 60,
-          box: { x: -18, y: -8, w: 36, h: 30 },
-          damage: 54,
-          hitstun: 22,
-          blockstun: 14,
-          guard: "low",
-          chip: 5,
-          pushX: 6,
-          knockdown: "sweep",
-          fx: "blunt",
-          color: "#d9a441",
-          trail: "#8a744f",
-          scale: 1,
-        },
-      ],
-      vfx: [{ at: 14, kind: "dust", x: 30, y: 2, scale: 1.6 }],
-      desc: "Drives the spear butt into the ground and sends a shockwave along the floor. Must be blocked low.",
-      notation: "↓↙← + B (1 Pila)",
-      frames: [
-        kf(0, { ...STANCE }, "out"),
-        kf(8, { ...STANCE, shoulderF: 150, elbowF: -40, weapon: 96, torso: -16, hipB: -26, kneeB: 38, offX: -4 }, "inOut"),
-        kf(14, { ...STANCE, crouch: 0.85, shoulderF: 20, elbowF: 34, weapon: -66, torso: 34, hipF: 42, kneeF: 76, hipB: -26, kneeB: 90, offX: 5 }, "out"),
-        kf(24, { ...STANCE, crouch: 0.6, shoulderF: 34, elbowF: 20, weapon: -40, torso: 26 }),
-        kf(42, { ...STANCE }),
-      ],
-    },
-    {
-      id: "vault",
-      name: "Spear Vault",
-      input: { button: "C", motion: "qcb", stance: ["stand", "crouch"] },
-      tags: ["special", "overhead"],
-      priority: 22,
-      duration: 46,
-      airborne: true,
-      vel: [
-        { at: 4, x: 7, y: 10.5 },
-        { at: 22, y: -0.6, mode: "add" },
-      ],
-      hits: [
-        hit(16, 24, bx(14, 8, 62, 54), 84, {
-          guard: "overhead",
-          fx: "blunt",
-          pushX: 7,
-          knockdown: "hard",
-          hitstun: 24,
-          shake: 1.7,
-        }),
-      ],
-      desc: "Vaults over the spear and comes down boots first. Overhead - crushes crouching blocks.",
-      notation: "↓↙← + C",
-      frames: [
-        kf(0, { ...STANCE, crouch: 0.5, hipF: 22, kneeF: 44 }, "out"),
-        kf(6, { ...STANCE, free: 1, torso: 16, shoulderF: 30, elbowF: 10, weapon: -70, hipF: -20, kneeF: 70, hipB: -34, kneeB: 60 }, "out"),
-        kf(16, { ...STANCE, free: 1, torso: 26, shoulderF: 10, elbowF: 30, weapon: -80, hipF: 86, kneeF: 10, hipB: -30, kneeB: 48 }, "out"),
-        kf(30, { ...STANCE, free: 1, torso: 20, shoulderF: 26, elbowF: 24, weapon: -60, hipF: 60, kneeF: 30, hipB: -24, kneeB: 44 }, "inOut"),
-        kf(46, { ...STANCE, free: 1 }),
-      ],
-    },
-
     // ----------------------------------------------------------------- super
     {
       id: "super",
@@ -1045,6 +1133,10 @@ export const ROMAN: FighterDef = {
           pushX: 4,
           hits: 6,
           clashes: false,
+          // A rank of men is a projectile only because that is the one thing
+          // in the engine that walks up the screen on its own. Catching it on
+          // a shield and sending it back the other way is not a fight.
+          deflectable: false,
           fx: "pierce",
           scale: 1.25,
           color: "#d9b45a",

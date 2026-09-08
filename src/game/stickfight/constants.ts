@@ -146,6 +146,15 @@ export const COMBAT = {
   parryRecovery: 12,
   parryMeter: 14,
   parryFreeze: 14,
+  /**
+   * How many times one shot may be turned around before it stops answering
+   * to anybody.
+   *
+   * Two fighters with deflect windows could otherwise keep a single pilum in
+   * the air until the clock ran out, and every reversal re-arms it and resets
+   * its life, so nothing else would ever end it.
+   */
+  maxDeflects: 3,
   /** Throw tech window after being grabbed. */
   throwTechWindow: 8,
   /** Input buffer length for specials and cancels. */

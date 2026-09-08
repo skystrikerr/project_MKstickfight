@@ -4,7 +4,7 @@
  */
 
 import { COMBAT, FPS, GROUND_Y, MATCH, STAGE_HALF_WIDTH } from "../constants";
-import type { FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn, Platform, StageRules, StripDef,
+import type { Box, FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn, Platform, StageRules, StripDef,
   ZoneSpawn,
 } from "../types";
 import { Fighter, boxesOverlap, toWorldBox, type WorldBox } from "./fighter";
@@ -78,6 +78,18 @@ export interface Projectile {
    * repeatedly - just spaced far enough apart to see.
    */
   hitCooldown: number;
+  /**
+   * Multiplier on the damage this particular shot does, as distinct from the
+   * damage its spec declares.
+   *
+   * A deflected pilum is the same pilum with a different owner, so it cannot
+   * carry its numbers on the spec - the spec is the move definition, shared
+   * by every shot the move ever fires, and writing to it would have quietly
+   * rebalanced the move for the rest of the match.
+   */
+  damageScale: number;
+  /** How many times this shot has been turned around, so it cannot ping-pong forever. */
+  deflects: number;
 }
 
 /**
@@ -963,6 +975,8 @@ export class Match {
         sourceMove: f.move.name,
         fromSuper: !!f.move.tags?.includes("super"),
         hitCooldown: 0,
+        damageScale: 1,
+        deflects: 0,
       });
       this.pushFx({ kind: "spawn", x: f.x + f.facing * spec.x, y: f.y + spec.y, scale: spec.scale ?? 1 });
     }
@@ -1020,6 +1034,10 @@ export class Match {
       if (this.roundActive) {
         const target = this.fighters[p.owner === 0 ? 1 : 0];
         const box = toWorldBox(p.spec.box, p.x, p.y, p.facing);
+        // A shield up in the way is asked before anything else. It changes
+        // hands, so everything below this line - who it can hurt, which way
+        // it is flying - has already been decided differently.
+        if (this.tryDeflect(p, target, box)) continue;
         // A shot that has not travelled far enough yet passes straight
         // through. It is not destroyed and it is not blocked - as far as
         // anyone standing this close is concerned, it simply is not a weapon
@@ -1032,12 +1050,12 @@ export class Match {
               from: 0,
               to: 0,
               box: p.spec.box,
-              damage: p.spec.damage,
+              damage: Math.round(p.spec.damage * p.damageScale),
               hitstun: p.spec.hitstun,
               blockstun: p.spec.blockstun,
               guard: p.spec.guard,
               knockdown: p.spec.knockdown,
-              chip: p.spec.chip,
+              chip: p.spec.chip === undefined ? undefined : Math.round(p.spec.chip * p.damageScale),
               pushX: p.spec.pushX,
               hitstop: p.spec.hitstop,
               fx: p.spec.fx,
@@ -1069,6 +1087,51 @@ export class Match {
       if (!p.dead && (expired || grounded)) this.killProjectile(p, true);
     }
     this.projectiles = this.projectiles.filter((p) => !p.dead);
+  }
+
+  /**
+   * Hand a shot back to the fighter it was aimed at.
+   *
+   * Deliberately not gated on the shot having armed. A pilum thrown into a
+   * raised scutum from two feet away is the clearest case there is of a
+   * deflect, and it costs the thrower nothing extra, because the shot re-arms
+   * from where it turned - it has the whole way back to travel before it can
+   * hurt anyone again.
+   */
+  private tryDeflect(p: Projectile, target: Fighter, box: WorldBox): boolean {
+    if (p.spec.deflectable === false || p.deflects >= COMBAT.maxDeflects) return false;
+    const w = target.move?.deflect;
+    if (!w || target.state !== "move") return false;
+    if (target.moveFrame < w.from || target.moveFrame > w.to) return false;
+
+    const surface: Box | undefined = w.box;
+    const caught = surface
+      ? boxesOverlap(box, toWorldBox(surface, target.x, target.y, target.facing))
+      : target.hurtboxes().some((h) => boxesOverlap(box, h));
+    if (!caught) return false;
+
+    p.owner = target.index;
+    p.deflects++;
+    p.vx = -p.vx * (w.speed ?? 1);
+    // Whatever arc it had is flattened out. A javelin knocked off a shield
+    // goes back roughly level; keeping its fall makes it plough into the
+    // floor two paces away and read as a fizzle rather than an answer.
+    p.vy *= 0.3;
+    p.facing = -p.facing as 1 | -1;
+    p.spin = -p.spin;
+    p.spawnX = p.x;
+    p.age = 0;
+    p.hitCooldown = 0;
+    p.hitsLeft = Math.max(p.hitsLeft, 1);
+    p.damageScale *= w.damage ?? 1;
+    // Attributed to the deflect from here on, so the kill card names the
+    // shield rather than the javelin the other man threw.
+    p.sourceMove = target.move!.name;
+    p.fromSuper = false;
+    target.addMeter(w.meterGain ?? COMBAT.parryMeter);
+    this.pushFx({ kind: "parry", x: p.x, y: p.y, scale: 1.2 });
+    this.pushFx({ kind: "spark", x: p.x, y: p.y, scale: 1.3 });
+    return true;
   }
 
   private killProjectile(p: Projectile, natural: boolean) {

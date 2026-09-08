@@ -11,7 +11,7 @@
  */
 
 import { AiController, STYLES } from "./engine/ai";
-import { HURTBOX, STAGE_HALF_WIDTH } from "./constants";
+import { COMBAT, HURTBOX, STAGE_HALF_WIDTH } from "./constants";
 import { DOSSIERS } from "./dossier";
 import { rawStat, statsFor, STAT_LABELS, type StatKey } from "./profile";
 import { EMPTY_INPUT, GamepadReader, Keyboard, P1_KEYS, type RawInput } from "./engine/input";
@@ -2545,7 +2545,7 @@ function superDamage() {
 
   // The moves that are meant to land at your feet must be exempt, or a sweep
   // along the ground becomes a move with a hole in the middle of it.
-  for (const [who, moveId] of [["roman", "stomp"], ["pirate", "hook"], ["mongol", "caltrops"]] as [string, string][]) {
+  for (const [who, moveId] of [["roman", "pilumEx"], ["pirate", "hook"], ["mongol", "caltrops"]] as [string, string][]) {
     const mv = getFighter(who).moves.find((m) => m.id === moveId);
     if (!mv) continue;
     const armed = (mv.projectiles ?? []).every((p) => p.armAfter === 0);
@@ -3627,6 +3627,165 @@ function profileTests() {
   check("profile: the shield fighters are the defensive ones",
     bar("spartan", "defence") >= 7 && bar("knight", "defence") >= 7,
     `Dienekes ${bar("spartan", "defence")}, Chandos ${bar("knight", "defence")}`);
+}
+
+{
+  // ---------------------------------------------------------------------
+  // Deflection
+  // ---------------------------------------------------------------------
+  //
+  // "Deflect" on this roster used to mean `invuln: "projectile"` - the shot
+  // passed through and carried on across the screen, and the man who threw it
+  // threw again. Two move descriptions claimed it and neither did it.
+  //
+  // These pin the real thing down: the shot changes hands, comes back, and
+  // hurts the person who threw it.
+  const pilum = getFighter("roman").moves.find((m) => m.id === "pilum")!;
+  const wall = getFighter("roman").moves.find((m) => m.id === "wall")!;
+  check("deflect: Lucius has a deflect window at all", !!wall.deflect);
+
+  /** Throw a pilum at Lucius and optionally have him plant the shield. */
+  const exchange = (plantAt: number | null, moveId = "wall") => {
+    const m = newMatch("roman", "roman");
+    const me = m.fighters[0];
+    const foe = m.fighters[1];
+    me.x = -220;
+    foe.x = 220;
+    me.meter = 100;
+    foe.resource = 3;
+    foe.startMove(pilum, true);
+    const mine = me.health;
+    const theirs = foe.health;
+    let turned = 0;
+    for (let f = 0; f < 160; f++) {
+      if (f === plantAt) me.startMove(getFighter("roman").moves.find((x) => x.id === moveId)!, true);
+      m.step([inp(), inp()]);
+      for (const p of m.projectiles) turned = Math.max(turned, p.deflects);
+    }
+    return { took: Math.round(mine - me.health), dealt: Math.round(theirs - foe.health), turned };
+  };
+
+  const through = exchange(null);
+  check("deflect: a pilum hurts an unshielded Lucius", through.took > 0, `${through.took}`);
+  check("deflect: nothing turns round on its own", through.turned === 0);
+
+  const caught = exchange(16);
+  check("deflect: the shield turns it round", caught.turned === 1, `${caught.turned}`);
+  check("deflect: and it stops hurting him", caught.took === 0, `${caught.took}`);
+  check("deflect: and it hurts the man who threw it", caught.dealt > 0, `${caught.dealt}`);
+  // The multiplier is the whole reason to spend the move rather than block.
+  check("deflect: it comes back harder than it left",
+    caught.dealt > through.took, `${caught.dealt} back vs ${through.took} out`);
+
+  const ex = exchange(16, "wallEx");
+  check("deflect: EX sends it back harder still", ex.dealt > caught.dealt, `${ex.dealt} vs ${caught.dealt}`);
+
+  // Planting too early is a whiff. The window is a read, not a toggle.
+  const early = exchange(0);
+  check("deflect: planting too early catches nothing", early.turned === 0 && early.took > 0,
+    `turned ${early.turned}, took ${early.took}`);
+
+  // A summoned rank of legionaries is a projectile only because that is the
+  // one thing in the engine that walks up the screen on its own. It opts out,
+  // and the opt-out has to actually be honoured.
+  const rank = getFighter("roman").moves.find((m) => m.id === "super")!.projectiles![0];
+  check("deflect: the testudo rank opts out", rank.deflectable === false);
+  {
+    const m = newMatch("roman", "roman");
+    const me = m.fighters[0];
+    const foe = m.fighters[1];
+    me.x = -220;
+    foe.x = 220;
+    me.meter = 100;
+    foe.meter = 100;
+    foe.startMove(getFighter("roman").moves.find((x) => x.id === "super")!, true);
+    let turned = 0;
+    for (let f = 0; f < 220; f++) {
+      if (f % 30 === 0) me.startMove(wall, true);
+      m.step([inp(), inp()]);
+      for (const p of m.projectiles) turned = Math.max(turned, p.deflects);
+    }
+    check("deflect: a formation cannot be caught on a shield", turned === 0, `${turned}`);
+  }
+
+  // Two shields could otherwise keep one pilum alive until the clock ran out:
+  // every reversal re-arms it and resets its life, so nothing else ends it.
+  {
+    const m = newMatch("roman", "roman");
+    const a = m.fighters[0];
+    const b = m.fighters[1];
+    a.x = -260;
+    b.x = 260;
+    a.meter = b.meter = 100;
+    b.resource = 3;
+    b.startMove(pilum, true);
+    let turned = 0;
+    for (let f = 0; f < 600; f++) {
+      // Both of them plant on a loop, so whoever the shot is flying at has a
+      // shield up more often than not.
+      if (f % 24 === 0) a.startMove(wall, true);
+      if (f % 24 === 12) b.startMove(wall, true);
+      m.step([inp(), inp()]);
+      for (const p of m.projectiles) turned = Math.max(turned, p.deflects);
+    }
+    check("deflect: a shot cannot be volleyed forever", turned <= COMBAT.maxDeflects, `${turned}`);
+  }
+}
+
+{
+  // ---------------------------------------------------------------------
+  // Throws that leave the ground
+  // ---------------------------------------------------------------------
+  //
+  // Lucius takes them off their feet on the end of the spear, jumps, and puts
+  // them back into the floor. Two things in the engine were in the way, and
+  // both were silent:
+  //
+  //   - an airborne move ended the instant it touched down, so the payload
+  //     timed to the landing never fired and the throw did two chip ticks;
+  //   - `setState` cleared the move but not the hold, so the opponent stayed
+  //     parked in `grabbed` with nobody holding them, for the rest of the
+  //     round.
+  const m = newMatch("roman", "knight");
+  const me = m.fighters[0];
+  const foe = m.fighters[1];
+  me.x = -55;
+  foe.x = 55;
+  const hp = foe.health;
+  me.startMove(getFighter("roman").moves.find((x) => x.id === "impale")!, true);
+  let lifted = 0;
+  let heldInAir = false;
+  for (let f = 0; f < 200; f++) {
+    m.step([inp(), inp()]);
+    lifted = Math.max(lifted, foe.y);
+    if (me.holding && !me.grounded) heldInAir = true;
+  }
+  const dealt = Math.round(hp - foe.health);
+  check("impale: the grab connects at spear range", me.moveHasHit || dealt > 0, `${dealt}`);
+  check("impale: they leave the ground on the end of it", lifted > 100, `${lifted.toFixed(0)}`);
+  check("impale: he is still holding them up there", heldInAir);
+  check("impale: the landing is what does the damage", dealt > 100, `${dealt}`);
+  check("impale: nobody is left holding anybody", !me.holding && foe.state !== "grabbed",
+    `${me.holding ? "still holding" : foe.state}`);
+
+  // The general form of the same bug: whatever route a fighter takes out of a
+  // throw, the opponent has to be let go.
+  for (const def of ROSTER) {
+    const grabs = def.moves.filter((mv) => mv.throwDef);
+    for (const grab of grabs) {
+      const g = newMatch(def.id, "knight");
+      const holder = g.fighters[0];
+      const victim = g.fighters[1];
+      holder.x = -50;
+      victim.x = 50;
+      if (def.resource) holder.resource = def.resource.max;
+      holder.meter = 100;
+      holder.startMove(grab, true);
+      for (let f = 0; f < 240; f++) g.step([inp(), inp()]);
+      check(`${def.id}/${grab.id}: lets go by the end of it`,
+        !holder.holding && victim.state !== "grabbed", `${victim.state}`);
+    }
+  }
 }
 
 const failed = results.filter((r) => !r.ok);

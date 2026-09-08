@@ -40,8 +40,10 @@ const ALIASES: Record<string, string[]> = {
   kunai: ["kunai", "flick"],
   staff: ["staff", "pole", "butt", "crown", "thrust", "mountain"],
   sword: ["sword", "hau", "half-sword", "mordhau", "pommel", "cut", "blade"],
-  shield: ["shield", "rim", "boss", "heater", "ram"],
-  spear: ["spear", "pilum", "thrust", "point", "haft"],
+  // "Scutum" is what a Roman calls his shield and it is what the move names
+  // say - without it, Scutum Wall read as a move made with no weapon at all.
+  shield: ["shield", "scutum", "rim", "boss", "heater", "ram"],
+  spear: ["spear", "pilum", "pila", "thrust", "point", "haft"],
   handwrapF: ["wrap", "wrapped", "taped", "elbow"],
   handwrapB: ["wrap", "wrapped", "taped", "elbow"],
   prajioudF: ["prajioud", "armband", "cord"],
