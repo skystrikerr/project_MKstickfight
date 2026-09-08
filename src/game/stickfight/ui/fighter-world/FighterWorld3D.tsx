@@ -14,6 +14,9 @@ type MarkerRecord = {
   root: THREE.Group;
   ring: THREE.Mesh;
   beacon: THREE.Mesh;
+  label: THREE.Sprite;
+  /** Which way this beacon points out of the globe, in globe space. */
+  normal: THREE.Vector3;
 };
 
 const EARTH_RADIUS = 2.5;
@@ -283,7 +286,7 @@ export function FighterWorld3D({ initialFighterId = "roman", onSelectFighter, on
       globeRoot.add(label);
 
       markerGroup.add(root);
-      markerRecords.push({ fighter, root, ring, beacon });
+      markerRecords.push({ fighter, root, ring, beacon, label, normal: normal.clone() });
     });
 
     let selectedIndex = Math.max(0, FIGHTER_WORLD_NODES_3D.findIndex(f => f.id === initialFighterId));
@@ -383,6 +386,66 @@ export function FighterWorld3D({ initialFighterId = "roman", onSelectFighter, on
     resize();
 
     let raf = 0;
+    /**
+     * Decide which name plates to draw this frame.
+     *
+     * The plates are sprites with `depthTest` off, so by default every one of
+     * them draws - including the twelve on the far side of the planet, which
+     * come through the globe and land on top of the continent you are looking
+     * at. With fifteen markers that was survivable; with twenty-five, Europe
+     * alone stacks six names on the same few degrees and none of them can be
+     * read.
+     *
+     * So: drop anything facing away from the camera, then walk what is left
+     * from most important to least - the selected fighter first, then whoever
+     * is nearest the front - and skip any plate that would land on top of one
+     * already placed. The beacon always stays; it is only the name that goes.
+     */
+    const labelScreen = new THREE.Vector3();
+    const labelNormal = new THREE.Vector3();
+    function layOutLabels(selected: number) {
+      const w = renderer.domElement.clientWidth || 1;
+      const h = renderer.domElement.clientHeight || 1;
+      const toCamera = camera.position.clone().normalize();
+
+      const candidates: { i: number; x: number; y: number; facing: number }[] = [];
+      for (let i = 0; i < markerRecords.length; i++) {
+        const m = markerRecords[i];
+        labelNormal.copy(m.normal).applyQuaternion(globeRoot.quaternion);
+        const facing = labelNormal.dot(toCamera);
+        // Just past the horizon, so a plate does not blink out while its
+        // beacon is still clearly on the edge of the disc.
+        if (facing < 0.08) {
+          m.label.visible = false;
+          continue;
+        }
+        labelScreen.copy(m.label.position).applyMatrix4(globeRoot.matrixWorld).project(camera);
+        candidates.push({
+          i,
+          x: (labelScreen.x * 0.5 + 0.5) * w,
+          y: (-labelScreen.y * 0.5 + 0.5) * h,
+          facing,
+        });
+        m.label.visible = false;
+      }
+
+      candidates.sort((a, b) =>
+        a.i === selected ? -1 : b.i === selected ? 1 : b.facing - a.facing,
+      );
+
+      // Half the size of a plate on screen. Names are wide and short, so the
+      // box that has to stay clear is too.
+      const GAP_X = 86;
+      const GAP_Y = 21;
+      const placed: { x: number; y: number }[] = [];
+      for (const c of candidates) {
+        const clash = placed.some((q) => Math.abs(q.x - c.x) < GAP_X && Math.abs(q.y - c.y) < GAP_Y);
+        if (clash) continue;
+        placed.push({ x: c.x, y: c.y });
+        markerRecords[c.i].label.visible = true;
+      }
+    }
+
     function animate() {
       const dt = Math.min(.05, clock.getDelta());
       pollGamepad(dt);
@@ -401,6 +464,7 @@ export function FighterWorld3D({ initialFighterId = "roman", onSelectFighter, on
         (m.ring.material as THREE.MeshBasicMaterial).color.setHex(active ? 0xff3b20 : 0xc78332);
         (m.beacon.material as THREE.MeshBasicMaterial).color.setHex(active ? 0xffd36a : 0xd89a42);
       });
+      layOutLabels(selectedIndex);
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);

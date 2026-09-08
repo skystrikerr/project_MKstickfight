@@ -150,6 +150,7 @@ export default function StickFighter() {
       {screen === "select" && (
         <CharacterSelect
           initialP1={worldFighter}
+          onBack={() => setScreen("title")}
           onShowProfile={(id) => setPageFor(id)}
           onStart={(opts) => {
             setConfig(opts);

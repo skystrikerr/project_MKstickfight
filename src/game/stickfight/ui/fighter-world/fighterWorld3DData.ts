@@ -9,6 +9,12 @@ export type FighterWorldNode3D = {
   region: string;
 };
 
+/**
+ * Kuro is deliberately absent. Every other fighter is a person who was
+ * somewhere on a particular day; he is a story people in several countries
+ * swear happened to them, with no year and no place, and the rest of the game
+ * already says so. Giving him a pin would be the one lie on the map.
+ */
 export const FIGHTER_WORLD_NODES_3D: FighterWorldNode3D[] = [
   { id: "roman",    name: "Lucius Vorenus",        title: "Roman Legionary", location: "Nervii territory, Gaul", era: "54 BC",       lat: 50.55, lon: 4.35,   region: "Europe" },
   { id: "spartan",  name: "Dienekes",              title: "Spartan Hoplite", location: "Thermopylae, Greece",    era: "480 BC",      lat: 38.80, lon: 22.54,  region: "Europe" },
@@ -25,6 +31,24 @@ export const FIGHTER_WORLD_NODES_3D: FighterWorldNode3D[] = [
   { id: "zulu",     name: "Mgobozi ovela Ntla",    title: "Zulu Warrior",    location: "Gqokli Hill, South Africa",era:"1818",          lat: -28.50,lon: 31.40,  region: "Africa" },
   { id: "western",  name: "Wyatt Earp",            title: "Frontier Lawman", location: "Tombstone, Arizona",       era: "1881",         lat: 31.71, lon: -110.07,region: "North America" },
   { id: "soldier",  name: "The Ia Drang Trooper",  title: "Infantryman",     location: "Ia Drang Valley, Vietnam", era: "1965",         lat: 13.58, lon: 107.72, region: "Asia" },
+
+  // The other ten. The globe shipped knowing fifteen of the roster, so eleven
+  // fighters had a card on the select screen and nowhere on the map they came
+  // from - which is the one thing this menu is for.
+  //
+  // Hydarnes and Cortés stand a fraction off Dienekes and Tzilacatzin rather
+  // than exactly on them: both pairs fought each other in the same place, and
+  // two beacons at identical coordinates are one beacon you cannot click.
+  { id: "iceman",   name: "Ötzi",                  title: "Copper Age Traveller", location: "Ötztal Alps, Tyrol",  era: "c. 3300 BC",  lat: 46.78, lon: 10.84,  region: "Europe" },
+  { id: "shanidar", name: "Shanidar 1",            title: "Neanderthal",     location: "Shanidar Cave, Zagros",   era: "c. 45,000 BC", lat: 36.83, lon: 44.22,  region: "Asia" },
+  { id: "persian",  name: "Hydarnes",              title: "Commander of the Immortals", location: "Thermopylae, Greece", era: "480 BC", lat: 38.72, lon: 22.63,  region: "Asia / Europe" },
+  { id: "celt",     name: "Vercingetorix",         title: "Arvernian War Chief", location: "Alesia, Gaul",        era: "52 BC",        lat: 47.54, lon: 4.50,   region: "Europe" },
+  { id: "iceni",    name: "Boudica",               title: "Queen of the Iceni", location: "Watling Street, Britain", era: "AD 61",    lat: 52.55, lon: -1.30,  region: "Europe" },
+  { id: "lapulapu", name: "Lapulapu",              title: "Datu of Mactan",  location: "Mactan, Visayas",         era: "1521",         lat: 10.31, lon: 124.02, region: "Asia" },
+  { id: "conquistador", name: "Hernán Cortés",     title: "Conquistador",    location: "Tenochtitlan",            era: "1521",         lat: 19.38, lon: -99.22, region: "North America" },
+  { id: "duelist",  name: "Julie d'Aubigny",       title: "Opera Singer and Duellist", location: "Paris",         era: "1690s",        lat: 48.86, lon: 2.35,   region: "Europe" },
+  { id: "maori",    name: "Te Rauparaha",          title: "Ngāti Toa Chief", location: "Kapiti Coast, Aotearoa",  era: "1820s",        lat: -40.87,lon: 174.98, region: "Oceania" },
+  { id: "ethiopia", name: "Ras Alula Engida",      title: "Ethiopian General", location: "Dogali, Eritrea",       era: "1887",         lat: 15.45, lon: 39.05,  region: "Africa" },
 ];
 
 export const FIGHTER_WORLD_BY_ID_3D = Object.fromEntries(

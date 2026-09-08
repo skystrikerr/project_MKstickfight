@@ -779,3 +779,26 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+
+
+/* The art panel is a column: banner, stage, quote. The stage takes whatever
+   the dossier beside it leaves over, and the card inside it is sized by its
+   own 3:4 - so it fills the height and finds its width from that, instead of
+   sitting small in the top of a tall empty box. */
+.pfcs-art-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.pfcs-art-stage {
+  flex: 1;
+  min-height: 380px;
+}
+
+.pfcs-art-stage > * {
+  max-height: 100%;
+}
+
+.pfcs-quote {
+  margin-top: auto;
+}

@@ -8,7 +8,7 @@
  * gone; everything on screen is read from the game.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AI_LEVELS, type AiLevel } from "../constants";
 import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef } from "../types";
@@ -45,6 +45,8 @@ interface Props {
   onShowProfile: (id: string) => void;
   /** Who the globe sent through, if the player came in off a marker. */
   initialP1?: string;
+  /** Back to the main menu. The control strip has always promised this. */
+  onBack?: () => void;
 }
 
 /** A tiny painted preview of a stage: sky gradient, horizon and accent. */
@@ -262,7 +264,7 @@ function PlateButton({
   );
 }
 
-export function CharacterSelect({ onStart, onShowMoves, onShowProfile, initialP1 }: Props) {
+export function CharacterSelect({ onStart, onShowMoves, onShowProfile, initialP1, onBack }: Props) {
   // Read once. Everything below starts where the last session left it, and
   // writes back as it changes, so the screen never opens cold twice.
   const [saved] = useState(loadSave);
@@ -337,6 +339,22 @@ export function CharacterSelect({ onStart, onShowMoves, onShowProfile, initialP1
       p2Weapon: weapons[p2],
     });
   };
+
+  // Escape and B are what the strip along the foot says leave this screen, so
+  // they do.
+  useEffect(() => {
+    if (!onBack) return;
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      if (el instanceof HTMLSelectElement || el instanceof HTMLInputElement) return;
+      if (e.key === "Escape" || e.key === "Backspace") {
+        e.preventDefault();
+        onBack();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onBack]);
 
   return (
     <div className="pfcs-screen">
@@ -488,7 +506,11 @@ export function CharacterSelect({ onStart, onShowMoves, onShowProfile, initialP1
               <PlateButton
                 plate="customize"
                 title="Customize"
-                subtitle="Skins • Colours • Weapons"
+                /* The plate already says what Customize is. The caption says
+                   what it is currently set to, which the plate cannot. */
+                subtitle={`${getSkin(skins[seat]).name}${
+                  weapons[[p1, p2][seat]] ? ` • ${weapons[[p1, p2][seat]]}` : " • As drawn"
+                }`}
                 active={panel === "customize"}
                 onClick={() => setPanel("customize")}
               />
@@ -624,6 +646,15 @@ export function CharacterSelect({ onStart, onShowMoves, onShowProfile, initialP1
 
         <footer className="pfcs-footer">
           <div className="flex items-center gap-3">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="border border-[#5d4a35] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[#9e907b] transition hover:border-[#b88b49] hover:text-[#efe2c9]"
+              >
+                &larr; World
+              </button>
+            )}
             {(solo ? picked.slice(0, 1) : picked).map((def, i) => (
               <div key={i} className="flex items-center gap-2">
                 <div className="pfcs-player-badge">P{i + 1}</div>

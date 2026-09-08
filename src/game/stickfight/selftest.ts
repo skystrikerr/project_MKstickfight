@@ -21,6 +21,7 @@ import { DEFAULT_TRAINING, frameData, TrainingRoom } from "./engine/training";
 import { stepsFor, TutorialRunner } from "./engine/tutorial";
 import { clipFor } from "./clips";
 import { getFighter, ROSTER } from "./fighters";
+import { FIGHTER_WORLD_NODES_3D } from "./ui/fighter-world/fighterWorld3DData";
 import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun, type Run } from "./ladder";
 import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./save";
 import { BINDABLE_ACTIONS, codeLabel, defaultKeyMap, isKeyCode, toKeyBindings } from "./keybinds";
@@ -3786,6 +3787,46 @@ function profileTests() {
         !holder.holding && victim.state !== "grabbed", `${victim.state}`);
     }
   }
+}
+
+{
+  // ---------------------------------------------------------------------
+  // The globe
+  // ---------------------------------------------------------------------
+  //
+  // The main menu is a map with a beacon per fighter, and the beacons carry a
+  // second copy of the names. Two lists of the same thing drift, and a name
+  // that has drifted is only visible to someone reading both screens.
+  //
+  // The id has to resolve and the name has to be the name. The title is not
+  // checked, because the globe's is deliberately a different thing: a one-line
+  // descriptor for a card on a map ("Roman Legionary") where the roster gives
+  // the rank he actually held ("Centurion, Legio XI").
+  for (const node of FIGHTER_WORLD_NODES_3D) {
+    const def = ROSTER.find((f) => f.id === node.id);
+    check(`globe/${node.id}: is a real fighter`, !!def);
+    if (!def) continue;
+    check(`globe/${node.id}: name matches the roster`, node.name === def.name, `${node.name} vs ${def.name}`);
+    check(`globe/${node.id}: is somewhere on Earth`,
+      node.lat >= -90 && node.lat <= 90 && node.lon >= -180 && node.lon <= 180,
+      `${node.lat}, ${node.lon}`);
+  }
+
+  // Two beacons at the same coordinates are one beacon you cannot click. The
+  // pairs who fought each other in the same place are the ones at risk.
+  const seen = new Map<string, string>();
+  for (const node of FIGHTER_WORLD_NODES_3D) {
+    const key = `${node.lat.toFixed(2)},${node.lon.toFixed(2)}`;
+    check(`globe/${node.id}: does not sit on top of another beacon`, !seen.has(key), `shares ${key} with ${seen.get(key)}`);
+    seen.set(key, node.id);
+  }
+
+  // Everyone who was a person gets a pin. Kuro is the composite legend with
+  // no year and no place, and the game says so everywhere else too - if he
+  // ever gets one, this is the line that should have been argued with first.
+  const onGlobe = new Set(FIGHTER_WORLD_NODES_3D.map((n) => n.id));
+  const missing = ROSTER.filter((f) => !onGlobe.has(f.id)).map((f) => f.id);
+  check("globe: only Kuro is off the map", missing.join(",") === "shade", missing.join(",") || "nobody");
 }
 
 const failed = results.filter((r) => !r.ok);
