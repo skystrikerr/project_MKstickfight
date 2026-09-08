@@ -21,6 +21,7 @@ import type {
   MoveDef,
   Platform,
   Pose,
+  StageRules,
   Stance,
 } from "../types";
 import { InputBuffer, type RawInput } from "./input";
@@ -267,6 +268,12 @@ export class Fighter {
   halfWidth = STAGE_HALF_WIDTH;
   /** The ledge currently underfoot, or null when standing on the floor. */
   standing: Platform | null = null;
+  /** What a long drop costs on this stage, if anything. Set by the Match. */
+  fall: StageRules["fall"];
+  /** Highest point reached since the feet last left something solid. */
+  private fallPeak = 0;
+  /** Damage the last landing cost, for the HUD and the tests. */
+  fallDamage = 0;
   /** Frames left ignoring platforms, after deliberately dropping through one. */
   private dropping = 0;
 
@@ -290,6 +297,33 @@ export class Fighter {
   /** True while any attack button is within its buffer window. */
   private attackPressed(): boolean {
     return (["A", "B", "C", "S"] as const).some((b) => this.input.pressedWithin(b, COMBAT.bufferFrames));
+  }
+
+  /**
+   * Bills for the drop, on the stages that charge for one.
+   *
+   * Only for a fall the fighter chose. Being launched off a gantry and hit all
+   * the way down is already the most expensive thing that can happen to you,
+   * and adding a landing fee on top of it would mean the height of the stage
+   * silently scaled every combo that ends in a knockdown - so hitstun and a
+   * pending knockdown are exempt.
+   *
+   * It also cannot finish anybody. Losing a round to the floor rather than to
+   * the other fighter reads as a bug however correct the arithmetic is, so the
+   * last point is always left alone.
+   */
+  private applyFallDamage() {
+    const rule = this.fall;
+    const drop = this.fallPeak - this.y;
+    this.fallDamage = 0;
+    this.fallPeak = this.y;
+    if (!rule || drop <= rule.from) return;
+    if (this.state === "hitstunAir" || this.pendingKnockdown !== "none") return;
+    const raw = ((drop - rule.from) / 100) * rule.per100;
+    const dealt = Math.min(rule.max, Math.max(0, Math.min(raw, this.health - 1)));
+    if (dealt <= 0) return;
+    this.health -= dealt;
+    this.fallDamage = dealt;
   }
 
   /** Steps off the ledge underfoot. */
@@ -1073,6 +1107,21 @@ export class Fighter {
     const wasY = this.y;
     this.x += this.vx;
     this.y += this.vy;
+    // The highest point since the feet last left something solid. Taken here
+    // rather than on the way down so a jump that is interrupted at the apex
+    // still knows how far there is to come back.
+    //
+    // Gated on `vy >= 0` as well as `grounded`, because the ground floor's
+    // height and the "not standing on anything" fallback are both zero: on
+    // the exact frame a long fall crosses below y = 0, `grounded` reads true
+    // one line before the floor-clamp below has actually caught it, and
+    // without the velocity check this would reset the peak to that
+    // in-flight overshoot instead of preserving it - which silently zeroed
+    // fall damage for every drop that landed on the ground floor rather than
+    // on a platform, since applyFallDamage() reads this value the moment
+    // onLand() fires later in this same frame.
+    if (this.grounded && this.vy >= 0) this.fallPeak = this.y;
+    else this.fallPeak = Math.max(this.fallPeak, this.y);
 
     if (this.dropping > 0) this.dropping--;
 
@@ -1152,6 +1201,7 @@ export class Fighter {
     this.airJumpsUsed = 0;
     this.airDashUsed = false;
     this.airMovesUsed = 0;
+    this.applyFallDamage();
 
     if (this.state === "hitstunAir" || this.pendingKnockdown !== "none") {
       this.knockDown(this.pendingKnockdown === "none" ? "soft" : this.pendingKnockdown);

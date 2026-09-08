@@ -7,7 +7,7 @@
  * build method. Nothing else needs to change - the select screen reads the
  * registry.
  */
-import type { Platform } from "../types";
+import type { Platform, StageRules } from "../types";
 import { detailScale } from "./detail";
 import type { StageLight } from "./shapes";
 
@@ -115,6 +115,25 @@ export interface StageDef {
   light?: StageLight;
   /** Ledges to stand on. Absent means a flat stage, which most of them are. */
   platforms?: Platform[];
+  /**
+   * How far the camera is allowed to zoom out on this stage, in the same
+   * units as `halfWidth`. Defaults to `CAMERA.maxViewWidth`.
+   *
+   * An arcade stage is built to be moved around in, which means the two
+   * fighters are routinely much further apart - horizontally and vertically -
+   * than an arena ever lets them get. The arena default caps the zoom well
+   * short of that on purpose (closer is more readable for a match that never
+   * leaves one screen's worth of ground), so a stage with real distance to
+   * cover has to raise it or the camera simply cannot back up far enough to
+   * keep both fighters in frame.
+   */
+  maxViewWidth?: number;
+  /**
+   * What a fall on this stage costs. Absent means falls are free, which is
+   * every arena and most of the roster's history - there was nowhere to fall
+   * from. See `StageRules.fall` for the shape.
+   */
+  fall?: StageRules["fall"];
   /** Painted rather than built. Skips the built-stage haze - see the Stage ctor. */
   backdrop?: BackdropDef;
 }
@@ -122,6 +141,21 @@ export interface StageDef {
 /** Half-width of a stage, falling back to the roster-wide default. */
 export function halfWidthOf(theme: StageTheme): number {
   return STAGE_THEMES[theme].halfWidth ?? STAGE_HALF_WIDTH;
+}
+
+/**
+ * The physical rules a Match needs for this stage - its width and its fall
+ * damage, if any - bundled the way `Match`'s constructor actually wants them.
+ *
+ * A thin wrapper rather than reading `STAGE_THEMES[theme]` at both call sites:
+ * the last time this stayed as two separate positional reads, a search-and-
+ * replace across `game.ts` inserted an argument in the wrong position at both
+ * of them without anything catching it. One function that returns the whole
+ * bundle is a value that can only be passed whole, not partially forgotten.
+ */
+export function stageRulesFor(theme: StageTheme): StageRules {
+  const def = STAGE_THEMES[theme];
+  return { halfWidth: def.halfWidth ?? STAGE_HALF_WIDTH, fall: def.fall };
 }
 
 /** Every stage of one kind, for a mode that only wants the big ones. */
@@ -268,11 +302,23 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
   ironworks: {
     name: "The Ironworks",
-    blurb: "Three storeys of dockyard gantry over a black tide. Everything here is a place to stand.",
+    blurb: "Four storeys of dockyard gantry over a black tide. Everything here is a place to stand, and the top of it is a real climb.",
     kind: "arcade",
-    // Half again as wide as an arena. The whole idea of the category is that
-    // there is somewhere to go, and at the standard width there is not.
-    halfWidth: 780,
+    // Wider still than the first pass. The whole idea of the category is that
+    // there is somewhere to go, and 780 turned out to still be close enough to
+    // an arena that two fighters found each other again in about a second.
+    halfWidth: 950,
+    // The camera has to be allowed to back up as far as the stage is wide, or
+    // the far corners of it are a place the player can stand but never see.
+    // An arena never asks for more than the default, because an arena never
+    // puts this much ground between two people.
+    maxViewWidth: 1700,
+    // A fall from the gantry or the crow's nest costs a little health -
+    // nothing that decides a round on its own, but enough that jumping off
+    // the top rather than fighting your way down is a real cost and not a
+    // free escape. Capped low, and it never reads as damage the other fighter
+    // dealt because nothing about it looks like a hit.
+    fall: { from: 90, per100: 5, max: 20 },
     sky: ["#0d1420", "#2a3a52"],
     ground: "#241c22",
     accent: "#ff9440",
@@ -281,22 +327,35 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     // is warm - the opposite of every daylight stage on the list.
     light: { key: "#ffb267", fill: "#33465e", strength: 0.85, shadow: "#3d2a22", glow: 0.22 },
     ambient: { kind: "ember", count: 34, colors: ["#ff9440", "#d8702a", "#ffd06b"], speed: 0.3, wind: -0.25, size: [2, 4], opacity: 0.6 },
-    // Three fighting levels, and the gaps between them are the level design.
-    //
-    // The lower deck is three runs with two gaps, so the ground floor is
-    // reachable from the middle of the stage rather than only off the ends.
-    // The upper gantry is deliberately short and split - it is the best place
-    // to be and the easiest to be knocked off, and each half bridges the gap
-    // in the deck below it.
-    //
-    // x is the LEFT edge, so these read: deck -560..-260, -150..150, 260..560;
-    // gantry -330..-110 and 110..330. Symmetric about the middle on purpose.
+    /**
+     * Four fighting levels, and the gaps between them are the level design.
+     *
+     * Every gap is sized against the roster's own jump arcs rather than
+     * picked by eye: Shanidar, the shortest jumper in the game, clears each
+     * one with room to spare and none to waste, and everyone else clears it
+     * easier. That is deliberate - the point of "you need to jump to get up
+     * here" is that it costs the worst jumper in the cast something real, not
+     * that it excludes him.
+     *
+     * The dock deck is three runs with two gaps, so the ground floor is
+     * reachable from the middle of the stage rather than only off the ends.
+     * The mid gantry is two runs, each bridging one of the deck's gaps. The
+     * crow's nest at the top is one short run sitting directly above the
+     * *gap between* the two gantry halves - so it cannot be reached in one
+     * jump from the deck below it (that gap is taller than anyone's jump);
+     * the only way up is gantry first, same as the gantry can only be reached
+     * from the deck. Three real jumps from the ground floor to the top.
+     *
+     * x is the LEFT edge. Deck -680..-340, -140..140, 340..680. Gantry
+     * -410..-150 and 150..410. Crow's nest -120..120. Symmetric on purpose.
+     */
     platforms: [
-      { x: -560, y: 62, w: 300 },
-      { x: -150, y: 62, w: 300 },
-      { x: 260, y: 62, w: 300 },
-      { x: -330, y: 140, w: 220 },
-      { x: 110, y: 140, w: 220 },
+      { x: -680, y: 74, w: 340 },
+      { x: -140, y: 74, w: 280 },
+      { x: 340, y: 74, w: 340 },
+      { x: -410, y: 144, w: 260 },
+      { x: 150, y: 144, w: 260 },
+      { x: -120, y: 214, w: 240 },
     ],
   },
   aqueduct: {
@@ -1585,17 +1644,28 @@ export class Stage {
    * the underside of every beam is the bright face and the tops are dark.
    */
   private buildIronworks() {
-    const W = 780;
+    const W = 950;
+    // The load-bearing slab, lip and end-caps for every platform are already
+    // drawn generically by buildPlatforms() off this same list - that call
+    // happens once, for every stage that has platforms, from the Stage
+    // constructor. Everything below is decoration layered on top of it, and
+    // it reads straight off the platforms themselves rather than repeating
+    // their numbers as a second, parallel set of literals: the last time the
+    // deck height changed here, the deck itself moved and the planking drawn
+    // on top of it did not, because nothing forced the two to agree.
+    const [deckL, deckM, deckR, gantryL, gantryR, nest] = STAGE_THEMES.ironworks.platforms!;
 
     const far = new THREE.Group();
     // Harbour water, and a city on the far shore. Kept cold and dim so the
     // orange of the works reads against it.
-    far.add(rect(0, 74, 2200, 240, "#12203a", 1));
-    far.add(rect(0, 74, 2200, 30, "#1b2f4e", 1, 0.9));
+    far.add(rect(0, 74, 2600, 260, "#12203a", 1));
+    far.add(rect(0, 74, 2600, 30, "#1b2f4e", 1, 0.9));
     // Furnace light spilling out across the water.
-    far.add(rect(0, 74, 2200, 16, "#7a4a2c", 2, 0.35));
-    // Skyline: flat blocks with lit windows, further ones dimmer.
-    for (let i = -9; i <= 9; i++) {
+    far.add(rect(0, 74, 2600, 16, "#7a4a2c", 2, 0.35));
+    // Skyline: flat blocks with lit windows, further ones dimmer. Widened
+    // along with the stage - at the old range it ran out of city well before
+    // the new camera's zoomed-out edge, which read as the far shore ending.
+    for (let i = -12; i <= 12; i++) {
       const x = i * 128 + ((i * 53) % 60);
       const h = 60 + ((i * 71) % 96);
       const w = 54 + ((i * 37) % 40);
@@ -1608,7 +1678,7 @@ export class Stage {
       }
     }
     // Cranes on the far quay.
-    for (const [x, k] of [[-620, 1], [420, 0.8], [700, 0.9]] as [number, number][]) {
+    for (const [x, k] of [[-740, 1], [-620, 0.85], [420, 0.8], [700, 0.9], [860, 0.75]] as [number, number][]) {
       far.add(rect(x, 96, 7, 120 * k, "#22344e", 3, 0.95));
       far.add(rect(x + 34, 96 + 118 * k, 96 * k, 6, "#22344e", 3, 0.95));
       far.add(rect(x + 74 * k, 96 + 92 * k, 3, 28 * k, "#22344e", 3, 0.9));
@@ -1637,6 +1707,9 @@ export class Stage {
     }
     mid.add(rect(-700, 60, 260, 120, "#241c22", 5, 0.97));
     mid.add(poly(-700, 180, [-134, 0, 0, 44, 134, 0], "#2e242c", 5, 0.97));
+    // A second shed further out, filling the width the wider stage opened up.
+    mid.add(rect(-900, 50, 200, 96, "#221a20", 5, 0.97));
+    mid.add(poly(-900, 146, [-104, 0, 0, 34, 104, 0], "#2c2228", 5, 0.97));
     this.addLayer(mid, 0.62);
 
     const near = new THREE.Group();
@@ -1646,97 +1719,172 @@ export class Stage {
 
     // ---- the ground floor ----
     // Wet planking, dark enough that a fighter down here is plainly on a
-    // different surface from the timber decks above. Three storeys only work
+    // different surface from the timber decks above. Four storeys only work
     // if you can tell at a glance which one someone is on.
-    near.add(rect(0, -120, 2200, 120, "#4a3840", 10, 1));
+    near.add(rect(0, -120, 2600, 120, "#4a3840", 10, 1));
     for (let x = -W - 40; x <= W + 40; x += 34) {
       near.add(rect(x, -120, 3, 120, "#2a1f28", 10, 0.8));
     }
-    near.add(rect(0, -6, 2200, 6, "#6b5148", 10, 0.9));
+    near.add(rect(0, -6, 2600, 6, "#6b5148", 10, 0.9));
     // Standing water, catching the fires overhead. Seen side-on a puddle is a
     // bright streak lying on the boards, not a pool with depth - drawn tall it
     // just reads as a hatch cut into the floor.
-    for (const [x, w] of [[-620, 130], [-180, 90], [140, 110], [500, 150]] as [number, number][]) {
+    for (const [x, w] of [[-780, 130], [-420, 90], [-180, 110], [200, 90], [560, 150], [800, 110]] as [
+      number,
+      number,
+    ][]) {
       near.add(rect(x, -12, w, 7, "#5c4048", 11, 0.85));
       near.add(rect(x, -10, w * 0.78, 4, "#a8642a", 11, 0.55));
       near.add(rect(x, -9, w * 0.42, 2, "#ffd06b", 11, 0.45));
     }
 
-    // ---- the piles the decks stand on ----
+    // ---- the piles the dock deck stands on ----
     for (let x = -W; x <= W; x += 96) {
-      near.add(rect(x, 0, 11, 62, beam, 7, 0.95));
-      near.add(rect(x, 0, 4, 62, beamLit, 8, 0.6));
+      near.add(rect(x, 0, 11, deckL.y, beam, 7, 0.95));
+      near.add(rect(x, 0, 4, deckL.y, beamLit, 8, 0.6));
       near.add(rect(x, 20, 26, 5, beam, 8, 0.9));
     }
 
-    // ---- lower deck, y 62 ----
+    // ---- dock deck, the lowest storey ----
     // The standable surface itself is drawn by buildPlatforms off the same
     // list, so only the parts it does not draw are here: the planking on top
     // and the glow on the underside, where the furnaces are.
-    for (const [px, pw] of [[-560, 300], [-150, 300], [260, 300]] as [number, number][]) {
-      for (let i = 0; i < Math.floor(pw / 26); i++) {
-        near.add(rect(px + 13 + i * 26, 62, 3, 6, iron, 9, 0.45));
+    for (const p of [deckL, deckM, deckR]) {
+      for (let i = 0; i < Math.floor(p.w / 26); i++) {
+        near.add(rect(p.x + 13 + i * 26, p.y, 3, 6, iron, 9, 0.45));
       }
-      near.add(rect(px + pw / 2, 50, pw, 5, "#a8642a", 9, 0.5));
+      near.add(rect(p.x + p.w / 2, p.y - 12, p.w, 5, "#a8642a", 9, 0.5));
     }
-    // Braziers on the lower deck and on the floor below it, which is where all
+    // Braziers on the dock deck and on the floor below it, which is where all
     // the light in this stage comes from.
     const brazier = (x: number, y: number, k = 1) => {
       near.add(rect(x, y, 22 * k, 20 * k, iron, 10, 0.97));
       near.add(poly(x, y + 20 * k, [-11, 0, -6, 16, 0, 24, 7, 14, 11, 0], "#ff9440", 11, 0.9));
       near.add(poly(x, y + 22 * k, [-6, 0, -3, 10, 0, 16, 4, 9, 6, 0], "#ffe3a0", 11, 0.9));
     };
-    for (const x of [-470, -60, 350, 520]) brazier(x, 62);
-    for (const x of [-330, 40, 420]) brazier(x, 0, 0.85);
+    for (const x of [-720, -420, -60, 420, 620]) brazier(x, deckL.y);
+    for (const x of [-560, -280, 100, 480]) brazier(x, 0, 0.85);
 
-    // ---- upper gantry, y 140 ----
-    for (const [px, pw] of [[-330, 220], [110, 220]] as [number, number][]) {
-      near.add(rect(px + pw / 2, 129, pw, 4, "#a8642a", 11, 0.45));
+    // ---- mid gantry, the second storey ----
+    for (const p of [gantryL, gantryR]) {
+      near.add(rect(p.x + p.w / 2, p.y - 15, p.w, 4, "#a8642a", 11, 0.45));
       // Handrail along the back, so the deck reads as a walkway.
-      near.add(rect(px + pw / 2, 148, pw, 3, iron, 11, 0.9));
-      near.add(rect(px + pw / 2, 168, pw, 3, iron, 11, 0.9));
-      for (let i = 0; i <= Math.floor(pw / 44); i++) {
-        near.add(rect(px + i * 44, 148, 3, 22, iron, 11, 0.9));
+      near.add(rect(p.x + p.w / 2, p.y + 8, p.w, 3, iron, 11, 0.9));
+      near.add(rect(p.x + p.w / 2, p.y + 28, p.w, 3, iron, 11, 0.9));
+      for (let i = 0; i <= Math.floor(p.w / 44); i++) {
+        near.add(rect(p.x + i * 44, p.y + 8, 3, 22, iron, 11, 0.9));
       }
-      // The legs holding it up, landing on the deck below.
-      near.add(rect(px + 14, 70, 7, 66, beam, 10, 0.95));
-      near.add(rect(px + pw - 14, 70, 7, 66, beam, 10, 0.95));
+      // The legs holding it up, landing on the dock deck below.
+      near.add(rect(p.x + 14, deckL.y, 7, p.y - deckL.y, beam, 10, 0.95));
+      near.add(rect(p.x + p.w - 14, deckL.y, 7, p.y - deckL.y, beam, 10, 0.95));
     }
 
-    // ---- ladders between the storeys ----
+    // ---- the crow's nest, the top storey ----
+    //
+    // It sits over the gap *between* the two gantry halves rather than over
+    // either one, which is why nothing lands on the gantry to hold it up -
+    // its own legs run all the way down to the dock deck's middle run,
+    // passing through that gap, the way a real gantry crane's tower rises
+    // through the walkways built onto its sides rather than resting on them.
+    // That is also why the climb to it is the one jump on the stage that
+    // needs a direction held rather than a straight hop: there is no ledge
+    // directly under it to hop from.
+    {
+      const legL = nest.x + 18;
+      const legR = nest.x + nest.w - 18;
+      near.add(rect(legL, deckM.y, 8, nest.y - deckM.y, beam, 6, 0.95));
+      near.add(rect(legR, deckM.y, 8, nest.y - deckM.y, beam, 6, 0.95));
+      // Horizontal ties, because a leg this tall reads as a flagpole without
+      // them - two rungs of scaffolding rather than a bare pair of posts.
+      for (const y of [deckM.y + 44, deckM.y + 88]) {
+        near.add(rect((legL + legR) / 2, y, legR - legL + 8, 5, beamLit, 6, 0.8));
+      }
+      near.add(rect(nest.x + nest.w / 2, nest.y - 15, nest.w, 4, "#a8642a", 11, 0.45));
+      // Rails on both faces - unlike the gantry halves, a fighter can climb
+      // onto this from either side, so both sides need something to stop
+      // them walking straight off the back of it.
+      for (const side of [1, -1]) {
+        near.add(rect(nest.x + nest.w / 2, nest.y + (side > 0 ? 8 : 28), nest.w, 3, iron, 11, 0.9));
+      }
+      for (let i = 0; i <= Math.floor(nest.w / 40); i++) {
+        near.add(rect(nest.x + i * 40, nest.y + 8, 3, 22, iron, 11, 0.9));
+      }
+      // The beacon: brighter and taller than the ordinary lamps on the
+      // gantry legs, so the best spot on the stage reads as the best spot
+      // on the stage from anywhere on it.
+      near.add(rect(nest.x + nest.w / 2, nest.y + 30, 4, 26, iron, 12, 0.9));
+      near.add(disc(nest.x + nest.w / 2, nest.y + 58, 10, "#ffd06b", 12, 0.9));
+      near.add(disc(nest.x + nest.w / 2, nest.y + 58, 22, "#ffd06b", 11, 0.2));
+    }
+
+    // ---- ladders and catwalks between the storeys ----
     const ladder = (x: number, y0: number, y1: number) => {
       near.add(rect(x - 9, y0, 4, y1 - y0, beamLit, 12, 0.95));
       near.add(rect(x + 9, y0, 4, y1 - y0, beamLit, 12, 0.95));
       for (let y = y0 + 8; y < y1; y += 14) near.add(rect(x, y, 22, 3, beamLit, 12, 0.95));
     };
-    ladder(-420, 0, 62);
-    ladder(30, 0, 62);
-    ladder(430, 0, 62);
-    // These two have to stand where a deck and the gantry above it overlap,
-    // or they climb out of thin air.
-    ladder(-300, 62, 140);
-    ladder(130, 62, 140);
+    // Straight up: ground to the dock deck, wherever a run actually is.
+    ladder(deckL.x + 60, 0, deckL.y);
+    ladder(deckM.x + deckM.w / 2, 0, deckM.y);
+    ladder(deckR.x + deckR.w - 60, 0, deckR.y);
+    // Straight up again: these stand where the deck and the gantry above it
+    // actually overlap, or they would climb out of thin air.
+    ladder((gantryL.x + deckL.x + deckL.w) / 2, deckL.y, gantryL.y);
+    ladder((gantryR.x + gantryR.w + deckR.x) / 2, deckR.y, gantryR.y);
+    // Angled: the gantry does not run under the crow's nest, so the last leg
+    // is a rising line of treads rather than a straight ladder - drawing it
+    // as one would be a lie about which way to press. One rising in from
+    // each gantry half toward the middle, the same way the vertical ladders
+    // above are a stack of unrotated rungs rather than a single rotated mesh.
+    for (const [x0, y0, x1, y1] of [
+      [gantryL.x + gantryL.w - 20, gantryL.y, nest.x + 14, nest.y],
+      [gantryR.x + 20, gantryR.y, nest.x + nest.w - 14, nest.y],
+    ] as [number, number, number, number][]) {
+      const steps = 6;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = x0 + (x1 - x0) * t;
+        const y = y0 + (y1 - y0) * t;
+        near.add(rect(x, y, 16, 3, beamLit, 12, 0.95));
+      }
+    }
 
     // ---- chains, hooks and the clutter that makes it a working yard ----
-    for (const [x, top] of [[-600, 250], [-90, 236], [370, 258], [640, 240]] as [number, number][]) {
+    for (const [x, top] of [[-820, 250], [-420, 300], [-90, 236], [370, 258], [700, 290], [900, 240]] as [
+      number,
+      number,
+    ][]) {
       for (let y = 150; y < top; y += 13) near.add(disc(x, y, 4, iron, 9, 0.9));
       near.add(poly(x, 138, [0, 12, -8, 4, -5, -6, 5, -6, 8, 4], iron, 9, 0.92));
     }
-    for (const [x, y] of [[-530, 62], [-350, 62], [120, 62], [520, 62], [-290, 140], [250, 140]] as [number, number][]) {
+    for (const [x, y] of [
+      [deckL.x + 60, deckL.y],
+      [deckL.x + 240, deckL.y],
+      [deckM.x + 30, deckM.y],
+      [deckR.x + 60, deckR.y],
+      [deckR.x + 260, deckR.y],
+      [gantryL.x + 100, gantryL.y],
+      [gantryR.x + 160, gantryR.y],
+    ] as [number, number][]) {
       near.add(rect(x, y, 30, 26, "#6b4a2c", 10, 0.97));
       near.add(rect(x, y + 12, 30, 3, "#4a3220", 11, 0.9));
       near.add(rect(x, y, 3, 26, "#4a3220", 11, 0.9));
     }
-    for (const [x, y] of [[-460, 62], [-40, 62], [300, 140]] as [number, number][]) {
+    for (const [x, y] of [
+      [deckL.x + 150, deckL.y],
+      [deckM.x + 180, deckM.y],
+      [deckR.x + 180, deckR.y],
+      [gantryL.x + 200, gantryL.y],
+    ] as [number, number][]) {
       near.add(rect(x, y, 20, 30, "#4a4a52", 10, 0.97));
       near.add(rect(x, y + 26, 22, 4, "#5c5c66", 11, 0.9));
       near.add(rect(x, y + 3, 22, 3, "#5c5c66", 11, 0.9));
     }
     // Lamps on the gantry legs.
-    for (const x of [-320, -130, 130, 320]) {
-      near.add(rect(x, 176, 3, 22, iron, 12, 0.9));
-      near.add(disc(x, 176, 7, "#ffd06b", 12, 0.85));
-      near.add(disc(x, 176, 14, "#ffd06b", 11, 0.16));
+    for (const x of [gantryL.x + 14, gantryL.x + gantryL.w - 14, gantryR.x + 14, gantryR.x + gantryR.w - 14]) {
+      near.add(rect(x, gantryL.y + 32, 3, 22, iron, 12, 0.9));
+      near.add(disc(x, gantryL.y + 32, 7, "#ffd06b", 12, 0.85));
+      near.add(disc(x, gantryL.y + 32, 14, "#ffd06b", 11, 0.16));
     }
     this.addLayer(near, 1);
   }

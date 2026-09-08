@@ -4,7 +4,8 @@
  */
 
 import { COMBAT, FPS, GROUND_Y, MATCH, STAGE_HALF_WIDTH } from "../constants";
-import type { FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn, Platform, StripDef, ZoneSpawn,
+import type { FighterDef, GuardHeight, HitDef, HitFx, ProjectileSpawn, Platform, StageRules, StripDef,
+  ZoneSpawn,
 } from "../types";
 import { Fighter, boxesOverlap, toWorldBox, type WorldBox } from "./fighter";
 import { EMPTY_INPUT, type RawInput } from "./input";
@@ -177,20 +178,24 @@ export class Match {
    */
   /** Half the playable width. Arcade levels are wider than arenas. */
   readonly halfWidth: number;
+  /** What the stage itself does to the fighters standing on it. */
+  readonly stage: StageRules;
 
   constructor(
     defs: [FighterDef, FighterDef],
     roundsToWin = MATCH.roundsToWin,
     platforms: Platform[] = [],
     rules: MatchRule[] = [],
-    halfWidth = STAGE_HALF_WIDTH,
+    stage: StageRules = {},
   ) {
     this.fighters = [new Fighter(defs[0], 0), new Fighter(defs[1], 1)];
     this.roundsToWin = roundsToWin;
-    this.halfWidth = halfWidth;
+    this.stage = stage;
+    this.halfWidth = stage.halfWidth ?? STAGE_HALF_WIDTH;
     for (const f of this.fighters) {
       f.platforms = platforms;
-      f.halfWidth = halfWidth;
+      f.halfWidth = this.halfWidth;
+      f.fall = stage.fall;
     }
     this.rules = rules;
     this.resetPositions();
@@ -1132,10 +1137,26 @@ export class Match {
     }
   }
 
-  /** Where the camera should look. */
-  cameraFocus(): { x: number; spread: number } {
+  /**
+   * Where the camera should look.
+   *
+   * `y` and `vspread` only matter on a stage with platforms - an arena keeps
+   * both fighters within a few units of the floor for the whole match, so
+   * they stay at zero and nothing about how the camera used to behave changes
+   * for the 25 stages that are not built out of storeys. On one that is, a
+   * fighter three storeys up is exactly the situation "zoom out" has to
+   * answer: `vspread` is what lets the renderer treat height apart the same
+   * way it already treats distance apart, and `y` is what lets it pan up to
+   * follow them there instead of always centring on the ground.
+   */
+  cameraFocus(): { x: number; y: number; spread: number; vspread: number } {
     const [a, b] = this.fighters;
-    return { x: (a.x + b.x) / 2, spread: Math.abs(a.x - b.x) };
+    return {
+      x: (a.x + b.x) / 2,
+      y: (a.y + b.y) / 2,
+      spread: Math.abs(a.x - b.x),
+      vspread: Math.abs(a.y - b.y),
+    };
   }
 }
 

@@ -809,6 +809,34 @@ export interface ResourceDef {
   spareName?: string;
 }
 
+/**
+ * The physical facts of the stage a fight happens on, as opposed to the rules
+ * of the fight itself.
+ *
+ * One object rather than more positional arguments on the Match constructor.
+ * There were already five, two of them stage properties, and the last time a
+ * sixth was needed it went in at the wrong position at both call sites without
+ * anything complaining.
+ */
+export interface StageRules {
+  /** Half the playable width. Arcade levels are wider than arenas. */
+  halfWidth?: number;
+  /**
+   * What a long drop costs.
+   *
+   * Only on stages built out of storeys - an arena has nowhere to fall from,
+   * and adding it there would change the meaning of every jump on the roster.
+   */
+  fall?: {
+    /** Drops shorter than this cost nothing. */
+    from: number;
+    /** Damage per hundred units beyond that. */
+    per100: number;
+    /** Never more than this from one landing. */
+    max: number;
+  };
+}
+
 export interface FighterStats {
   health: number;
   walkF: number;

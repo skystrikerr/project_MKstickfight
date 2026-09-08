@@ -134,10 +134,21 @@ export class GameRenderer {
   private debugGroup = new THREE.Group();
   private viewWidth = CAMERA.minViewWidth;
   private camX = 0;
+  /** Vertical camera centre, lerped toward the pair the same way camX is. */
+  private camY = 0;
   private aspect = 16 / 9;
   private post: PostFx | null = null;
   private quality: "high" | "low";
   private stageHalfWidth = STAGE_HALF_WIDTH;
+  /** How far this stage lets the camera zoom out. Wider on an arcade level. */
+  private maxViewWidth = CAMERA.maxViewWidth;
+  /**
+   * The highest a platform on this stage goes, so vertical panning has
+   * somewhere to stop rather than drifting up over an arena that never asked
+   * for it. Zero on every flat stage, which leaves this whole system inert
+   * there - the camera already centred on the ground, and it still does.
+   */
+  private stageMaxHeight = 0;
   /** Extra zoom applied by impacts, eased back out over a few frames. */
   private punch = 0;
   private lastShake = 0;
@@ -168,6 +179,8 @@ export class GameRenderer {
 
     this.stage = new Stage(theme);
     this.stageHalfWidth = halfWidthOf(theme);
+    this.maxViewWidth = STAGE_THEMES[theme].maxViewWidth ?? CAMERA.maxViewWidth;
+    this.stageMaxHeight = Math.max(0, ...(STAGE_THEMES[theme].platforms ?? []).map((p) => p.y));
     this.scene.add(this.stage.group);
 
     // Both fighters are lit by the stage they are standing in, so a figure
@@ -220,7 +233,7 @@ export class GameRenderer {
         this.post.setSize(width * pr, height * pr);
       }
     }
-    this.updateCamera(this.viewWidth, this.camX, 0);
+    this.updateCamera(this.viewWidth, this.camX, this.camY, 0);
   }
 
   setMotion(motion: "full" | "reduced" | "off") {
@@ -261,12 +274,15 @@ export class GameRenderer {
     return /swiftshader|llvmpipe|software|basic render|microsoft basic/i.test(name);
   }
 
-  private updateCamera(viewWidth: number, x: number, shake: number) {
+  private updateCamera(viewWidth: number, x: number, y: number, shake: number) {
     const halfW = viewWidth / 2;
     const halfH = halfW / this.aspect;
     const sx = shake > 0 ? (Math.random() - 0.5) * shake * 2.2 : 0;
     const sy = shake > 0 ? (Math.random() - 0.5) * shake * 1.6 : 0;
-    const centerY = CAMERA.height + halfH * 0.18;
+    // `y` is how high the pair is standing, on a stage that has anywhere to
+    // stand but the ground - zero on the other 25, which is exactly what this
+    // used to hard-code, so nothing about a flat stage's framing moves.
+    const centerY = CAMERA.height + y + halfH * 0.18;
     this.camera.left = -halfW + x + sx;
     this.camera.right = halfW + x + sx;
     this.camera.top = centerY + halfH + sy;
@@ -275,12 +291,17 @@ export class GameRenderer {
   }
 
   render(match: Match) {
-    // Camera framing follows the pair.
+    // Camera framing follows the pair - and follows them apart vertically the
+    // same way it always has horizontally. Converted into the same "view
+    // width" unit the horizontal spread already is: half of whatever height
+    // gap has to fit becomes half of a width, scaled by the aspect ratio, so
+    // a wide screen and a tall one ask for the same actual zoom off the same
+    // vertical gap. On the 25 stages nobody leaves the ground on for more
+    // than a jump, vspread stays near zero and this term never wins.
     const focus = match.cameraFocus();
-    const want = Math.max(
-      CAMERA.minViewWidth,
-      Math.min(CAMERA.maxViewWidth, focus.spread + CAMERA.padding),
-    );
+    const wantX = focus.spread + CAMERA.padding;
+    const wantY = (focus.vspread + CAMERA.vpadding) * this.aspect;
+    const want = Math.max(CAMERA.minViewWidth, Math.min(this.maxViewWidth, Math.max(wantX, wantY)));
     this.viewWidth += (want - this.viewWidth) * CAMERA.lerp;
 
     // A spike in screen shake means something heavy landed: punch the camera
@@ -309,8 +330,16 @@ export class GameRenderer {
     const bound = this.stageHalfWidth;
     const clampX = Math.max(-bound + halfView - 60, Math.min(bound - halfView + 60, focusX));
     this.camX += (clampX - this.camX) * CAMERA.lerp;
-    this.updateCamera(framed, this.camX, shake);
-    this.stage.update(this.camX, 0);
+
+    // Vertical follow, clamped to the stage's own platforms rather than let
+    // loose - a launcher can put a fighter briefly far higher than anywhere
+    // they can actually stand, and chasing that for a few frames reads as the
+    // camera flinching rather than as it framing something.
+    const targetY = Math.max(0, Math.min(this.stageMaxHeight, focus.y));
+    this.camY += (targetY - this.camY) * CAMERA.lerp;
+
+    this.updateCamera(framed, this.camX, this.camY, shake);
+    this.stage.update(this.camX, this.camY);
 
     // Fighters.
     for (let i = 0; i < 2; i++) {
@@ -929,9 +958,14 @@ export class GameRenderer {
     this.scene.remove(this.stage.group);
     this.stage.dispose();
     this.stage = new Stage(theme);
-    // The camera bound travels with the stage, so swapping to a wider one
-    // mid-session has to move it too or the far end stays unreachable.
+    // Every stage-shaped camera bound travels with the stage, so swapping to
+    // a wider or taller one mid-session has to move all three or the far end,
+    // the zoomed-out view, or the top platform stays unreachable on a rematch
+    // that rolled a different arcade level than the one this renderer opened
+    // with.
     this.stageHalfWidth = halfWidthOf(theme);
+    this.maxViewWidth = STAGE_THEMES[theme].maxViewWidth ?? CAMERA.maxViewWidth;
+    this.stageMaxHeight = Math.max(0, ...(STAGE_THEMES[theme].platforms ?? []).map((p) => p.y));
     this.scene.add(this.stage.group);
   }
 

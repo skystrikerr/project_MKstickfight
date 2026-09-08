@@ -24,7 +24,7 @@ import { getFighter, ROSTER } from "./fighters";
 import { advanceRun, buildLadder, continueRun, ENDINGS, LADDER_LENGTH, shiftLevel, startRun, type Run } from "./ladder";
 import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./save";
 import { BINDABLE_ACTIONS, codeLabel, defaultKeyMap, isKeyCode, toKeyBindings } from "./keybinds";
-import { halfWidthOf, STAGE_THEMES, stagesOfKind } from "./render/stage";
+import { halfWidthOf, stageRulesFor, STAGE_THEMES, stagesOfKind } from "./render/stage";
 import { attachTransform } from "./render/rig";
 import { buildSkeleton, sampleClip, sampleFrames } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
@@ -2886,36 +2886,142 @@ function superDamage() {
   }
 }
 
-// The storeys have to be reachable. A gantry you cannot jump to is scenery,
+// The storeys have to be reachable. A platform you cannot jump to is scenery,
 // and the height that makes it scenery is a plausible thing to get wrong by
 // twenty units, which no amount of looking at the file would catch.
+//
+// Tested with Shanidar rather than the file's usual fighters - he is the
+// shortest jumper in the roster (measured, not eyeballed: about 79 units of
+// apex against a next-worst of 93 and a best of 135), so if he clears every
+// storey then every other fighter clears it with room to spare.
 {
   const ironworks = STAGE_THEMES.ironworks.platforms ?? [];
-  const m = new Match([getFighter("roman"), getFighter("pirate")], 2, ironworks,
-    undefined, halfWidthOf("ironworks"));
+  const m = new Match([getFighter("shanidar"), getFighter("roman")], 2, ironworks,
+    undefined, stageRulesFor("ironworks"));
   run(m, 120, () => inp());
   const f = m.fighters[0];
-  m.fighters[1].x = 700;
+  m.fighters[1].x = 900;
 
-  // Start on the ground under the lower deck's left run and climb.
-  f.x = -400;
+  // Ground to the dock deck. Straight up - the deck runs wide enough that
+  // this low a jump needs no help from a direction held at the same time.
+  f.x = -500;
   f.y = 0;
   for (let i = 0; i < 90 && !f.standing; i++) m.step([inp({ up: i < 4 }), inp()]);
-  check("ironworks: the lower deck is one jump up", !!f.standing && Math.abs(f.y - 62) < 2,
+  check("ironworks: the dock deck is one jump up", !!f.standing && Math.abs(f.y - 74) < 2,
     `y=${f.y.toFixed(0)}`);
 
-  // And from the deck to the gantry above it. Taken at the near end, where a
-  // deck actually runs under the gantry - the middle of the gantry hangs over
-  // the gap on purpose, and that gap is the point of the stage.
-  f.x = -300;
-  f.y = 62;
+  // Deck to the mid gantry, from where the two actually overlap.
+  f.x = -380;
+  f.y = 74;
   for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
   for (let i = 0; i < 90; i++) {
     m.step([inp({ up: i < 4 }), inp()]);
     if (f.grounded && f.y > 100) break;
   }
-  check("ironworks: the gantry is one jump above the deck", f.grounded && Math.abs(f.y - 140) < 2,
+  check("ironworks: the mid gantry is one jump above the deck", f.grounded && Math.abs(f.y - 144) < 2,
     `y=${f.y.toFixed(0)}`);
+
+  // Gantry to the crow's nest. This one sits above the gap *between* the two
+  // gantry halves on purpose - there is no spot on the gantry directly under
+  // it, so this is the one jump on the stage that needs an actual direction
+  // held rather than a straight hop, and the test holds one rather than
+  // proving something easier than what a player actually has to do.
+  f.x = -160;
+  f.y = 144;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4, right: i < 20 }), inp()]);
+    if (f.grounded && f.y > 170) break;
+  }
+  check("ironworks: the crow's nest is one directed jump above the gantry",
+    f.grounded && Math.abs(f.y - 214) < 2, `y=${f.y.toFixed(0)}`);
+
+  // And it cannot be skipped: straight from the deck to the crow's nest is a
+  // 140-unit climb, and nobody on the roster jumps higher than about 135 -
+  // so the gantry is a real step, not a detour a good enough jump avoids.
+  check("ironworks: the crow's nest cannot be reached from the deck directly",
+    214 - 74 > 135, `${214 - 74} vs the roster's tallest measured jump (135)`);
+}
+
+// ---------------------------------------------------------------------------
+// Fall damage
+// ---------------------------------------------------------------------------
+//
+// A stage can charge for a long drop (see StageRules.fall). The bill is
+// levied in Fighter.onLand() off a peak height tracked every frame, and the
+// two ways onto solid ground - catching a platform, or hitting the actual
+// floor - go through completely different code paths to get there. The first
+// version of this only worked for the platform path: the peak tracker used
+// the public `grounded` getter to decide when to reset itself, and on the
+// floor specifically, "not standing on anything" and "resting on the floor"
+// are the same height (zero) - so the instant a falling fighter's y crossed
+// below zero, one frame before the floor-clamp below actually caught them,
+// `grounded` read true and wiped the recorded peak. Every fall that landed on
+// the ground floor rather than a platform was silently free. These tests
+// exercise both landings so that regression cannot come back through either
+// one alone.
+{
+  const platforms = STAGE_THEMES.ironworks.platforms ?? [];
+  const rules = stageRulesFor("ironworks");
+
+  // Drop a fighter from a given height at a given x, straight down (no
+  // standing, barely negative vy - the same state `dropThrough` leaves a
+  // fighter in), and run until they land somewhere.
+  const dropTest = (startY: number, x: number) => {
+    const m = new Match([getFighter("roman"), getFighter("pirate")], 2, platforms, undefined, rules);
+    run(m, 80, () => inp());
+    const f = m.fighters[0];
+    m.fighters[1].x = 900;
+    f.x = x;
+    f.y = startY - 1;
+    f.standing = null;
+    f.vy = -0.1;
+    const before = f.health;
+    for (let i = 0; i < 150; i++) m.step([inp(), inp()]);
+    return { landedY: f.y, before, after: f.health, fallDamage: f.fallDamage };
+  };
+
+  // Straight down from the crow's nest through its own footprint, landing on
+  // the dock deck below (~140 units) - caught by a platform.
+  const toDeck = dropTest(214, 0);
+  check("fall damage: a real drop onto a platform costs something",
+    toDeck.fallDamage > 0 && toDeck.after < toDeck.before, JSON.stringify(toDeck));
+
+  // The gap between two tiers on this stage (~70 units) is under the
+  // configured threshold and has to stay free, or ordinary tier-to-tier
+  // movement starts taxing the player for playing the level as designed.
+  const shortHop = dropTest(144, -380);
+  check("fall damage: an ordinary tier-to-tier drop is free",
+    shortHop.fallDamage === 0 && shortHop.after === shortHop.before, JSON.stringify(shortHop));
+
+  // The regression itself: straight down from the crow's nest missing every
+  // platform, landing on the actual ground floor rather than a ledge. This is
+  // the single largest fall the stage has, and it is the one the first
+  // version charged nothing for.
+  const toFloor = dropTest(214, 900);
+  check("fall damage: a drop onto the ground floor costs something too",
+    toFloor.fallDamage > 0 && toFloor.after < toFloor.before, JSON.stringify(toFloor));
+
+  // And it stays small either way - a few percent of a health bar, not a
+  // finisher. Checked against the actual configured cap rather than a
+  // rewritten copy of it, so raising the cap in the stage file does not also
+  // require finding and updating this number.
+  check("fall damage: even the tallest drop on the stage stays capped",
+    toFloor.fallDamage <= (rules.fall?.max ?? 0) + 0.01, `${toFloor.fallDamage}`);
+
+  // A stage with no `fall` rule at all - every arena, and most of the roster's
+  // history - must never charge for anything, however far the drop.
+  const arena = new Match([getFighter("roman"), getFighter("pirate")], 2, []);
+  run(arena, 80, () => inp());
+  const g = arena.fighters[0];
+  arena.fighters[1].x = 300;
+  g.y = 300;
+  g.standing = null;
+  g.vy = -0.1;
+  const beforeArena = g.health;
+  for (let i = 0; i < 150; i++) arena.step([inp(), inp()]);
+  check("fall damage: an arena with no fall rule never charges for one",
+    g.health === beforeArena, `${beforeArena} -> ${g.health}`);
 }
 
 {

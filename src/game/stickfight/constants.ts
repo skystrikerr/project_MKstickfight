@@ -15,6 +15,13 @@ export const CAMERA = {
   minViewWidth: 620,
   maxViewWidth: 980,
   padding: 210,
+  /**
+   * The vertical equivalent of `padding`. Kept smaller than the horizontal
+   * figure - a fighter's height is mostly vertical to begin with, so framing
+   * two of them stacked needs proportionally less air around the pair than
+   * framing two of them side by side does.
+   */
+  vpadding: 130,
   height: 96,
   lerp: 0.12,
 };

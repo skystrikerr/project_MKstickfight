@@ -23,7 +23,7 @@ import { getFighter } from "@/game/stickfight/fighters";
 import { EMPTY_INPUT } from "@/game/stickfight/engine/input";
 import { GameRenderer } from "@/game/stickfight/render/renderer";
 import { setDetail } from "@/game/stickfight/render/detail";
-import { STAGE_THEMES, type StageTheme } from "@/game/stickfight/render/stage";
+import { stageRulesFor, STAGE_THEMES, type StageTheme } from "@/game/stickfight/render/stage";
 
 const q = new URLSearchParams(location.search);
 const num = (k: string, d: number) => Number(q.get(k) ?? d);
@@ -46,6 +46,8 @@ const match = new Match(
   [getFighter(q.get("p1") ?? "lapulapu"), getFighter(q.get("p2") ?? "knight")],
   2,
   STAGE_THEMES[theme].platforms ?? [],
+  undefined,
+  stageRulesFor(theme),
 );
 
 const renderer = new GameRenderer(
@@ -61,6 +63,11 @@ const idle = () => [EMPTY_INPUT, EMPTY_INPUT] as [typeof EMPTY_INPUT, typeof EMP
 for (let i = 0; i < num("frames", 90); i++) match.step(idle());
 
 if (q.get("gap")) match.fighters[1].x = match.fighters[0].x + num("gap", 150);
+// Direct height placement, for judging a platform stage - a fighter's y is
+// never something a caller has reason to set except to pose them on a
+// specific storey, so there is no default to fall back to.
+if (q.has("y1")) match.fighters[0].y = num("y1", 0);
+if (q.has("y2")) match.fighters[1].y = num("y2", 0);
 
 // Supers and resource moves refuse to start without the bar to pay for them,
 // and a harness that silently draws an idle stance instead of the move you
