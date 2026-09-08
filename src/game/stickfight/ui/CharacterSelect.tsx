@@ -13,6 +13,8 @@ import { unlockLabel, unlockProgress, type ProgressState } from "../progress";
 import { loadSave, patchSave } from "../save";
 import { FactionMarks } from "./FactionEmblem";
 import { FighterPortrait } from "./Portrait";
+import { FighterCard } from "./FighterCard";
+import { portraitFor } from "./art";
 
 interface Props {
   onStart: (opts: {
@@ -240,43 +242,48 @@ function Card({
       onClick={onPick}
       onMouseEnter={onHover}
       onFocus={onHover}
-      className={`cut-sm group relative overflow-hidden border p-3 text-left transition ${
-        selected
-          ? "border-[var(--accent)] bg-[#15211c]"
-          : "border-[var(--rule)] bg-[var(--ink-2)] hover:border-[var(--bone-dim)]"
+      className={`group relative block self-start text-left transition ${
+        selected ? "" : "hover:brightness-110"
       } ${dim ? "opacity-60" : ""}`}
     >
-      {/* The fighter's own colour, as a strip under their feet rather than a
-          glow behind them - it reads as a file tab, and it does not wash the
-          portrait out. */}
-      <span className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: def.palette.accent }} />
-      {/* The faction marks sit in the top-left corner, with the roster number
-          moved under them - the corner is the first place the eye lands on a
-          card and the number is the least interesting thing on it. */}
-      <FactionMarks fighterId={def.id} size={17} kinds={["faith", "power"]} className="absolute left-1.5 top-1.5 z-10" />
-      <span className="absolute left-2 top-[26px] font-mono text-[10px] text-[var(--bone-dim)]">{index}</span>
-      {clearedAt && (
-        <span
-          className="absolute left-2 bottom-2.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[var(--accent)]"
-          title={`Arcade ladder cleared on ${clearedAt}`}
-        >
-          ★ {clearedAt}
+      {/* The painted card. A fighter nobody has art for yet gets the same
+          frame with an empty window rather than a substitute portrait: the
+          gap is meant to be visible, so it is obvious at a glance which of
+          the twenty-six are still waiting to be drawn. */}
+      <FighterCard
+        fighterId={def.id}
+        kind={selected ? "selected" : "plain"}
+        className="w-full"
+        name={def.name}
+        sub={def.archetype}
+        title={def.name}
+      >
+        {/* Inside the window, so the badges sit on the art rather than
+            floating in the gap between cards - which is where they ended up
+            when they were positioned against the button. */}
+        <FactionMarks
+          fighterId={def.id}
+          size={15}
+          kinds={["faith", "power"]}
+          className="absolute left-1 top-1 z-10 drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]"
+        />
+        <span className="absolute left-1.5 top-[22px] z-10 font-mono text-[9px] text-[var(--bone)] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]">
+          {index}
         </span>
-      )}
-      <FighterPortrait def={def} className="relative h-32 w-full" />
-      <div className="relative mt-1">
-        <div className="font-display text-xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)]">
-          {def.name}
-        </div>
-        <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
-          {def.archetype}
-        </div>
-      </div>
-      {selected && (
-        <span className="absolute right-0 top-0 bg-[var(--accent)] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[var(--ink)]">
-          {selected === "both" ? "P1 · P2" : selected.toUpperCase()}
-        </span>
-      )}
+        {clearedAt && (
+          <span
+            className="absolute bottom-1 left-1.5 z-10 font-mono text-[8px] uppercase tracking-[0.12em] text-[var(--accent)] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]"
+            title={`Arcade ladder cleared on ${clearedAt}`}
+          >
+            ★ {clearedAt}
+          </span>
+        )}
+        {selected && (
+          <span className="absolute right-0 top-0 z-10 bg-[var(--accent)] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[var(--ink)]">
+            {selected === "both" ? "P1 · P2" : selected.toUpperCase()}
+          </span>
+        )}
+      </FighterCard>
     </button>
   );
 }
@@ -428,7 +435,7 @@ export function CharacterSelect({ onStart, onShowMoves, onShowProfile }: Props) 
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {ROSTER.map((def, i) => (
             <Card
               key={def.id}
@@ -556,7 +563,11 @@ export function CharacterSelect({ onStart, onShowMoves, onShowProfile }: Props) 
         <div className="flex flex-wrap items-center gap-5">
           {(solo ? picked.slice(0, 1) : picked).map((def, i) => (
             <div key={i} className="flex items-center gap-2">
-              <FighterPortrait def={def} className="h-14 w-14" facing={i === 0 ? 1 : -1} />
+              {portraitFor(def.id) ? (
+                <FighterCard fighterId={def.id} kind={i === 0 ? "p1" : "p2"} className="w-[70px] shrink-0" />
+              ) : (
+                <FighterPortrait def={def} className="h-14 w-14" facing={i === 0 ? 1 : -1} />
+              )}
               <div>
                 <div
                   className="font-mono text-[10px] uppercase tracking-[0.2em]"

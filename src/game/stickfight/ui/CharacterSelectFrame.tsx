@@ -47,11 +47,13 @@ export interface CharacterSelectFrameProps {
   footerQuote?: string;
 }
 
-const DEFAULT_ACTIONS: CharacterSelectAction[] = [
-  { key: "customize", title: "Customize", subtitle: "Skins • Colors • Weapons" },
-  { key: "moves", title: "Moves", subtitle: "View command list" },
-  { key: "progression", title: "Progression", subtitle: "Level • Rewards • Stats" },
-].map((item, index) => ({ ...item, active: index === 0 }));
+const DEFAULT_ACTIONS: CharacterSelectAction[] = (
+  [
+    { key: "customize", title: "Customize", subtitle: "Skins • Colors • Weapons" },
+    { key: "moves", title: "Moves", subtitle: "View command list" },
+    { key: "progression", title: "Progression", subtitle: "Level • Rewards • Stats" },
+  ] satisfies CharacterSelectAction[]
+).map((item, index) => ({ ...item, active: index === 0 }));
 
 const DEFAULT_ROSTER: CharacterSelectRosterEntry[] = [
   "fighter-1","fighter-2","fighter-3","fighter-4","fighter-5","fighter-6",
