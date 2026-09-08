@@ -62,10 +62,13 @@ renderer.setSize(w, h);
 const idle = () => [EMPTY_INPUT, EMPTY_INPUT] as [typeof EMPTY_INPUT, typeof EMPTY_INPUT];
 for (let i = 0; i < num("frames", 90); i++) match.step(idle());
 
+// Direct placement, for judging a platform stage where the interesting spot
+// is not near x=0 - a fighter's x/y are never something a caller has reason
+// to set except to pose them somewhere specific, so there is no default to
+// fall back to for either.
+if (q.has("x1")) match.fighters[0].x = num("x1", 0);
 if (q.get("gap")) match.fighters[1].x = match.fighters[0].x + num("gap", 150);
-// Direct height placement, for judging a platform stage - a fighter's y is
-// never something a caller has reason to set except to pose them on a
-// specific storey, so there is no default to fall back to.
+if (q.has("x2")) match.fighters[1].x = num("x2", 0);
 if (q.has("y1")) match.fighters[0].y = num("y1", 0);
 if (q.has("y2")) match.fighters[1].y = num("y2", 0);
 

@@ -2943,6 +2943,113 @@ function superDamage() {
     214 - 74 > 135, `${214 - 74} vs the roster's tallest measured jump (135)`);
 }
 
+// The Pagoda and the Bell Tower repeat the same discipline at greater
+// height: still Shanidar, still every rise checked against his jump rather
+// than the roster's average, and still a same-storey delta (72 units, both
+// stages) checked to be more than double anyone's tallest measured jump so
+// nothing can be skipped by jumping two storeys at once.
+{
+  const platforms = STAGE_THEMES.pagoda.platforms ?? [];
+  const [baseL, , bridge1, midL, , bridge2, spire] = platforms;
+  const m = new Match([getFighter("shanidar"), getFighter("roman")], 2, platforms, undefined, stageRulesFor("pagoda"));
+  run(m, 120, () => inp());
+  const f = m.fighters[0];
+  m.fighters[1].x = 850;
+
+  // Each check below repositions the fighter directly rather than replaying
+  // the whole climb, so `standing` is set explicitly at every one of them -
+  // leaving it pointing at wherever the previous check happened to land is
+  // exactly the kind of stale reference `grounded` cannot tell from the real
+  // thing, and it will fall through the platform it is supposedly on for the
+  // whole settle window before a single jump input is even read.
+  f.x = baseL.x + 60;
+  f.y = 0;
+  f.standing = null;
+  for (let i = 0; i < 90 && !f.standing; i++) m.step([inp({ up: i < 4 }), inp()]);
+  check("pagoda: the base roof is one jump up", !!f.standing && Math.abs(f.y - baseL.y) < 2,
+    `y=${f.y.toFixed(0)}`);
+
+  // Base to the first bridge, from where the two overlap.
+  f.x = baseL.x + baseL.w - 30;
+  f.y = baseL.y;
+  f.standing = baseL;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4 }), inp()]);
+    if (f.grounded && f.y > baseL.y + 30) break;
+  }
+  check("pagoda: the first bridge is one jump above the base",
+    f.grounded && Math.abs(f.y - bridge1.y) < 2, `y=${f.y.toFixed(0)}`);
+
+  // Bridge to the second tier, needing a direction - the two only overlap by
+  // a little, the same margin the Ironworks proved was enough.
+  f.x = bridge1.x + 20;
+  f.y = bridge1.y;
+  f.standing = bridge1;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4, left: i < 20 }), inp()]);
+    if (f.grounded && f.y > bridge1.y + 30) break;
+  }
+  check("pagoda: the second tier is one directed jump above the first bridge",
+    f.grounded && Math.abs(f.y - midL.y) < 2, `y=${f.y.toFixed(0)}`);
+
+  // And the whole thing tapers to the spire, four storeys up from the
+  // ground - taller than the Ironworks manages in three.
+  check("pagoda: the spire is a taller climb than the Ironworks' crow's nest",
+    spire.y > 214, `${spire.y}`);
+  check("pagoda: no storey can be skipped by a good enough jump",
+    72 * 2 > 135, `${72 * 2} vs the roster's tallest measured jump (135)`);
+}
+
+{
+  const platforms = STAGE_THEMES.belltower.platforms ?? [];
+  const [baseL, , bridge1, midL, , bridge2, bellChamber, spireTop] = platforms;
+  const m = new Match([getFighter("shanidar"), getFighter("roman")], 2, platforms, undefined, stageRulesFor("belltower"));
+  run(m, 120, () => inp());
+  const f = m.fighters[0];
+  m.fighters[1].x = 850;
+
+  f.x = baseL.x + 60;
+  f.y = 0;
+  f.standing = null;
+  for (let i = 0; i < 90 && !f.standing; i++) m.step([inp({ up: i < 4 }), inp()]);
+  check("bell tower: the base ledge is one jump up", !!f.standing && Math.abs(f.y - baseL.y) < 2,
+    `y=${f.y.toFixed(0)}`);
+
+  // The bell chamber is this stage's one deliberate exception, the same
+  // trick the Ironworks plays once - it sits to the side of the gap below
+  // it rather than above any of it, so it needs a direction held.
+  f.x = bridge2.x + bridge2.w - 30;
+  f.y = bridge2.y;
+  f.standing = bridge2;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4, right: i < 25 }), inp()]);
+    if (f.grounded && f.y > bridge2.y + 30) break;
+  }
+  check("bell tower: the bell chamber is one directed jump above the second bridge",
+    f.grounded && Math.abs(f.y - bellChamber.y) < 2, `y=${f.y.toFixed(0)}`);
+
+  // From the chamber to the spire top, back toward the centre line.
+  f.x = bellChamber.x + bellChamber.w - 30;
+  f.y = bellChamber.y;
+  f.standing = bellChamber;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4, left: i < 20 }), inp()]);
+    if (f.grounded && f.y > bellChamber.y + 30) break;
+  }
+  check("bell tower: the spire top is one jump above the bell chamber",
+    f.grounded && Math.abs(f.y - spireTop.y) < 2, `y=${f.y.toFixed(0)}`);
+
+  // The tallest single climb on the roster.
+  check("bell tower: is the tallest arcade stage on the roster",
+    spireTop.y > 360 && spireTop.y > 214, `${spireTop.y}`);
+  check("bell tower: no storey can be skipped by a good enough jump",
+    72 * 2 > 135, `${72 * 2} vs the roster's tallest measured jump (135)`);
+}
+
 // ---------------------------------------------------------------------------
 // Fall damage
 // ---------------------------------------------------------------------------

@@ -29,6 +29,8 @@ export type StageTheme =
   | "causeway"
   // Arcade levels: wide, built and multi-storey. See StageKind.
   | "ironworks"
+  | "pagoda"
+  | "belltower"
   // Painted backdrops rather than built shapes.
   | "postroad"
   | "dryclaim"
@@ -356,6 +358,100 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: -410, y: 144, w: 260 },
       { x: 150, y: 144, w: 260 },
       { x: -120, y: 214, w: 240 },
+    ],
+  },
+  pagoda: {
+    name: "The Pagoda",
+    blurb: "Five roofs of a temple tower, each smaller than the one under it. The higher you fight, the further down it is.",
+    kind: "arcade",
+    // Tapers as it rises, the way the real thing does, so the width figure
+    // is measured at the base - the top storeys sit well inside it.
+    halfWidth: 900,
+    maxViewWidth: 1600,
+    // A genuinely tall stage should genuinely cost something to fall off of.
+    // Same per-100 rate as the Ironworks, but the cap is raised to match a
+    // drop that can now run to the better part of the whole stage's height.
+    fall: { from: 90, per100: 5, max: 26 },
+    sky: ["#1a1430", "#4a2f52"],
+    ground: "#2a1f28",
+    accent: "#e8b866",
+    // Lanterns rather than furnaces: warm light hung at head height on every
+    // storey, against a cold violet night sky - close to the Dojo's palette,
+    // because this is the same idea one building taller.
+    light: { key: "#ffcf9e", fill: "#2e2450", strength: 0.82, shadow: "#3a2a44", glow: 0.2 },
+    ambient: { kind: "petal", count: 30, colors: ["#ffc0cf", "#ff9db4", "#ffe1e8"], speed: 0.5, wind: 0.35, size: [4, 7], opacity: 0.7 },
+    /**
+     * Five storeys, alternating between a split base (two roofs with the
+     * temple's own bulk between them) and a bridge (one narrower roof laid
+     * across that gap) - the same climbing grammar as the Ironworks, run
+     * twice, so the building actually tapers to a point the way a pagoda's
+     * silhouette has to.
+     *
+     * Every rise is 72 units, comfortably inside the roster's shortest jump
+     * (Shanidar clears about 79 unassisted), so nobody is shut out of their
+     * own stage - but two of them stacked is 144, past the roster's tallest
+     * jump at 135, so no storey can be skipped by jumping well rather than
+     * climbing it.
+     *
+     * x is the LEFT edge. Base -560..-100 and 100..560. First bridge
+     * -150..150. Second tier -420..-80 and 80..420. Second bridge
+     * -110..110. Spire -90..90 at the very top, 360 units up - a taller
+     * total climb than the Ironworks manages in three storeys.
+     */
+    platforms: [
+      { x: -560, y: 72, w: 460 },
+      { x: 100, y: 72, w: 460 },
+      { x: -150, y: 144, w: 300 },
+      { x: -420, y: 216, w: 340 },
+      { x: 80, y: 216, w: 340 },
+      { x: -110, y: 288, w: 220 },
+      { x: -90, y: 360, w: 180 },
+    ],
+  },
+  belltower: {
+    name: "The Bell Tower",
+    blurb: "A cathedral belfry, storey on storey of it. The bell chamber near the top is the one landing nothing sits directly under.",
+    kind: "arcade",
+    halfWidth: 900,
+    maxViewWidth: 1600,
+    // The tallest arcade stage on the roster, so it carries the highest cap -
+    // still a few percent of a health bar at the very worst, never a
+    // finisher, but a real cost for choosing to jump rather than fight down.
+    fall: { from: 90, per100: 5, max: 28 },
+    sky: ["#141824", "#4a4a5e"],
+    ground: "#302c34",
+    accent: "#e8b866",
+    // Dusk through stained glass: a warm key where the windows are lit from
+    // within, a cold stone fill everywhere else, and almost no bloom - this
+    // is worked stone, not a furnace or a lantern string.
+    light: { key: "#e8b866", fill: "#2a2c3a", strength: 0.76, shadow: "#26242e", glow: 0.1 },
+    ambient: { kind: "dust", count: 24, colors: ["#e8d8a8", "#c9b888"], speed: 0.12, wind: 0.08, size: [2, 4], opacity: 0.4 },
+    /**
+     * Eight storeys - one more than the Pagoda, and the tallest single climb
+     * on the roster at 432 units. The same split/bridge grammar carries the
+     * first six storeys; the top two are the one deliberate exception, the
+     * same trick the Ironworks plays once with its crow's nest, played once
+     * here too: the bell chamber sits to the right of the gap in the storey
+     * below it, not directly above any of it, so reaching it needs a
+     * direction held rather than a straight hop. Verified against the whole
+     * roster's jump arcs, not just the middle of it - Shanidar clears the
+     * gap with room to spare and so does everyone with a longer jump than
+     * his.
+     *
+     * x is the LEFT edge. Base -520..-120 and 120..520. First bridge
+     * -170..170. Second tier -380..-60 and 60..380. Second bridge
+     * -110..110. Bell chamber 140..320 - offset right, the directed jump.
+     * Spire top 60..240, back toward centre and the last climb of the stage.
+     */
+    platforms: [
+      { x: -520, y: 72, w: 400 },
+      { x: 120, y: 72, w: 400 },
+      { x: -170, y: 144, w: 340 },
+      { x: -380, y: 216, w: 320 },
+      { x: 60, y: 216, w: 320 },
+      { x: -110, y: 288, w: 220 },
+      { x: 140, y: 360, w: 180 },
+      { x: 60, y: 432, w: 180 },
     ],
   },
   aqueduct: {
@@ -807,6 +903,12 @@ export class Stage {
         break;
       case "ironworks":
         this.buildIronworks();
+        break;
+      case "pagoda":
+        this.buildPagoda();
+        break;
+      case "belltower":
+        this.buildBellTower();
         break;
       case "delta":
         this.buildDelta();
@@ -1886,6 +1988,365 @@ export class Stage {
       near.add(disc(x, gantryL.y + 32, 7, "#ffd06b", 12, 0.85));
       near.add(disc(x, gantryL.y + 32, 14, "#ffd06b", 11, 0.16));
     }
+    this.addLayer(near, 1);
+  }
+
+  /**
+   * A temple tower, five roofs tall, tapering as it rises. Where the
+   * Ironworks is a working structure that happens to be climbable, this one
+   * is built to be looked at first - lacquer and tile rather than iron, warm
+   * lanterns instead of forge-light, and a silhouette that is recognisably
+   * "pagoda" from the select screen thumbnail before a single platform is
+   * read as one.
+   *
+   * The climb reads the same way the Ironworks does: every rect on the near
+   * layer that has to line up with a platform is drawn off
+   * STAGE_THEMES.pagoda.platforms directly, not off a second set of numbers
+   * that could quietly drift from it.
+   */
+  private buildPagoda() {
+    const W = 900;
+    const [baseL, baseR, bridge1, midL, midR, bridge2, spire] = STAGE_THEMES.pagoda.platforms!;
+
+    const far = new THREE.Group();
+    // Night sky over hills, and a moon large enough to read as the light
+    // source it partly is.
+    far.add(disc(560, 460, 90, "#e7d9c2", 1, 0.9));
+    far.add(disc(560, 460, 130, "#e7d9c2", 1, 0.14));
+    for (const [x, h, k] of [[-1100, 130, 1], [-700, 190, 1.2], [-260, 150, 0.9], [220, 210, 1.3], [700, 160, 1], [1080, 200, 1.15]] as [
+      number,
+      number,
+      number,
+    ][]) {
+      far.add(tri(x, 40, 340 * k, h, "#241a34", 1, 0.85));
+    }
+    for (const [x, h, k] of [[-900, 90, 1], [-420, 120, 1.1], [40, 100, 0.9], [500, 130, 1.2], [940, 95, 1]] as [
+      number,
+      number,
+      number,
+    ][]) {
+      far.add(tri(x, 40, 260 * k, h, "#2e2242", 2, 0.9));
+    }
+    // A shrine gate, far off, so the eye has already been told "temple"
+    // before it reaches the tower itself.
+    far.add(rect(-760, 96, 10, 70, "#5a2c28", 3, 0.75));
+    far.add(rect(-680, 96, 10, 70, "#5a2c28", 3, 0.75));
+    far.add(rect(-722, 158, 106, 10, "#5a2c28", 3, 0.75));
+    far.add(rect(-722, 172, 130, 8, "#6a352e", 3, 0.75));
+    this.addLayer(far, 0.22);
+
+    const mid = new THREE.Group();
+    // Bamboo, in loose stands rather than a hedge - a few thick culms each,
+    // spaced so the tower is never fully hidden behind them.
+    const bamboo = (x: number, h: number) => {
+      for (let i = 0; i < 4; i++) {
+        const bx = x + i * 14 - 20;
+        mid.add(rect(bx, 0, 6, h - i * 18, "#3a4a34", 4, 0.9));
+        for (let y = 20; y < h - i * 18; y += 34) mid.add(rect(bx, y, 8, 3, "#26311f", 4, 0.9));
+      }
+    };
+    bamboo(-1000, 210);
+    bamboo(-620, 260);
+    bamboo(620, 240);
+    bamboo(1020, 200);
+    // A second, smaller shrine roof at ground level, off to one side.
+    mid.add(rect(760, 40, 220, 60, "#241c2c", 5, 0.95));
+    mid.add(poly(760, 100, [-130, 0, 0, 32, 130, 0], "#3a2a3a", 5, 0.95));
+    mid.add(poly(760, 100, [-130, 0, -110, -8, 0, 22, 110, -8, 130, 0], "#4a3444", 5, 0.9));
+    // Stone lanterns either side of the temple approach.
+    for (const x of [-260, 260]) {
+      mid.add(rect(x, 0, 14, 30, "#3a3444", 6, 0.95));
+      mid.add(rect(x, 30, 26, 16, "#443a52", 6, 0.95));
+      mid.add(disc(x, 40, 8, "#ffcf9e", 6, 0.7));
+      mid.add(poly(x, 46, [-16, 0, 0, 16, 16, 0], "#443a52", 6, 0.95));
+    }
+    this.addLayer(mid, 0.6);
+
+    const near = new THREE.Group();
+    const wood = "#3a2624";
+    const lacquer = "#8a2e28";
+    const lacquerLit = "#c04c3a";
+    const tile = "#241c2a";
+
+    // ---- courtyard floor ----
+    near.add(rect(0, -120, 2400, 120, "#342830", 10, 1));
+    for (let x = -W - 40; x <= W + 40; x += 60) {
+      near.add(rect(x, -120, 3, 120, "#241c26", 10, 0.6));
+    }
+    near.add(rect(0, -6, 2400, 6, "#4a3a40", 10, 0.85));
+    // Paving ring around the tower's base.
+    for (let x = -420; x <= 420; x += 84) {
+      near.add(rect(x, -18, 70, 14, "#443640", 10, 0.8));
+    }
+
+    // ---- the central mast: two lacquered corner posts running the whole
+    // height of the tower, so it reads as one building and not six floating
+    // roofs. Every platform ties back into these. ----
+    for (const x of [-40, 40]) {
+      near.add(rect(x, 0, 12, spire.y + 30, wood, 5, 0.92));
+      near.add(rect(x, 0, 4, spire.y + 30, lacquerLit, 6, 0.4));
+    }
+
+    /**
+     * One roof, drawn for a platform: fascia board along the front edge,
+     * upturned corner eaves (the single most recognisable pagoda silhouette
+     * cue), a band of tile shading on top, and paper lanterns hung along the
+     * underside in place of the Ironworks' braziers.
+     */
+    const roof = (p: { x: number; y: number; w: number }, tone: number) => {
+      const cx = p.x + p.w / 2;
+      const shade = tone > 0 ? lacquerLit : lacquer;
+      near.add(rect(cx, p.y - 10, p.w, 4, shade, 9, 0.5));
+      for (let i = 0; i < Math.floor(p.w / 30); i++) {
+        near.add(rect(p.x + 15 + i * 30, p.y, 3, 5, tile, 9, 0.4));
+      }
+      // Upturned corners: a short diagonal lip flicking up at each end.
+      for (const side of [-1, 1] as const) {
+        const ex = p.x + p.w / 2 + side * (p.w / 2 - 10);
+        near.add(poly(ex, p.y + 5, [0, 0, side * 22, 0, side * 26, 16], lacquer, 9, 0.95));
+      }
+      // Lanterns along the underside.
+      const lanternCount = Math.max(2, Math.floor(p.w / 140));
+      for (let i = 0; i < lanternCount; i++) {
+        const lx = p.x + (p.w / (lanternCount + 1)) * (i + 1);
+        near.add(rect(lx, p.y - 22, 2, 10, wood, 8, 0.9));
+        near.add(disc(lx, p.y - 30, 8, "#ffcf9e", 8, 0.85));
+        near.add(disc(lx, p.y - 30, 15, "#ffcf9e", 7, 0.18));
+      }
+    };
+    for (const p of [baseL, baseR]) roof(p, 0);
+    roof(bridge1, 1);
+    for (const p of [midL, midR]) roof(p, 0);
+    roof(bridge2, 1);
+
+    // ---- support brackets: short angled struts from each roof back to the
+    // central mast, in place of the Ironworks' straight vertical legs - a
+    // pagoda's roofs are cantilevered off the trunk, not planted on posts.
+    const bracket = (p: { x: number; y: number; w: number }) => {
+      const cx = p.x + p.w / 2;
+      const side = cx < 0 ? -1 : cx > 0 ? 1 : 0;
+      if (side === 0) return;
+      const mastX = side * 40;
+      near.add(rect((cx + mastX) / 2, p.y - 16, Math.abs(cx - mastX), 5, wood, 8, 0.85));
+    };
+    for (const p of [baseL, baseR, midL, midR]) bracket(p);
+
+    // ---- the spire: the finial at the very top, its own small roof plus a
+    // stacked ring motif standing above it, the way a real pagoda's sōrin
+    // reads as a spike from a distance. ----
+    roof(spire, 1);
+    {
+      const cx = spire.x + spire.w / 2;
+      near.add(rect(cx, spire.y + 4, 6, 70, "#c9a05c", 12, 0.95));
+      for (let i = 0; i < 4; i++) {
+        near.add(disc(cx, spire.y + 18 + i * 15, 12 - i * 2, "#c9a05c", 12, 0.9));
+      }
+      near.add(disc(cx, spire.y + 78, 7, "#ffe3a0", 12, 0.95));
+      near.add(disc(cx, spire.y + 78, 16, "#ffe3a0", 11, 0.25));
+    }
+
+    // ---- stairs between the storeys: wooden treads climbing at an angle,
+    // in place of the Ironworks' iron ladders - drawn the same way, as a
+    // stack of unrotated rungs along the line between two overlapping
+    // platforms, or a rising line where they do not overlap. ----
+    const stairs = (x0: number, y0: number, x1: number, y1: number, steps: number) => {
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        near.add(rect(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 20, 3, "#6a4a34", 12, 0.9));
+      }
+    };
+    stairs(baseL.x + 60, 0, baseL.x + 60, baseL.y, 5);
+    stairs(baseR.x + baseR.w - 60, 0, baseR.x + baseR.w - 60, baseR.y, 5);
+    stairs(baseL.x + baseL.w - 30, baseL.y, bridge1.x + 20, bridge1.y, 5);
+    stairs(bridge1.x + 20, bridge1.y, midL.x + midL.w - 20, midL.y, 5);
+    stairs(midR.x + 20, midR.y, bridge2.x + bridge2.w - 20, bridge2.y, 5);
+    stairs(bridge2.x + bridge2.w / 2 - 10, bridge2.y, spire.x + spire.w / 2 - 10, spire.y, 5);
+
+    // ---- wind chimes and banners, for texture at every height ----
+    for (const [x, y] of [
+      [baseL.x + 340, baseL.y],
+      [baseR.x + 100, baseR.y],
+      [midL.x + 60, midL.y],
+      [midR.x + 240, midR.y],
+    ] as [number, number][]) {
+      near.add(rect(x, y + 4, 2, 34, "#6a4a34", 10, 0.85));
+      near.add(poly(x, y + 4, [-9, 0, 9, 0, 0, -20], "#c04c3a", 10, 0.9));
+    }
+
+    this.addLayer(near, 1);
+  }
+
+  /**
+   * A cathedral belfry, eight storeys and the tallest single climb on the
+   * roster. Stone and lead rather than iron or lacquer - the palette is the
+   * one thing every Gothic building on the roster already shares, so this
+   * reads as "that kind of tower" on sight rather than as a new material
+   * nobody has seen yet.
+   *
+   * Same discipline as the other two arcades: everything in the near layer
+   * that has to land where a platform is reads its coordinates from
+   * STAGE_THEMES.belltower.platforms rather than repeating them.
+   */
+  private buildBellTower() {
+    const W = 900;
+    const [baseL, baseR, bridge1, midL, midR, bridge2, bellChamber, spireTop] =
+      STAGE_THEMES.belltower.platforms!;
+
+    const far = new THREE.Group();
+    // A dusk sky over a huddle of lower cathedral roofs and one distant
+    // spire, so the tower being climbed reads as the tall one, not the only
+    // one.
+    far.add(rect(0, 60, 2400, 30, "#22283a", 1, 0.9));
+    for (let i = -9; i <= 9; i++) {
+      const x = i * 150 + ((i * 41) % 50);
+      const h = 40 + ((i * 53) % 70);
+      const w = 60 + ((i * 29) % 50);
+      far.add(rect(x, 60, w, h, i % 2 ? "#242a3c" : "#1e2434", 1, 0.95));
+    }
+    // A far spire of its own, smaller, so this one reads as the tall one.
+    far.add(rect(-820, 60, 46, 130, "#242a3c", 2, 0.95));
+    far.add(tri(-820, 190, 60, 90, "#20263a", 2, 0.95));
+    far.add(rect(880, 60, 40, 100, "#242a3c", 2, 0.95));
+    far.add(tri(880, 160, 52, 76, "#20263a", 2, 0.95));
+    // Windows lit from within, scattered and warm against the cold sky.
+    for (let i = 0; i < 40; i++) {
+      const x = (((i * 137) % 2000) - 1000) as number;
+      const y = 70 + ((i * 53) % 140);
+      far.add(rect(x, y, 5, 7, "#e8b866", 3, 0.35));
+    }
+    this.addLayer(far, 0.24);
+
+    const mid = new THREE.Group();
+    // Flying buttresses off the tower's own base, arcing out to piers -
+    // drawn as three straight segments rather than a curve, the same way
+    // every other stage on this roster keeps its shapes flat-sided.
+    const buttress = (x: number, dir: 1 | -1) => {
+      mid.add(rect(x, 0, 14, 40, "#3a3c48", 5, 0.95));
+      mid.add(poly(x + dir * 7, 40, [0, 0, dir * 70, 30, dir * 78, 22, dir * 10, -6], "#33333e", 5, 0.95));
+      mid.add(rect(x + dir * 78, 0, 16, 46, "#3a3c48", 5, 0.95));
+    };
+    buttress(-360, -1);
+    buttress(360, 1);
+    buttress(-620, -1);
+    buttress(620, 1);
+    // A rose window on the nave wall behind the tower, off to one side.
+    mid.add(disc(-760, 200, 44, "#2a2c3a", 5, 0.95));
+    mid.add(disc(-760, 200, 34, "#8a6a44", 5, 0.4));
+    mid.add(disc(-760, 200, 18, "#e8b866", 5, 0.35));
+    this.addLayer(mid, 0.58);
+
+    const near = new THREE.Group();
+    const stone = "#4a4a54";
+    const stoneLit = "#68687a";
+    const stoneDark = "#302e38";
+    const lead = "#3a3a42";
+
+    // ---- the square at the tower's foot ----
+    near.add(rect(0, -120, 2400, 120, "#3a3844", 10, 1));
+    for (let x = -W - 40; x <= W + 40; x += 70) {
+      near.add(rect(x, -120, 3, 120, "#2a2830", 10, 0.6));
+    }
+    near.add(rect(0, -6, 2400, 6, "#5a586a", 10, 0.85));
+
+    // ---- the tower's own corner piers, running the full height, so eight
+    // separately-drawn storeys read as one building ----
+    for (const x of [-46, 46]) {
+      near.add(rect(x, 0, 16, spireTop.y + 60, stone, 5, 0.95));
+      near.add(rect(x, 0, 5, spireTop.y + 60, stoneLit, 6, 0.3));
+    }
+    // Coursing: horizontal joint lines up both piers, so the height actually
+    // reads instead of disappearing into one flat grey slab.
+    for (let y = 20; y < spireTop.y + 50; y += 34) {
+      for (const x of [-46, 46]) near.add(rect(x, y, 16, 2, stoneDark, 6, 0.5));
+    }
+
+    /**
+     * One storey's ledge: a stone course under it, a pointed-arch window
+     * recessed into the pier behind it, and a lead-flashed lip on top. The
+     * arch is what says "cathedral" rather than "castle" - the Knight's
+     * stage already owns flat crenellation, so this leans the other way.
+     */
+    const ledge = (p: { x: number; y: number; w: number }) => {
+      const cx = p.x + p.w / 2;
+      near.add(rect(cx, p.y - 10, p.w, 4, stoneLit, 9, 0.4));
+      near.add(rect(cx, p.y, p.w, 6, lead, 9, 0.5));
+      // Pointed arch window, recessed, lit from behind.
+      const aw = Math.min(60, p.w * 0.3);
+      near.add(rect(cx, p.y + 14, aw, 30, stoneDark, 9, 0.85));
+      near.add(poly(cx, p.y + 44, [-aw / 2, 0, aw / 2, 0, 0, 18], stoneDark, 9, 0.85));
+      near.add(rect(cx, p.y + 17, aw - 10, 22, "#e8b866", 9, 0.3));
+      near.add(poly(cx, p.y + 39, [-(aw - 10) / 2, 0, (aw - 10) / 2, 0, 0, 13], "#e8b866", 9, 0.3));
+    };
+    for (const p of [baseL, baseR, bridge1, midL, midR, bridge2]) ledge(p);
+
+    // The bell chamber reads differently from the plain ledges below it -
+    // open arcading rather than a window, because this is where the bell
+    // actually is and the whole face has to be open for the sound to carry.
+    {
+      const cx = bellChamber.x + bellChamber.w / 2;
+      near.add(rect(cx, bellChamber.y - 10, bellChamber.w, 4, stoneLit, 9, 0.4));
+      for (let i = -1; i <= 1; i++) {
+        const ax = cx + i * 46;
+        near.add(rect(ax, bellChamber.y + 8, 6, 34, stone, 9, 0.9));
+      }
+      near.add(poly(cx - 46, bellChamber.y + 42, [0, 0, 46, 0, 23, 14], stoneDark, 9, 0.9));
+      near.add(poly(cx, bellChamber.y + 42, [0, 0, 46, 0, 23, 14], stoneDark, 9, 0.9));
+      // The bell itself, hung dead centre - the signature piece, the way the
+      // Ironworks has its beacon and the Pagoda its sōrin.
+      near.add(rect(cx, bellChamber.y + 44, 3, 10, "#2a2830", 10, 0.9));
+      near.add(poly(cx, bellChamber.y + 30, [-16, 14, -12, -6, 0, -14, 12, -6, 16, 14], "#c9924a", 10, 0.95));
+      near.add(rect(cx, bellChamber.y + 22, 4, 10, "#8a6a3a", 10, 0.9));
+    }
+
+    // ---- the spire ----
+    {
+      const cx = spireTop.x + spireTop.w / 2;
+      near.add(rect(cx, spireTop.y - 10, spireTop.w, 4, stoneLit, 9, 0.4));
+      near.add(rect(cx, spireTop.y, spireTop.w, 6, lead, 9, 0.5));
+      near.add(tri(cx, spireTop.y + 6, 120, 130, stoneDark, 12, 0.97));
+      near.add(tri(cx, spireTop.y + 6, 92, 110, stone, 12, 0.5));
+      near.add(rect(cx, spireTop.y + 136, 4, 24, "#8a8a94", 12, 0.95));
+      near.add(disc(cx, spireTop.y + 162, 6, "#e8b866", 12, 0.9));
+      near.add(disc(cx, spireTop.y + 162, 14, "#e8b866", 11, 0.2));
+    }
+
+    // ---- gargoyles, jutting from the piers at odd heights ----
+    for (const [x, y, side] of [
+      [-46, baseL.y + 30, -1],
+      [46, midL.y + 20, 1],
+      [-46, bridge2.y + 10, -1],
+    ] as [number, number, number][]) {
+      near.add(rect(x + side * 10, y, side * 20, 8, stoneDark, 9, 0.95));
+      near.add(poly(x + side * 30, y + 4, [0, 4, side * 10, 0, side * 14, -4, 0, -4], stoneDark, 9, 0.95));
+    }
+
+    // ---- stairs between the storeys: stone treads set into the pier, drawn
+    // the same way as the Pagoda's wooden ones - a rising line of rungs
+    // rather than one rotated mesh ----
+    const stairs = (x0: number, y0: number, x1: number, y1: number, steps: number) => {
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        near.add(rect(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 22, 3, stoneLit, 12, 0.9));
+      }
+    };
+    stairs(baseL.x + 60, 0, baseL.x + 60, baseL.y, 5);
+    stairs(baseR.x + baseR.w - 60, 0, baseR.x + baseR.w - 60, baseR.y, 5);
+    stairs(baseL.x + baseL.w - 40, baseL.y, bridge1.x + 20, bridge1.y, 5);
+    stairs(bridge1.x + 20, bridge1.y, midL.x + midL.w - 20, midL.y, 5);
+    stairs(midR.x + 30, midR.y, bridge2.x + bridge2.w - 20, bridge2.y, 5);
+    // The bell chamber climb is the one deliberate exception - the treads
+    // rise at a real angle rather than a near-vertical line, because this is
+    // the storey that needs a direction held to reach at all.
+    stairs(bridge2.x + bridge2.w - 30, bridge2.y, bellChamber.x + 20, bellChamber.y, 6);
+    stairs(bellChamber.x + bellChamber.w - 30, bellChamber.y, spireTop.x + spireTop.w - 30, spireTop.y, 5);
+
+    // ---- ivy, working its way up the lower courses ----
+    for (const [x, top] of [[-46, 160], [46, 210]] as [number, number][]) {
+      for (let y = 0; y < top; y += 11) {
+        near.add(disc(x + ((y * 7) % 9) - 4, y, 5, "#3a5a34", 9, 0.55));
+      }
+    }
+
     this.addLayer(near, 1);
   }
 
