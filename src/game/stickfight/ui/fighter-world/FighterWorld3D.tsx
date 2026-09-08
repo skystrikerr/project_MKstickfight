@@ -171,8 +171,13 @@ export function FighterWorld3D({ initialFighterId = "roman", onSelectFighter, on
     renderer.toneMappingExposure = 1.05;
     mount.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0x9cc8ff, 0x120a05, 1.5));
-    const key = new THREE.DirectionalLight(0xffddb0, 4.0);
+    // The key was at 4.0 against a tone-mapped scene, which put a blown-out
+    // white bloom across the whole lit quarter of the globe - the thing that
+    // reads on the menu as a circle stuck on the planet. It sits low enough
+    // now to model the sphere rather than flare it, and the hemisphere light
+    // carries more of the fill so the dark side does not go to nothing.
+    scene.add(new THREE.HemisphereLight(0x9cc8ff, 0x120a05, 2.1));
+    const key = new THREE.DirectionalLight(0xffddb0, 1.9);
     key.position.set(-5, 6, 7);
     scene.add(key);
     const rim = new THREE.DirectionalLight(0x4d80ff, 2.2);
