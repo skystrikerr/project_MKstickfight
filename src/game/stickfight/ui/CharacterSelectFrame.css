@@ -594,3 +594,188 @@
     grid-template-columns: 34px 74px 1fr 40px;
   }
 }
+
+
+/* ---------------------------------------------------------------------------
+ * Plate buttons.
+ *
+ * The painted bars carry their own icon and lettering, so the button is the
+ * image with a legible label laid back over the dark end of it - the baked
+ * type is part of a 900px picture and turns to mush at panel width.
+ * ------------------------------------------------------------------------- */
+.pfcs-actions--image { display:grid; gap:12px; }
+.pfcs-image-action {
+  position:relative;
+  display:block;
+  width:100%;
+  padding:0;
+  border:1px solid #5a4632;
+  background:#080808;
+  color:#f2e2c5;
+  overflow:hidden;
+  cursor:pointer;
+  clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
+  box-shadow:inset 0 1px rgba(255,255,255,.04), inset 0 -2px rgba(0,0,0,.65);
+  transition:transform .12s ease, border-color .12s ease, filter .12s ease;
+}
+.pfcs-image-action img {
+  display:block;
+  width:100%;
+  height:108px;
+  object-fit:cover;
+  filter:saturate(.82) contrast(1.04) brightness(.78);
+  transform:scale(1.01);
+}
+.pfcs-image-action::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(0,0,0,.1),rgba(0,0,0,.62) 66%,rgba(0,0,0,.74));
+  pointer-events:none;
+}
+.pfcs-image-action__overlay {
+  position:absolute;
+  z-index:2;
+  right:18px;
+  top:50%;
+  transform:translateY(-50%);
+  text-align:right;
+  text-shadow:0 2px 2px #000;
+}
+.pfcs-image-action__overlay strong {
+  display:block;
+  font-size:21px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.pfcs-image-action__overlay small {
+  display:block;
+  margin-top:5px;
+  color:#c8b89c;
+  font-size:10px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.pfcs-image-action.is-active {
+  border-color:#b57445;
+  box-shadow:inset 0 0 0 1px rgba(214,119,66,.35);
+}
+.pfcs-image-action.is-active img {
+  filter:saturate(1) contrast(1.08) brightness(.9);
+}
+@media (hover:hover) and (pointer:fine) {
+  .pfcs-image-action:hover {
+    transform:translateX(-3px);
+    border-color:#94704d;
+  }
+  .pfcs-image-action:hover img { filter:saturate(1) contrast(1.08) brightness(.9); }
+}
+
+/* ---------------------------------------------------------------------------
+ * The world map behind the screen.
+ *
+ * Scoped to `.pfcs-screen` rather than set on `body` the way the mockup had
+ * it: this is one screen inside a running game, and a background on the
+ * document would still be there behind the match.
+ *
+ * `fixed` attachment goes with it for the same reason - the roster scrolls
+ * inside this panel, and a fixed background is anchored to the viewport, so
+ * it would sit still while the game around it moved.
+ * ------------------------------------------------------------------------- */
+.pfcs-screen {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  background: #050505;
+}
+
+.pfcs-screen__map {
+  position: absolute;
+  inset: 0;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.pfcs-screen__map::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(3, 3, 3, 0.52), rgba(3, 3, 3, 0.62));
+}
+
+.pfcs-screen > .pfcs-shell {
+  position: relative;
+  z-index: 1;
+  margin: 18px;
+  background:
+    linear-gradient(180deg, rgba(10, 9, 8, 0.72), rgba(5, 5, 5, 0.82)) !important;
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+}
+
+/* The roster is the one part that has to stay a fixed shape while the rest of
+   the screen flexes, so it gets its own scroller rather than growing the page.
+   Twenty-six fighters at thirteen across is two rows. */
+.pfcs-roster {
+  grid-template-columns: repeat(13, minmax(72px, 1fr));
+}
+
+@media (max-width: 1500px) {
+  .pfcs-roster { grid-template-columns: repeat(9, minmax(72px, 1fr)); }
+}
+
+@media (max-width: 1100px) {
+  .pfcs-roster { grid-template-columns: repeat(6, minmax(72px, 1fr)); }
+}
+
+/* The tiles hold a painted card now, which brings its own border and its own
+   name plate - so the tile chrome underneath it would be a second frame around
+   the first. */
+.pfcs-roster__tile.is-card {
+  padding: 0;
+  border: 0;
+  background: none;
+  clip-path: none;
+}
+
+
+/* The plate's own lettering is the label, so the dark scrim that existed to
+   make an overlay readable is dialled right back - it was there to hide the
+   picture, and the picture is the point. */
+.pfcs-image-action::after {
+  background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(0,0,0,.12) 45%, rgba(0,0,0,.3));
+}
+
+.pfcs-image-action img {
+  height: 82px;
+  filter: saturate(.95) contrast(1.05) brightness(.92);
+}
+
+.pfcs-image-action.is-active img,
+.pfcs-image-action:hover img {
+  filter: saturate(1.05) contrast(1.1) brightness(1.05);
+}
+
+.pfcs-image-action__caption {
+  position: relative;
+  z-index: 2;
+  display: block;
+  padding: 5px 12px 7px;
+  background: rgba(6, 6, 6, 0.86);
+  border-top: 1px solid #3a2d21;
+  color: #c8b89c;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.pfcs-image-action__fallback {
+  display: block;
+  padding: 26px 16px;
+  font-size: 20px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

@@ -10,11 +10,9 @@ import { CharacterSelect } from "@/game/stickfight/ui/CharacterSelect";
 import { GameCanvas, type MatchConfig } from "@/game/stickfight/ui/GameCanvas";
 import { FighterPage } from "@/game/stickfight/ui/FighterPage";
 import { MoveList } from "@/game/stickfight/ui/MoveList";
-import { FighterPortrait } from "@/game/stickfight/ui/Portrait";
 import { ROSTER } from "@/game/stickfight/fighters";
-import { Wordmark } from "@/game/stickfight/ui/Wordmark";
 import { Settings } from "@/game/stickfight/ui/Settings";
-import { StartButton } from "@/game/stickfight/ui/StartButton";
+import { MainMenu } from "@/game/stickfight/ui/fighter-world/MainMenu";
 import { music } from "@/game/stickfight/engine/music";
 import { ContinuePrompt, EndingCard, VersusCard } from "@/game/stickfight/ui/Arcade";
 import { advanceRun, continueRun, endingFor, startRun, type LadderStep, type Run } from "@/game/stickfight/ladder";
@@ -31,35 +29,8 @@ import {
 } from "@/game/stickfight/towers";
 import type { WeaponVariant } from "@/game/stickfight/weapons";
 import { SKINS } from "@/game/stickfight/skins";
-import menuMap from "@/assets/menu-map.jpg";
 
 type Screen = "title" | "select" | "towers" | "fight";
-
-/**
- * The fighters who were never documented people.
- *
- * Kuro is a composite of stories nobody can pin to a year, and the select
- * screen says so rather than quietly counting him with the rest. Anyone added
- * on the same footing belongs here, and the headline arithmetic follows.
- */
-const LEGENDARY = ["shade"];
-
-const WORDS = [
-  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-  "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-  "sixteen", "seventeen", "eighteen", "nineteen",
-];
-const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
-
-/** Small cardinals in words, because "21 of them were real" reads like a stat. */
-function spellOut(n: number): string {
-  if (n < 20) return WORDS[n] ?? String(n);
-  if (n >= 100) return String(n);
-  const tens = TENS[Math.floor(n / 10)];
-  const ones = n % 10;
-  return ones ? `${tens}-${WORDS[ones]}` : tens;
-}
-
 
 /**
  * Keeps the two sides of a mirror match visibly different. Everywhere else the
@@ -72,6 +43,8 @@ function mirrorSafeSkin(step: LadderStep, p1Skin?: string, p2Skin?: string): str
 
 export default function StickFighter() {
   const [screen, setScreen] = useState<Screen>("title");
+  /** Who the globe handed over, so character select opens on them. */
+  const [worldFighter, setWorldFighter] = useState<string | undefined>(undefined);
   const [config, setConfig] = useState<MatchConfig | null>(null);
   // What the last finished match unlocked, if anything. Cleared when the
   // player acknowledges it or starts another fight.
@@ -130,136 +103,53 @@ export default function StickFighter() {
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-[var(--ink)] text-[var(--bone)]">
+      {/*
+        The main menu is the globe.
+
+        Per the package's integration contract this is the screen before
+        character select: pick a marker, and select opens on that fighter. The
+        component owns its own renderer and disposes it on unmount, so it is
+        mounted and unmounted like any other screen and nothing of it survives
+        into a match.
+      */}
       {screen === "title" && (
-        <>
-          {/*
-            The campaign map, sitting still while the roster scrolls over it.
-
-            It is a sibling of the scroller rather than a child on purpose. An
-            absolute layer inside a scrolling box is positioned against the
-            scrolled content and slides away on the second row of fighters;
-            out here it is anchored to the viewport-height wrapper instead.
-            `background-attachment: fixed` would be the other way to do it and
-            is ignored or juddered by half the mobile browsers there are.
-
-            The scrim over it is the load-bearing part. The map is warm light
-            parchment and every word on this screen is bone on near-black, so
-            without it the type sits on pale paper and cannot be read. It is
-            one flat colour at a fixed opacity, not a gradient: the job is to
-            hold the whole image down evenly to a texture the type can live
-            on, not to bloom a pool of light behind the heading.
-          */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
-            {/* Flattened before the scrim goes over it. The map carries its
-                own hand-lettered place names in hard dark ink, and a flat
-                scrim dims those exactly as much as it dims the parchment, so
-                they stay just legible enough to compete with the roster names
-                sitting on top of them. Pulling the contrast down first is what
-                drops the lettering back to texture while the coastlines and
-                the buildings survive. */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${menuMap})`, filter: "contrast(0.62) saturate(0.85)" }}
-            />
-            {/* An explicit rgba, not `bg-[var(--ink)]/82`. Tailwind's opacity
-                modifier cannot be applied to a bare CSS variable - it needs a
-                colour it can decompose - so that class silently renders no
-                scrim at all and the map comes through at full strength with
-                every word on the screen sitting unreadable on top of it. */}
-            <div className="absolute inset-0" style={{ background: "rgba(12, 17, 15, 0.84)" }} />
-          </div>
-
-        <div className="grain relative z-10 flex h-full flex-col items-center overflow-y-auto px-6 py-10">
-          <header className="relative flex w-full max-w-6xl flex-col items-center">
-            <div className="flex w-full items-center gap-4">
-              <span className="h-px flex-1 bg-[var(--rule)]" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--bone-dim)]">
-                {ROSTER.length} fighters · 3300 BC – 1965
-              </span>
-              <span className="h-px flex-1 bg-[var(--rule)]" />
-            </div>
-            <Wordmark className="mt-5" />
-            {/* Counted rather than typed. It was typed, and adding the
-                twenty-third fighter left the line claiming twenty-one - a
-                number about honesty that had quietly stopped being true.
-                Saying "all of them" would be the only lie on the screen, so
-                the one who was not gets named here and the rest is arithmetic. */}
-            <p className="mt-3 text-sm uppercase tracking-[0.3em] text-[var(--bone-dim)]">
-              {spellOut(ROSTER.length - LEGENDARY.length)} of them were real
-            </p>
-          </header>
-
-          <div className="relative mt-8 flex flex-wrap items-end justify-center gap-x-5 gap-y-6">
-            {ROSTER.map((def, i) => (
-              <div key={def.id} className="flex w-32 flex-col items-center sm:w-40">
-                <FighterPortrait def={def} className="h-40 w-32 sm:h-52 sm:w-40" facing={i % 2 === 0 ? 1 : -1} />
-                <span className="mt-1 h-px w-8" style={{ background: def.palette.accent }} />
-                <span className="mt-1.5 text-center font-display text-lg font-bold uppercase leading-none tracking-[0.02em]">
-                  {def.name}
-                </span>
-                <span className="mt-0.5 text-center font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
-                  {def.era}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative mt-10 flex flex-col items-center gap-3">
-            <StartButton onClick={() => setScreen("select")} />
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setRun(null);
-                  // The tutorial teaches your fighter's own kit now, not just
-                  // the fundamentals, so it opens on whoever you last picked
-                  // rather than always on the centurion.
-                  const saved = loadSave();
-                  setConfig({
-                    p1: saved.p1,
-                    p2: saved.p1,
-                    mode: "tutorial",
-                    aiLevel: "Rookie",
-                    rounds: 1,
-                    stage: "colosseum",
-                    p2Skin: SKINS.find((s) => s.id !== "classic")?.id,
-                  });
-                  setScreen("fight");
-                }}
-                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
-              >
-                [ Tutorial ]
-              </button>
-              <button
-                type="button"
-                onClick={() => setPageFor(ROSTER[0].id)}
-                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
-              >
-                [ Fighters ]
-              </button>
-              <button
-                type="button"
-                onClick={() => setMoveListFor(ROSTER[0].id)}
-                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
-              >
-                [ Move lists ]
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowSettings(true)}
-                className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--bone-dim)] transition hover:text-[var(--bone)]"
-              >
-                [ Settings ]
-              </button>
-            </div>
-          </div>
-
-        </div>
-        </>
+        <MainMenu
+          initialFighterId={loadSave().p1}
+          onPick={(id) => {
+            setWorldFighter(id);
+            setScreen("select");
+          }}
+          onGo={(where) => {
+            if (where === "options") {
+              setShowSettings(true);
+              return;
+            }
+            if (where === "training") {
+              const saved = loadSave();
+              setRun(null);
+              setConfig({
+                p1: saved.p1,
+                p2: saved.p1,
+                mode: "tutorial",
+                aiLevel: "Rookie",
+                rounds: 1,
+                stage: "colosseum",
+                p2Skin: SKINS.find((s) => s.id !== "classic")?.id,
+              });
+              setScreen("fight");
+              return;
+            }
+            // Arcade and Versus are both choices character select already
+            // makes, so they land there rather than duplicating the mode
+            // picker on the menu.
+            if (where !== "world") setScreen("select");
+          }}
+        />
       )}
 
       {screen === "select" && (
         <CharacterSelect
+          initialP1={worldFighter}
           onShowProfile={(id) => setPageFor(id)}
           onStart={(opts) => {
             setConfig(opts);

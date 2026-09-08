@@ -1,11 +1,18 @@
-/** Character select: roster grid, stats panel, mode and difficulty options. */
+/**
+ * Character select.
+ *
+ * The layout is the `pfcs-` frame from the UI package - world map behind, a
+ * three-column main block of art / dossier / actions, the roster along the
+ * foot - wired to the real roster, the real save file and the real numbers
+ * out of `profile.ts`. The mockup's placeholder text and invented stats are
+ * gone; everything on screen is read from the game.
+ */
 
 import { useMemo, useState } from "react";
 import { AI_LEVELS, type AiLevel } from "../constants";
 import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef } from "../types";
 import type { GameMode } from "../engine/game";
-import menuSelect from "@/assets/menu-select.jpg";
 import { stagesOfKind, STAGE_THEMES, type StageTheme } from "../render/stage";
 import { applySkin, getSkin, SKINS } from "../skins";
 import { applyWeapon, weaponsFor } from "../weapons";
@@ -14,7 +21,11 @@ import { loadSave, patchSave } from "../save";
 import { FactionMarks } from "./FactionEmblem";
 import { FighterPortrait } from "./Portrait";
 import { FighterCard } from "./FighterCard";
-import { portraitFor } from "./art";
+import { PLATES, portraitFor } from "./art";
+import worldMap from "@/assets/ui/fighter-world-map.webp";
+import { statsFor } from "../profile";
+import { STAT_COLORS, StatIcon } from "./StatMedallion";
+import "./CharacterSelectFrame.css";
 
 interface Props {
   onStart: (opts: {
@@ -32,6 +43,8 @@ interface Props {
   }) => void;
   onShowMoves: (id: string) => void;
   onShowProfile: (id: string) => void;
+  /** Who the globe sent through, if the player came in off a marker. */
+  initialP1?: string;
 }
 
 /** A tiny painted preview of a stage: sky gradient, horizon and accent. */
@@ -82,6 +95,7 @@ function StageChip({
     </button>
   );
 }
+
 
 /** A two-tone chip standing in for one of the alternate colour schemes. */
 function SkinChip({
@@ -188,114 +202,74 @@ function WeaponRow({
   );
 }
 
-function StatBar({ label, value, max = 5 }: { label: string; value: number; max?: number }) {
+/** One combat bar: medallion, label, ten segments, the graded value. */
+function StatRow({ stat }: { stat: ReturnType<typeof statsFor>[number] }) {
+  const color = STAT_COLORS[stat.key];
   return (
-    <div className="flex items-center gap-3">
-      <span className="w-[74px] font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">{label}</span>
-      <div className="flex gap-px">
-        {Array.from({ length: max }).map((_, i) => (
-          <span
+    <div className="pfcs-bars__row" title={stat.note}>
+      <span className="pfcs-bars__icon">
+        <StatIcon kind={stat.key} />
+      </span>
+      <span className="pfcs-bars__label">{stat.label}</span>
+      <div className="pfcs-bars__track">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <i
             key={i}
-            className="h-2.5 w-5"
-            style={{ background: i < value ? "var(--accent)" : "#2b352f" }}
+            className={`pfcs-bars__seg ${i < stat.value ? "is-filled" : ""}`}
+            style={{ ["--seg-color" as never]: color } as React.CSSProperties}
           />
         ))}
       </div>
-      <span className="font-mono text-[10px] text-[var(--bone-dim)]">
-        {value}/{max}
-      </span>
+      <span className="pfcs-bars__value">{stat.value.toFixed(1)}</span>
     </div>
   );
 }
 
-function ratingFor(def: FighterDef) {
-  const s = def.stats;
-  return {
-    power: Math.min(5, Math.round((s.health / 240) * 1.1)),
-    speed: Math.min(5, Math.round(s.walkF * 1.6)),
-    range: def.id === "roman" ? 5 : def.id === "western" ? 4 : 3,
-    tricky: Math.min(5, def.difficulty + 1),
-  };
-}
-
-function Card({
-  def,
-  index,
-  selected,
-  clearedAt,
-  dim,
-  onPick,
-  onHover,
+/**
+ * A painted menu plate used as a button.
+ *
+ * The plate carries its own medallion and its own lettering, so nothing is
+ * drawn back over it - the mockup's overlay label was written for a plate with
+ * a blank right-hand end, and on these it lands on top of the painted word.
+ * The line that changes with the game goes underneath the plate instead, where
+ * it can be read and where it is obviously not part of the picture.
+ */
+function PlateButton({
+  plate,
+  title,
+  subtitle,
+  active,
+  onClick,
 }: {
-  def: FighterDef;
-  index: string;
-  selected: "p1" | "p2" | "both" | null;
-  /** Hardest difficulty this fighter's ladder has been cleared on, if any. */
-  clearedAt?: string;
-  dim: boolean;
-  onPick: () => void;
-  onHover: () => void;
+  plate: string;
+  title: string;
+  subtitle: string;
+  active?: boolean;
+  onClick: () => void;
 }) {
+  const src = PLATES[plate];
   return (
     <button
       type="button"
-      onClick={onPick}
-      onMouseEnter={onHover}
-      onFocus={onHover}
-      className={`group relative block self-start text-left transition ${
-        selected ? "" : "hover:brightness-110"
-      } ${dim ? "opacity-60" : ""}`}
+      className={`pfcs-image-action ${active ? "is-active" : ""}`}
+      aria-label={title}
+      title={`${title} — ${subtitle}`}
+      onClick={onClick}
     >
-      {/* The painted card. A fighter nobody has art for yet gets the same
-          frame with an empty window rather than a substitute portrait: the
-          gap is meant to be visible, so it is obvious at a glance which of
-          the twenty-six are still waiting to be drawn. */}
-      <FighterCard
-        fighterId={def.id}
-        kind={selected ? "selected" : "plain"}
-        className="w-full"
-        name={def.name}
-        sub={def.archetype}
-        title={def.name}
-      >
-        {/* Inside the window, so the badges sit on the art rather than
-            floating in the gap between cards - which is where they ended up
-            when they were positioned against the button. */}
-        <FactionMarks
-          fighterId={def.id}
-          size={15}
-          kinds={["faith", "power"]}
-          className="absolute left-1 top-1 z-10 drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]"
-        />
-        <span className="absolute left-1.5 top-[22px] z-10 font-mono text-[9px] text-[var(--bone)] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]">
-          {index}
-        </span>
-        {clearedAt && (
-          <span
-            className="absolute bottom-1 left-1.5 z-10 font-mono text-[8px] uppercase tracking-[0.12em] text-[var(--accent)] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]"
-            title={`Arcade ladder cleared on ${clearedAt}`}
-          >
-            ★ {clearedAt}
-          </span>
-        )}
-        {selected && (
-          <span className="absolute right-0 top-0 z-10 bg-[var(--accent)] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[var(--ink)]">
-            {selected === "both" ? "P1 · P2" : selected.toUpperCase()}
-          </span>
-        )}
-      </FighterCard>
+      {src ? <img src={src} alt="" /> : <span className="pfcs-image-action__fallback">{title}</span>}
+      <span className="pfcs-image-action__caption">{subtitle}</span>
     </button>
   );
 }
 
-export function CharacterSelect({ onStart, onShowMoves, onShowProfile }: Props) {
+export function CharacterSelect({ onStart, onShowMoves, onShowProfile, initialP1 }: Props) {
   // Read once. Everything below starts where the last session left it, and
   // writes back as it changes, so the screen never opens cold twice.
   const [saved] = useState(loadSave);
-  const [p1, setP1] = useState(saved.p1);
+  const [p1, setP1] = useState(initialP1 ?? saved.p1);
   const [p2, setP2] = useState(saved.p2);
   const [picking, setPicking] = useState<"p1" | "p2">("p1");
-  const [hover, setHover] = useState(saved.p1);
+  const [hover, setHover] = useState(initialP1 ?? saved.p1);
   const [mode, setMode] = useState<GameMode>("arcade");
   // Arcade and Towers are both one-player climbs: you pick who goes up and the
   // mode supplies everyone they meet. Every place that used to name "arcade"
@@ -309,13 +283,15 @@ export function CharacterSelect({ onStart, onShowMoves, onShowProfile }: Props) 
   // so picking a hasta for Vorenus means Vorenus carries it whichever side of
   // the screen he comes out on, and in a mirror match on both.
   const [weapons, setWeapons] = useState<Record<string, string>>(saved.weapons);
+  // Which plate is open under the dossier. Customize is the one that changes
+  // what you take into the match, so it is the one showing when you arrive.
+  const [panel, setPanel] = useState<"customize" | "stage">("customize");
   const cleared = saved.cleared;
-  // What has been earned. Read once when the screen opens: nothing on the
-  // select screen can change it, because unlocks only move when a match ends.
   const progress: ProgressState = { mastery: saved.mastery, cleared };
 
   const preview = ROSTER.find((f) => f.id === hover) ?? ROSTER[0];
-  const ratings = ratingFor(preview);
+  const bars = useMemo(() => statsFor(preview), [preview]);
+  const seat = solo ? 0 : preview.id === p2 && preview.id !== p1 ? 1 : 0;
 
   // The two locked-in fighters, wearing their chosen colours.
   const picked = useMemo(
@@ -343,299 +319,349 @@ export function CharacterSelect({ onStart, onShowMoves, onShowProfile }: Props) 
     }
   };
 
+  const seatOf = (id: string): "p1" | "p2" | "both" | null =>
+    solo ? (p1 === id ? "p1" : null) : p1 === id && p2 === id ? "both" : p1 === id ? "p1" : p2 === id ? "p2" : null;
+
+  const begin = () => {
+    patchSave({ p1, p2, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1], weapons });
+    onStart({
+      p1,
+      p2,
+      mode,
+      aiLevel,
+      rounds,
+      stage,
+      p1Skin: skins[0],
+      p2Skin: skins[1],
+      p1Weapon: weapons[p1],
+      p2Weapon: weapons[p2],
+    });
+  };
+
   return (
-    <div className="relative flex h-full flex-col overflow-y-auto">
-      {/* The backdrop sits outside the scrolling content, fixed to the panel,
-          so it does not slide up the screen as the roster is scrolled. */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${menuSelect})`, filter: "contrast(0.72) saturate(0.8)" }}
-        />
-        {/* An explicit rgba rather than a Tailwind opacity modifier on a bare
-            CSS variable - that silently renders no scrim at all, and this
-            painting is bright enough in the middle to swallow a whole column
-            of roster names if it comes through at full strength. */}
-        <div className="absolute inset-0" style={{ background: "rgba(12, 17, 15, 0.76)" }} />
-      </div>
+    <div className="pfcs-screen">
+      <div className="pfcs-screen__map" style={{ backgroundImage: `url(${worldMap})` }} />
 
-      <div className="grain relative z-10 flex flex-1 flex-col gap-4 p-4 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-display text-4xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)] sm:text-5xl">
-            Choose your fighter
-          </h2>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--bone-dim)]">
-            {solo ? (
-              <>{mode === "towers" ? "Pick who climbs · the tower is chosen next" : "Eight fights · pick who climbs"}</>
-            ) : (
-              <>
-                Selecting for{" "}
-                <span style={{ color: picking === "p1" ? "var(--accent)" : "var(--p2)" }}>
-                  {picking.toUpperCase()}
-                </span>{" "}
-                · click a fighter to lock in
-              </>
-            )}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex border border-[var(--rule)]">
-            {(["arcade", "towers", "cpu", "versus", "training"] as GameMode[]).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition ${
-                  mode === m
-                    ? "bg-[var(--accent)] text-[var(--ink)]"
-                    : "text-[var(--bone-dim)] hover:bg-white/5 hover:text-[var(--bone)]"
-                }`}
-              >
-                {m === "arcade"
-                  ? "Arcade"
-                  : m === "towers"
-                    ? "Towers"
-                    : m === "cpu"
-                      ? "1P vs CPU"
-                      : m === "versus"
-                        ? "2 Players"
-                        : "Training"}
-              </button>
-            ))}
-          </div>
-
-          {(mode === "cpu" || solo || mode === "training") && (
-            <select
-              value={aiLevel}
-              onChange={(e) => setAiLevel(e.target.value as AiLevel)}
-              className="field border border-[var(--rule)] bg-[var(--ink-2)] px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)]"
-            >
-              {AI_LEVELS.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          )}
-
-          {mode !== "training" && (
-          <select
-            value={rounds}
-            onChange={(e) => setRounds(Number(e.target.value))}
-            className="field border border-[var(--rule)] bg-[var(--ink-2)] px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)]"
-          >
-            <option value={1}>1 round</option>
-            <option value={2}>Best of 3</option>
-            <option value={3}>Best of 5</option>
-          </select>
-          )}
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {ROSTER.map((def, i) => (
-            <Card
-              key={def.id}
-              def={def}
-              index={String(i + 1).padStart(2, "0")}
-              clearedAt={cleared[def.id]}
-              selected={
-                solo
-                  ? p1 === def.id
-                    ? "p1"
-                    : null
-                  : p1 === def.id && p2 === def.id
-                    ? "both"
-                    : p1 === def.id
-                      ? "p1"
-                      : p2 === def.id
-                        ? "p2"
-                        : null
-              }
-              dim={false}
-              onPick={() => pick(def.id)}
-              onHover={() => setHover(def.id)}
-            />
-          ))}
-          <div className="cut-sm flex min-h-[180px] flex-col items-center justify-center border border-dashed border-[var(--rule)] p-3 text-center">
-            <span className="font-display text-4xl text-[#2f3a34]">+</span>
-            <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#5f7068]">
-              More fighters soon
-            </span>
-          </div>
-        </div>
-
-        <aside className="cut flex flex-col gap-3 border border-[var(--rule)] bg-[var(--ink-2)] p-4">
-          <div>
-            <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--bone-dim)]">Dossier</div>
-            <div className="font-display text-3xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)]">
-              {preview.name}
-            </div>
-            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em]" style={{ color: preview.palette.accent }}>
-              {preview.title} · {preview.era}
-            </div>
-          </div>
-          <p className="border-l-2 border-[var(--rule)] pl-2.5 text-[13px] leading-snug text-[var(--bone-dim)]">
-            {preview.bio}
-          </p>
-
-          <div className="flex flex-col gap-1.5">
-            <StatBar label="Power" value={ratings.power} />
-            <StatBar label="Speed" value={ratings.speed} />
-            <StatBar label="Range" value={ratings.range} />
-            <StatBar label="Difficulty" value={preview.difficulty} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-[11px]">
+      <section className="pfcs-shell">
+        <header className="pfcs-topbar">
+          <div className="pfcs-brand">
+            <div className="pfcs-brand__crest" />
             <div>
-              <div className="mb-1 border-b border-[var(--rule)] pb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#8aa87a]">
-                Strengths
-              </div>
-              <ul className="space-y-0.5 text-[var(--bone-dim)]">
-                {preview.strengths.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className="mb-1 border-b border-[var(--rule)] pb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#c2705c]">
-                Weaknesses
-              </div>
-              <ul className="space-y-0.5 text-[var(--bone-dim)]">
-                {preview.weaknesses.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
+              <div className="pfcs-brand__title">Plank Fighter</div>
+              <div className="pfcs-brand__tag">History Fights Back</div>
             </div>
           </div>
 
-          {/* The profile comes first because it is the one a player who does
-              not know this fighter wants: who they were, what they carry, and
-              how they compare. The move list is the reference you go to once
-              you have already picked them. */}
-          <button
-            type="button"
-            onClick={() => onShowProfile(preview.id)}
-            className="cut-sm border border-[var(--accent)] bg-[var(--accent)]/10 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone)] transition hover:bg-[var(--accent)]/20"
-          >
-            Profile &mdash; history, weapons &amp; stats
-          </button>
-          <button
-            type="button"
-            onClick={() => onShowMoves(preview.id)}
-            className="cut-sm border border-[var(--rule)] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--bone-dim)] transition hover:border-[var(--accent)] hover:text-[var(--bone)]"
-          >
-            View move list ({preview.moves.filter((m) => !m.internal).length} moves)
-          </button>
-        </aside>
-      </div>
-
-      <div className="cut-sm border border-[var(--rule)] bg-[var(--ink-2)] p-3">
-        <div className="mb-2 flex items-baseline justify-between border-b border-[var(--rule)] pb-1.5">
-          <span className="font-display text-xl font-bold uppercase tracking-[0.1em] text-[var(--bone)]">Stage</span>
-          <span className="text-xs text-[var(--bone-dim)]">
-            {stage === "random" ? "A different arena every match" : STAGE_THEMES[stage].blurb}
-          </span>
-        </div>
-        <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--bone-dim)]">
-          Arenas
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          <StageChip theme="random" selected={stage === "random"} onPick={() => setStage("random")} />
-          {stagesOfKind("arena").map((t) => (
-            <StageChip key={t} theme={t} selected={stage === t} onPick={() => setStage(t)} />
-          ))}
-        </div>
-        <div className="mb-1 mt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--accent)]">
-          Arcade &mdash; wide, several storeys, room to run
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {stagesOfKind("arcade").map((t) => (
-            <StageChip key={t} theme={t} selected={stage === t} onPick={() => setStage(t)} />
-          ))}
-        </div>
-      </div>
-
-      <div className="cut-sm flex flex-wrap items-center justify-between gap-3 border border-[var(--rule)] bg-[var(--ink-2)] p-3">
-        <div className="flex flex-wrap items-center gap-5">
-          {(solo ? picked.slice(0, 1) : picked).map((def, i) => (
-            <div key={i} className="flex items-center gap-2">
-              {portraitFor(def.id) ? (
-                <FighterCard fighterId={def.id} kind={i === 0 ? "p1" : "p2"} className="w-[70px] shrink-0" />
-              ) : (
-                <FighterPortrait def={def} className="h-14 w-14" facing={i === 0 ? 1 : -1} />
-              )}
-              <div>
-                <div
-                  className="font-mono text-[10px] uppercase tracking-[0.2em]"
-                  style={{ color: i === 0 ? "var(--accent)" : "var(--p2)" }}
+          {/* The mockup's screen box is a label. It is the only spare surface
+              at the top of the screen, so the things you have to be able to
+              change before a match live in it rather than in a strip of their
+              own underneath. */}
+          <div className="pfcs-screenbox">
+            <div className="pfcs-screenbox__title">Character Select</div>
+            <div className="pfcs-screenbox__sub">
+              {solo
+                ? mode === "towers"
+                  ? "Pick who climbs · the tower comes next"
+                  : "Eight fights · pick who climbs"
+                : `Selecting for ${picking.toUpperCase()}`}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+              <div className="flex border border-[#5d4a35]">
+                {(["arcade", "towers", "cpu", "versus", "training"] as GameMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    className={`px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] transition ${
+                      mode === m ? "bg-[#b88b49] text-black" : "text-[#9e907b] hover:bg-white/5 hover:text-[#efe2c9]"
+                    }`}
+                  >
+                    {m === "arcade"
+                      ? "Arcade"
+                      : m === "towers"
+                        ? "Towers"
+                        : m === "cpu"
+                          ? "1P vs CPU"
+                          : m === "versus"
+                            ? "2 Players"
+                            : "Training"}
+                  </button>
+                ))}
+              </div>
+              {(mode === "cpu" || solo || mode === "training") && (
+                <select
+                  value={aiLevel}
+                  onChange={(e) => setAiLevel(e.target.value as AiLevel)}
+                  className="field border border-[#5d4a35] bg-black/60 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#efe2c9]"
                 >
-                  P{i + 1}
+                  {AI_LEVELS.map((l) => (
+                    <option key={l} value={l}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {mode !== "training" && (
+                <select
+                  value={rounds}
+                  onChange={(e) => setRounds(Number(e.target.value))}
+                  className="field border border-[#5d4a35] bg-black/60 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#efe2c9]"
+                >
+                  <option value={1}>1 round</option>
+                  <option value={2}>Best of 3</option>
+                  <option value={3}>Best of 5</option>
+                </select>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <div className="pfcs-main">
+          <aside className="pfcs-art-panel">
+            <div className="pfcs-banner">Character Artwork</div>
+            <div className="pfcs-art-stage">
+              {portraitFor(preview.id) ? (
+                <FighterCard
+                  fighterId={preview.id}
+                  kind={seat === 1 ? "p2" : "p1"}
+                  className="h-full"
+                  name={preview.name}
+                />
+              ) : (
+                /* Nobody has painted this one yet. The empty frame is the
+                   honest answer - and the stick figure underneath it is the
+                   fighter as the game actually draws them, which is the next
+                   most useful thing to look at. */
+                <div className="relative flex h-full items-center justify-center">
+                  <FighterCard fighterId={preview.id} kind={seat === 1 ? "p2" : "p1"} className="h-full" />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <FighterPortrait def={preview} className="h-[58%] w-[58%]" />
+                  </div>
                 </div>
-                <div className="font-display text-xl font-bold uppercase leading-none tracking-[0.02em] text-[var(--bone)]">
-                  {def.name}
+              )}
+            </div>
+            <div className="pfcs-quote">&ldquo;{preview.winQuote}&rdquo;</div>
+          </aside>
+
+          <section className="pfcs-info-panel">
+            <div className="pfcs-fighter-head">
+              <h2>{preview.name}</h2>
+              <div className="pfcs-subname">{preview.title}</div>
+            </div>
+
+            <div className="pfcs-meta">
+              <div>
+                <span>Where</span>
+                <strong>{preview.era.split(", ")[0]}</strong>
+              </div>
+              <div>
+                <span>Era</span>
+                <strong>{preview.era.split(", ").slice(1).join(", ") || "—"}</strong>
+              </div>
+              <div>
+                <span>Style</span>
+                <strong>{preview.archetype}</strong>
+              </div>
+            </div>
+
+            <div className="pfcs-story">
+              <p>{preview.bio}</p>
+            </div>
+
+            <div className="pfcs-section-label">Playstyle</div>
+            <p className="pfcs-playstyle">
+              {preview.strengths[0]}. {preview.weaknesses[0]}.
+            </p>
+
+            {/* Eight bars, graded against the rest of the roster by
+                `profile.ts`. These are measured off the move data - nothing
+                here is a number somebody typed in to fill the row. */}
+            <div className="pfcs-bars">
+              {bars.map((s) => (
+                <StatRow key={s.key} stat={s} />
+              ))}
+            </div>
+          </section>
+
+          <aside className="pfcs-right-panel">
+            <div className="pfcs-actions pfcs-actions--image">
+              <PlateButton
+                plate="customize"
+                title="Customize"
+                subtitle="Skins • Colours • Weapons"
+                active={panel === "customize"}
+                onClick={() => setPanel("customize")}
+              />
+              <PlateButton
+                plate="moves"
+                title="Moves"
+                subtitle={`${preview.moves.filter((m) => !m.internal).length} in the command list`}
+                onClick={() => onShowMoves(preview.id)}
+              />
+              <PlateButton
+                plate="progression"
+                title="Progression"
+                subtitle="History • Weapons • Deep stats"
+                onClick={() => onShowProfile(preview.id)}
+              />
+              <PlateButton
+                plate="stage-select"
+                title="Stage Select"
+                subtitle={stage === "random" ? "A different arena every match" : STAGE_THEMES[stage].name}
+                active={panel === "stage"}
+                onClick={() => setPanel("stage")}
+              />
+            </div>
+
+            {panel === "customize" ? (
+              <div className="pfcs-skin-card">
+                <div className="pfcs-skin-card__viewport">
+                  <FighterPortrait def={picked[seat]} className="h-full w-full" facing={seat === 0 ? 1 : -1} />
                 </div>
-                <div className="mt-1 flex gap-1">
+                <div className="pfcs-skin-card__footer">
+                  <strong>{getSkin(skins[seat]).name}</strong>
+                  <small>{getSkin(skins[seat]).blurb}</small>
+                </div>
+                <div className="flex flex-wrap items-center gap-1 p-2.5 pt-0">
                   {SKINS.map((s) => (
                     <SkinChip
                       key={s.id}
                       skinId={s.id}
-                      selected={skins[i] === s.id}
+                      selected={skins[seat] === s.id}
                       onPick={() =>
                         setSkins((prev) => {
                           const next: [string, string] = [prev[0], prev[1]];
-                          next[i] = s.id;
+                          next[seat] = s.id;
                           return next;
                         })
                       }
                     />
                   ))}
                 </div>
-                <WeaponRow
-                  fighterId={[p1, p2][i]}
-                  chosen={weapons[[p1, p2][i]]}
-                  progress={progress}
-                  onPick={(variantId) =>
-                    setWeapons((prev) => {
-                      const next = { ...prev };
-                      const id = [p1, p2][i];
-                      if (variantId) next[id] = variantId;
-                      else delete next[id];
-                      return next;
-                    })
-                  }
-                />
+                <div className="px-2.5 pb-2.5">
+                  <WeaponRow
+                    fighterId={[p1, p2][seat]}
+                    chosen={weapons[[p1, p2][seat]]}
+                    progress={progress}
+                    onPick={(variantId) =>
+                      setWeapons((prev) => {
+                        const next = { ...prev };
+                        const id = [p1, p2][seat];
+                        if (variantId) next[id] = variantId;
+                        else delete next[id];
+                        return next;
+                      })
+                    }
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ) : (
+              <div className="pfcs-skin-card">
+                <div className="max-h-[320px] overflow-y-auto p-2.5">
+                  <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#9e907b]">Arenas</div>
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    <StageChip theme="random" selected={stage === "random"} onPick={() => setStage("random")} />
+                    {stagesOfKind("arena").map((t) => (
+                      <StageChip key={t} theme={t} selected={stage === t} onPick={() => setStage(t)} />
+                    ))}
+                  </div>
+                  <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#b88b49]">
+                    Arcade — wide, several storeys
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {stagesOfKind("arcade").map((t) => (
+                      <StageChip key={t} theme={t} selected={stage === t} onPick={() => setStage(t)} />
+                    ))}
+                  </div>
+                </div>
+                <div className="pfcs-skin-card__footer">
+                  <strong>{stage === "random" ? "Random" : STAGE_THEMES[stage].name}</strong>
+                  <small>{stage === "random" ? "Rolled every match" : STAGE_THEMES[stage].blurb}</small>
+                </div>
+              </div>
+            )}
+          </aside>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            patchSave({ p1, p2, aiLevel, rounds, stage, p1Skin: skins[0], p2Skin: skins[1], weapons });
-            onStart({
-              p1,
-              p2,
-              mode,
-              aiLevel,
-              rounds,
-              stage,
-              p1Skin: skins[0],
-              p2Skin: skins[1],
-              p1Weapon: weapons[p1],
-              p2Weapon: weapons[p2],
-            });
-          }}
-          className="cut bg-[var(--accent)] px-12 py-3 font-display text-3xl font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--accent-hot)]"
-        >
-          {mode === "training" ? "Train" : solo ? "Begin" : "Fight"}
-        </button>
-      </div>
-      </div>
+        <div className="pfcs-roster-wrap">
+          <div className="pfcs-roster">
+            {ROSTER.map((def) => {
+              const sel = seatOf(def.id);
+              return (
+                <button
+                  key={def.id}
+                  type="button"
+                  className={`pfcs-roster__tile is-card ${sel ? "is-selected" : ""}`}
+                  onClick={() => pick(def.id)}
+                  onMouseEnter={() => setHover(def.id)}
+                  onFocus={() => setHover(def.id)}
+                  title={`${def.name} — ${def.archetype}`}
+                >
+                  <FighterCard
+                    fighterId={def.id}
+                    kind={sel ? "selected" : "plain"}
+                    className="w-full"
+                    name={def.name}
+                  >
+                    <FactionMarks
+                      fighterId={def.id}
+                      size={13}
+                      kinds={["faith"]}
+                      className="absolute left-1 top-1 z-10 drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]"
+                    />
+                    {cleared[def.id] && (
+                      <span className="absolute bottom-1 left-1.5 z-10 font-mono text-[8px] text-[#e0b866] drop-shadow-[1px_1px_0_rgba(0,0,0,0.9)]">
+                        ★
+                      </span>
+                    )}
+                    {sel && <em className="pfcs-roster__badge">{sel === "both" ? "P1·P2" : sel.toUpperCase()}</em>}
+                  </FighterCard>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <footer className="pfcs-footer">
+          <div className="flex items-center gap-3">
+            {(solo ? picked.slice(0, 1) : picked).map((def, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className="pfcs-player-badge">P{i + 1}</div>
+                <div className="font-display text-lg font-bold uppercase leading-none tracking-[0.02em] text-[#efe2c9]">
+                  {def.name}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="pfcs-center-prompt">
+            {solo ? "Choose your fighter" : `Selecting for ${picking.toUpperCase()}`}
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={begin}
+              className="cut bg-[#b88b49] px-10 py-2.5 font-display text-2xl font-bold uppercase tracking-[0.12em] text-black transition hover:bg-[#d6a75a]"
+            >
+              {mode === "training" ? "Train" : solo ? "Begin" : "Fight"}
+            </button>
+          </div>
+        </footer>
+
+        <div className="pfcs-controls">
+          <span>
+            <b>A</b>Select
+          </span>
+          <span>
+            <b>B</b>Back
+          </span>
+          <span>
+            <b>X</b>Random
+          </span>
+          <span>
+            <b>Y</b>Stage Select
+          </span>
+        </div>
+      </section>
     </div>
   );
 }
