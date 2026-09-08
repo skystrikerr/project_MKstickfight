@@ -3050,6 +3050,69 @@ function superDamage() {
     72 * 2 > 135, `${72 * 2} vs the roster's tallest measured jump (135)`);
 }
 
+// The Pyramids spends its height budget on width instead - four terraces
+// rather than five or eight, and two standalone obelisks out in the open
+// plaza that are not part of the climb at all.
+{
+  const platforms = STAGE_THEMES.pyramids.platforms ?? [];
+  const [baseL, , bridge, capstone, obeliskL] = platforms;
+  const m = new Match([getFighter("shanidar"), getFighter("roman")], 2, platforms, undefined, stageRulesFor("pyramids"));
+  run(m, 120, () => inp());
+  const f = m.fighters[0];
+  m.fighters[1].x = 1000;
+
+  // The obelisk stands apart from the pyramid entirely - it has to be
+  // reachable from the open plaza on its own, not by way of anything else.
+  f.x = obeliskL.x + obeliskL.w / 2;
+  f.y = 0;
+  f.standing = null;
+  for (let i = 0; i < 90 && !f.standing; i++) m.step([inp({ up: i < 4 }), inp()]);
+  check("pyramids: the obelisk is one jump up from the open plaza",
+    !!f.standing && Math.abs(f.y - obeliskL.y) < 2, `y=${f.y.toFixed(0)}`);
+
+  // Ground to the base terrace, straight up - this stage's whole point is
+  // that the climb itself is the easy part.
+  f.x = baseL.x + 60;
+  f.y = 0;
+  f.standing = null;
+  for (let i = 0; i < 90 && !f.standing; i++) m.step([inp({ up: i < 4 }), inp()]);
+  check("pyramids: the base terrace is one jump up", !!f.standing && Math.abs(f.y - baseL.y) < 2,
+    `y=${f.y.toFixed(0)}`);
+
+  // Base to the bridge, from the 60-unit overlap between the two.
+  f.x = baseL.x + baseL.w - 30;
+  f.y = baseL.y;
+  f.standing = baseL;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4 }), inp()]);
+    if (f.grounded && f.y > baseL.y + 30) break;
+  }
+  check("pyramids: the bridge terrace is one jump above the base",
+    f.grounded && Math.abs(f.y - bridge.y) < 2, `y=${f.y.toFixed(0)}`);
+
+  // Bridge to the capstone - entirely nested inside the bridge's own span,
+  // deliberately the most generous climb on any of the four arcade stages.
+  f.x = capstone.x + capstone.w / 2;
+  f.y = bridge.y;
+  f.standing = bridge;
+  for (let i = 0; i < 20; i++) m.step([inp(), inp()]);
+  for (let i = 0; i < 90; i++) {
+    m.step([inp({ up: i < 4 }), inp()]);
+    if (f.grounded && f.y > bridge.y + 30) break;
+  }
+  check("pyramids: the capstone is one jump above the bridge",
+    f.grounded && Math.abs(f.y - capstone.y) < 2, `y=${f.y.toFixed(0)}`);
+
+  check("pyramids: is the widest arcade stage on the roster",
+    (STAGE_THEMES.pyramids.halfWidth ?? 0) > (STAGE_THEMES.ironworks.halfWidth ?? 0) &&
+      (STAGE_THEMES.pyramids.halfWidth ?? 0) > (STAGE_THEMES.pagoda.halfWidth ?? 0) &&
+      (STAGE_THEMES.pyramids.halfWidth ?? 0) > (STAGE_THEMES.belltower.halfWidth ?? 0),
+    `${STAGE_THEMES.pyramids.halfWidth}`);
+  check("pyramids: no storey can be skipped by a good enough jump",
+    72 * 2 > 135, `${72 * 2} vs the roster's tallest measured jump (135)`);
+}
+
 // ---------------------------------------------------------------------------
 // Fall damage
 // ---------------------------------------------------------------------------
@@ -3129,6 +3192,67 @@ function superDamage() {
   for (let i = 0; i < 150; i++) arena.step([inp(), inp()]);
   check("fall damage: an arena with no fall rule never charges for one",
     g.health === beforeArena, `${beforeArena} -> ${g.health}`);
+}
+
+// ---------------------------------------------------------------------------
+// Ring outs
+// ---------------------------------------------------------------------------
+//
+// Every stage but the Pagoda has always had a wall - a fighter simply cannot
+// reach the numbers this section tests for on any of them, which is the
+// point being checked first: the wall has to actually be gone before the
+// kill line means anything, or a hard hit just bounces off the edge the same
+// way it always has and the round never ends the new way at all.
+{
+  const platforms = STAGE_THEMES.pagoda.platforms ?? [];
+  const rules = stageRulesFor("pagoda");
+  const beyond = rules.ringOut!.beyond;
+
+  // The wall is gone: parked well past where the ordinary arena wall would
+  // sit, a fighter here is not clamped back to it.
+  {
+    const m = new Match([getFighter("roman"), getFighter("pirate")], 2, platforms, undefined, rules);
+    run(m, 80, () => inp());
+    const f = m.fighters[0];
+    m.fighters[1].x = 0;
+    f.x = beyond - 50;
+    f.y = 0;
+    f.standing = null;
+    m.step([inp(), inp()]);
+    check("ring out: there is no wall to stop a fighter short of the kill line",
+      Math.abs(f.x - (beyond - 50)) < 1, `x=${f.x.toFixed(0)}`);
+  }
+
+  // Crossing it ends the round on the spot, credited to whoever did not go
+  // over the edge - not on some later health check, the same frame.
+  {
+    const m = new Match([getFighter("roman"), getFighter("pirate")], 2, platforms, undefined, rules);
+    run(m, 80, () => inp());
+    const [a, b] = m.fighters;
+    b.x = 0;
+    a.x = beyond + 10;
+    a.standing = null;
+    m.step([inp(), inp()]);
+    check("ring out: crossing the kill line ends the round immediately",
+      m.phase === "roundEnd" && m.lastResult?.reason === "ringOut",
+      `phase=${m.phase} reason=${m.lastResult?.reason}`);
+    check("ring out: the fighter who went over the edge loses",
+      m.lastResult?.winner === 1, `winner=${m.lastResult?.winner}`);
+  }
+
+  // The same stage's ordinary wall-side arena counterpart still has one - a
+  // stage does not lose its wall by accident, only by name.
+  {
+    const m = new Match([getFighter("roman"), getFighter("pirate")], 2, []);
+    run(m, 80, () => inp());
+    const f = m.fighters[0];
+    m.fighters[1].x = 0;
+    f.x = beyond - 50;
+    f.standing = null;
+    m.step([inp(), inp()]);
+    check("ring out: every other stage keeps its wall",
+      Math.abs(f.x) < STAGE_HALF_WIDTH, `x=${f.x.toFixed(0)}`);
+  }
 }
 
 {

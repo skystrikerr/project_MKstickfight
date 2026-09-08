@@ -31,6 +31,7 @@ export type StageTheme =
   | "ironworks"
   | "pagoda"
   | "belltower"
+  | "pyramids"
   // Painted backdrops rather than built shapes.
   | "postroad"
   | "dryclaim"
@@ -136,6 +137,12 @@ export interface StageDef {
    * from. See `StageRules.fall` for the shape.
    */
   fall?: StageRules["fall"];
+  /**
+   * Turns the wall at the edge of this stage into open air. Absent
+   * everywhere else - see `StageRules.ringOut` for what it does and why it
+   * has to be opted into.
+   */
+  ringOut?: StageRules["ringOut"];
   /** Painted rather than built. Skips the built-stage haze - see the Stage ctor. */
   backdrop?: BackdropDef;
 }
@@ -157,7 +164,7 @@ export function halfWidthOf(theme: StageTheme): number {
  */
 export function stageRulesFor(theme: StageTheme): StageRules {
   const def = STAGE_THEMES[theme];
-  return { halfWidth: def.halfWidth ?? STAGE_HALF_WIDTH, fall: def.fall };
+  return { halfWidth: def.halfWidth ?? STAGE_HALF_WIDTH, fall: def.fall, ringOut: def.ringOut };
 }
 
 /** Every stage of one kind, for a mode that only wants the big ones. */
@@ -362,7 +369,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
   },
   pagoda: {
     name: "The Pagoda",
-    blurb: "Five roofs of a temple tower, each smaller than the one under it. The higher you fight, the further down it is.",
+    blurb: "Five roofs of a temple tower, each smaller than the one under it. Get hit hard enough near the edge and there is nothing to stop you going over it.",
     kind: "arcade",
     // Tapers as it rises, the way the real thing does, so the width figure
     // is measured at the base - the top storeys sit well inside it.
@@ -372,6 +379,15 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     // Same per-100 rate as the Ironworks, but the cap is raised to match a
     // drop that can now run to the better part of the whole stage's height.
     fall: { from: 90, per100: 5, max: 26 },
+    // The one stage on the roster with no wall. 250 units past the edge of
+    // the playable width, which is enough that a fighter carried off it goes
+    // sailing past the edge of the screen - the camera cannot lean out far
+    // enough to keep them in frame at this stage's width - before the round
+    // actually ends, rather than the fight simply stopping at the boundary
+    // the way it does everywhere else. An ordinary hit never sends anyone
+    // anywhere near it; this is what a launcher or a super connecting near
+    // the rail is for.
+    ringOut: { beyond: 1150 },
     sky: ["#1a1430", "#4a2f52"],
     ground: "#2a1f28",
     accent: "#e8b866",
@@ -452,6 +468,53 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: -110, y: 288, w: 220 },
       { x: 140, y: 360, w: 180 },
       { x: 60, y: 432, w: 180 },
+    ],
+  },
+  pyramids: {
+    name: "The Pyramids",
+    blurb: "A causeway wide enough to lose sight of the other fighter in, terraces climbing to a gilded cap.",
+    kind: "arcade",
+    // Where the Pagoda and the Bell Tower are narrow and go straight up,
+    // this one goes the other way - the widest stage on the roster by a
+    // real margin, because the point of it is the desert around the thing,
+    // not just the thing. The climb tops out modest, closer to the
+    // Ironworks than to either tower.
+    halfWidth: 1050,
+    maxViewWidth: 1900,
+    fall: { from: 90, per100: 5, max: 20 },
+    // Bright desert daylight rather than another night stage - long shadows,
+    // a hard sun, and a horizon lost in heat haze rather than in dark.
+    sky: ["#b9dcec", "#f2c98a"],
+    ground: "#c9a876",
+    accent: "#e0b866",
+    light: { key: "#fff4d6", fill: "#7a8fae", strength: 0.85, shadow: "#a9764a", glow: 0.06 },
+    ambient: { kind: "dust", count: 26, colors: ["#e8d2a0", "#d8b878"], speed: -0.05, wind: 0.4, size: [2, 5], opacity: 0.4 },
+    /**
+     * Four steps rather than the towers' five or eight - this stage spends
+     * its height budget on width instead. A split base wide enough to be a
+     * fighting ground in its own right, one bridge across the gap in it, one
+     * capstone terrace sitting inside the bridge's own footprint so the last
+     * climb is a generous, open one rather than another precise jump - two
+     * stages already ask for that, and a large casual level does not need a
+     * third. Two low obelisk tops stand apart from the pyramid entirely, out
+     * in the open plaza on each side, for a fight that has no reason to go
+     * near the steps at all.
+     *
+     * Every rise is still 72 units, so the same jump that clears a storey on
+     * either tower clears one here.
+     *
+     * x is the LEFT edge. Base -780..-200 and 200..780. Bridge -260..260,
+     * sitting inside both base runs by 60 units on each side. Capstone
+     * -150..150, entirely inside the bridge. Obelisks -1000..-880 and
+     * 880..1000, standing alone.
+     */
+    platforms: [
+      { x: -780, y: 72, w: 580 },
+      { x: 200, y: 72, w: 580 },
+      { x: -260, y: 144, w: 520 },
+      { x: -150, y: 216, w: 300 },
+      { x: -1000, y: 64, w: 120 },
+      { x: 880, y: 64, w: 120 },
     ],
   },
   aqueduct: {
@@ -909,6 +972,9 @@ export class Stage {
         break;
       case "belltower":
         this.buildBellTower();
+        break;
+      case "pyramids":
+        this.buildPyramids();
         break;
       case "delta":
         this.buildDelta();
@@ -2346,6 +2412,193 @@ export class Stage {
         near.add(disc(x + ((y * 7) % 9) - 4, y, 5, "#3a5a34", 9, 0.55));
       }
     }
+
+    this.addLayer(near, 1);
+  }
+
+  /**
+   * A causeway across the Giza plateau, wide enough that the two fighters
+   * can genuinely lose sight of each other in it, ending at a single great
+   * pyramid built to be climbed. Where the Pagoda and the Bell Tower spend
+   * their height budget going up, this one spends it going sideways - the
+   * widest stage on the roster, in bright desert daylight rather than
+   * another night sky.
+   *
+   * Same discipline as the other three: everything in the near layer that
+   * has to line up with a platform reads its coordinates from
+   * STAGE_THEMES.pyramids.platforms rather than repeating them.
+   */
+  private buildPyramids() {
+    const W = 1050;
+    const [baseL, baseR, bridge, capstone, obeliskL, obeliskR] = STAGE_THEMES.pyramids.platforms!;
+
+    const far = new THREE.Group();
+    // A hard, high sun and a sky that pales toward the horizon rather than
+    // darkening - the one built stage on the roster lit like midday.
+    far.add(disc(-680, 500, 60, "#fff6df", 1, 0.95));
+    far.add(disc(-680, 500, 90, "#fff6df", 1, 0.16));
+    // Heat haze: soft horizontal bands low over the desert.
+    for (let i = 0; i < 3; i++) {
+      far.add(rect(0, 60 + i * 10, 2800, 8, "#f2ddb0", 1, 0.12));
+    }
+    // Distant dunes, rolling rather than jagged.
+    for (const [x, w, h] of [[-1300, 700, 60], [-500, 900, 90], [500, 800, 70], [1300, 700, 60]] as [
+      number,
+      number,
+      number,
+    ][]) {
+      far.add(tri(x, 40, w, h, "#e0bd82", 1, 0.85));
+    }
+    // Two smaller pyramids further off, so the one being fought on reads as
+    // the largest of three rather than the only one there is.
+    far.add(tri(-980, 60, 260, 200, "#d9b384", 2, 0.9));
+    far.add(tri(-980, 60, 210, 160, "#c9a06e", 2, 0.5));
+    far.add(tri(1120, 60, 220, 170, "#d9b384", 2, 0.9));
+    far.add(tri(1120, 60, 175, 135, "#c9a06e", 2, 0.5));
+    // The Sphinx, reclining off to one side - the single silhouette that
+    // says "Giza" before the pyramid behind it has to.
+    {
+      const sx = -560;
+      far.add(rect(sx, 60, 260, 34, "#c2955f", 3, 0.92));
+      far.add(poly(sx - 130, 90, [0, 0, 40, 0, 30, 20, 0, 14], "#c2955f", 3, 0.92));
+      far.add(poly(sx + 90, 90, [0, 0, 46, 60, 30, 64, -10, 26], "#c2955f", 3, 0.92));
+      far.add(rect(sx + 108, 150, 26, 20, "#b98a54", 3, 0.92));
+      far.add(poly(sx + 96, 170, [0, 0, 40, 0, 34, 14, 6, 14], "#a97c4a", 3, 0.9));
+    }
+    this.addLayer(far, 0.2);
+
+    const mid = new THREE.Group();
+    // A temple pylon: the tapering twin-tower gateway that fronts an
+    // Egyptian temple, standing well back from the pyramid itself.
+    {
+      const px = 720;
+      for (const side of [-1, 1] as const) {
+        mid.add(poly(px + side * 60, 50, [0, 0, side * 70, 0, side * 46, 190, side * -10, 190], "#b98a54", 4, 0.95));
+      }
+      mid.add(rect(px, 50, 60, 130, "#a97c4a", 4, 0.9));
+    }
+    // Palm trees, in loose stands.
+    const palm = (x: number, h: number) => {
+      mid.add(rect(x, 0, 7, h, "#6a5230", 5, 0.95));
+      for (const a of [-40, -14, 14, 40]) {
+        mid.add(poly(x, h, [0, 0, Math.cos((a * Math.PI) / 180) * 46, Math.sin((a * Math.PI) / 180) * 22 + 10, Math.cos((a * Math.PI) / 180) * 30, -4], "#4a6a34", 5, 0.9));
+      }
+    };
+    palm(-1180, 90);
+    palm(-1120, 70);
+    palm(980, 100);
+    palm(1050, 76);
+    // A fallen, broken obelisk half-buried in sand - background flavour,
+    // separate from the two standing ones a fighter can actually land on.
+    mid.add(rect(-260, 0, 120, 22, "#c2955f", 4, 0.9));
+    mid.add(poly(-140, 0, [0, 0, 20, 0, 26, 11, 0, 22], "#c2955f", 4, 0.9));
+    this.addLayer(mid, 0.55);
+
+    const near = new THREE.Group();
+    const stone = "#c9a876";
+    const stoneLit = "#e0c090";
+    const stoneDark = "#9a7a52";
+    const gold = "#e0b866";
+
+    // ---- the plaza floor ----
+    near.add(rect(0, -110, 2800, 110, "#d9bd8c", 10, 1));
+    for (let x = -W - 60; x <= W + 60; x += 90) {
+      near.add(rect(x, -110, 4, 110, "#c2a06e", 10, 0.6));
+    }
+    near.add(rect(0, -8, 2800, 8, "#b9986a", 10, 0.85));
+    // Causeway paving down the middle - large flagstones underfoot rather
+    // than bare sand, the way the real approach to Giza is a built road.
+    for (let x = -W; x <= W; x += 130) {
+      near.add(rect(x, -8, 110, 6, stoneLit, 10, 0.6));
+    }
+    // Drifts of sand banked against everything at ground level.
+    for (const [x, w] of [[-900, 220], [-400, 260], [140, 240], [640, 260]] as [number, number][]) {
+      near.add(poly(x, 0, [-w / 2, 0, w / 2, 0, w / 3, 20, -w / 3, 18], "#e0c592", 9, 0.55));
+    }
+
+    /**
+     * One terrace: a course of weathered limestone under the lip
+     * `buildPlatforms` already draws, a row of carved relief bands standing
+     * in for hieroglyphs, and sand banked up its uphill face.
+     */
+    const terrace = (p: { x: number; y: number; w: number }) => {
+      const cx = p.x + p.w / 2;
+      near.add(rect(cx, p.y - 12, p.w, 5, stoneDark, 9, 0.5));
+      for (let i = 0; i < Math.floor(p.w / 46); i++) {
+        const bx = p.x + 23 + i * 46;
+        near.add(rect(bx, p.y - 26, 24, 14, stoneDark, 9, 0.35));
+        near.add(rect(bx - 7, p.y - 22, 5, 6, "#7a5c3a", 9, 0.5));
+        near.add(disc(bx + 6, p.y - 19, 3, "#7a5c3a", 9, 0.5));
+      }
+      // Sand banked against the riser below this terrace.
+      near.add(poly(p.x + 20, p.y - 26, [0, 0, 36, 0, 0, 22], "#e0c592", 9, 0.6));
+      near.add(poly(p.x + p.w - 20, p.y - 26, [0, 0, -36, 0, 0, 22], "#e0c592", 9, 0.6));
+    };
+    for (const p of [baseL, baseR, bridge, capstone]) terrace(p);
+
+    // ---- the riser faces between terraces, so the pyramid reads as a solid
+    // mass rather than four boards floating over each other ----
+    const face = (p: { x: number; y: number; w: number }, below: number) => {
+      const cx = p.x + p.w / 2;
+      near.add(rect(cx, below, p.w - 20, p.y - below - 14, stone, 6, 0.96));
+      near.add(rect(cx, below, p.w - 20, 4, stoneDark, 6, 0.4));
+    };
+    face(baseL, 0);
+    face(baseR, 0);
+    face(bridge, baseL.y);
+    face(capstone, bridge.y);
+
+    // ---- the capstone itself: gilded, the way the very tip of a real
+    // pyramid once was, and the brightest thing on the stage after the sun ----
+    {
+      const cx = capstone.x + capstone.w / 2;
+      near.add(poly(cx, capstone.y - 6, [-70, 0, 70, 0, 0, 130], gold, 12, 0.95));
+      near.add(poly(cx, capstone.y - 6, [-50, 0, 50, 0, 0, 100], "#f0d494", 12, 0.5));
+      near.add(disc(cx, capstone.y + 128, 8, "#fff2c9", 12, 0.9));
+      near.add(disc(cx, capstone.y + 128, 20, "#fff2c9", 11, 0.22));
+    }
+
+    /** One obelisk: a tapering shaft, hieroglyph bands, and its own small
+     * gilded pyramidion, standing apart from the pyramid entirely. */
+    const obelisk = (p: { x: number; y: number; w: number }) => {
+      const cx = p.x + p.w / 2;
+      near.add(poly(cx, p.y, [-p.w / 2 + 8, 0, p.w / 2 - 8, 0, p.w / 2 - 20, 150, -p.w / 2 + 20, 150], stone, 9, 0.96));
+      for (let y = 20; y < 140; y += 26) {
+        near.add(rect(cx, p.y + y, 8, 12, stoneDark, 9, 0.4));
+      }
+      near.add(poly(cx, p.y + 150, [-14, 0, 14, 0, 0, 30], gold, 9, 0.95));
+    };
+    obelisk(obeliskL);
+    obelisk(obeliskR);
+
+    // ---- ramps between the terraces: shallow stone stairs rather than a
+    // ladder, matching the way the real Step Pyramid was actually climbed ----
+    const ramp = (x0: number, y0: number, x1: number, y1: number, steps: number) => {
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        near.add(rect(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 26, 4, stoneLit, 12, 0.85));
+      }
+    };
+    ramp(baseL.x + baseL.w - 80, 0, baseL.x + baseL.w - 80, baseL.y, 5);
+    ramp(baseR.x + 80, 0, baseR.x + 80, baseR.y, 5);
+    ramp(bridge.x + 30, baseL.y, bridge.x + 30, bridge.y, 4);
+    ramp(capstone.x - 40, bridge.y, capstone.x + 20, capstone.y, 5);
+
+    // ---- small guardian statues lining the causeway, and braziers marking
+    // the way up - the working clutter every one of these stages carries ----
+    for (const x of [-820, -420, 420, 820]) {
+      near.add(rect(x, 0, 26, 30, stoneDark, 9, 0.92));
+      near.add(rect(x, 30, 34, 10, stoneDark, 9, 0.92));
+      near.add(rect(x - 10, 6, 6, 20, "#7a5c3a", 10, 0.5));
+      near.add(rect(x + 10, 6, 6, 20, "#7a5c3a", 10, 0.5));
+    }
+    const brazier = (x: number, y: number) => {
+      near.add(rect(x, y, 18, 16, stoneDark, 10, 0.95));
+      near.add(poly(x, y + 16, [-9, 0, -5, 13, 0, 19, 5, 11, 9, 0], "#e0b866", 11, 0.85));
+      near.add(poly(x, y + 18, [-5, 0, -2, 8, 0, 13, 3, 7, 5, 0], "#fff2c9", 11, 0.85));
+    };
+    for (const x of [baseL.x + 480, baseR.x + 100]) brazier(x, baseL.y);
+    brazier(bridge.x + bridge.w - 40, bridge.y);
 
     this.addLayer(near, 1);
   }

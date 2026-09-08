@@ -410,6 +410,10 @@ export class GameSession {
     } else if (m.phase === "roundEnd") {
       if (m.lastResult?.reason === "time") announcement = "Time Up";
       else if (m.lastResult?.reason === "double") announcement = "Double K.O.";
+      // Keeps the "K.O." substring on purpose - the Hud reads that to decide
+      // whether an announcement gets the big stamp treatment, and a death by
+      // falling off the stage has earned it as much as any other finish has.
+      else if (m.lastResult?.reason === "ringOut") announcement = "Ring Out K.O.";
       else announcement = "K.O.";
     } else if (m.phase === "matchEnd") {
       announcement = null;

@@ -274,6 +274,13 @@ export class Fighter {
   private fallPeak = 0;
   /** Damage the last landing cost, for the HUD and the tests. */
   fallDamage = 0;
+  /**
+   * The kill line on a stage with a ring-out rule, if this one has one. Set
+   * by the Match. While this is defined the horizontal wall is skipped
+   * entirely - see `applyWall` - so a hit with enough knockback can carry a
+   * fighter past where the edge used to be instead of bouncing off it.
+   */
+  ringOutBeyond?: number;
   /** Frames left ignoring platforms, after deliberately dropping through one. */
   private dropping = 0;
 
@@ -1174,21 +1181,27 @@ export class Fighter {
       }
     }
 
-    const limit = this.halfWidth - s.width;
-    for (const side of [-1, 1] as const) {
-      const wall = side * limit;
-      if (side < 0 ? this.x < wall : this.x > wall) {
-        this.x = wall;
-        const into = side < 0 ? this.vx < 0 : this.vx > 0;
-        if (!into) continue;
-        // Getting slammed into the corner bounces you back out of it.
-        if (this.bouncesLeft > 0 && Math.abs(this.vx) > PHYSICS.bounceThreshold && this.state === "hitstunAir") {
-          this.bouncesLeft--;
-          this.vx = -this.vx * PHYSICS.wallRestitution;
-          this.vy = Math.max(this.vy, 4);
-          this.bounced = "wall";
-        } else {
-          this.vx = 0;
+    // A ring-out stage has no wall at all - the whole point is that a hard
+    // enough hit carries a fighter straight past where it used to be. The
+    // Match checks `ringOutBeyond` every frame and ends the round the moment
+    // it is crossed, so there is nothing here to stop them with.
+    if (this.ringOutBeyond === undefined) {
+      const limit = this.halfWidth - s.width;
+      for (const side of [-1, 1] as const) {
+        const wall = side * limit;
+        if (side < 0 ? this.x < wall : this.x > wall) {
+          this.x = wall;
+          const into = side < 0 ? this.vx < 0 : this.vx > 0;
+          if (!into) continue;
+          // Getting slammed into the corner bounces you back out of it.
+          if (this.bouncesLeft > 0 && Math.abs(this.vx) > PHYSICS.bounceThreshold && this.state === "hitstunAir") {
+            this.bouncesLeft--;
+            this.vx = -this.vx * PHYSICS.wallRestitution;
+            this.vy = Math.max(this.vy, 4);
+            this.bounced = "wall";
+          } else {
+            this.vx = 0;
+          }
         }
       }
     }

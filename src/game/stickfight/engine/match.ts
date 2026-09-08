@@ -98,9 +98,10 @@ export interface Zone {
 
 export interface RoundResult {
   winner: 0 | 1 | null;
-  reason: "ko" | "time" | "double";
+  reason: "ko" | "time" | "double" | "ringOut";
   /** What actually landed the last real hit on the fighter who lost - only
-   *  meaningful for a "ko", so a timeout never claims a move finished it. */
+   *  meaningful for a "ko" or a "ringOut" (the hit that carried them off the
+   *  edge is still the finishing move), so a timeout never claims one. */
   finishingMove?: string;
   finishingDamage?: number;
 }
@@ -196,6 +197,7 @@ export class Match {
       f.platforms = platforms;
       f.halfWidth = this.halfWidth;
       f.fall = stage.fall;
+      f.ringOutBeyond = stage.ringOut?.beyond;
     }
     this.rules = rules;
     this.resetPositions();
@@ -378,17 +380,21 @@ export class Match {
 
     if (this.timer > 0) this.timer--;
 
-    const aDead = a.health <= 0;
-    const bDead = b.health <= 0;
+    // A ring-out is checked the same way a health death is - crossing the
+    // line ends the round on this same frame, not on some later health tick.
+    const aOut = a.ringOutBeyond !== undefined && Math.abs(a.x) > a.ringOutBeyond;
+    const bOut = b.ringOutBeyond !== undefined && Math.abs(b.x) > b.ringOutBeyond;
+    const aDead = a.health <= 0 || aOut;
+    const bDead = b.health <= 0 || bOut;
     if (aDead || bDead || this.timer <= 0) {
-      this.endRound(aDead, bDead);
+      this.endRound(aDead, bDead, aOut || bOut);
     }
   }
 
-  private endRound(aDead: boolean, bDead: boolean) {
+  private endRound(aDead: boolean, bDead: boolean, ringOut = false) {
     const [a, b] = this.fighters;
     let winner: 0 | 1 | null = null;
-    let reason: RoundResult["reason"] = "ko";
+    let reason: RoundResult["reason"] = ringOut ? "ringOut" : "ko";
 
     if (aDead && bDead) {
       reason = "double";
@@ -404,7 +410,7 @@ export class Match {
     }
 
     const loser = winner === 0 ? 1 : winner === 1 ? 0 : null;
-    const finishing = reason === "ko" && loser !== null ? this.lastHitTaken[loser] : null;
+    const finishing = (reason === "ko" || reason === "ringOut") && loser !== null ? this.lastHitTaken[loser] : null;
     this.lastResult = {
       winner,
       reason,
@@ -424,8 +430,14 @@ export class Match {
     if (winner !== null) {
       const loser = this.fighters[winner === 0 ? 1 : 0];
       loser.setState("ko");
-      loser.vy = 6;
-      loser.vx = -loser.facing * 3.2;
+      // A ring-out keeps whatever velocity actually carried them off the
+      // edge, so the ragdoll keeps sailing in that direction instead of
+      // snapping into the ordinary KO's small backward hop - the fall is the
+      // finish, and it should still look like the fall.
+      if (reason !== "ringOut") {
+        loser.vy = 6;
+        loser.vx = -loser.facing * 3.2;
+      }
       loser.startRagdoll(1.8);
       this.pushFx({ kind: "ko", x: loser.x, y: loser.y + 60, scale: 2 });
     }

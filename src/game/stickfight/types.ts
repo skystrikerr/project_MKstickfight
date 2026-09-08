@@ -835,6 +835,24 @@ export interface StageRules {
     /** Never more than this from one landing. */
     max: number;
   };
+  /**
+   * Turns the wall at the edge of the stage into open air.
+   *
+   * Every other stage stops a fighter dead at its half-width - there is
+   * always a wall, so nobody has ever been knocked off the side of one. Here
+   * there is no wall: a hit with enough knockback carries them straight past
+   * where the edge used to be, and crossing `beyond` ends the round on the
+   * spot, credited to whoever hit them last. Set well past `halfWidth` so
+   * the fall is visible - the fighter is meant to sail off the edge of the
+   * screen before the round actually ends, not vanish at the boundary.
+   *
+   * Absent everywhere else. A stage that means to be a duel with a floor
+   * under the whole fight should never quietly grow a way to lose that has
+   * nothing to do with health.
+   */
+  ringOut?: {
+    beyond: number;
+  };
 }
 
 export interface FighterStats {
