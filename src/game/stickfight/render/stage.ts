@@ -220,9 +220,17 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Perdition Flats",
     blurb: "A dead main street at sundown.",
     sky: ["#3a1f2b", "#e2925a"],
-    ground: "#c98d5a",
+    ground: "#5c3723",
     accent: "#ffcf6b",
     ambient: { kind: "dust", count: 34, colors: ["#e8c9a0", "#c98d5a"], speed: -0.08, wind: 0.9, size: [2, 6], opacity: 0.45 },
+    // Painted. `sink` is solved rather than guessed: the painting's own
+    // foreground ledge starts 65% of the way down a 941px source, which at
+    // this width is 231 world units off the bottom, so sinking it by that
+    // lands the ledge at the fighters' feet and the painted ground runs on
+    // behind them into the floor plane.
+    // `ground` is resampled off the painting's own foot for the same reason -
+    // the floor plane continues below it and bands against it otherwise.
+    backdrop: { file: "perdition.jpg", aspect: 1.7768, width: 1180, sink: 231 },
   },
   dojo: {
     // Blossom light: a pink sky doing most of the work.
@@ -250,9 +258,17 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Frozen Pass",
     blurb: "Above the treeline, under the aurora.",
     sky: ["#0b1630", "#7099c6"],
-    ground: "#b9cde0",
+    ground: "#191b24",
     accent: "#8fd0ff",
     ambient: { kind: "snow", count: 70, colors: ["#ffffff", "#dbeaff"], speed: 1.1, wind: 0.55, size: [3, 5], opacity: 0.85 },
+    // Painted. `sink` is solved rather than guessed: the painting's own
+    // foreground ledge starts 77% of the way down a 941px source, which at
+    // this width is 150 world units off the bottom, so sinking it by that
+    // lands the ledge at the fighters' feet and the painted ground runs on
+    // behind them into the floor plane.
+    // `ground` is resampled off the painting's own foot for the same reason -
+    // the floor plane continues below it and bands against it otherwise.
+    backdrop: { file: "frozen-pass.jpg", aspect: 1.7768, width: 1180, sink: 150 },
   },
   forge: {
     // Firelight. The key is the forge itself, so it is orange and it is close.
@@ -260,9 +276,17 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Ember Forge",
     blurb: "Cut into a volcano. Mind the drop.",
     sky: ["#1a0a0e", "#8a2f1e"],
-    ground: "#3b2b2b",
+    ground: "#2b0e0b",
     accent: "#ff8a3c",
     ambient: { kind: "ember", count: 46, colors: ["#ffb648", "#ff6a2c", "#ffe6a8"], speed: -1.5, wind: 0.5, size: [3, 6], opacity: 0.9 },
+    // Painted. `sink` is solved rather than guessed: the painting's own
+    // foreground ledge starts 77% of the way down a 941px source, which at
+    // this width is 156 world units off the bottom, so sinking it by that
+    // lands the ledge at the fighters' feet and the painted ground runs on
+    // behind them into the floor plane.
+    // `ground` is resampled off the painting's own foot for the same reason -
+    // the floor plane continues below it and bands against it otherwise.
+    backdrop: { file: "ember-forge.jpg", aspect: 1.7768, width: 1180, sink: 156 },
   },
   delta: {
     // Sun through canopy - green-filtered, and the shadows go green with it.
@@ -270,9 +294,17 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Monsoon Delta",
     blurb: "Flooded paddy, low cloud, and the treeline too close.",
     sky: ["#1d2a24", "#7f8f66"],
-    ground: "#4a5340",
+    ground: "#242218",
     accent: "#a7d16a",
     ambient: { kind: "rain", count: 80, colors: ["#b7cfa8", "#dfe9cf"], speed: 12, wind: -1.8, size: [1.3, 20], opacity: 0.42 },
+    // Painted. `sink` is solved rather than guessed: the painting's own
+    // foreground ledge starts 85% of the way down a 941px source, which at
+    // this width is 100 world units off the bottom, so sinking it by that
+    // lands the ledge at the fighters' feet and the painted ground runs on
+    // behind them into the floor plane.
+    // `ground` is resampled off the painting's own foot for the same reason -
+    // the floor plane continues below it and bands against it otherwise.
+    backdrop: { file: "monsoon-delta.jpg", aspect: 1.7768, width: 1180, sink: 100 },
   },
   mactan: {
     name: "Mactan Shallows",
@@ -635,9 +667,17 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Cloudbreak Temple",
     blurb: "A stone platform floating in clear morning air.",
     sky: ["#2f6fb5", "#a9d3f0"],
-    ground: "#cfc3a8",
+    ground: "#211f1e",
     accent: "#ffe9a8",
     ambient: { kind: "petal", count: 22, colors: ["#ffffff", "#e6f3ff"], speed: 0.7, wind: 1.4, size: [4, 6], opacity: 0.6 },
+    // Painted. `sink` is solved rather than guessed: the painting's own
+    // foreground ledge starts 79% of the way down a 941px source, which at
+    // this width is 139 world units off the bottom, so sinking it by that
+    // lands the ledge at the fighters' feet and the painted ground runs on
+    // behind them into the floor plane.
+    // `ground` is resampled off the painting's own foot for the same reason -
+    // the floor plane continues below it and bands against it otherwise.
+    backdrop: { file: "cloudbreak.jpg", aspect: 1.7768, width: 1180, sink: 139 },
   },
 };
 
@@ -1055,8 +1095,11 @@ export class Stage {
         g.add(rect(x, -34, 6, 34, "#000000", 9, 0.18));
       }
     }
-    if (theme === "skyward") {
-      // The platform has an edge instead of running off-screen.
+    // The built stage's platform has an edge instead of running off-screen.
+    // Gated on the stage not being painted, like the floor line above it: a
+    // painting brings its own ledge, and this slab sat across the foot of it
+    // in a colour sampled from nothing.
+    if (theme === "skyward" && !painted) {
       g.add(rect(0, -180, 1240, 180, "#8d8064", 8));
       g.add(rect(0, -30, 1300, 30, "#b3a486", 8));
     }
