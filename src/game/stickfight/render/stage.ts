@@ -145,6 +145,30 @@ export interface StageDef {
   ringOut?: StageRules["ringOut"];
   /** Painted rather than built. Skips the built-stage haze - see the Stage ctor. */
   backdrop?: BackdropDef;
+  /**
+   * A tiling photograph laid over the floor and the ledges.
+   *
+   * The flat colour underneath it stays: the texture arrives asynchronously
+   * even when it is inlined, and a floor that flashes from nothing to stone is
+   * worse than one that fills in. It is also what shows through wherever the
+   * texture is deliberately faded.
+   */
+  floor?: FloorDef;
+}
+
+export interface FloorDef {
+  /** File name inside src/assets/textures. */
+  file: string;
+  /** World units one tile of it covers. Larger means bigger stones. */
+  scale: number;
+  /**
+   * How hard it sits over the stage's own ground colour, 0..1.
+   *
+   * Not always 1. These are photographs and the stages they land on are flat
+   * colour and hard shapes; at full strength the floor stops belonging to the
+   * same drawing as everything standing on it.
+   */
+  strength?: number;
 }
 
 /** Half-width of a stage, falling back to the roster-wide default. */
@@ -213,6 +237,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ground: "#6b4b32",
     accent: "#4fd1c5",
     ambient: { kind: "rain", count: 90, colors: ["#9fc7e8", "#cfe4f5"], speed: 13, wind: -2.6, size: [1.4, 22], opacity: 0.5 },
+    floor: { file: "wet-planks.webp", scale: 130, strength: 0.9 },
   },
   frontier: {
     // Low sun an hour before dark, with the red rock throwing it back up.
@@ -241,6 +266,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     ground: "#8a6b45",
     accent: "#ff9db4",
     ambient: { kind: "petal", count: 40, colors: ["#ffc0cf", "#ff9db4", "#ffe1e8"], speed: 1.3, wind: 0.9, size: [5, 8], opacity: 0.9 },
+    floor: { file: "blossom-cobbles.webp", scale: 120, strength: 0.85 },
   },
   neon: {
     // Signage. There is no sun here at all - everything is lit by advertising.
@@ -329,6 +355,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     // something burning should bloom.
     light: { key: "#ffb267", fill: "#3a2e34", strength: 0.85, shadow: "#3d2c2a", glow: 0.2 },
     ambient: { kind: "ember", count: 30, colors: ["#ff9440", "#d8702a", "#8a4318"], speed: 0.22, wind: 0.35, size: [2, 5], opacity: 0.55 },
+    floor: { file: "dry-grass.webp", scale: 150, strength: 0.8 },
   },
   causeway: {
     name: "The Causeway",
@@ -340,6 +367,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     // key off the lake, a cool fill, and a warm shadow where the burning is.
     light: { key: "#fff2da", fill: "#5c7d9a", strength: 0.8, shadow: "#6a5548", glow: 0.14 },
     ambient: { kind: "dust", count: 26, colors: ["#d8cbb8", "#a89a86"], speed: 0.14, wind: 0.5, size: [2, 5], opacity: 0.4 },
+    floor: { file: "aztec-paving.webp", scale: 140, strength: 0.85 },
   },
   ironworks: {
     name: "The Ironworks",
@@ -398,6 +426,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: 150, y: 144, w: 260 },
       { x: -120, y: 214, w: 240 },
     ],
+    floor: { file: "dark-cobbles.webp", scale: 120, strength: 0.85 },
   },
   pagoda: {
     name: "The Pagoda",
@@ -455,6 +484,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: -110, y: 288, w: 220 },
       { x: -90, y: 360, w: 180 },
     ],
+    floor: { file: "maple-stone.webp", scale: 120, strength: 0.85 },
   },
   belltower: {
     name: "The Bell Tower",
@@ -558,6 +588,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: -1000, y: 64, w: 120 },
       { x: 880, y: 64, w: 120 },
     ],
+    floor: { file: "sandstone-blocks.webp", scale: 125, strength: 0.8 },
   },
   aqueduct: {
     // Overcast stone light. Flat, cool, and not much of it.
@@ -590,6 +621,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: -350, y: 74, w: 250 },
       { x: 100, y: 74, w: 250 },
     ],
+    floor: { file: "granite-ring.webp", scale: 130, strength: 0.85 },
   },
 
   siegeworks: {
@@ -607,6 +639,7 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
       { x: -280, y: 108, w: 175 },
       { x: 140, y: 70, w: 260 },
     ],
+    floor: { file: "churned-dirt.webp", scale: 150, strength: 0.85 },
   },
 
   postroad: {
@@ -848,6 +881,62 @@ function poly(
   return m;
 }
 
+/**
+ * A quad carrying a tiling texture.
+ *
+ * The mesh is returned immediately with a plain transparent material and the
+ * bitmap is dropped into it when it arrives - same reason as the painted
+ * backdrops, the decode is asynchronous even for an inlined data URI, and a
+ * floor that pops is worse than a floor that fades up.
+ *
+ * `repeat` is set from the quad's own size in world units rather than from a
+ * tile count, so the stones stay the same size whether they are under a 600
+ * unit arena or a 2100 unit causeway.
+ */
+function tiledRect(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  def: FloorDef,
+  order: number,
+  textures: THREE.Texture[],
+): THREE.Mesh {
+  const material = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0,
+    toneMapped: false,
+  });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material);
+  m.position.set(x, y + h / 2, layerZ(order));
+  m.renderOrder = order;
+
+  // Globbed rather than imported for the same reason the backdrops are: the
+  // self-tests load this module under Node to read STAGE_THEMES, and Node
+  // cannot parse an image import.
+  const files = import.meta.glob("../../../assets/textures/*.webp", {
+    import: "default",
+    query: "?url",
+  }) as Record<string, () => Promise<string>>;
+  const load = files[`../../../assets/textures/${def.file}`];
+  if (!load) return m;
+
+  void load().then((url) => {
+    new THREE.TextureLoader().load(url, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(w / def.scale, h / def.scale);
+      tex.anisotropy = 4;
+      material.map = tex;
+      material.opacity = def.strength ?? 0.9;
+      material.needsUpdate = true;
+      textures.push(tex);
+    });
+  });
+  return m;
+}
+
 /** Vertical gradient backdrop built from a two-colour vertex-coloured quad. */
 function skyQuad(top: string, bottom: string, order: number): THREE.Mesh {
   const geo = new THREE.PlaneGeometry(2400, 1300);
@@ -1037,8 +1126,8 @@ export class Stage {
     // it is already fading on its own. Veiling it again in flat horizon
     // colour only makes it muddy, so the haze is for built stages.
     if (!cfg.backdrop) this.buildHaze(cfg.sky[1]);
-    this.buildGround(cfg.ground, theme, !!cfg.backdrop, halfWidthOf(theme));
-    if (cfg.platforms?.length) this.buildPlatforms(cfg.platforms, cfg.ground, cfg.accent);
+    this.buildGround(cfg.ground, theme, !!cfg.backdrop, halfWidthOf(theme), cfg.floor);
+    if (cfg.platforms?.length) this.buildPlatforms(cfg.platforms, cfg.ground, cfg.accent, cfg.floor);
 
     this.ambient = new Ambient(cfg.ambient);
     this.group.add(this.ambient.group);
@@ -1073,7 +1162,7 @@ export class Stage {
     veil(5.6, 0.12, 0.62);
   }
 
-  private buildGround(color: string, theme: StageTheme, painted: boolean, halfWidth: number) {
+  private buildGround(color: string, theme: StageTheme, painted: boolean, halfWidth: number, floor?: FloorDef) {
     const g = new THREE.Group();
     const W = Math.max(1800, halfWidth * 2 + 480);
     if (painted) {
@@ -1084,6 +1173,10 @@ export class Stage {
       g.add(fadeUpRect(0, -74, W, 74, color, 8));
     } else {
       g.add(rect(0, -420, W, 420, color, 8));
+      // The stone itself, over the flat colour rather than instead of it. It
+      // stops short of the bottom because nothing down there is ever in shot
+      // and a tiling photograph running to infinity reads as wallpaper.
+      if (floor) g.add(tiledRect(0, -300, W, 300, floor, 8, this.textures));
     }
     // The line along the floor edge. On a painted stage there is no edge to
     // draw - the sand runs back into the picture - so it would be a rule ruled
@@ -1114,13 +1207,18 @@ export class Stage {
    * with a bright lip along the top. That lip is the whole contract with the
    * player: land on the light line, pass through everything under it.
    */
-  private buildPlatforms(platforms: Platform[], ground: string, accent: string) {
+  private buildPlatforms(platforms: Platform[], ground: string, accent: string, floor?: FloorDef) {
     const g = new THREE.Group();
     const THICK = 15;
     for (const p of platforms) {
       const cx = p.x + p.w / 2;
       // Body, hanging below the surface.
       g.add(rect(cx, p.y - THICK, p.w, THICK, ground, 7));
+      // The same stone as the floor, so a ledge reads as cut from the same
+      // quarry as the ground rather than as a coloured bar laid over it. The
+      // lip below stays flat and bright - it is the contract with the player
+      // about what can be landed on, and a photograph would bury it.
+      if (floor) g.add(tiledRect(cx, p.y - THICK, p.w, THICK, floor, 7, this.textures));
       g.add(rect(cx, p.y - THICK - 3, p.w - 10, 3, "#000000", 7, 0.28));
       // The lip you actually land on.
       g.add(rect(cx, p.y - 3.5, p.w, 3.5, accent, 8));
