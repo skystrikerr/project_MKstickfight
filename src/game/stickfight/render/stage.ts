@@ -2939,10 +2939,15 @@ export class Stage {
     void load().then((url) => {
       new THREE.TextureLoader().load(url, (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
-        // The quad is bigger than the source and the art is pixel work, so it
-        // is left crisp rather than smoothed back into mush.
-        tex.magFilter = THREE.NearestFilter;
+        // The camera only ever frames 620-980 world units of a quad that is
+        // 1180 wide, so this texture is always magnified - 2x on a 1280 canvas
+        // and past 6x on a retina 1080p one. Nearest turns that into hard
+        // texel blocks on what is a painting, not pixel art, which is most of
+        // why these read as low resolution. Linear at least resolves to a soft
+        // enlargement instead of a mosaic; the actual fix is more texels.
+        tex.magFilter = THREE.LinearFilter;
         tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.anisotropy = 4;
         tex.generateMipmaps = true;
         material.map = tex;
         material.opacity = 1;
