@@ -9,6 +9,7 @@
 import { getFighter } from "../fighters";
 import { LADDER_LENGTH, type LadderStep } from "../ladder";
 import { FighterPortrait } from "./Portrait";
+import { portraitFor } from "./art";
 
 const STAGE_LABEL: Record<LadderStep["stage"], string> = {
   climb: "Fight",
@@ -22,6 +23,27 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="grain absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-[var(--ink)] p-6">
       {children}
     </div>
+  );
+}
+
+/** Display the same painted roster art here and on the selection screen. */
+function StoryPortrait({
+  def,
+  className,
+  facing = 1,
+}: {
+  def: ReturnType<typeof getFighter>;
+  className: string;
+  facing?: 1 | -1;
+}) {
+  const image = portraitFor(def.id);
+  return image ? (
+    <div className={`relative overflow-hidden bg-[#160f0d] ${className}`}>
+      <img src={image} alt="" className="h-full w-full object-cover object-[50%_20%]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+    </div>
+  ) : (
+    <FighterPortrait def={def} className={className} facing={facing} />
   );
 }
 
@@ -60,7 +82,7 @@ export function VersusCard({
               </span>
             )}
             <div className="flex w-44 flex-col items-center sm:w-60">
-              <FighterPortrait def={def} className="h-48 w-44 sm:h-64 sm:w-60" facing={i === 0 ? 1 : -1} />
+              <StoryPortrait def={def} className="h-48 w-44 sm:h-64 sm:w-60" facing={i === 0 ? 1 : -1} />
               <span
                 className="mt-1 h-px w-10"
                 style={{ background: i === 0 ? (playerSkinAccent ?? def.palette.accent) : def.palette.accent }}
@@ -179,7 +201,7 @@ export function EndingCard({
   return (
     <Shell>
       <div className="flex w-full max-w-2xl flex-col items-center gap-4 overflow-y-auto">
-        <FighterPortrait def={me} className="h-44 w-40" />
+        <StoryPortrait def={me} className="h-44 w-40" />
         <div className="text-center">
           <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--accent)]">
             Ladder cleared · {level}
