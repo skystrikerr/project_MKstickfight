@@ -149,6 +149,8 @@ export class StickRig {
   private readonly shadowGroup = new THREE.Group();
   private props: PropMesh[] = [];
   private materials: THREE.Material[] = [];
+  /** Loaded prop textures, tracked separately from materials for disposal. */
+  private textures: THREE.Texture[] = [];
   private propInk!: THREE.MeshBasicMaterial;
   private trail: WeaponTrail | null = null;
   private trailReach = 0;
@@ -355,6 +357,35 @@ export class StickRig {
     const mat = rigMaterial(color, { vertexColors: true });
     this.materials.push(mat);
 
+    if (part.texture) {
+      // The tile count comes off the geometry's own bounding box rather than
+      // off `part.size` directly, because that box is what the shape's UVs
+      // are actually stretched across - it is right for every geo kind
+      // (box, disc, poly, blade...) without special-casing each one.
+      geo.computeBoundingBox();
+      const box = geo.boundingBox!;
+      const w = Math.max(0.001, box.max.x - box.min.x);
+      const h = Math.max(0.001, box.max.y - box.min.y);
+      const scale = part.textureScale ?? 24;
+      loadPropTexture(part.texture)
+        .then((tex) => {
+          tex.wrapS = THREE.RepeatWrapping;
+          tex.wrapT = THREE.RepeatWrapping;
+          tex.repeat.set(w / scale, h / scale);
+          tex.colorSpace = THREE.SRGBColorSpace;
+          // MeshBasicMaterial multiplies map x vertexColors x color for free,
+          // so the baked lit/shadow gradient survives under the texture
+          // instead of the part suddenly sitting in its own flat light.
+          mat.map = tex;
+          mat.needsUpdate = true;
+          this.textures.push(tex);
+        })
+        .catch(() => {
+          // No such file, or it failed to decode - the flat colour already
+          // assigned above stays exactly as it would have without this.
+        });
+    }
+
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(part.pos[0], part.pos[1], 0);
     if (part.rot) mesh.rotation.z = part.rot * DEG;
@@ -532,7 +563,34 @@ export class StickRig {
     }
     this.trail?.dispose();
     for (const m of this.materials) m.dispose();
+    for (const t of this.textures) t.dispose();
   }
+}
+
+/**
+ * Loads one tiling material from the same folder and format the stage floors
+ * use (src/assets/textures/*.webp).
+ *
+ * The glob lives inside this function rather than at module scope on purpose:
+ * `selftest.ts` imports this file under Node for `attachTransform`, and
+ * `import.meta.glob` is a Vite build-time macro that does not exist at plain
+ * Node runtime. Kept inside a function that only runs when a part actually
+ * asks for a texture, it is never reached during the self-tests - the same
+ * discipline `buildPainted` uses in stage.ts for the same reason.
+ */
+function loadPropTexture(file: string): Promise<THREE.Texture> {
+  const files = import.meta.glob("../../../assets/textures/*.webp", {
+    import: "default",
+    query: "?url",
+  }) as Record<string, () => Promise<string>>;
+  const load = files[`../../../assets/textures/${file}`];
+  if (!load) return Promise.reject(new Error(`no such prop texture: ${file}`));
+  return load().then(
+    (url) =>
+      new Promise<THREE.Texture>((resolve, reject) => {
+        new THREE.TextureLoader().load(url, resolve, undefined, reject);
+      }),
+  );
 }
 
 /**

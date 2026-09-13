@@ -728,6 +728,17 @@ export interface ShapePart {
   z?: number;
   /** Renders behind the body (capes, back-mounted shields). */
   behind?: boolean;
+  /**
+   * A tiling material laid over this one part, file name inside
+   * src/assets/textures - same folder and format the stage floors use.
+   *
+   * Multiplied against the part's own lit/shadow gradient rather than
+   * replacing it, so a textured plate still catches the stage's actual key
+   * light instead of sitting in its own flat world.
+   */
+  texture?: string;
+  /** World units one tile of `texture` covers on this part. */
+  textureScale?: number;
 }
 
 export type PropAttach =
