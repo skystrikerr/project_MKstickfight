@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { HudState, PlayerHud } from "../engine/game";
 import { getFighter } from "../fighters";
 import { FighterPortrait } from "./Portrait";
+import { portraitFor } from "./art";
 
 /** Angled frame used by every bar, so the HUD reads as one piece. */
 const SKEW = "skewX(-14deg)";
@@ -185,13 +186,22 @@ function RoundPips({ wins, roundsToWin, side }: { wins: number; roundsToWin: num
  */
 function PortraitChip({ id, accent, side }: { id: string; accent: string; side: "left" | "right" }) {
   const def = getFighter(id);
+  const image = portraitFor(id);
   return (
     <div
       className="relative hidden h-14 w-14 shrink-0 overflow-hidden border-2 sm:block"
       style={{ transform: SKEW, background: `${accent}26`, borderColor: accent }}
     >
-      <div style={{ transform: "skewX(14deg)" }}>
-        <FighterPortrait def={def} className="h-full w-full" facing={side === "left" ? 1 : -1} />
+      <div className="h-full w-full" style={{ transform: "skewX(14deg)" }}>
+        {image ? (
+          <img
+            src={image}
+            alt=""
+            className="h-full w-full object-cover object-[50%_18%]"
+          />
+        ) : (
+          <FighterPortrait def={def} className="h-full w-full" facing={side === "left" ? 1 : -1} />
+        )}
       </div>
     </div>
   );
