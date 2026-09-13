@@ -49,7 +49,14 @@ interface Props {
   onBack?: () => void;
 }
 
-/** A tiny painted preview of a stage: sky gradient, horizon and accent. */
+/** Use the same arena images in stage selection that are shown during a match. */
+const stageBackdropUrls = import.meta.glob("../../../assets/*.jpg", {
+  eager: true,
+  import: "default",
+  query: "?url",
+}) as Record<string, string>;
+
+/** A stage preview with painted art where available and a clear fallback otherwise. */
 function StageChip({
   theme,
   selected,
@@ -60,6 +67,9 @@ function StageChip({
   onPick: () => void;
 }) {
   const def = theme === "random" ? null : STAGE_THEMES[theme];
+  const backdrop = def?.backdrop
+    ? stageBackdropUrls[`../../../assets/${def.backdrop.file}`]
+    : undefined;
   return (
     <button
       type="button"
@@ -72,17 +82,27 @@ function StageChip({
       }`}
     >
       {def ? (
-        <>
-          <div
-            className="absolute inset-0"
-            style={{ background: `linear-gradient(to bottom, ${def.sky[0]}, ${def.sky[1]})` }}
+        backdrop ? (
+          <img
+            src={backdrop}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-x-0 bottom-0 h-4" style={{ background: def.ground }} />
-          <div
-            className="absolute bottom-4 left-1/2 h-6 w-10 -translate-x-1/2 rounded-sm opacity-70"
-            style={{ background: def.accent }}
-          />
-        </>
+        ) : (
+          <>
+            <div
+              className="absolute inset-0"
+              style={{ background: `linear-gradient(to bottom, ${def.sky[0]}, ${def.sky[1]})` }}
+            />
+            <div className="absolute inset-x-0 bottom-0 h-4" style={{ background: def.ground }} />
+            <div
+              className="absolute bottom-4 left-1/2 h-6 w-10 -translate-x-1/2 rounded-sm opacity-70"
+              style={{ background: def.accent }}
+            />
+          </>
+        )
       ) : (
         <div className="absolute inset-0 bg-[var(--ink-2)]" />
       )}
