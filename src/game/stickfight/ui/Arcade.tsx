@@ -9,6 +9,8 @@
 import { getFighter } from "../fighters";
 import { LADDER_LENGTH, type LadderStep } from "../ladder";
 import { FighterPortrait } from "./Portrait";
+import matchIntroArt from "@/assets/ui/match-intro.webp";
+import resultsArt from "@/assets/ui/results.webp";
 import { portraitFor } from "./art";
 
 const STAGE_LABEL: Record<LadderStep["stage"], string> = {
@@ -18,9 +20,12 @@ const STAGE_LABEL: Record<LadderStep["stage"], string> = {
   final: "Final",
 };
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, backdrop }: { children: React.ReactNode; backdrop?: string }) {
   return (
-    <div className="grain absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-[var(--ink)] p-6">
+    <div
+      className="grain absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-[var(--ink)] bg-cover bg-center p-6"
+      style={backdrop ? { backgroundImage: `url(${backdrop})` } : undefined}
+    >
       {children}
     </div>
   );
@@ -64,7 +69,7 @@ export function VersusCard({
   const me = getFighter(playerId);
   const them = getFighter(step.opponent);
   return (
-    <Shell>
+    <Shell backdrop={matchIntroArt}>
       <div className="flex w-full max-w-3xl items-center gap-3">
         <span className="h-px flex-1 bg-[var(--rule)]" />
         <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--bone-dim)]">
@@ -148,7 +153,7 @@ export function ContinuePrompt({
 }) {
   const them = getFighter(step.opponent);
   return (
-    <Shell>
+    <Shell backdrop={resultsArt}>
       <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--blood)] sm:text-8xl">
         Defeated
       </div>
@@ -199,7 +204,7 @@ export function EndingCard({
 }) {
   const me = getFighter(playerId);
   return (
-    <Shell>
+    <Shell backdrop={resultsArt}>
       <div className="flex w-full max-w-2xl flex-col items-center gap-4 overflow-y-auto">
         <StoryPortrait def={me} className="h-44 w-40" />
         <div className="text-center">

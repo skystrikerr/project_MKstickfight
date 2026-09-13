@@ -11,6 +11,7 @@ import { toKeyBindings } from "../keybinds";
 import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
 import { Announcement, Hud } from "./Hud";
+import resultsArt from "@/assets/ui/results.webp";
 import { TouchControls } from "./TouchControls";
 import { renderNotation, renderPrompt } from "../inputscheme";
 
@@ -405,7 +406,10 @@ export function GameCanvas({
       )}
 
       {hud?.phase === "matchEnd" && !onMatchEnd && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/75">
+        <div
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-[#080605] bg-cover bg-center px-4 text-center"
+          style={{ backgroundImage: `url(${resultsArt})` }}
+        >
           <div className="font-mono text-[11px] uppercase tracking-[0.4em] text-[var(--accent)]">Winner</div>
           <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--bone)] sm:text-8xl">
             {hud.winnerName}

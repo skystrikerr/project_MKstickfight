@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { CharacterSelect } from "@/game/stickfight/ui/CharacterSelect";
 import { GameCanvas, type MatchConfig } from "@/game/stickfight/ui/GameCanvas";
+import { MatchIntro } from "@/game/stickfight/ui/MatchIntro";
 import { FighterPage } from "@/game/stickfight/ui/FighterPage";
 import { MoveList } from "@/game/stickfight/ui/MoveList";
 import { ROSTER } from "@/game/stickfight/fighters";
@@ -46,6 +47,7 @@ export default function StickFighter() {
   /** Who the globe handed over, so character select opens on them. */
   const [worldFighter, setWorldFighter] = useState<string | undefined>(undefined);
   const [config, setConfig] = useState<MatchConfig | null>(null);
+  const [showVersusIntro, setShowVersusIntro] = useState(false);
   // What the last finished match unlocked, if anything. Cleared when the
   // player acknowledges it or starts another fight.
   const [earned, setEarned] = useState<{ fighter: string; items: WeaponVariant[] } | null>(null);
@@ -154,6 +156,7 @@ export default function StickFighter() {
           onShowProfile={(id) => setPageFor(id)}
           onStart={(opts) => {
             setConfig(opts);
+            setShowVersusIntro(opts.mode === "versus");
             setRun(opts.mode === "arcade" ? startRun(opts.p1, opts.aiLevel) : null);
             setTower(null);
             // Towers needs one more choice - which tower - before there is a
@@ -177,13 +180,24 @@ export default function StickFighter() {
       )}
 
       {screen === "fight" && config && !run && !tower && (
-        <GameCanvas
-          config={config}
-          touch={touch}
-          onQuit={() => setScreen("select")}
-          onShowMoves={() => setMoveListFor(config.p1)}
-          onResult={(winner) => creditMatch(config, winner)}
-        />
+        showVersusIntro && config.mode === "versus" ? (
+          <MatchIntro
+            config={config}
+            onFight={() => setShowVersusIntro(false)}
+            onBack={() => {
+              setShowVersusIntro(false);
+              setScreen("select");
+            }}
+          />
+        ) : (
+          <GameCanvas
+            config={config}
+            touch={touch}
+            onQuit={() => setScreen("select")}
+            onShowMoves={() => setMoveListFor(config.p1)}
+            onResult={(winner) => creditMatch(config, winner)}
+          />
+        )
       )}
 
       {screen === "fight" && config && tower && (() => {
