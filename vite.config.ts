@@ -3,21 +3,27 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  // Relative asset paths: the desktop build loads dist/index.html straight off
-  // disk over file://, where Vite's default absolute "/assets/..." would 404.
+  // Relative asset paths. The desktop build serves dist/ through a privileged
+  // app:// handler rather than file:// (see electron/main.cjs), so "./assets/x"
+  // resolves against the page URL and lands back inside dist either way.
   base: "./",
   plugins: [react()],
   build: {
-    // The fonts have to travel inside the stylesheet: `pack:page` folds the
-    // build into one HTML file, and a woff2 sitting in assets/ would be left
-    // behind. They are ~135 KB in total, so inlining all of them is cheap.
+    // Fonts, and only fonts, travel inside the stylesheet. A woff2 is reached
+    // from inside CSS rather than from a module, so it has no import for the
+    // packer to rewrite; at ~135 KB total, inlining them is cheaper than
+    // teaching the packer about url() in two syntaxes.
     //
-    // Painted stage backdrops ride along for the same reason, plus one more:
-    // the desktop build opens dist/index.html off disk with no server behind
-    // it, so a texture left sitting in assets/ is a missing backdrop rather
-    // than a slow one.
-    assetsInlineLimit: (file: string) =>
-      file.endsWith(".woff2") || /src[\\/]assets[\\/]/.test(file) ? true : undefined,
+    // Everything else under src/assets is emitted as a real file. It used to
+    // be inlined here as well, back when the desktop build opened dist off
+    // file:// and a loose asset was a 404. That has not been true since the
+    // app:// handler landed, and inlining costs more the bigger the game gets:
+    // every image ends up base64 inside one JS chunk that the browser must
+    // parse in full before a frame renders, and a JS string cannot exceed
+    // about half a gigabyte no matter how much disk the game is allowed.
+    // `pack:page` folds these back into data URIs for the single-file web
+    // build, which is the one target that actually needs them inline.
+    assetsInlineLimit: (file: string) => (file.endsWith(".woff2") ? true : undefined),
     rollupOptions: {
       output: {
         // One chunk, always. The stage backdrop is behind a dynamic import so

@@ -61,10 +61,95 @@ if (!js || !css) {
   process.exit(1);
 }
 
-const [jsSrc, cssSrc] = await Promise.all([
+let [jsSrc, cssSrc] = await Promise.all([
   readFile(path.join(DIST, "assets", js), "utf8"),
   readFile(path.join(DIST, "assets", css), "utf8"),
 ]);
+// The build emits images, audio and any other asset as real files, because
+// inlining every one of them into the bundle is what put a ceiling on how big
+// the game is allowed to get. This target is the exception that still needs
+// them inline - it is one HTML file with no assets directory beside it - so
+// fold them back in here, at the only point where that is actually required.
+//
+// Both bundles are rewritten: the JS reaches assets through import URLs, the
+// CSS through url(). Anything left pointing at ./assets after this is a file
+// the build emitted and this pass failed to find, which would be a silently
+// broken image in a build meant for play-testers, so it is a hard error.
+const MEDIA_TYPES = {
+  ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg", ".gif": "image/gif", ".svg": "image/svg+xml",
+  ".avif": "image/avif", ".woff2": "font/woff2", ".woff": "font/woff",
+  ".mp3": "audio/mpeg", ".ogg": "audio/ogg", ".m4a": "audio/mp4",
+  ".wav": "audio/wav", ".json": "application/json",
+};
+
+const inlined = new Map();
+async function assetDataUri(file) {
+  if (inlined.has(file)) return inlined.get(file);
+  const type = MEDIA_TYPES[path.extname(file).toLowerCase()];
+  if (!type) return null;
+  const bytes = await readFile(path.join(DIST, "assets", file));
+  const uri = `data:${type};base64,${bytes.toString("base64")}`;
+  inlined.set(file, uri);
+  return uri;
+}
+
+const escapeRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Vite emits an asset reference as `new URL("<name>", import.meta.url).href`,
+ * with the name relative to the bundle inside dist/assets - no "assets/" in
+ * the string at all. In a single HTML file `import.meta.url` is the page, so
+ * that expression resolves somewhere else entirely and would break even if the
+ * file were beside it. So the whole expression is replaced, not just the path.
+ *
+ * The stylesheet reaches its own assets through url(), relative the same way.
+ */
+function inlineAssets(source, isCss) {
+  let out = source;
+  let bytes = 0;
+  for (const [file, uri] of inlined) {
+    const name = escapeRe(file);
+    const patterns = isCss
+      ? [new RegExp(`url\\(\\s*(['"]?)(?:\\.\\/)?${name}\\1\\s*\\)`, "g")]
+      : [new RegExp(`new URL\\(\\s*(['"])(?:\\.\\/)?${name}\\1\\s*,\\s*import\\.meta\\.url\\s*\\)\\.href`, "g"),
+         new RegExp(`(['"])(?:\\.\\/)?assets\\/${name}\\1`, "g")];
+    for (const re of patterns) {
+      out = out.replace(re, () => {
+        bytes += uri.length;
+        return isCss ? `url("${uri}")` : JSON.stringify(uri);
+      });
+    }
+  }
+  return { out, bytes };
+}
+
+{
+  for (const file of assets) {
+    if (file === js || file === css) continue;
+    await assetDataUri(file);
+  }
+  const before = jsSrc.length + cssSrc.length;
+  jsSrc = inlineAssets(jsSrc, false).out;
+  cssSrc = inlineAssets(cssSrc, true).out;
+
+  // The check is for the emitted filename anywhere at all, not for a path
+  // shape. A leftover means the build referenced a file in a form this pass
+  // does not know about, and a single HTML file cannot reach it - which is a
+  // silently missing image in the build handed to play-testers, so it fails.
+  const stillReferenced = assets.filter(
+    (f) => f !== js && f !== css && (jsSrc.includes(f) || cssSrc.includes(f)),
+  );
+  if (stillReferenced.length) {
+    console.error(`Could not inline ${stillReferenced.length} asset(s) the build emitted:`);
+    for (const f of stillReferenced.slice(0, 10)) console.error(`  ${f}`);
+    console.error("The build references these in a form pack-page does not rewrite.");
+    process.exit(1);
+  }
+  const mb = ((jsSrc.length + cssSrc.length - before) / 1048576).toFixed(2);
+  console.log(`  + ${inlined.size} asset(s) inlined (+${mb} MB as base64)`);
+}
+
 // A literal </script> inside the bundle would close the inline tag early and
 // leave the rest of the game as page text.
 if (jsSrc.includes("</script")) {
