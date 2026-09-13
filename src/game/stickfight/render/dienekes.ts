@@ -1,6 +1,5 @@
 /** The approved low-poly model, driven only by the existing combat skeleton. */
 import * as THREE from "three";
-import modelData from "../../../assets/models/dienekes.json";
 import { BONES, type Joint, type Skeleton } from "../skeleton";
 import type { FighterDef } from "../types";
 import type { StageLight } from "./shapes";
@@ -8,7 +7,10 @@ import type { StageLight } from "./shapes";
 type Attachment = { x: number; y: number; rot: number };
 const DEG = Math.PI / 180;
 const YAW = 0.8;
-export const DIENEKES_MODEL_PROPS = new Set(["helm", "aspis", "dory", "cloak", "cuirass", "greaveF", "greaveB"]);
+/** Darkest and brightest baked facet values. Max above 1 lifts lit faces. */
+const SHADE_MIN = 0.46;
+const SHADE_MAX = 1.22;
+
 
 export class DienekesModel {
   readonly group = new THREE.Group();
@@ -16,9 +18,9 @@ export class DienekesModel {
   private armor: THREE.Group[] = [];
   private materials = new Map<string, { material: THREE.MeshBasicMaterial; base: THREE.Color }>();
 
-  constructor(def: FighterDef, light?: StageLight) {
+  constructor(def: FighterDef, modelData: unknown, light?: StageLight) {
     this.group.name = "DienekesModel";
-    const source = new THREE.ObjectLoader().parse(modelData);
+    const source = new THREE.ObjectLoader().parse(modelData as never);
     const lightDir = new THREE.Vector3(-0.4, 0.8, 0.65).normalize();
     const piece = (name: string, parent: string, include: (name: string) => boolean,
       origin: [number, number, number], scale: [number, number, number], yaw = YAW) => {
@@ -46,11 +48,20 @@ export class DienekesModel {
           this.materials.set(originalMaterial.uuid, entry);
         }
         // Facet lighting is baked so this mesh works with the game's unlit stage.
+        //
+        // Wrapped rather than clamped: a plain max(0, n.l) leaves every face
+        // pointing away from the key at one identical value, so a whole side of
+        // the model goes flat and the silhouette stops reading as solid. This
+        // maps the full -1..1 range onto the ramp, and the ramp runs past 1 so
+        // faces square to the light actually brighten instead of only ever
+        // darkening away from the base colour - the same range the stick rig's
+        // own lit/hot/dark gradient covers, so the two read as one art style.
         const normals = geometry.getAttribute("normal");
         const colors = new Float32Array(normals.count * 3);
         const normal = new THREE.Vector3();
         for (let i = 0; i < normals.count; i++) {
-          const shade = 0.6 + 0.4 * Math.max(0, normal.fromBufferAttribute(normals, i).normalize().dot(lightDir));
+          const ndl = 0.5 + 0.5 * normal.fromBufferAttribute(normals, i).normalize().dot(lightDir);
+          const shade = SHADE_MIN + (SHADE_MAX - SHADE_MIN) * ndl * ndl;
           colors.set([shade, shade, shade], i * 3);
         }
         geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));

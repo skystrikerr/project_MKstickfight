@@ -23,7 +23,8 @@ import {
 } from "./shapes";
 import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
-import { DienekesModel, DIENEKES_MODEL_PROPS } from "./dienekes";
+import { DienekesModel } from "./dienekes";
+import { modelFor } from "./models";
 
 const ORDER = {
   cloth: 14,
@@ -159,6 +160,7 @@ export class StickRig {
   private def: FighterDef;
   private scale: number;
   private dienekes: DienekesModel | null = null;
+  private modelProps = new Set<string>();
 
   constructor(def: FighterDef, private light?: StageLight) {
     this.def = def;
@@ -295,8 +297,13 @@ export class StickRig {
       this.trail = new WeaponTrail(def.palette.metal, ORDER.trail);
       this.worldGroup.add(this.trail.mesh);
     }
-    if (def.id === "spartan") {
-      this.dienekes = new DienekesModel(def, light);
+    // A fighter with an approved model renders that instead of the flat ink
+    // shapes. Looked up by id rather than branched on one, so the next model is
+    // a registry entry and not another special case in this constructor.
+    const model = modelFor(def.id);
+    if (model) {
+      this.modelProps = new Set(model.hideProps);
+      this.dienekes = new DienekesModel(def, model.data, light);
       this.group.add(this.dienekes.group);
       for (const limb of Object.values(this.limbs)) limb.group.visible = false;
       for (const mesh of [this.head, this.headOutline, ...this.hands, ...this.handOutlines, ...this.boots, ...this.bootOutlines]) mesh.visible = false;
@@ -512,7 +519,7 @@ export class StickRig {
       // Preserve the existing javelin, projectile, shadow, and trail paths.
       // Only the body and the model's matching equipment replace ink shapes.
       for (const prop of this.props) {
-        if (!DIENEKES_MODEL_PROPS.has(prop.def.id)) continue;
+        if (!this.modelProps.has(prop.def.id)) continue;
         prop.group.visible = false;
         if (prop.cloth) prop.cloth.mesh.visible = false;
       }
