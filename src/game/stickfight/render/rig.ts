@@ -23,6 +23,7 @@ import {
 } from "./shapes";
 import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
+import { DienekesModel, DIENEKES_MODEL_PROPS } from "./dienekes";
 
 const ORDER = {
   cloth: 14,
@@ -157,6 +158,7 @@ export class StickRig {
   private trailAttach: "handF" | "handB" = "handF";
   private def: FighterDef;
   private scale: number;
+  private dienekes: DienekesModel | null = null;
 
   constructor(def: FighterDef, private light?: StageLight) {
     this.def = def;
@@ -292,6 +294,12 @@ export class StickRig {
     if (this.trailReach > 24) {
       this.trail = new WeaponTrail(def.palette.metal, ORDER.trail);
       this.worldGroup.add(this.trail.mesh);
+    }
+    if (def.id === "spartan") {
+      this.dienekes = new DienekesModel(def, light);
+      this.group.add(this.dienekes.group);
+      for (const limb of Object.values(this.limbs)) limb.group.visible = false;
+      for (const mesh of [this.head, this.headOutline, ...this.hands, ...this.handOutlines, ...this.boots, ...this.bootOutlines]) mesh.visible = false;
     }
   }
 
@@ -500,6 +508,18 @@ export class StickRig {
       }
     }
 
+    if (this.dienekes) {
+      // Preserve the existing javelin, projectile, shadow, and trail paths.
+      // Only the body and the model's matching equipment replace ink shapes.
+      for (const prop of this.props) {
+        if (!DIENEKES_MODEL_PROPS.has(prop.def.id)) continue;
+        prop.group.visible = false;
+        if (prop.cloth) prop.cloth.mesh.visible = false;
+      }
+      this.dienekes.update(sk, opts.hiddenProps, opts.flash,
+        attachTransform(sk, "forearmF"), attachTransform(sk, "handB"), opts.speed);
+    }
+
     // Weapon trail --------------------------------------------------------
     if (this.trail) {
       const attach = attachTransform(sk, this.trailAttach);
@@ -556,6 +576,7 @@ export class StickRig {
   }
 
   dispose() {
+    this.dienekes?.dispose();
     for (const limb of Object.values(this.limbs)) limb.dispose();
     for (const m of [...this.hands, ...this.handOutlines, ...this.boots, ...this.bootOutlines]) {
       m.geometry.dispose();
