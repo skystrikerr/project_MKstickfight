@@ -234,9 +234,12 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Storm Deck",
     blurb: "Wet planking, a rolling sea, nowhere to run.",
     sky: ["#0d1b2a", "#3f6b8a"],
-    ground: "#6b4b32",
+    ground: "#66443e",
     accent: "#4fd1c5",
     ambient: { kind: "rain", count: 90, colors: ["#9fc7e8", "#cfe4f5"], speed: 13, wind: -2.6, size: [1.4, 22], opacity: 0.5 },
+    // The painting is already a ship's deck seen from deck height, rails and
+    // all, so the arena floor only has to carry on the planking it ends at.
+    backdrop: { file: "storm-deck.jpg", aspect: 1.7768, width: 1180, sink: 200 },
     floor: { file: "wet-planks.webp", scale: 130, strength: 0.9 },
   },
   frontier: {
@@ -263,9 +266,10 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Blossom Dojo",
     blurb: "Paper screens, old timber, falling petals.",
     sky: ["#2a2140", "#e79fa8"],
-    ground: "#8a6b45",
+    ground: "#99573d",
     accent: "#ff9db4",
     ambient: { kind: "petal", count: 40, colors: ["#ffc0cf", "#ff9db4", "#ffe1e8"], speed: 1.3, wind: 0.9, size: [5, 8], opacity: 0.9 },
+    backdrop: { file: "blossom-dojo.jpg", aspect: 1.7768, width: 1180, sink: 224 },
     floor: { file: "blossom-cobbles.webp", scale: 120, strength: 0.85 },
   },
   neon: {
@@ -274,9 +278,10 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Neon Bazaar",
     blurb: "Rain, signage and a crowd that never looks up.",
     sky: ["#080a18", "#2b1b4d"],
-    ground: "#1c2030",
+    ground: "#4c3455",
     accent: "#ff3ea5",
     ambient: { kind: "rain", count: 110, colors: ["#7ad7ff", "#ff6ec7"], speed: 15, wind: -1.4, size: [1.2, 26], opacity: 0.4 },
+    backdrop: { file: "neon-bazaar.jpg", aspect: 1.7768, width: 1180, sink: 213 },
   },
   tundra: {
     // Snow glare from every direction, and a blue sky filling the shadows. A shadow on snow is blue, not black - and nothing here should bloom.
@@ -336,12 +341,13 @@ export const STAGE_THEMES: Record<StageTheme, StageDef> = {
     name: "Mactan Shallows",
     blurb: "The boats grounded on the reef. They came the last of the way on foot.",
     sky: ["#2f6f9b", "#cfe6d8"],
-    ground: "#d9c9a2",
+    ground: "#a28c78",
     accent: "#5fb7c9",
     // Early morning, the sun still low over the water, and enough of it coming
     // back up off a shallow lagoon that nothing here has a dark side.
     light: { key: "#fff3d2", fill: "#4e7f96", strength: 0.78, shadow: "#4a6f7a", glow: 0.12 },
     ambient: { kind: "dust", count: 20, colors: ["#eaf6fb", "#bfe0ea"], speed: -0.08, wind: 0.1, size: [2, 4], opacity: 0.34 },
+    backdrop: { file: "mactan-reef.jpg", aspect: 1.7768, width: 1180, sink: 211 },
   },
   watling: {
     name: "Watling Street",
