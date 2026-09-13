@@ -344,17 +344,25 @@ export class StickRig {
   private buildPart(part: ShapePart): THREE.Mesh {
     const color = part.color ?? this.def.palette.metal;
     const geo = partGeometry(part, 0);
+    // A textured part shades off white instead of off its own colour, so the
+    // baked gradient carries light and nothing else and the map is free to set
+    // the actual hue. Shading off `color` as usual would leave every texture
+    // multiplied down into whatever it was laid over - steel on a crimson
+    // plate coming out as dark crimson rather than as steel.
+    const shade = part.texture
+      ? new THREE.Color("#ffffff").lerp(new THREE.Color(color), part.textureTint ?? 0)
+      : new THREE.Color(color);
     // Props get an across-the-form gradient so they sit in the same world as
     // the body. Round shapes get a softer one - a boss or a pommel is a dome,
     // not a flat plate.
     applyPartShading(
       geo,
-      color,
+      shade,
       part.geo === "disc" || part.geo === "sphere" ? 0.55 : 1,
       (part.rot ?? 0) * DEG,
       this.light,
     );
-    const mat = rigMaterial(color, { vertexColors: true });
+    const mat = rigMaterial(shade, { vertexColors: true });
     this.materials.push(mat);
 
     if (part.texture) {
@@ -373,9 +381,11 @@ export class StickRig {
           tex.wrapT = THREE.RepeatWrapping;
           tex.repeat.set(w / scale, h / scale);
           tex.colorSpace = THREE.SRGBColorSpace;
-          // MeshBasicMaterial multiplies map x vertexColors x color for free,
-          // so the baked lit/shadow gradient survives under the texture
-          // instead of the part suddenly sitting in its own flat light.
+          // MeshBasicMaterial multiplies map x vertexColors x color for free.
+          // With both of those shaded off white the product is just the
+          // texture under the stage light, which is the point - but it also
+          // means the lit end of the ramp has no headroom to brighten into, so
+          // send swatches that already read at the value you want.
           mat.map = tex;
           mat.needsUpdate = true;
           this.textures.push(tex);

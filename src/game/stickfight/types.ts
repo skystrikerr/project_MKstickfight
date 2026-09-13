@@ -729,16 +729,25 @@ export interface ShapePart {
   /** Renders behind the body (capes, back-mounted shields). */
   behind?: boolean;
   /**
-   * A tiling material laid over this one part, file name inside
-   * src/assets/textures - same folder and format the stage floors use.
+   * A tiling material for this one part, file name inside src/assets/textures
+   * - same folder and format the stage floors use.
    *
-   * Multiplied against the part's own lit/shadow gradient rather than
-   * replacing it, so a textured plate still catches the stage's actual key
-   * light instead of sitting in its own flat world.
+   * The texture supplies the colour outright: `color` stops painting the
+   * surface and only the lit/shadow ramp derived from it survives, so a steel
+   * swatch on a crimson plate reads as steel, not as tinted crimson. The part
+   * still catches the stage's actual key light rather than sitting flat in its
+   * own world, and its ink outline still uses `color`, so the silhouette holds.
    */
   texture?: string;
   /** World units one tile of `texture` covers on this part. */
   textureScale?: number;
+  /**
+   * How much of `color` bleeds back through `texture`, 0 to 1. Default 0 - the
+   * texture owns the colour. Raise it to tint one shared swatch per fighter
+   * (the same worn steel pulled warm on one champion and cold on another); 1
+   * is the old behaviour, where the texture only ever darkened `color`.
+   */
+  textureTint?: number;
 }
 
 export type PropAttach =
