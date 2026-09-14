@@ -308,11 +308,11 @@ export class StickRig {
     // A GLB body from the prototype packs, if this fighter has one. Weapons
     // stay with the props below - they carry the reach the sim checks and the
     // frames they appear on, neither of which lives in a mesh.
-    // A hand-built model wins over a GLB where one exists. It is tuned piece
-    // by piece for this renderer, and it looks it - which is the whole reason
-    // Dienekes read like a character while the generic path read flat.
-    const legacy = modelFor(def.id);
-    if (!legacy && hasBodyModel(def.id)) {
+    // The approved roster GLB wins whenever it exists. This guarantees the
+    // full prototype set actually replaces the procedural bodies in game;
+    // the older hand-authored model is retained only as a missing-GLB fallback.
+    const hasGlbBody = hasBodyModel(def.id);
+    if (hasGlbBody) {
       this.body = new FighterModel(def.id, light, def.palette);
       void this.body.load().then((ok) => {
         if (!ok || !this.body) return;
@@ -321,9 +321,9 @@ export class StickRig {
       });
     }
 
-    // Never both: they drew on top of each other once already, and Dienekes
-    // wearing two models was why he alone looked unlike the rest of the roster.
-    const model = this.body ? undefined : legacy;
+    // Never draw both renderers. The fallback is used only when no approved
+    // body GLB exists for the fighter id.
+    const model = hasGlbBody ? undefined : modelFor(def.id);
     if (model) {
       this.modelProps = new Set(model.hideProps);
       this.dienekes = new DienekesModel(def, model.data, light);
