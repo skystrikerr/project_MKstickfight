@@ -19,31 +19,63 @@ import type { StageLight } from "./shapes";
 const DEG = Math.PI / 180;
 
 /**
- * Bone lengths as the packs authored them. Every one of the 26 uses the same
- * figure, which is what makes a single loader possible - verified by reading
- * the joint matrices out of all 26 bodies, not assumed.
- *
- * They do not agree with BONES: the packs want x66.7 on a thigh and x49 on
- * hip height, so no uniform scale fits. Each bone is therefore stretched to
- * the length the simulation expects, which is the only version that keeps the
- * visible body matching the hurtbox.
+ * Bone lengths as the prototype packs authored them - all 26 share this
+ * figure, verified by reading the joint matrices out of every body.
  */
-const AUTHORED = {
+const PACK = {
   upperArm: 0.33,
   foreArm: 0.31,
   thigh: 0.39,
   shin: 0.435,
   spine: 0.65,
   neck: 0.12,
+  hip: 1.04,
 } as const;
 
+interface Scales {
+  upperArm: number;
+  foreArm: number;
+  thigh: number;
+  shin: number;
+  spine: number;
+  neck: number;
+  girth: number;
+}
+
 /**
- * Girth scale. Thickness is free where length is not, but it cannot drift far
- * from the length scales or the figure distorts: the bones stretch by 57-67x
- * here, so girth at 45 was making every limb about a third too thin and the
- * roster came out spindly.
+ * How far each bone has to stretch for this particular model.
+ *
+ * Two eras of asset live side by side. The prototype packs are authored at
+ * roughly 1/60 with proportions that disagree with BONES - a thigh wants
+ * x66.7 while hip height wants x49 - so no uniform scale fits and each bone
+ * is stretched on its own. The Blender models are built at true game scale
+ * against the real skeleton and need no correction at all; stretching those
+ * by the pack factors would produce a sixty-metre fighter.
+ *
+ * Which is which is read off the model rather than configured, so a fighter
+ * upgraded from a pack to a Blender build needs no code change.
  */
-const GIRTH = 58;
+function scalesFor(source: THREE.Object3D): Scales {
+  const pelvis = source.getObjectByName("Pelvis");
+  const hip = pelvis ? Math.abs(pelvis.position.y) : PACK.hip;
+  // A model already near game scale is passed straight through.
+  if (hip > BONES.hip * 0.5) {
+    return { upperArm: 1, foreArm: 1, thigh: 1, shin: 1, spine: 1, neck: 1, girth: 1 };
+  }
+  const s = {
+    upperArm: BONES.upperArm / PACK.upperArm,
+    foreArm: BONES.foreArm / PACK.foreArm,
+    thigh: BONES.thigh / PACK.thigh,
+    shin: BONES.shin / PACK.shin,
+    spine: BONES.spine / PACK.spine,
+    neck: BONES.neck / PACK.neck,
+    girth: 1,
+  };
+  // Girth tracks the mean length stretch. Left to drift - it was a flat 45
+  // against length scales of 57-67 - every limb comes out a third too thin.
+  s.girth = (s.upperArm + s.foreArm + s.thigh + s.shin) / 4;
+  return s;
+}
 
 /** Yaw off pure profile, so the model reads as a figure and not a cutout. */
 const YAW = 0.8;
@@ -94,6 +126,7 @@ export class FighterModel {
   }
 
   private build(source: THREE.Object3D) {
+    const S = scalesFor(source);
     const lightDir = new THREE.Vector3(-0.4, 0.8, 0.65).normalize();
     const seen = new Map<string, { material: THREE.MeshBasicMaterial; base: THREE.Color }>();
 
@@ -113,7 +146,7 @@ export class FighterModel {
           child.updateMatrix();
           const geo = child.geometry.clone().applyMatrix4(child.matrix);
           geo.translate(0, -originY, 0);
-          geo.scale(GIRTH, lengthScale, GIRTH);
+          geo.scale(S.girth, lengthScale, S.girth);
           geo.rotateY(YAW);
 
           const src = child.material as THREE.MeshStandardMaterial;
@@ -150,24 +183,27 @@ export class FighterModel {
     };
 
     const all = () => true;
-    piece("pelvis", "Pelvis", (n) => !/^(Torso|Hip_|Knee_)/.test(n), 0, GIRTH);
-    piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n), 0,
-          BONES.spine / AUTHORED.spine);
-    piece("neck", "Torso", (n) => n === "Neck", 0, BONES.neck / AUTHORED.neck);
-    piece("head", "Head", all, 0, GIRTH);
+    piece("pelvis", "Pelvis", (n) => !/^(Torso|Hip_|Knee_)/.test(n), 0, S.girth);
+    piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n), 0, S.spine);
+    piece("neck", "Torso", (n) => n === "Neck", 0, S.neck);
+    piece("head", "Head", all, 0, S.girth);
     for (const [suffix, side] of [["F", "L"], ["B", "R"]] as const) {
       piece(`thigh${suffix}` as BodyPart, `Hip_${side}`, (n) => !n.startsWith("Knee"),
-            0, BONES.thigh / AUTHORED.thigh);
+            0, S.thigh);
       piece(`shin${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => !/^(Sandal|Foot|Boot|Shoe)/.test(n), 0, BONES.shin / AUTHORED.shin);
+            (n) => !/^(Sandal|Foot|Boot|Shoe)/.test(n), 0, S.shin);
       piece(`foot${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => /^(Sandal|Foot|Boot|Shoe)/.test(n), -0.4725, GIRTH);
+            (n) => /^(Sandal|Foot|Boot|Shoe)/.test(n),
+            // The foot mesh is authored down at the ankle, and it is then
+            // placed at the foot joint too - so its own offset has to come off
+            // first or the feet land a shin's length below the leg.
+            S.girth > 2 ? -0.4725 : -BONES.shin, S.girth);
       piece(`upperArm${suffix}` as BodyPart, `Shoulder_${side}`, (n) => !n.startsWith("Elbow"),
-            0, BONES.upperArm / AUTHORED.upperArm);
+            0, S.upperArm);
       piece(`foreArm${suffix}` as BodyPart, `Elbow_${side}`, (n) => !n.startsWith("Hand"),
-            0, BONES.foreArm / AUTHORED.foreArm);
+            0, S.foreArm);
       piece(`hand${suffix}` as BodyPart, `Elbow_${side}`, (n) => n.startsWith("Hand"),
-            -AUTHORED.foreArm, GIRTH);
+            S.girth > 2 ? -PACK.foreArm : -BONES.foreArm, S.girth);
     }
 
     // The parsed original is scratch; every runtime piece owns its geometry.
