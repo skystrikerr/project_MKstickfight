@@ -156,21 +156,30 @@ function tint(name: string | undefined, base: THREE.Color, palette?: FighterPale
   return base;
 }
 
-/** Bake facet light into vertex colours, since the arena is unlit. */
-function bakeShading(geo: THREE.BufferGeometry, lightDir: THREE.Vector3) {
-  const normals = geo.getAttribute("normal");
-  const colors = new Float32Array(normals.count * 3);
-  const n = new THREE.Vector3();
-  for (let i = 0; i < normals.count; i++) {
-    const ndl = 0.5 + 0.5 * n.fromBufferAttribute(normals, i).normalize().dot(lightDir);
-    // Gentler than it was. The first range ran 0.46-1.22 and squared the ramp,
-    // which crushed every shadowed face and blew out every lit one - bronze
-    // came out as orange plastic and the models looked nothing like the source
-    // meshes. This keeps the form readable without restating the colour.
-    const shade = 0.68 + 0.42 * ndl;
-    colors.set([shade, shade, shade], i * 3);
-  }
-  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+/**
+ * Lights for the fighter models, added once to whatever scene they join.
+ *
+ * The arena is drawn entirely in MeshBasicMaterial, which ignores lights - so
+ * putting real ones in changes nothing about the stages, the flat rigs or the
+ * props, and only the modelled fighters respond. That is the difference
+ * between a model looking like its own source mesh and looking like a flat
+ * cutout of it: baking a single direction into vertex colours could never
+ * produce the soft fill that makes these read as solid.
+ */
+function ensureLights(scene: THREE.Object3D, light?: StageLight) {
+  if (scene.getObjectByName("fighterKey")) return;
+  const key = new THREE.DirectionalLight(light?.key ?? "#fff4e2", 1.55);
+  key.name = "fighterKey";
+  key.position.set(-0.45, 1.0, 0.85);
+  scene.add(key);
+  const fill = new THREE.HemisphereLight(
+    light?.key ?? "#ffffff", light?.fill ?? "#33281c", 1.35);
+  fill.name = "fighterFill";
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight("#9fc0ff", 0.42);
+  rim.name = "fighterRim";
+  rim.position.set(0.7, 0.25, -0.9);
+  scene.add(rim);
 }
 
 /**
@@ -213,7 +222,6 @@ export async function fitPropModel(
 
   loader ??= new GLTFLoader();
   const gltf = await loader.loadAsync(await entry());
-  const lightDir = new THREE.Vector3(-0.4, 0.8, 0.65).normalize();
 
   const source = new THREE.Box3().setFromObject(gltf.scene);
   const ts = target.getSize(new THREE.Vector3());
@@ -226,7 +234,7 @@ export async function fitPropModel(
   const thin = Math.max(ts.x, ts.y) > 0 ? Math.min(ts.x, ts.y) / srcThin : fit;
 
   const built: THREE.Mesh[] = [];
-  const shared = new Map<string, THREE.MeshBasicMaterial>();
+  const shared = new Map<string, THREE.MeshLambertMaterial>();
   gltf.scene.updateMatrixWorld(true);
   gltf.scene.traverse((o) => {
     if (!(o instanceof THREE.Mesh)) return;
@@ -238,10 +246,11 @@ export async function fitPropModel(
     if (!mat) {
       const base = tint(src.name, src.color?.clone() ?? new THREE.Color("#c8c8c8"),
                         palette, PAINTED_FACE.test(propId));
-      mat = new THREE.MeshBasicMaterial({ color: base, vertexColors: true });
+      mat = new THREE.MeshLambertMaterial({ color: base, emissive: base,
+                                            emissiveIntensity: 0.18 });
       shared.set(src.uuid, mat);
     }
-    bakeShading(geo, lightDir);
+    geo.computeVertexNormals();
     built.push(new THREE.Mesh(geo, mat));
   });
   if (!built.length) return false;
@@ -260,6 +269,9 @@ export async function fitPropModel(
     group.remove(child);
   }
   for (const m of built) group.add(m);
+  let root: THREE.Object3D | null = group;
+  while (root?.parent) root = root.parent;
+  if (root) ensureLights(root, light);
   gltf.scene.traverse((o) => { if (o instanceof THREE.Mesh) o.geometry.dispose(); });
   return true;
 }
@@ -272,8 +284,9 @@ export function hasBodyModel(id: string): boolean {
 export class FighterModel {
   readonly group = new THREE.Group();
   private parts = new Map<BodyPart, THREE.Group>();
-  private materials: { material: THREE.MeshBasicMaterial; base: THREE.Color }[] = [];
+  private materials: { material: THREE.MeshLambertMaterial; base: THREE.Color }[] = [];
   ready = false;
+  private lit = false;
 
   constructor(private id: string, private light?: StageLight,
               private palette?: FighterPalette) {
@@ -293,8 +306,7 @@ export class FighterModel {
 
   private build(source: THREE.Object3D) {
     const S = scalesFor(source);
-    const lightDir = new THREE.Vector3(-0.4, 0.8, 0.65).normalize();
-    const seen = new Map<string, { material: THREE.MeshBasicMaterial; base: THREE.Color }>();
+    const seen = new Map<string, { material: THREE.MeshLambertMaterial; base: THREE.Color }>();
 
     const piece = (
       part: BodyPart,
@@ -326,12 +338,16 @@ export class FighterModel {
             const base = tint(src.name,
                               src.color?.clone() ?? new THREE.Color("#c8c8c8"),
                               this.palette);
-            entry = { material: new THREE.MeshBasicMaterial({ color: base, vertexColors: true }), base };
+            entry = {
+              material: new THREE.MeshLambertMaterial({ color: base, emissive: base,
+                                                        emissiveIntensity: 0.18 }),
+              base,
+            };
             seen.set(key, entry);
             this.materials.push(entry);
           }
 
-          bakeShading(geo, lightDir);
+          geo.computeVertexNormals();
           group.add(new THREE.Mesh(geo, entry.material));
         }
       }
@@ -374,6 +390,13 @@ export class FighterModel {
 
   update(sk: Skeleton, flash: number) {
     if (!this.ready) return;
+    // The group is parented after load, so the scene is only reachable here.
+    if (!this.lit) {
+      const scene = this.group.parent ? this.group.parent : null;
+      let root: THREE.Object3D | null = scene;
+      while (root?.parent) root = root.parent;
+      if (root) { ensureLights(root, this.light); this.lit = true; }
+    }
     const place = (part: BodyPart, at: Joint, z: number, rot = 0) => {
       const g = this.parts.get(part);
       if (!g) return null;
