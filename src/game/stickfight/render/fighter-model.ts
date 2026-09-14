@@ -110,26 +110,49 @@ function modelUrls(): Record<string, () => Promise<string>> {
  * material names onto the palette gives each fighter their colours back now,
  * and does not stand in the way of textures doing it properly later.
  */
-function tint(name: string | undefined, base: THREE.Color, palette?: FighterPalette): THREE.Color {
+/**
+ * Props whose broad face is painted rather than bare. A shield carries more of
+ * a fighter's identity than anything else they hold, and the models ship its
+ * face untinted because MODELING_RULES forbids baked heraldry - so left alone
+ * it renders as a bare board or a blank steel disc. Dienekes' hand-built aspis
+ * has a crimson face, and that one difference is most of why he read like a
+ * character while the rest of the roster read like prototypes.
+ */
+const PAINTED_FACE = /shield|aspis|buckler|scutum|rodela|kalasag|isihlangu|spara|gasha/i;
+
+/**
+ * Push a model's material toward the fighter's palette - but only the slots
+ * that carry identity.
+ *
+ * The first version remapped everything, including the physical materials the
+ * model had already got right. Freydis' buckler is 69% `metal`, so forcing
+ * that to her pale palette steel turned it into a blank disc, and a third of
+ * her body is `leather` that reads better at the brown it was authored with
+ * than at anything a palette can offer. Cloth and trim say who someone is;
+ * leather, fur, skin and hair just say what they are made of.
+ */
+function tint(name: string | undefined, base: THREE.Color, palette?: FighterPalette,
+              painted = false): THREE.Color {
   if (!palette || !name) return base;
   const slot = name.toLowerCase();
-  const mix = (hex: string, t = 0) =>
-    t ? new THREE.Color(hex).lerp(new THREE.Color("white"), t) : new THREE.Color(hex);
-  // Cloth, and the accent the cloth is trimmed with.
-  if (slot.includes("cloth") || slot.includes("crimson") || slot.includes("tunic")) {
-    return mix(palette.cloth);
+  const of = (hex: string) => new THREE.Color(hex);
+
+  // A painted face takes the fighter's colours whatever it is made of.
+  if (painted) {
+    if (/wood|plank|board|metal|iron|steel|face|hide/.test(slot)) return of(palette.accent);
+    if (/gold|bronze|edge|rim|boss/.test(slot)) return of(palette.metal);
   }
-  if (slot.includes("redhighlight") || slot.includes("highlight")) return mix(palette.cloth, 0.2);
-  // Two tiers of metal, so a gilded edge still reads against the plate.
-  if (slot.includes("goldedge") || slot.includes("gold") || slot.includes("brass")) {
-    return mix(palette.accent);
-  }
-  if (slot.includes("darkbronze")) return mix(palette.metal).multiplyScalar(0.62);
-  if (slot.includes("bronze")) return mix(palette.metal);
-  if (slot.includes("iron") || slot.includes("steel") || slot.includes("metal")) {
-    return mix(palette.metal, 0.12);
-  }
-  if (slot.includes("ivory") || slot.includes("linen")) return mix(palette.body);
+
+  // Identity: what the fighter wears and is trimmed with.
+  if (/cloth|crimson|tunic|sash|cloak|surcoat/.test(slot)) return of(palette.cloth);
+  if (/redhighlight|highlight/.test(slot)) return of(palette.cloth).lerp(of("#ffffff"), 0.22);
+  if (/goldedge|gold|brass/.test(slot)) return of(palette.accent);
+  if (/darkbronze/.test(slot)) return of(palette.metal).multiplyScalar(0.6);
+  if (/^bronze$/.test(slot)) return of(palette.metal);
+  if (/ivory/.test(slot)) return of(palette.body);
+
+  // Everything else - leather, metal, fur, skin, hair, wood, linen, shadow -
+  // keeps the colour the model was built with.
   return base;
 }
 
@@ -213,7 +236,8 @@ export async function fitPropModel(
     const src = o.material as THREE.MeshStandardMaterial;
     let mat = shared.get(src.uuid);
     if (!mat) {
-      const base = tint(src.name, src.color?.clone() ?? new THREE.Color("#c8c8c8"), palette);
+      const base = tint(src.name, src.color?.clone() ?? new THREE.Color("#c8c8c8"),
+                        palette, PAINTED_FACE.test(propId));
       mat = new THREE.MeshBasicMaterial({ color: base, vertexColors: true });
       shared.set(src.uuid, mat);
     }
