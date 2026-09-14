@@ -78,8 +78,42 @@ function scalesFor(source: THREE.Object3D): Scales {
   return s;
 }
 
+/**
+ * Put back a mesh that was authored where the figure stands rather than where
+ * its joint is.
+ *
+ * Almost every mesh in the set is authored against its joint, or carries a
+ * node offset that cancels the joint's height - either way the walk above
+ * lands it correctly. One does not: the roman's `Tunic_Torso` sits at its
+ * world height with an identity transform, so baking it against the torso
+ * leaves it floating a chest above the chest, and the fighter goes bare under
+ * the armour. That was invisible while the flat ink tunic was still drawn on
+ * top of the model, and obvious the moment it was not.
+ *
+ * The rule is measured rather than named, so it also catches the next export
+ * that does this: a mesh whose centre lands further from its joint than a
+ * whole hip height, and which comes home when exactly the joint's own height
+ * is taken off it, was authored in world space. Anything else is left alone -
+ * a crest plume or a cape genuinely does reach a long way from its joint.
+ */
+function reseat(geo: THREE.BufferGeometry, jointY: number, hip: number) {
+  if (!jointY) return;
+  geo.computeBoundingBox();
+  const box = geo.boundingBox!;
+  const centre = (box.min.y + box.max.y) / 2;
+  const far = hip * 0.6;
+  if (Math.abs(centre) <= far || Math.abs(centre - jointY) > far) return;
+  geo.translate(0, -jointY, 0);
+}
+
 /** Yaw off pure profile, so the model reads as a figure and not a cutout. */
 const YAW = 0.8;
+
+/** Worn on the foot rather than the shin: the ankle splits one joint in two. */
+const SHOD = /^(Sandal|Foot|Boot|Shoe)/;
+
+/** Held or worn at the wrist rather than along the forearm. */
+const HELD = /^Hand/;
 
 const BODY_PARTS = [
   "pelvis", "torso", "neck", "head",
@@ -87,6 +121,37 @@ const BODY_PARTS = [
   "thighB", "shinB", "footB", "upperArmB", "foreArmB", "handB",
 ] as const;
 type BodyPart = (typeof BODY_PARTS)[number];
+
+/**
+ * The nodes every body names, which is what makes one model poseable by a
+ * skeleton built for another. A piece is everything under its joint and above
+ * the next one, so these double as the boundaries the walk below stops at.
+ */
+const JOINTS = new Set([
+  "Pelvis", "Torso", "Neck", "Head",
+  "Hip_L", "Hip_R", "Knee_L", "Knee_R",
+  "Shoulder_L", "Shoulder_R", "Elbow_L", "Elbow_R",
+]);
+
+/**
+ * Every mesh belonging to one joint: its whole subtree, stopping wherever the
+ * next joint starts.
+ *
+ * The old walk read a joint's direct mesh children only, which quietly lost
+ * anything a modeller had grouped - the capes, most of the roman's helmet
+ * furniture - and left the fighters wearing the flat ink versions of the same
+ * kit instead. Descending properly is what lets the model own its own costume.
+ */
+function meshesUnder(joint: THREE.Object3D, include: (name: string) => boolean): THREE.Mesh[] {
+  const out: THREE.Mesh[] = [];
+  const walk = (o: THREE.Object3D, root: boolean) => {
+    if (!root && JOINTS.has(o.name)) return; // the next piece's business
+    if (o instanceof THREE.Mesh && include(o.name)) out.push(o);
+    for (const child of o.children) walk(child, false);
+  };
+  walk(joint, true);
+  return out;
+}
 
 let loader: GLTFLoader | null = null;
 
@@ -305,7 +370,12 @@ export class FighterModel {
   }
 
   private build(source: THREE.Object3D) {
+    source.updateMatrixWorld(true);
     const S = scalesFor(source);
+    const pelvis = source.getObjectByName("Pelvis");
+    const hip = pelvis
+      ? Math.abs(new THREE.Vector3().setFromMatrixPosition(pelvis.matrixWorld).y)
+      : PACK.hip;
     const seen = new Map<string, { material: THREE.MeshLambertMaterial; base: THREE.Color }>();
 
     const piece = (
@@ -319,10 +389,20 @@ export class FighterModel {
       group.name = `${this.id}:${part}`;
       const joint = source.getObjectByName(jointName);
       if (joint) {
-        for (const child of joint.children) {
-          if (!(child instanceof THREE.Mesh) || !include(child.name)) continue;
-          child.updateMatrix();
-          const geo = child.geometry.clone().applyMatrix4(child.matrix);
+        const toJoint = joint.matrixWorld.clone().invert();
+        const jointY = new THREE.Vector3().setFromMatrixPosition(joint.matrixWorld).y;
+        const local = new THREE.Matrix4();
+        for (const child of meshesUnder(joint, include)) {
+          // Relative to the joint through the model's own world matrices, not
+          // through one local matrix. Two things depend on it: costume hung
+          // under a group rather than straight off the joint (every cape in
+          // the prototype set is a `Cape` group of folds), and meshes authored
+          // in world space with a compensating offset, which the Blender-era
+          // bodies use and a lone local matrix reads as a metre of altitude.
+          const geo = child.geometry
+            .clone()
+            .applyMatrix4(local.multiplyMatrices(toJoint, child.matrixWorld));
+          reseat(geo, jointY, hip);
           geo.translate(0, -originY, 0);
           geo.scale(S.girth, lengthScale, S.girth);
           geo.rotateY(YAW);
@@ -356,26 +436,25 @@ export class FighterModel {
     };
 
     const all = () => true;
-    piece("pelvis", "Pelvis", (n) => !/^(Torso|Hip_|Knee_)/.test(n), 0, S.girth);
-    piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n), 0, S.spine);
-    piece("neck", "Torso", (n) => n === "Neck", 0, S.neck);
+    // Joints bound each piece, so these filters only have to split the two
+    // places where one joint carries two of them: the ankle inside the shin,
+    // and the hand inside the forearm.
+    piece("pelvis", "Pelvis", all, 0, S.girth);
+    piece("torso", "Torso", all, 0, S.spine);
+    piece("neck", "Neck", all, 0, S.neck);
     piece("head", "Head", all, 0, S.girth);
     for (const [suffix, side] of [["F", "L"], ["B", "R"]] as const) {
-      piece(`thigh${suffix}` as BodyPart, `Hip_${side}`, (n) => !n.startsWith("Knee"),
-            0, S.thigh);
-      piece(`shin${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => !/^(Sandal|Foot|Boot|Shoe)/.test(n), 0, S.shin);
-      piece(`foot${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => /^(Sandal|Foot|Boot|Shoe)/.test(n),
+      piece(`thigh${suffix}` as BodyPart, `Hip_${side}`, all, 0, S.thigh);
+      piece(`shin${suffix}` as BodyPart, `Knee_${side}`, (n) => !SHOD.test(n), 0, S.shin);
+      piece(`foot${suffix}` as BodyPart, `Knee_${side}`, (n) => SHOD.test(n),
             // The foot mesh is authored down at the ankle, and it is then
             // placed at the foot joint too - so its own offset has to come off
             // first or the feet land a shin's length below the leg.
             S.girth > 2 ? -0.4725 : -BONES.shin, S.girth);
-      piece(`upperArm${suffix}` as BodyPart, `Shoulder_${side}`, (n) => !n.startsWith("Elbow"),
-            0, S.upperArm);
-      piece(`foreArm${suffix}` as BodyPart, `Elbow_${side}`, (n) => !n.startsWith("Hand"),
+      piece(`upperArm${suffix}` as BodyPart, `Shoulder_${side}`, all, 0, S.upperArm);
+      piece(`foreArm${suffix}` as BodyPart, `Elbow_${side}`, (n) => !HELD.test(n),
             0, S.foreArm);
-      piece(`hand${suffix}` as BodyPart, `Elbow_${side}`, (n) => n.startsWith("Hand"),
+      piece(`hand${suffix}` as BodyPart, `Elbow_${side}`, (n) => HELD.test(n),
             S.girth > 2 ? -PACK.foreArm : -BONES.foreArm, S.girth);
     }
 

@@ -10,6 +10,8 @@
  * No test framework: it prints PASS/FAIL lines and exits non-zero on failure.
  */
 
+import { readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { AiController, STYLES } from "./engine/ai";
 import { COMBAT, HURTBOX, STAGE_HALF_WIDTH } from "./constants";
 import { DOSSIERS } from "./dossier";
@@ -27,6 +29,7 @@ import { clearSave, DEFAULT_SAVE, loadSave, patchSave, recordClear } from "./sav
 import { BINDABLE_ACTIONS, codeLabel, defaultKeyMap, isKeyCode, toKeyBindings } from "./keybinds";
 import { halfWidthOf, stageRulesFor, STAGE_THEMES, stagesOfKind } from "./render/stage";
 import { attachTransform } from "./render/rig";
+import { WORN_BY_MODEL } from "./render/models";
 import { buildSkeleton, sampleClip, sampleFrames } from "./skeleton";
 import { applySkin, distinctSkin, getSkin } from "./skins";
 import { applyWeapon, WEAPONS, weaponsFor } from "./weapons";
@@ -297,9 +300,45 @@ function contract(def: FighterDef) {
   }
 }
 
+/**
+ * The roster is 3D, and each model wears its costume exactly once.
+ *
+ * Both halves of that are load-bearing. A fighter with no `-body.glb` silently
+ * falls back to the flat ink rig and stands out against 25 models; a costume
+ * prop left visible over a model that already draws it is the same garment
+ * twice, which is what `WORN_BY_MODEL` exists to stop. Read off the assets
+ * folder rather than `hasBodyModel`, which is a Vite glob and does not exist
+ * under Node.
+ */
+function modelTests() {
+  const dir = fileURLToPath(new URL("../../assets/models/", import.meta.url));
+  const files = new Set(readdirSync(dir));
+
+  for (const def of ROSTER) {
+    check(`model: ${def.id} has a body`, files.has(`${def.id}-body.glb`));
+  }
+
+  for (const [id, worn] of Object.entries(WORN_BY_MODEL)) {
+    const def = ROSTER.find((f) => f.id === id);
+    check(`model: ${id} is on the roster`, !!def);
+    if (!def) continue;
+    for (const propId of worn) {
+      const prop = def.props.find((p) => p.id === propId);
+      check(`model/${id}: "${propId}" is a prop this fighter has`, !!prop,
+            def.props.map((p) => p.id).join(","));
+      // A prop with its own GLB is already replaced in place by fitPropModel.
+      // Hiding it as well would delete a weapon from the fighter's hands.
+      check(`model/${id}: "${propId}" has no model of its own`,
+            !files.has(`${id}-${propId}.glb`));
+    }
+    check(`model/${id}: lists each prop once`, new Set(worn).size === worn.length);
+  }
+}
+
 for (const def of ROSTER) contract(def);
 inputSchemeTests();
 progressionTests();
+modelTests();
 
 // ---------------------------------------------------------------------------
 // Mechanics

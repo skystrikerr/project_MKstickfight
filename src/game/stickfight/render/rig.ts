@@ -25,7 +25,7 @@ import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
 import { DienekesModel } from "./dienekes";
 import { FighterModel, fitPropModel, hasBodyModel } from "./fighter-model";
-import { modelFor } from "./models";
+import { modelFor, wornByModel } from "./models";
 
 const ORDER = {
   cloth: 14,
@@ -318,6 +318,10 @@ export class StickRig {
         if (!ok || !this.body) return;
         this.group.add(this.body.group);
         this.hideFlatBody();
+        // The body arrives already dressed - helm, armour, cloak, hair. The
+        // ink versions of those are the same costume drawn a second time, so
+        // they stand down once the model is actually standing there.
+        this.modelProps = new Set(wornByModel(def.id));
       });
     }
 
@@ -548,14 +552,15 @@ export class StickRig {
 
     this.body?.update(sk, opts.flash);
 
+    // Preserve the existing javelin, projectile, shadow, and trail paths.
+    // Only the body and the model's matching equipment replace ink shapes.
+    for (const prop of this.props) {
+      if (!this.modelProps.has(prop.def.id)) continue;
+      prop.group.visible = false;
+      if (prop.cloth) prop.cloth.mesh.visible = false;
+    }
+
     if (this.dienekes) {
-      // Preserve the existing javelin, projectile, shadow, and trail paths.
-      // Only the body and the model's matching equipment replace ink shapes.
-      for (const prop of this.props) {
-        if (!this.modelProps.has(prop.def.id)) continue;
-        prop.group.visible = false;
-        if (prop.cloth) prop.cloth.mesh.visible = false;
-      }
       this.dienekes.update(sk, opts.hiddenProps, opts.flash,
         attachTransform(sk, "forearmF"), attachTransform(sk, "handB"), opts.speed);
     }
