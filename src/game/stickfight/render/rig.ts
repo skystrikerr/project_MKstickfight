@@ -24,6 +24,7 @@ import {
 import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
 import { DienekesModel } from "./dienekes";
+import { FighterModel, fitPropModel, hasBodyModel } from "./fighter-model";
 import { modelFor } from "./models";
 
 const ORDER = {
@@ -161,6 +162,7 @@ export class StickRig {
   private scale: number;
   private dienekes: DienekesModel | null = null;
   private modelProps = new Set<string>();
+  private body: FighterModel | null = null;
 
   constructor(def: FighterDef, private light?: StageLight) {
     this.def = def;
@@ -283,6 +285,12 @@ export class StickRig {
       this.props.push(entry);
       this.group.add(g);
 
+      // If this fighter has a model for the prop, it replaces what is drawn
+      // inside the group and nothing else: the rig still places the group, the
+      // sim still measures reach off the flat parts, and a conditional prop
+      // still appears on exactly the frames it did.
+      if (hasBodyModel(def.id)) void fitPropModel(def.id, prop.id, g, light, def.palette);
+
       // The furthest point of a hand-held prop is the weapon tip.
       if (prop.attach === "handF" || prop.attach === "handB") {
         const reach = Math.max(...prop.parts.map((part) => partReach(part)));
@@ -297,16 +305,39 @@ export class StickRig {
       this.trail = new WeaponTrail(def.palette.metal, ORDER.trail);
       this.worldGroup.add(this.trail.mesh);
     }
-    // A fighter with an approved model renders that instead of the flat ink
-    // shapes. Looked up by id rather than branched on one, so the next model is
-    // a registry entry and not another special case in this constructor.
-    const model = modelFor(def.id);
+    // A GLB body from the prototype packs, if this fighter has one. Weapons
+    // stay with the props below - they carry the reach the sim checks and the
+    // frames they appear on, neither of which lives in a mesh.
+    // The approved roster GLB wins whenever it exists. This guarantees the
+    // full prototype set actually replaces the procedural bodies in game;
+    // the older hand-authored model is retained only as a missing-GLB fallback.
+    const hasGlbBody = hasBodyModel(def.id);
+    if (hasGlbBody) {
+      this.body = new FighterModel(def.id, light, def.palette);
+      void this.body.load().then((ok) => {
+        if (!ok || !this.body) return;
+        this.group.add(this.body.group);
+        this.hideFlatBody();
+      });
+    }
+
+    // Never draw both renderers. The fallback is used only when no approved
+    // body GLB exists for the fighter id.
+    const model = hasGlbBody ? undefined : modelFor(def.id);
     if (model) {
       this.modelProps = new Set(model.hideProps);
       this.dienekes = new DienekesModel(def, model.data, light);
       this.group.add(this.dienekes.group);
-      for (const limb of Object.values(this.limbs)) limb.group.visible = false;
-      for (const mesh of [this.head, this.headOutline, ...this.hands, ...this.handOutlines, ...this.boots, ...this.bootOutlines]) mesh.visible = false;
+      this.hideFlatBody();
+    }
+  }
+
+  /** Hide the flat ink body once a model is standing in for it. */
+  private hideFlatBody() {
+    for (const limb of Object.values(this.limbs)) limb.group.visible = false;
+    for (const mesh of [this.head, this.headOutline, ...this.hands, ...this.handOutlines,
+                        ...this.boots, ...this.bootOutlines]) {
+      mesh.visible = false;
     }
   }
 
@@ -515,6 +546,8 @@ export class StickRig {
       }
     }
 
+    this.body?.update(sk, opts.flash);
+
     if (this.dienekes) {
       // Preserve the existing javelin, projectile, shadow, and trail paths.
       // Only the body and the model's matching equipment replace ink shapes.
@@ -583,6 +616,7 @@ export class StickRig {
   }
 
   dispose() {
+    this.body?.dispose();
     this.dienekes?.dispose();
     for (const limb of Object.values(this.limbs)) limb.dispose();
     for (const m of [...this.hands, ...this.handOutlines, ...this.boots, ...this.bootOutlines]) {
