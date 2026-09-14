@@ -24,7 +24,7 @@ import {
 import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
 import { DienekesModel } from "./dienekes";
-import { FighterModel, fitPropModel, hasBodyModel } from "./fighter-model";
+import { FighterModel, fitPropModel, hasBodyModel, hasPropModel } from "./fighter-model";
 import { modelFor } from "./models";
 
 const ORDER = {
@@ -133,6 +133,8 @@ interface PropMesh {
   def: PropDef;
   group: THREE.Group;
   cloth?: ClothStrip;
+  /** The GLB body already contains this always-visible costume piece. */
+  bakedIntoBody?: boolean;
 }
 
 export class StickRig {
@@ -274,10 +276,20 @@ export class StickRig {
     this.shadow.renderOrder = ORDER.shadow;
     this.shadowGroup.add(this.shadowWide, this.shadow);
 
+    const hasGlbBody = hasBodyModel(def.id);
+
     // Props, cloth and trail ----------------------------------------------
     for (const prop of def.props) {
       const g = this.buildProp(prop);
-      const entry: PropMesh = { def: prop, group: g };
+      const separateModel = hasGlbBody && hasPropModel(def.id, prop.id);
+      const entry: PropMesh = {
+        def: prop,
+        group: g,
+        // Always-visible costume pieces are already part of the body GLB.
+        // Conditional/thrown props are gameplay effects and must survive even
+        // when the pack did not include a model for them.
+        bakedIntoBody: hasGlbBody && !separateModel && !prop.conditional && !prop.thrown,
+      };
       if (prop.cloth) {
         entry.cloth = new ClothStrip(prop.cloth, ORDER.cloth);
         this.worldGroup.add(entry.cloth.mesh);
@@ -289,7 +301,7 @@ export class StickRig {
       // inside the group and nothing else: the rig still places the group, the
       // sim still measures reach off the flat parts, and a conditional prop
       // still appears on exactly the frames it did.
-      if (hasBodyModel(def.id)) void fitPropModel(def.id, prop.id, g, light, def.palette);
+      if (separateModel) void fitPropModel(def.id, prop.id, g, light, def.palette);
 
       // The furthest point of a hand-held prop is the weapon tip.
       if (prop.attach === "handF" || prop.attach === "handB") {
@@ -311,7 +323,6 @@ export class StickRig {
     // The approved roster GLB wins whenever it exists. This guarantees the
     // full prototype set actually replaces the procedural bodies in game;
     // the older hand-authored model is retained only as a missing-GLB fallback.
-    const hasGlbBody = hasBodyModel(def.id);
     if (hasGlbBody) {
       this.body = new FighterModel(def.id, light, def.palette);
       void this.body.load().then((ok) => {
@@ -530,7 +541,9 @@ export class StickRig {
     // Props ---------------------------------------------------------------
     for (const prop of this.props) {
       const visible =
-        (!prop.def.conditional || opts.visibleProps.has(prop.def.id)) && !opts.hiddenProps.has(prop.def.id);
+        !(prop.bakedIntoBody && this.body?.ready) &&
+        (!prop.def.conditional || opts.visibleProps.has(prop.def.id)) &&
+        !opts.hiddenProps.has(prop.def.id);
       prop.group.visible = visible;
       if (prop.cloth) prop.cloth.mesh.visible = visible;
       if (!visible) continue;

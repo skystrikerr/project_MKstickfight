@@ -90,6 +90,21 @@ type BodyPart = (typeof BODY_PARTS)[number];
 
 let loader: GLTFLoader | null = null;
 
+/**
+ * A few asset packs use a descriptive filename while the fighter definition
+ * uses the historical/in-game prop name. Keep that translation in one place
+ * so those models are not silently skipped by the generic loader.
+ */
+const PROP_ASSET_ALIASES: Readonly<Record<string, string>> = {
+  "samurai:ya": "arrow",
+  "mongol:nocked": "arrow",
+  "zulu:isihlangu": "shield",
+};
+
+export function propModelAssetId(fighterId: string, propId: string): string {
+  return PROP_ASSET_ALIASES[`${fighterId}:${propId}`] ?? propId;
+}
+
 function modelUrls(): Record<string, () => Promise<string>> {
   // Globbed inside a function, not at module scope: the self-tests import
   // this module's neighbours under Node, where import.meta.glob does not
@@ -207,7 +222,8 @@ export async function fitPropModel(
     import: "default",
     query: "?url",
   }) as Record<string, () => Promise<string>>;
-  const entry = urls[`../../../assets/models/${fighterId}-${propId}.glb`];
+  const assetId = propModelAssetId(fighterId, propId);
+  const entry = urls[`../../../assets/models/${fighterId}-${assetId}.glb`];
   if (!entry) return false;
 
   // What the flat prop occupies, measured off the geometry actually built.
@@ -276,6 +292,16 @@ export async function fitPropModel(
   return true;
 }
 
+/** Whether a separate GLB exists for this gameplay prop. */
+export function hasPropModel(fighterId: string, propId: string): boolean {
+  const assetId = propModelAssetId(fighterId, propId);
+  const urls = import.meta.glob("../../../assets/models/*.glb", {
+    import: "default",
+    query: "?url",
+  }) as Record<string, () => Promise<string>>;
+  return `../../../assets/models/${fighterId}-${assetId}.glb` in urls;
+}
+
 /** Whether a fighter has a body model sitting in the assets folder. */
 export function hasBodyModel(id: string): boolean {
   return `../../../assets/models/${id}-body.glb` in modelUrls();
@@ -325,6 +351,16 @@ export class FighterModel {
           const geo = child.geometry.clone().applyMatrix4(child.matrix);
           geo.translate(0, -originY, 0);
           geo.scale(S.girth, lengthScale, S.girth);
+          // Neck geometry is authored relative to either Torso or Head.
+          // The runtime neck starts at sk.neck: retaining the authored
+          // offset applies that translation twice and floats it above the head.
+          if (part === "neck") {
+            geo.computeBoundingBox();
+            const bounds = geo.boundingBox!;
+            const height = bounds.max.y - bounds.min.y;
+            geo.translate(0, -bounds.min.y, 0);
+            if (height > 1e-6) geo.scale(1, BONES.neck / height, 1);
+          }
           geo.rotateY(YAW);
 
           const src = child.material as THREE.MeshStandardMaterial;
@@ -358,8 +394,10 @@ export class FighterModel {
     const all = () => true;
     piece("pelvis", "Pelvis", (n) => !/^(Torso|Hip_|Knee_)/.test(n), 0, S.girth);
     piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n), 0, S.spine);
-    piece("neck", "Torso", (n) => n === "Neck", 0, S.neck);
-    piece("head", "Head", all, 0, S.girth);
+    const neckSource = source.getObjectByName("Neck");
+    const neckParent = neckSource instanceof THREE.Mesh ? neckSource.parent?.name ?? "Torso" : "Neck";
+    piece("neck", neckParent, (n) => n === "Neck" || n.startsWith("Neck_"), 0, S.neck);
+    piece("head", "Head", (n) => n !== "Neck", 0, S.girth);
     for (const [suffix, side] of [["F", "L"], ["B", "R"]] as const) {
       piece(`thigh${suffix}` as BodyPart, `Hip_${side}`, (n) => !n.startsWith("Knee"),
             0, S.thigh);
