@@ -4,6 +4,10 @@ import path from "node:path";
 
 import { ROSTER } from "../src/game/stickfight/fighters/index.ts";
 import { propModelAssetId } from "../src/game/stickfight/render/fighter-model.ts";
+import { FighterModel } from "../src/game/stickfight/render/fighter-model.ts";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { Box3 } from "three";
+import { BONES } from "../src/game/stickfight/skeleton.ts";
 
 const modelDir = path.resolve("src/assets/models");
 const files = new Set(fs.readdirSync(modelDir));
@@ -38,6 +42,17 @@ for (const fighter of ROSTER) {
     assert(names.has(joint), `${fighter.name}: body is missing joint ${joint}`);
   }
   assert((body.meshes ?? []).length > 0, `${fighter.name}: body has no meshes`);
+  const bytes = fs.readFileSync(path.join(modelDir, bodyFile));
+  const parsed = await new GLTFLoader().parseAsync(
+    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), "");
+  const runtime = new FighterModel(fighter.id);
+  runtime.build(parsed.scene);
+  const neck = runtime.group.getObjectByName(`${fighter.id}:neck`);
+  const bounds = new Box3().setFromObject(neck);
+  assert(!bounds.isEmpty(), `${fighter.name}: runtime neck missing`);
+  assert(Math.abs(bounds.min.y) < 1e-4, `${fighter.name}: neck has a doubled offset`);
+  assert(Math.abs(bounds.max.y - BONES.neck) < 1e-4, `${fighter.name}: neck length mismatch`);
+  runtime.dispose();
 
   for (const prop of fighter.props) {
     const assetId = propModelAssetId(fighter.id, prop.id);
