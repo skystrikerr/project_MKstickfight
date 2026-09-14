@@ -24,6 +24,7 @@ import {
 import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
 import { DienekesModel } from "./dienekes";
+import { FighterModel, hasBodyModel } from "./fighter-model";
 import { modelFor } from "./models";
 
 const ORDER = {
@@ -161,6 +162,7 @@ export class StickRig {
   private scale: number;
   private dienekes: DienekesModel | null = null;
   private modelProps = new Set<string>();
+  private body: FighterModel | null = null;
 
   constructor(def: FighterDef, private light?: StageLight) {
     this.def = def;
@@ -297,16 +299,35 @@ export class StickRig {
       this.trail = new WeaponTrail(def.palette.metal, ORDER.trail);
       this.worldGroup.add(this.trail.mesh);
     }
-    // A fighter with an approved model renders that instead of the flat ink
-    // shapes. Looked up by id rather than branched on one, so the next model is
-    // a registry entry and not another special case in this constructor.
+    // A GLB body from the prototype packs, if this fighter has one. Weapons
+    // stay with the props below - they carry the reach the sim checks and the
+    // frames they appear on, neither of which lives in a mesh.
+    if (hasBodyModel(def.id)) {
+      this.body = new FighterModel(def.id, light);
+      void this.body.load().then((ok) => {
+        if (!ok || !this.body) return;
+        this.group.add(this.body.group);
+        this.hideFlatBody();
+      });
+    }
+
+    // The older hand-authored model, still keyed by id for the one fighter
+    // that has one. Superseded by the pack bodies above.
     const model = modelFor(def.id);
     if (model) {
       this.modelProps = new Set(model.hideProps);
       this.dienekes = new DienekesModel(def, model.data, light);
       this.group.add(this.dienekes.group);
-      for (const limb of Object.values(this.limbs)) limb.group.visible = false;
-      for (const mesh of [this.head, this.headOutline, ...this.hands, ...this.handOutlines, ...this.boots, ...this.bootOutlines]) mesh.visible = false;
+      this.hideFlatBody();
+    }
+  }
+
+  /** Hide the flat ink body once a model is standing in for it. */
+  private hideFlatBody() {
+    for (const limb of Object.values(this.limbs)) limb.group.visible = false;
+    for (const mesh of [this.head, this.headOutline, ...this.hands, ...this.handOutlines,
+                        ...this.boots, ...this.bootOutlines]) {
+      mesh.visible = false;
     }
   }
 
@@ -515,6 +536,8 @@ export class StickRig {
       }
     }
 
+    this.body?.update(sk, opts.flash);
+
     if (this.dienekes) {
       // Preserve the existing javelin, projectile, shadow, and trail paths.
       // Only the body and the model's matching equipment replace ink shapes.
@@ -583,6 +606,7 @@ export class StickRig {
   }
 
   dispose() {
+    this.body?.dispose();
     this.dienekes?.dispose();
     for (const limb of Object.values(this.limbs)) limb.dispose();
     for (const m of [...this.hands, ...this.handOutlines, ...this.boots, ...this.bootOutlines]) {
