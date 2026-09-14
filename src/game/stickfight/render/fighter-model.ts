@@ -243,15 +243,33 @@ export async function fitPropModel(
   loader ??= new GLTFLoader();
   const gltf = await loader.loadAsync(await entry());
 
+  gltf.scene.updateMatrixWorld(true);
   const source = new THREE.Box3().setFromObject(gltf.scene);
-  const ts = target.getSize(new THREE.Vector3());
   const ss = source.getSize(new THREE.Vector3());
   // Longest axis of each, so a blade authored up the Y lies down along X.
-  const spin = ss.y > ss.x ? -Math.PI / 2 : 0;
+  const shield = PAINTED_FACE.test(assetId);
+  const bow = /^(bow|yumi)$/.test(assetId);
+  const costume = /^(saya|quiver|surcoat|poncho|scarf|mongkhon|standard)$/.test(assetId);
+  const spin = shield || bow || assetId === "saya" ? 0
+    : costume ? (ss.y > ss.x ? -Math.PI / 2 : 0) : -Math.PI / 2;
   const srcLong = Math.max(ss.x, ss.y) || 1;
-  const srcThin = Math.min(ss.x, ss.y) || 1;
-  const fit = Math.max(ts.x, ts.y) / srcLong;
-  const thin = Math.max(ts.x, ts.y) > 0 ? Math.min(ts.x, ts.y) / srcThin : fit;
+  // Assets come in metre-sized prototype units or true game units. Keep
+  // their proportions; old flat-prop bounds are not a modelling scale.
+  const nativeScale = srcLong > 10 ? 1 : 60;
+  const limit = shield ? 62 : bow ? 100 : costume ? 65 : 112;
+  const fit = Math.min(nativeScale, limit / srcLong);
+  const anchor = new THREE.Vector3();
+  // Authored hand props use a grip-centred origin. Shields additionally
+  // provide a rear grip/brace, whose depth places the face ahead of the arm.
+  if (shield) {
+    const grip = gltf.scene.getObjectByName("RearGrip") ?? gltf.scene.getObjectByName("Grip")
+      ?? gltf.scene.getObjectByName("Scutum_Arm_Brace");
+    if (grip) grip.getWorldPosition(anchor);
+  }
+  const offset = new THREE.Vector3(0, 0, shield ? 49 : 47);
+  if (costume) offset.copy(target.getCenter(new THREE.Vector3())).setZ(19);
+  if (assetId === "saya") offset.set(8, 3, 19);
+  if (assetId === "bayonet") offset.x = 36;
 
   const built: THREE.Mesh[] = [];
   const shared = new Map<string, THREE.MeshStandardMaterial>();
@@ -259,8 +277,13 @@ export async function fitPropModel(
   gltf.scene.traverse((o) => {
     if (!(o instanceof THREE.Mesh)) return;
     const geo = o.geometry.clone().applyMatrix4(o.matrixWorld);
+    geo.translate(-anchor.x, -anchor.y, -anchor.z);
     if (spin) geo.rotateZ(spin);
-    geo.scale(fit, Math.min(thin, fit * 2.2), fit);
+    geo.scale(fit, fit, fit);
+    if (assetId === "saya") {
+      geo.rotateZ(Math.PI / 2 + 0.25);
+    }
+    geo.translate(offset.x, offset.y, offset.z);
     const src = o.material as THREE.MeshStandardMaterial;
     let mat = shared.get(src.uuid);
     if (!mat) {
@@ -272,14 +295,21 @@ export async function fitPropModel(
   });
   if (!built.length) return false;
 
-  // Sit the model where the flat one sat, so grip and tip land the same.
-  const placed = new THREE.Box3();
-  for (const m of built) {
-    m.geometry.computeBoundingBox();
-    placed.union(m.geometry.boundingBox!);
+  // Worn accessories have no hand-grip contract. Retain their established
+  // attachment centre; the saya uses its explicit belt fitting above.
+  if (costume && assetId !== "saya") {
+    const bounds = new THREE.Box3();
+    for (const mesh of built) {
+      mesh.geometry.computeBoundingBox();
+      bounds.union(mesh.geometry.boundingBox!);
+    }
+    const delta = target.getCenter(new THREE.Vector3()).sub(bounds.getCenter(new THREE.Vector3()));
+    for (const mesh of built) mesh.geometry.translate(delta.x, delta.y, 0);
   }
-  const shift = target.getCenter(new THREE.Vector3()).sub(placed.getCenter(new THREE.Vector3()));
-  for (const m of built) m.geometry.translate(shift.x, shift.y, 0);
+
+  // Sit the model where the flat one sat, so grip and tip land the same.
+  // Do not centre hand equipment on its bounds: that moves the grip away
+  // from the hand whenever the blade/shaft is asymmetric around its origin.
 
   for (const child of [...group.children]) {
     if (child instanceof THREE.Mesh) child.geometry.dispose();
