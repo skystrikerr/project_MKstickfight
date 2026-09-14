@@ -6,8 +6,8 @@ import { ROSTER } from "../src/game/stickfight/fighters/index.ts";
 import { propModelAssetId } from "../src/game/stickfight/render/fighter-model.ts";
 import { FighterModel } from "../src/game/stickfight/render/fighter-model.ts";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { Box3 } from "three";
-import { BONES } from "../src/game/stickfight/skeleton.ts";
+import { Box3, Vector3 } from "three";
+import { BONES, buildSkeleton, sampleFrames } from "../src/game/stickfight/skeleton.ts";
 
 const modelDir = path.resolve("src/assets/models");
 const files = new Set(fs.readdirSync(modelDir));
@@ -31,6 +31,7 @@ assert.equal(ROSTER.length, 26, "expected the complete 26-fighter roster");
 
 let equipmentCount = 0;
 let moveCount = 0;
+let poseSamples = 0;
 const mappedEquipment = new Set();
 for (const fighter of ROSTER) {
   moveCount += fighter.moves.length;
@@ -52,6 +53,32 @@ for (const fighter of ROSTER) {
   assert(!bounds.isEmpty(), `${fighter.name}: runtime neck missing`);
   assert(Math.abs(bounds.min.y) < 1e-4, `${fighter.name}: neck has a doubled offset`);
   assert(Math.abs(bounds.max.y - BONES.neck) < 1e-4, `${fighter.name}: neck length mismatch`);
+  runtime.ready = true;
+  for (const move of fighter.moves) {
+    for (let frame = 0; frame <= move.duration; frame++) {
+      const sk = buildSkeleton(sampleFrames(move.frames ?? [], frame, fighter.stance), true);
+      const before = JSON.stringify(sk);
+      for (const facing of [1, -1]) {
+        runtime.group.scale.x = facing;
+        runtime.update(sk, 0);
+        runtime.group.updateMatrixWorld(true);
+        for (const [prefix, endPrefix, length] of [
+          ["thigh", "knee", BONES.thigh], ["shin", "foot", BONES.shin],
+          ["upperArm", "elbow", BONES.upperArm], ["foreArm", "hand", BONES.foreArm],
+        ]) for (const side of ["F", "B"]) {
+          const part = runtime.group.getObjectByName(`${fighter.id}:${prefix}${side}`);
+          const tip = new Vector3(0, -length, 0).applyMatrix4(part.matrixWorld);
+          const end = sk[`${endPrefix}${side}`];
+          const expected = new Vector3(end.x, end.y, part.position.z).applyMatrix4(runtime.group.matrixWorld);
+          assert(tip.distanceTo(expected) < 1e-4, `${fighter.id}/${move.id}/${frame}: limb endpoint detached`);
+        }
+        runtime.group.traverse(o => assert(o.matrixWorld.elements.every(Number.isFinite),
+          `${fighter.id}/${move.id}/${frame}: non-finite transform`));
+        assert.equal(JSON.stringify(sk), before, "model changed combat skeleton");
+        poseSamples++;
+      }
+    }
+  }
   runtime.dispose();
 
   for (const prop of fighter.props) {
@@ -78,6 +105,7 @@ const unusedEquipment = [...files].filter((file) =>
 assert.deepEqual(unusedEquipment, [], `unmapped equipment: ${unusedEquipment.join(", ")}`);
 
 console.log(
+  `Animation review: ${poseSamples} frame/facing samples passed. ` +
   `Fighter models: ${ROSTER.length} bodies, ${equipmentCount} mapped equipment props, ` +
   `${moveCount} moves; GLB structure and joint contracts passed.`,
 );
