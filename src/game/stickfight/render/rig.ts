@@ -317,9 +317,11 @@ export class StickRig {
       });
     }
 
-    // The older hand-authored model, still keyed by id for the one fighter
-    // that has one. Superseded by the pack bodies above.
-    const model = modelFor(def.id);
+    // The older hand-authored model, for any fighter that has one and no GLB.
+    // Without the guard both draw at once - which is exactly what happened to
+    // Dienekes, who ended up wearing the old hand-built model over his Blender
+    // one and was the only fighter in the roster who looked different.
+    const model = hasBodyModel(def.id) ? undefined : modelFor(def.id);
     if (model) {
       this.modelProps = new Set(model.hideProps);
       this.dienekes = new DienekesModel(def, model.data, light);

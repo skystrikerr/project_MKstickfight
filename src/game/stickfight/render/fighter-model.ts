@@ -129,7 +129,11 @@ function bakeShading(geo: THREE.BufferGeometry, lightDir: THREE.Vector3) {
   const n = new THREE.Vector3();
   for (let i = 0; i < normals.count; i++) {
     const ndl = 0.5 + 0.5 * n.fromBufferAttribute(normals, i).normalize().dot(lightDir);
-    const shade = 0.46 + 0.76 * ndl * ndl;
+    // Gentler than it was. The first range ran 0.46-1.22 and squared the ramp,
+    // which crushed every shadowed face and blew out every lit one - bronze
+    // came out as orange plastic and the models looked nothing like the source
+    // meshes. This keeps the form readable without restating the colour.
+    const shade = 0.68 + 0.42 * ndl;
     colors.set([shade, shade, shade], i * 3);
   }
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
@@ -199,7 +203,6 @@ export async function fitPropModel(
     let mat = shared.get(src.uuid);
     if (!mat) {
       const base = tint(src.name, src.color?.clone() ?? new THREE.Color("#c8c8c8"), palette);
-      if (light) base.lerp(new THREE.Color(light.key), (light.strength ?? 1) * 0.1);
       mat = new THREE.MeshBasicMaterial({ color: base, vertexColors: true });
       shared.set(src.uuid, mat);
     }
@@ -280,10 +283,9 @@ export class FighterModel {
           const key = src.uuid;
           let entry = seen.get(key);
           if (!entry) {
+            // Left at the colour the model was authored with. Tinting toward
+            // the stage key turned Dienekes' bronze orange on the Colosseum.
             const base = src.color?.clone() ?? new THREE.Color("#c8c8c8");
-            if (this.light) {
-              base.lerp(new THREE.Color(this.light.key), (this.light.strength ?? 1) * 0.1);
-            }
             entry = { material: new THREE.MeshBasicMaterial({ color: base, vertexColors: true }), base };
             seen.set(key, entry);
             this.materials.push(entry);
