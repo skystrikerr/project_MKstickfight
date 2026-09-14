@@ -308,8 +308,12 @@ export class StickRig {
     // A GLB body from the prototype packs, if this fighter has one. Weapons
     // stay with the props below - they carry the reach the sim checks and the
     // frames they appear on, neither of which lives in a mesh.
-    if (hasBodyModel(def.id)) {
-      this.body = new FighterModel(def.id, light);
+    // A hand-built model wins over a GLB where one exists. It is tuned piece
+    // by piece for this renderer, and it looks it - which is the whole reason
+    // Dienekes read like a character while the generic path read flat.
+    const legacy = modelFor(def.id);
+    if (!legacy && hasBodyModel(def.id)) {
+      this.body = new FighterModel(def.id, light, def.palette);
       void this.body.load().then((ok) => {
         if (!ok || !this.body) return;
         this.group.add(this.body.group);
@@ -317,11 +321,9 @@ export class StickRig {
       });
     }
 
-    // The older hand-authored model, for any fighter that has one and no GLB.
-    // Without the guard both draw at once - which is exactly what happened to
-    // Dienekes, who ended up wearing the old hand-built model over his Blender
-    // one and was the only fighter in the roster who looked different.
-    const model = hasBodyModel(def.id) ? undefined : modelFor(def.id);
+    // Never both: they drew on top of each other once already, and Dienekes
+    // wearing two models was why he alone looked unlike the rest of the roster.
+    const model = this.body ? undefined : legacy;
     if (model) {
       this.modelProps = new Set(model.hideProps);
       this.dienekes = new DienekesModel(def, model.data, light);

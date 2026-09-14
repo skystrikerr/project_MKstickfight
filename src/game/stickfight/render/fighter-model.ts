@@ -113,12 +113,23 @@ function modelUrls(): Record<string, () => Promise<string>> {
 function tint(name: string | undefined, base: THREE.Color, palette?: FighterPalette): THREE.Color {
   if (!palette || !name) return base;
   const slot = name.toLowerCase();
-  if (slot.includes("cloth") || slot.includes("crimson")) return new THREE.Color(palette.cloth);
-  if (slot.includes("bronze") || slot.includes("gold")) return new THREE.Color(palette.accent);
-  if (slot.includes("metal") || slot.includes("iron") || slot.includes("steel")) {
-    return new THREE.Color(palette.metal);
+  const mix = (hex: string, t = 0) =>
+    t ? new THREE.Color(hex).lerp(new THREE.Color("white"), t) : new THREE.Color(hex);
+  // Cloth, and the accent the cloth is trimmed with.
+  if (slot.includes("cloth") || slot.includes("crimson") || slot.includes("tunic")) {
+    return mix(palette.cloth);
   }
-  if (slot.includes("linen")) return new THREE.Color(palette.body);
+  if (slot.includes("redhighlight") || slot.includes("highlight")) return mix(palette.cloth, 0.2);
+  // Two tiers of metal, so a gilded edge still reads against the plate.
+  if (slot.includes("goldedge") || slot.includes("gold") || slot.includes("brass")) {
+    return mix(palette.accent);
+  }
+  if (slot.includes("darkbronze")) return mix(palette.metal).multiplyScalar(0.62);
+  if (slot.includes("bronze")) return mix(palette.metal);
+  if (slot.includes("iron") || slot.includes("steel") || slot.includes("metal")) {
+    return mix(palette.metal, 0.12);
+  }
+  if (slot.includes("ivory") || slot.includes("linen")) return mix(palette.body);
   return base;
 }
 
@@ -240,7 +251,8 @@ export class FighterModel {
   private materials: { material: THREE.MeshBasicMaterial; base: THREE.Color }[] = [];
   ready = false;
 
-  constructor(private id: string, private light?: StageLight) {
+  constructor(private id: string, private light?: StageLight,
+              private palette?: FighterPalette) {
     this.group.name = `FighterModel:${id}`;
   }
 
@@ -283,9 +295,13 @@ export class FighterModel {
           const key = src.uuid;
           let entry = seen.get(key);
           if (!entry) {
-            // Left at the colour the model was authored with. Tinting toward
-            // the stage key turned Dienekes' bronze orange on the Colosseum.
-            const base = src.color?.clone() ?? new THREE.Color("#c8c8c8");
+            // Mapped onto this fighter's palette, the way the hand-built
+            // Dienekes did. The packs ship deliberately neutral prototype
+            // colours, so taking them literally is what made the whole roster
+            // read flat while he read like a character.
+            const base = tint(src.name,
+                              src.color?.clone() ?? new THREE.Color("#c8c8c8"),
+                              this.palette);
             entry = { material: new THREE.MeshBasicMaterial({ color: base, vertexColors: true }), base };
             seen.set(key, entry);
             this.materials.push(entry);
