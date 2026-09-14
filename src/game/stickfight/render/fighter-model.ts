@@ -350,6 +350,11 @@ export class FighterModel {
           if (!(child instanceof THREE.Mesh) || !include(child.name)) continue;
           child.updateMatrix();
           const geo = child.geometry.clone().applyMatrix4(child.matrix);
+          // This export contains one mesh in scene coordinates despite being
+          // parented to Torso. Bring it back into that joint's local space.
+          if (this.id === "roman" && child.name === "Tunic_Torso") {
+            geo.translate(0, -74, 0);
+          }
           geo.translate(0, -originY, 0);
           geo.scale(S.girth, lengthScale, S.girth);
           // Neck geometry is authored relative to either Torso or Head.
@@ -391,18 +396,21 @@ export class FighterModel {
 
     const all = () => true;
     piece("pelvis", "Pelvis", (n) => !/^(Torso|Hip_|Knee_)/.test(n), 0, S.girth);
-    piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n), 0, S.spine);
+    piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n),
+      -(source.getObjectByName("Torso")?.position.y ?? 0), S.spine);
     const neckSource = source.getObjectByName("Neck");
     const neckParent = neckSource instanceof THREE.Mesh ? neckSource.parent?.name ?? "Torso" : "Neck";
     piece("neck", neckParent, (n) => n === "Neck" || n.startsWith("Neck_"), 0, S.neck);
     piece("head", "Head", (n) => n !== "Neck", 0, S.girth);
+    // Boot cuffs and wraps belong to the shin; only the shoe moves to the foot.
+    const isFoot = (n: string) => /^(Sandal|Foot|Boot|Shoe)/.test(n) && !/Wrap|Cuff/.test(n);
     for (const [suffix, side] of [["F", "L"], ["B", "R"]] as const) {
       piece(`thigh${suffix}` as BodyPart, `Hip_${side}`, (n) => !n.startsWith("Knee"),
             0, S.thigh);
       piece(`shin${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => !/^(Sandal|Foot|Boot|Shoe)/.test(n), 0, S.shin);
+            (n) => !isFoot(n), 0, S.shin);
       piece(`foot${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => /^(Sandal|Foot|Boot|Shoe)/.test(n),
+            isFoot,
             // The foot mesh is authored down at the ankle, and it is then
             // placed at the foot joint too - so its own offset has to come off
             // first or the feet land a shin's length below the leg.
@@ -413,6 +421,31 @@ export class FighterModel {
             0, S.foreArm);
       piece(`hand${suffix}` as BodyPart, `Elbow_${side}`, (n) => n.startsWith("Hand"),
             S.girth > 2 ? -PACK.foreArm : -BONES.foreArm, S.girth);
+    }
+
+    // Rigid segments rotate independently. A narrow inner limb and rounded
+    // joint keep bends connected where an authored segment stops short.
+    const lengths: Partial<Record<BodyPart, number>> = {
+      upperArmF: BONES.upperArm, upperArmB: BONES.upperArm,
+      foreArmF: BONES.foreArm, foreArmB: BONES.foreArm,
+      thighF: BONES.thigh, thighB: BONES.thigh,
+      shinF: BONES.shin, shinB: BONES.shin,
+    };
+    for (const [part, length] of Object.entries(lengths)) {
+      const group = this.parts.get(part as BodyPart)!;
+      const first = group.children.find(o => o instanceof THREE.Mesh) as THREE.Mesh | undefined;
+      if (!first) continue;
+      const radius = part.startsWith("thigh") ? 2.8 : 2.1;
+      const connector = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 8), first.material);
+      connector.position.y = -length / 2;
+      connector.name = "joint-connector";
+      group.add(connector);
+      for (const y of [0, -length]) {
+        const joint = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 6), first.material);
+        joint.position.y = y;
+        joint.name = "joint-cap";
+        group.add(joint);
+      }
     }
 
     // The parsed original is scratch; every runtime piece owns its geometry.
