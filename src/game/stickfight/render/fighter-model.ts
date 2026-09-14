@@ -351,6 +351,16 @@ export class FighterModel {
           const geo = child.geometry.clone().applyMatrix4(child.matrix);
           geo.translate(0, -originY, 0);
           geo.scale(S.girth, lengthScale, S.girth);
+          // Neck geometry is authored relative to either Torso or Head.
+          // The runtime neck starts at sk.neck: retaining the authored
+          // offset applies that translation twice and floats it above the head.
+          if (part === "neck") {
+            geo.computeBoundingBox();
+            const bounds = geo.boundingBox!;
+            const height = bounds.max.y - bounds.min.y;
+            geo.translate(0, -bounds.min.y, 0);
+            if (height > 1e-6) geo.scale(1, BONES.neck / height, 1);
+          }
           geo.rotateY(YAW);
 
           const src = child.material as THREE.MeshStandardMaterial;
@@ -384,8 +394,10 @@ export class FighterModel {
     const all = () => true;
     piece("pelvis", "Pelvis", (n) => !/^(Torso|Hip_|Knee_)/.test(n), 0, S.girth);
     piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n), 0, S.spine);
-    piece("neck", "Torso", (n) => n === "Neck", 0, S.neck);
-    piece("head", "Head", all, 0, S.girth);
+    const neckSource = source.getObjectByName("Neck");
+    const neckParent = neckSource instanceof THREE.Mesh ? neckSource.parent?.name ?? "Torso" : "Neck";
+    piece("neck", neckParent, (n) => n === "Neck" || n.startsWith("Neck_"), 0, S.neck);
+    piece("head", "Head", (n) => n !== "Neck", 0, S.girth);
     for (const [suffix, side] of [["F", "L"], ["B", "R"]] as const) {
       piece(`thigh${suffix}` as BodyPart, `Hip_${side}`, (n) => !n.startsWith("Knee"),
             0, S.thigh);
