@@ -90,7 +90,26 @@ type BodyPart = (typeof BODY_PARTS)[number];
 
 let loader: GLTFLoader | null = null;
 
+/**
+ * A few asset packs use a descriptive filename while the fighter definition
+ * uses the historical/in-game prop name. Keep that translation in one place
+ * so those models are not silently skipped by the generic loader.
+ */
+const PROP_ASSET_ALIASES: Readonly<Record<string, string>> = {
+  "samurai:ya": "arrow",
+  "mongol:nocked": "arrow",
+  "zulu:isihlangu": "shield",
+};
+
+export function propModelAssetId(fighterId: string, propId: string): string {
+  return PROP_ASSET_ALIASES[`${fighterId}:${propId}`] ?? propId;
+}
+
 function modelUrls(): Record<string, () => Promise<string>> {
+  // Node-only simulation tests have no Vite asset registry.
+  // Vite replaces glob CALLS during compilation; the glob property itself
+  // does not exist at runtime. Test the environment, not that macro.
+  if (typeof window === "undefined") return {};
   // Globbed inside a function, not at module scope: the self-tests import
   // this module's neighbours under Node, where import.meta.glob does not
   // exist. Vite still sees the pattern statically and bundles every match.
@@ -207,7 +226,8 @@ export async function fitPropModel(
     import: "default",
     query: "?url",
   }) as Record<string, () => Promise<string>>;
-  const entry = urls[`../../../assets/models/${fighterId}-${propId}.glb`];
+  const assetId = propModelAssetId(fighterId, propId);
+  const entry = urls[`../../../assets/models/${fighterId}-${assetId}.glb`];
   if (!entry) return false;
 
   // What the flat prop occupies, measured off the geometry actually built.
@@ -223,31 +243,51 @@ export async function fitPropModel(
   loader ??= new GLTFLoader();
   const gltf = await loader.loadAsync(await entry());
 
+  gltf.scene.updateMatrixWorld(true);
   const source = new THREE.Box3().setFromObject(gltf.scene);
-  const ts = target.getSize(new THREE.Vector3());
   const ss = source.getSize(new THREE.Vector3());
   // Longest axis of each, so a blade authored up the Y lies down along X.
-  const spin = ss.y > ss.x ? -Math.PI / 2 : 0;
+  const shield = PAINTED_FACE.test(assetId);
+  const bow = /^(bow|yumi)$/.test(assetId);
+  const costume = /^(saya|quiver|surcoat|poncho|scarf|mongkhon|standard)$/.test(assetId);
+  const spin = shield || bow || assetId === "saya" ? 0
+    : costume ? (ss.y > ss.x ? -Math.PI / 2 : 0) : -Math.PI / 2;
   const srcLong = Math.max(ss.x, ss.y) || 1;
-  const srcThin = Math.min(ss.x, ss.y) || 1;
-  const fit = Math.max(ts.x, ts.y) / srcLong;
-  const thin = Math.max(ts.x, ts.y) > 0 ? Math.min(ts.x, ts.y) / srcThin : fit;
+  // Assets come in metre-sized prototype units or true game units. Keep
+  // their proportions; old flat-prop bounds are not a modelling scale.
+  const nativeScale = srcLong > 10 ? 1 : 60;
+  const limit = shield ? 62 : bow ? 100 : costume ? 65 : 112;
+  const fit = Math.min(nativeScale, limit / srcLong);
+  const anchor = new THREE.Vector3();
+  // Authored hand props use a grip-centred origin. Shields additionally
+  // provide a rear grip/brace, whose depth places the face ahead of the arm.
+  if (shield) {
+    const grip = gltf.scene.getObjectByName("RearGrip") ?? gltf.scene.getObjectByName("Grip")
+      ?? gltf.scene.getObjectByName("Scutum_Arm_Brace");
+    if (grip) grip.getWorldPosition(anchor);
+  }
+  const offset = new THREE.Vector3(0, 0, shield ? 49 : 47);
+  if (costume) offset.copy(target.getCenter(new THREE.Vector3())).setZ(19);
+  if (assetId === "saya") offset.set(8, 3, 19);
+  if (assetId === "bayonet") offset.x = 36;
 
   const built: THREE.Mesh[] = [];
-  const shared = new Map<string, THREE.MeshLambertMaterial>();
+  const shared = new Map<string, THREE.MeshStandardMaterial>();
   gltf.scene.updateMatrixWorld(true);
   gltf.scene.traverse((o) => {
     if (!(o instanceof THREE.Mesh)) return;
     const geo = o.geometry.clone().applyMatrix4(o.matrixWorld);
+    geo.translate(-anchor.x, -anchor.y, -anchor.z);
     if (spin) geo.rotateZ(spin);
-    geo.scale(fit, Math.min(thin, fit * 2.2), fit);
+    geo.scale(fit, fit, fit);
+    if (assetId === "saya") {
+      geo.rotateZ(Math.PI / 2 + 0.25);
+    }
+    geo.translate(offset.x, offset.y, offset.z);
     const src = o.material as THREE.MeshStandardMaterial;
     let mat = shared.get(src.uuid);
     if (!mat) {
-      const base = tint(src.name, src.color?.clone() ?? new THREE.Color("#c8c8c8"),
-                        palette, PAINTED_FACE.test(propId));
-      mat = new THREE.MeshLambertMaterial({ color: base, emissive: base,
-                                            emissiveIntensity: 0.18 });
+      mat = src.clone();
       shared.set(src.uuid, mat);
     }
     geo.computeVertexNormals();
@@ -255,14 +295,21 @@ export async function fitPropModel(
   });
   if (!built.length) return false;
 
-  // Sit the model where the flat one sat, so grip and tip land the same.
-  const placed = new THREE.Box3();
-  for (const m of built) {
-    m.geometry.computeBoundingBox();
-    placed.union(m.geometry.boundingBox!);
+  // Worn accessories have no hand-grip contract. Retain their established
+  // attachment centre; the saya uses its explicit belt fitting above.
+  if (costume && assetId !== "saya") {
+    const bounds = new THREE.Box3();
+    for (const mesh of built) {
+      mesh.geometry.computeBoundingBox();
+      bounds.union(mesh.geometry.boundingBox!);
+    }
+    const delta = target.getCenter(new THREE.Vector3()).sub(bounds.getCenter(new THREE.Vector3()));
+    for (const mesh of built) mesh.geometry.translate(delta.x, delta.y, 0);
   }
-  const shift = target.getCenter(new THREE.Vector3()).sub(placed.getCenter(new THREE.Vector3()));
-  for (const m of built) m.geometry.translate(shift.x, shift.y, 0);
+
+  // Sit the model where the flat one sat, so grip and tip land the same.
+  // Do not centre hand equipment on its bounds: that moves the grip away
+  // from the hand whenever the blade/shaft is asymmetric around its origin.
 
   for (const child of [...group.children]) {
     if (child instanceof THREE.Mesh) child.geometry.dispose();
@@ -276,6 +323,16 @@ export async function fitPropModel(
   return true;
 }
 
+/** Whether a separate GLB exists for this gameplay prop. */
+export function hasPropModel(fighterId: string, propId: string): boolean {
+  const assetId = propModelAssetId(fighterId, propId);
+  const urls = import.meta.glob("../../../assets/models/*.glb", {
+    import: "default",
+    query: "?url",
+  }) as Record<string, () => Promise<string>>;
+  return `../../../assets/models/${fighterId}-${assetId}.glb` in urls;
+}
+
 /** Whether a fighter has a body model sitting in the assets folder. */
 export function hasBodyModel(id: string): boolean {
   return `../../../assets/models/${id}-body.glb` in modelUrls();
@@ -284,7 +341,7 @@ export function hasBodyModel(id: string): boolean {
 export class FighterModel {
   readonly group = new THREE.Group();
   private parts = new Map<BodyPart, THREE.Group>();
-  private materials: { material: THREE.MeshLambertMaterial; base: THREE.Color }[] = [];
+  private materials: { material: THREE.MeshStandardMaterial; base: THREE.Color }[] = [];
   ready = false;
   private lit = false;
 
@@ -306,7 +363,7 @@ export class FighterModel {
 
   private build(source: THREE.Object3D) {
     const S = scalesFor(source);
-    const seen = new Map<string, { material: THREE.MeshLambertMaterial; base: THREE.Color }>();
+    const seen = new Map<string, { material: THREE.MeshStandardMaterial; base: THREE.Color }>();
 
     const piece = (
       part: BodyPart,
@@ -323,8 +380,23 @@ export class FighterModel {
           if (!(child instanceof THREE.Mesh) || !include(child.name)) continue;
           child.updateMatrix();
           const geo = child.geometry.clone().applyMatrix4(child.matrix);
+          // This export contains one mesh in scene coordinates despite being
+          // parented to Torso. Bring it back into that joint's local space.
+          if (this.id === "roman" && child.name === "Tunic_Torso") {
+            geo.translate(0, -74, 0);
+          }
           geo.translate(0, -originY, 0);
           geo.scale(S.girth, lengthScale, S.girth);
+          // Neck geometry is authored relative to either Torso or Head.
+          // The runtime neck starts at sk.neck: retaining the authored
+          // offset applies that translation twice and floats it above the head.
+          if (part === "neck") {
+            geo.computeBoundingBox();
+            const bounds = geo.boundingBox!;
+            const height = bounds.max.y - bounds.min.y;
+            geo.translate(0, -bounds.min.y, 0);
+            if (height > 1e-6) geo.scale(1, BONES.neck / height, 1);
+          }
           geo.rotateY(YAW);
 
           const src = child.material as THREE.MeshStandardMaterial;
@@ -335,12 +407,9 @@ export class FighterModel {
             // Dienekes did. The packs ship deliberately neutral prototype
             // colours, so taking them literally is what made the whole roster
             // read flat while he read like a character.
-            const base = tint(src.name,
-                              src.color?.clone() ?? new THREE.Color("#c8c8c8"),
-                              this.palette);
+            const base = src.color.clone();
             entry = {
-              material: new THREE.MeshLambertMaterial({ color: base, emissive: base,
-                                                        emissiveIntensity: 0.18 }),
+              material: src.clone(),
               base,
             };
             seen.set(key, entry);
@@ -357,16 +426,21 @@ export class FighterModel {
 
     const all = () => true;
     piece("pelvis", "Pelvis", (n) => !/^(Torso|Hip_|Knee_)/.test(n), 0, S.girth);
-    piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n), 0, S.spine);
-    piece("neck", "Torso", (n) => n === "Neck", 0, S.neck);
-    piece("head", "Head", all, 0, S.girth);
+    piece("torso", "Torso", (n) => !/^(Shoulder_|Elbow_|Head|Neck)/.test(n),
+      -(source.getObjectByName("Torso")?.position.y ?? 0), S.spine);
+    const neckSource = source.getObjectByName("Neck");
+    const neckParent = neckSource instanceof THREE.Mesh ? neckSource.parent?.name ?? "Torso" : "Neck";
+    piece("neck", neckParent, (n) => n === "Neck" || n.startsWith("Neck_"), 0, S.neck);
+    piece("head", "Head", (n) => n !== "Neck", 0, S.girth);
+    // Boot cuffs and wraps belong to the shin; only the shoe moves to the foot.
+    const isFoot = (n: string) => /^(Sandal|Foot|Boot|Shoe)/.test(n) && !/Wrap|Cuff/.test(n);
     for (const [suffix, side] of [["F", "L"], ["B", "R"]] as const) {
       piece(`thigh${suffix}` as BodyPart, `Hip_${side}`, (n) => !n.startsWith("Knee"),
             0, S.thigh);
       piece(`shin${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => !/^(Sandal|Foot|Boot|Shoe)/.test(n), 0, S.shin);
+            (n) => !isFoot(n), 0, S.shin);
       piece(`foot${suffix}` as BodyPart, `Knee_${side}`,
-            (n) => /^(Sandal|Foot|Boot|Shoe)/.test(n),
+            isFoot,
             // The foot mesh is authored down at the ankle, and it is then
             // placed at the foot joint too - so its own offset has to come off
             // first or the feet land a shin's length below the leg.
@@ -378,6 +452,55 @@ export class FighterModel {
       piece(`hand${suffix}` as BodyPart, `Elbow_${side}`, (n) => n.startsWith("Hand"),
             S.girth > 2 ? -PACK.foreArm : -BONES.foreArm, S.girth);
     }
+
+    // Rigid segments rotate independently. A narrow inner limb and rounded
+    // joint keep bends connected where an authored segment stops short.
+    const lengths: Partial<Record<BodyPart, number>> = {
+      upperArmF: BONES.upperArm, upperArmB: BONES.upperArm,
+      foreArmF: BONES.foreArm, foreArmB: BONES.foreArm,
+      thighF: BONES.thigh, thighB: BONES.thigh,
+      shinF: BONES.shin, shinB: BONES.shin,
+    };
+    for (const [part, length] of Object.entries(lengths)) {
+      const group = this.parts.get(part as BodyPart)!;
+      const first = group.children.find(o => o instanceof THREE.Mesh) as THREE.Mesh | undefined;
+      if (!first) continue;
+      const radius = part.startsWith("thigh") ? 2.8 : 2.1;
+      const connector = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 8), first.material);
+      connector.position.y = -length / 2;
+      connector.name = "joint-connector";
+      group.add(connector);
+      for (const y of [0, -length]) {
+        const joint = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 6), first.material);
+        joint.position.y = y;
+        joint.name = "joint-cap";
+        group.add(joint);
+      }
+    }
+
+    // Some prototype bodies leave their torso and neck as separate shells.
+    // That can look acceptable in the source bind pose, but a game pose opens
+    // a bright slit at the waist or collar and makes the head look suspended.
+    // A narrow core stays inside the authored model and only becomes visible
+    // where it is needed to keep the central silhouette continuous.
+    const bridgeUp = (part: BodyPart, length: number, radius: number) => {
+      const group = this.parts.get(part)!;
+      const first = group.children.find(o => o instanceof THREE.Mesh) as THREE.Mesh | undefined;
+      if (!first) return;
+      const core = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius, radius, length, 10), first.material);
+      core.position.y = length / 2;
+      core.name = `${part}-bridge`;
+      group.add(core);
+      for (const y of [radius, length - radius]) {
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(radius, 10, 7), first.material);
+        cap.position.y = y;
+        cap.name = `${part}-bridge-cap`;
+        group.add(cap);
+      }
+    };
+    bridgeUp("torso", BONES.spine, 3.5);
+    bridgeUp("neck", BONES.neck, 3.1);
 
     // The parsed original is scratch; every runtime piece owns its geometry.
     source.traverse((o) => {

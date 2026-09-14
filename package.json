@@ -1,7 +1,7 @@
 {
   "name": "stickfighter",
   "private": true,
-  "version": "0.7.1",
+  "version": "0.8.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -16,6 +16,7 @@
     "electron:dev": "VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
     "preview": "vite preview",
     "test": "tsx src/game/stickfight/selftest.ts",
+    "test:models": "node --import tsx tools/audit-fighter-models.mjs",
     "get:exe": "node scripts/get-exe.mjs",
     "play": "npm run dev -- --open",
     "pack:page": "npm run build && node tools/pack-page.mjs"
