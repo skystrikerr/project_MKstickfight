@@ -90,6 +90,21 @@ type BodyPart = (typeof BODY_PARTS)[number];
 
 let loader: GLTFLoader | null = null;
 
+/**
+ * A few asset packs use a descriptive filename while the fighter definition
+ * uses the historical/in-game prop name. Keep that translation in one place
+ * so those models are not silently skipped by the generic loader.
+ */
+const PROP_ASSET_ALIASES: Readonly<Record<string, string>> = {
+  "samurai:ya": "arrow",
+  "mongol:nocked": "arrow",
+  "zulu:isihlangu": "shield",
+};
+
+export function propModelAssetId(fighterId: string, propId: string): string {
+  return PROP_ASSET_ALIASES[`${fighterId}:${propId}`] ?? propId;
+}
+
 function modelUrls(): Record<string, () => Promise<string>> {
   // Globbed inside a function, not at module scope: the self-tests import
   // this module's neighbours under Node, where import.meta.glob does not
@@ -207,7 +222,8 @@ export async function fitPropModel(
     import: "default",
     query: "?url",
   }) as Record<string, () => Promise<string>>;
-  const entry = urls[`../../../assets/models/${fighterId}-${propId}.glb`];
+  const assetId = propModelAssetId(fighterId, propId);
+  const entry = urls[`../../../assets/models/${fighterId}-${assetId}.glb`];
   if (!entry) return false;
 
   // What the flat prop occupies, measured off the geometry actually built.
@@ -274,6 +290,16 @@ export async function fitPropModel(
   if (root) ensureLights(root, light);
   gltf.scene.traverse((o) => { if (o instanceof THREE.Mesh) o.geometry.dispose(); });
   return true;
+}
+
+/** Whether a separate GLB exists for this gameplay prop. */
+export function hasPropModel(fighterId: string, propId: string): boolean {
+  const assetId = propModelAssetId(fighterId, propId);
+  const urls = import.meta.glob("../../../assets/models/*.glb", {
+    import: "default",
+    query: "?url",
+  }) as Record<string, () => Promise<string>>;
+  return `../../../assets/models/${fighterId}-${assetId}.glb` in urls;
 }
 
 /** Whether a fighter has a body model sitting in the assets folder. */
