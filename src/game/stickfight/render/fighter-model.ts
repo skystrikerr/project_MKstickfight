@@ -448,6 +448,30 @@ export class FighterModel {
       }
     }
 
+    // Some prototype bodies leave their torso and neck as separate shells.
+    // That can look acceptable in the source bind pose, but a game pose opens
+    // a bright slit at the waist or collar and makes the head look suspended.
+    // A narrow core stays inside the authored model and only becomes visible
+    // where it is needed to keep the central silhouette continuous.
+    const bridgeUp = (part: BodyPart, length: number, radius: number) => {
+      const group = this.parts.get(part)!;
+      const first = group.children.find(o => o instanceof THREE.Mesh) as THREE.Mesh | undefined;
+      if (!first) return;
+      const core = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius, radius, length, 10), first.material);
+      core.position.y = length / 2;
+      core.name = `${part}-bridge`;
+      group.add(core);
+      for (const y of [radius, length - radius]) {
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(radius, 10, 7), first.material);
+        cap.position.y = y;
+        cap.name = `${part}-bridge-cap`;
+        group.add(cap);
+      }
+    };
+    bridgeUp("torso", BONES.spine, 3.5);
+    bridgeUp("neck", BONES.neck, 3.1);
+
     // The parsed original is scratch; every runtime piece owns its geometry.
     source.traverse((o) => {
       if (o instanceof THREE.Mesh) {
