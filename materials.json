@@ -1,0 +1,426 @@
+{
+  "linen-undyed": {
+    "family": "linen",
+    "baseColor": "materials/linen-undyed-basecolor.png",
+    "normal": "materials/linen-undyed-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-undyed-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-ivory": {
+    "family": "linen",
+    "baseColor": "materials/linen-ivory-basecolor.png",
+    "normal": "materials/linen-ivory-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-ivory-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-crimson": {
+    "family": "linen",
+    "baseColor": "materials/linen-crimson-basecolor.png",
+    "normal": "materials/linen-crimson-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-crimson-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-rust": {
+    "family": "linen",
+    "baseColor": "materials/linen-rust-basecolor.png",
+    "normal": "materials/linen-rust-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-rust-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-ochre": {
+    "family": "linen",
+    "baseColor": "materials/linen-ochre-basecolor.png",
+    "normal": "materials/linen-ochre-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-ochre-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-orange": {
+    "family": "linen",
+    "baseColor": "materials/linen-orange-basecolor.png",
+    "normal": "materials/linen-orange-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-orange-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-navy": {
+    "family": "linen",
+    "baseColor": "materials/linen-navy-basecolor.png",
+    "normal": "materials/linen-navy-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-navy-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-indigo": {
+    "family": "linen",
+    "baseColor": "materials/linen-indigo-basecolor.png",
+    "normal": "materials/linen-indigo-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-indigo-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-black": {
+    "family": "linen",
+    "baseColor": "materials/linen-black-basecolor.png",
+    "normal": "materials/linen-black-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-black-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-olive": {
+    "family": "linen",
+    "baseColor": "materials/linen-olive-basecolor.png",
+    "normal": "materials/linen-olive-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-olive-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-teal": {
+    "family": "linen",
+    "baseColor": "materials/linen-teal-basecolor.png",
+    "normal": "materials/linen-teal-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-teal-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-blue": {
+    "family": "linen",
+    "baseColor": "materials/linen-blue-basecolor.png",
+    "normal": "materials/linen-blue-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-blue-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-purple": {
+    "family": "linen",
+    "baseColor": "materials/linen-purple-basecolor.png",
+    "normal": "materials/linen-purple-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-purple-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "linen-scarlet": {
+    "family": "linen",
+    "baseColor": "materials/linen-scarlet-basecolor.png",
+    "normal": "materials/linen-scarlet-normal.png",
+    "occlusionRoughnessMetallic": "materials/linen-scarlet-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "leather-natural": {
+    "family": "leather",
+    "baseColor": "materials/leather-natural-basecolor.png",
+    "normal": "materials/leather-natural-normal.png",
+    "occlusionRoughnessMetallic": "materials/leather-natural-orm.png",
+    "roughness": 0.79,
+    "metallic": 0
+  },
+  "leather-dark": {
+    "family": "leather",
+    "baseColor": "materials/leather-dark-basecolor.png",
+    "normal": "materials/leather-dark-normal.png",
+    "occlusionRoughnessMetallic": "materials/leather-dark-orm.png",
+    "roughness": 0.79,
+    "metallic": 0
+  },
+  "leather-saddle": {
+    "family": "leather",
+    "baseColor": "materials/leather-saddle-basecolor.png",
+    "normal": "materials/leather-saddle-normal.png",
+    "occlusionRoughnessMetallic": "materials/leather-saddle-orm.png",
+    "roughness": 0.79,
+    "metallic": 0
+  },
+  "leather-oxblood": {
+    "family": "leather",
+    "baseColor": "materials/leather-oxblood-basecolor.png",
+    "normal": "materials/leather-oxblood-normal.png",
+    "occlusionRoughnessMetallic": "materials/leather-oxblood-orm.png",
+    "roughness": 0.79,
+    "metallic": 0
+  },
+  "leather-tan": {
+    "family": "leather",
+    "baseColor": "materials/leather-tan-basecolor.png",
+    "normal": "materials/leather-tan-normal.png",
+    "occlusionRoughnessMetallic": "materials/leather-tan-orm.png",
+    "roughness": 0.79,
+    "metallic": 0
+  },
+  "leather-black": {
+    "family": "leather",
+    "baseColor": "materials/leather-black-basecolor.png",
+    "normal": "materials/leather-black-normal.png",
+    "occlusionRoughnessMetallic": "materials/leather-black-orm.png",
+    "roughness": 0.79,
+    "metallic": 0
+  },
+  "leather-weathered": {
+    "family": "leather",
+    "baseColor": "materials/leather-weathered-basecolor.png",
+    "normal": "materials/leather-weathered-normal.png",
+    "occlusionRoughnessMetallic": "materials/leather-weathered-orm.png",
+    "roughness": 0.79,
+    "metallic": 0
+  },
+  "metal-iron": {
+    "family": "metal",
+    "baseColor": "materials/metal-iron-basecolor.png",
+    "normal": "materials/metal-iron-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-iron-orm.png",
+    "roughness": 0.53,
+    "metallic": 1
+  },
+  "metal-steel": {
+    "family": "metal",
+    "baseColor": "materials/metal-steel-basecolor.png",
+    "normal": "materials/metal-steel-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-steel-orm.png",
+    "roughness": 0.53,
+    "metallic": 1
+  },
+  "metal-polished-steel": {
+    "family": "metal",
+    "baseColor": "materials/metal-polished-steel-basecolor.png",
+    "normal": "materials/metal-polished-steel-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-polished-steel-orm.png",
+    "roughness": 0.28,
+    "metallic": 1
+  },
+  "metal-bronze": {
+    "family": "metal",
+    "baseColor": "materials/metal-bronze-basecolor.png",
+    "normal": "materials/metal-bronze-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-bronze-orm.png",
+    "roughness": 0.6,
+    "metallic": 1
+  },
+  "metal-gold": {
+    "family": "metal",
+    "baseColor": "materials/metal-gold-basecolor.png",
+    "normal": "materials/metal-gold-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-gold-orm.png",
+    "roughness": 0.53,
+    "metallic": 1
+  },
+  "metal-dark-iron": {
+    "family": "metal",
+    "baseColor": "materials/metal-dark-iron-basecolor.png",
+    "normal": "materials/metal-dark-iron-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-dark-iron-orm.png",
+    "roughness": 0.6,
+    "metallic": 1
+  },
+  "metal-copper": {
+    "family": "metal",
+    "baseColor": "materials/metal-copper-basecolor.png",
+    "normal": "materials/metal-copper-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-copper-orm.png",
+    "roughness": 0.53,
+    "metallic": 1
+  },
+  "metal-silver": {
+    "family": "metal",
+    "baseColor": "materials/metal-silver-basecolor.png",
+    "normal": "materials/metal-silver-normal.png",
+    "occlusionRoughnessMetallic": "materials/metal-silver-orm.png",
+    "roughness": 0.53,
+    "metallic": 1
+  },
+  "wood-ash": {
+    "family": "wood",
+    "baseColor": "materials/wood-ash-basecolor.png",
+    "normal": "materials/wood-ash-normal.png",
+    "occlusionRoughnessMetallic": "materials/wood-ash-orm.png",
+    "roughness": 0.76,
+    "metallic": 0
+  },
+  "wood-oak": {
+    "family": "wood",
+    "baseColor": "materials/wood-oak-basecolor.png",
+    "normal": "materials/wood-oak-normal.png",
+    "occlusionRoughnessMetallic": "materials/wood-oak-orm.png",
+    "roughness": 0.76,
+    "metallic": 0
+  },
+  "wood-walnut": {
+    "family": "wood",
+    "baseColor": "materials/wood-walnut-basecolor.png",
+    "normal": "materials/wood-walnut-normal.png",
+    "occlusionRoughnessMetallic": "materials/wood-walnut-orm.png",
+    "roughness": 0.76,
+    "metallic": 0
+  },
+  "wood-ebony": {
+    "family": "wood",
+    "baseColor": "materials/wood-ebony-basecolor.png",
+    "normal": "materials/wood-ebony-normal.png",
+    "occlusionRoughnessMetallic": "materials/wood-ebony-orm.png",
+    "roughness": 0.76,
+    "metallic": 0
+  },
+  "wood-painted-red": {
+    "family": "wood",
+    "baseColor": "materials/wood-painted-red-basecolor.png",
+    "normal": "materials/wood-painted-red-normal.png",
+    "occlusionRoughnessMetallic": "materials/wood-painted-red-orm.png",
+    "roughness": 0.65,
+    "metallic": 0
+  },
+  "wood-painted-blue": {
+    "family": "wood",
+    "baseColor": "materials/wood-painted-blue-basecolor.png",
+    "normal": "materials/wood-painted-blue-normal.png",
+    "occlusionRoughnessMetallic": "materials/wood-painted-blue-orm.png",
+    "roughness": 0.65,
+    "metallic": 0
+  },
+  "paint-crimson": {
+    "family": "paint",
+    "baseColor": "materials/paint-crimson-basecolor.png",
+    "normal": "materials/paint-crimson-normal.png",
+    "occlusionRoughnessMetallic": "materials/paint-crimson-orm.png",
+    "roughness": 0.68,
+    "metallic": 0
+  },
+  "paint-navy": {
+    "family": "paint",
+    "baseColor": "materials/paint-navy-basecolor.png",
+    "normal": "materials/paint-navy-normal.png",
+    "occlusionRoughnessMetallic": "materials/paint-navy-orm.png",
+    "roughness": 0.68,
+    "metallic": 0
+  },
+  "paint-ivory": {
+    "family": "paint",
+    "baseColor": "materials/paint-ivory-basecolor.png",
+    "normal": "materials/paint-ivory-normal.png",
+    "occlusionRoughnessMetallic": "materials/paint-ivory-orm.png",
+    "roughness": 0.68,
+    "metallic": 0
+  },
+  "paint-gold": {
+    "family": "paint",
+    "baseColor": "materials/paint-gold-basecolor.png",
+    "normal": "materials/paint-gold-normal.png",
+    "occlusionRoughnessMetallic": "materials/paint-gold-orm.png",
+    "roughness": 0.68,
+    "metallic": 0
+  },
+  "paint-black": {
+    "family": "paint",
+    "baseColor": "materials/paint-black-basecolor.png",
+    "normal": "materials/paint-black-normal.png",
+    "occlusionRoughnessMetallic": "materials/paint-black-orm.png",
+    "roughness": 0.68,
+    "metallic": 0
+  },
+  "stone-slate": {
+    "family": "stone",
+    "baseColor": "materials/stone-slate-basecolor.png",
+    "normal": "materials/stone-slate-normal.png",
+    "occlusionRoughnessMetallic": "materials/stone-slate-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "stone-flint": {
+    "family": "stone",
+    "baseColor": "materials/stone-flint-basecolor.png",
+    "normal": "materials/stone-flint-normal.png",
+    "occlusionRoughnessMetallic": "materials/stone-flint-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "stone-obsidian": {
+    "family": "stone",
+    "baseColor": "materials/stone-obsidian-basecolor.png",
+    "normal": "materials/stone-obsidian-normal.png",
+    "occlusionRoughnessMetallic": "materials/stone-obsidian-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "stone-granite": {
+    "family": "stone",
+    "baseColor": "materials/stone-granite-basecolor.png",
+    "normal": "materials/stone-granite-normal.png",
+    "occlusionRoughnessMetallic": "materials/stone-granite-orm.png",
+    "roughness": 0.92,
+    "metallic": 0
+  },
+  "skin-warm": {
+    "family": "skin",
+    "baseColor": "materials/skin-warm-basecolor.png",
+    "normal": "materials/skin-warm-normal.png",
+    "occlusionRoughnessMetallic": "materials/skin-warm-orm.png",
+    "roughness": 0.85,
+    "metallic": 0
+  },
+  "skin-deep": {
+    "family": "skin",
+    "baseColor": "materials/skin-deep-basecolor.png",
+    "normal": "materials/skin-deep-normal.png",
+    "occlusionRoughnessMetallic": "materials/skin-deep-orm.png",
+    "roughness": 0.85,
+    "metallic": 0
+  },
+  "skin-light": {
+    "family": "skin",
+    "baseColor": "materials/skin-light-basecolor.png",
+    "normal": "materials/skin-light-normal.png",
+    "occlusionRoughnessMetallic": "materials/skin-light-orm.png",
+    "roughness": 0.85,
+    "metallic": 0
+  },
+  "fur-natural": {
+    "family": "fur",
+    "baseColor": "materials/fur-natural-basecolor.png",
+    "normal": "materials/fur-natural-normal.png",
+    "occlusionRoughnessMetallic": "materials/fur-natural-orm.png",
+    "roughness": 0.98,
+    "metallic": 0
+  },
+  "fur-dark": {
+    "family": "fur",
+    "baseColor": "materials/fur-dark-basecolor.png",
+    "normal": "materials/fur-dark-normal.png",
+    "occlusionRoughnessMetallic": "materials/fur-dark-orm.png",
+    "roughness": 0.98,
+    "metallic": 0
+  },
+  "fur-ivory": {
+    "family": "fur",
+    "baseColor": "materials/fur-ivory-basecolor.png",
+    "normal": "materials/fur-ivory-normal.png",
+    "occlusionRoughnessMetallic": "materials/fur-ivory-orm.png",
+    "roughness": 0.98,
+    "metallic": 0
+  },
+  "rope-hemp": {
+    "family": "rope",
+    "baseColor": "materials/rope-hemp-basecolor.png",
+    "normal": "materials/rope-hemp-normal.png",
+    "occlusionRoughnessMetallic": "materials/rope-hemp-orm.png",
+    "roughness": 0.96,
+    "metallic": 0
+  },
+  "rope-pale": {
+    "family": "rope",
+    "baseColor": "materials/rope-pale-basecolor.png",
+    "normal": "materials/rope-pale-normal.png",
+    "occlusionRoughnessMetallic": "materials/rope-pale-orm.png",
+    "roughness": 0.96,
+    "metallic": 0
+  },
+  "rope-dark": {
+    "family": "rope",
+    "baseColor": "materials/rope-dark-basecolor.png",
+    "normal": "materials/rope-dark-normal.png",
+    "occlusionRoughnessMetallic": "materials/rope-dark-orm.png",
+    "roughness": 0.96,
+    "metallic": 0
+  }
+}

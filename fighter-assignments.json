@@ -1,0 +1,616 @@
+{
+  "dienekes": {
+    "bodyCloth": "linen-crimson",
+    "strapsLeather": "leather-dark",
+    "armorMetal": "metal-bronze",
+    "shaftOrFurnitureWood": "wood-ash",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "aspis",
+      "dory"
+    ],
+    "materialNameRecommendations": {
+      "bronze": "metal-bronze",
+      "crimson": "linen-crimson",
+      "darkBronze": "metal-bronze",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "redHighlight": "linen-scarlet",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "wood": "wood-ash"
+    },
+    "uvCoverage": "104/104 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "vorenus": {
+    "bodyCloth": "linen-crimson",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-iron",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "scutum",
+      "spear",
+      "gladius"
+    ],
+    "materialNameRecommendations": {
+      "bronze": "metal-bronze",
+      "crimson": "linen-crimson",
+      "darkBronze": "metal-bronze",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "redHighlight": "linen-scarlet",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "192/192 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "freydis": {
+    "bodyCloth": "linen-undyed",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-iron",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "buckler",
+      "axe"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "paint-crimson",
+      "darkBronze": "metal-bronze",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-undyed",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "93/93 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "anne": {
+    "bodyCloth": "linen-navy",
+    "strapsLeather": "leather-dark",
+    "armorMetal": "metal-steel",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "cutlass",
+      "pistol"
+    ],
+    "materialNameRecommendations": {
+      "bronze": "metal-bronze",
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-navy",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "76/76 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "tomoe": {
+    "bodyCloth": "linen-navy",
+    "strapsLeather": "leather-black",
+    "armorMetal": "metal-dark-iron",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "katana",
+      "yumi",
+      "arrow",
+      "saya"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-navy",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "64/64 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "nai": {
+    "bodyCloth": "linen-crimson",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-gold",
+    "shaftOrFurnitureWood": "wood-ash",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "handwraps"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "ivory": "linen-ivory",
+      "shadow": "paint-black",
+      "skin": "skin-warm"
+    },
+    "uvCoverage": "51/51 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "hanzo": {
+    "bodyCloth": "linen-indigo",
+    "strapsLeather": "leather-black",
+    "armorMetal": "metal-dark-iron",
+    "shaftOrFurnitureWood": "wood-ebony",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "tanto",
+      "yari",
+      "kunai"
+    ],
+    "materialNameRecommendations": {
+      "iron": "metal-steel",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-indigo",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "46/46 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "subutai": {
+    "bodyCloth": "linen-teal",
+    "strapsLeather": "leather-saddle",
+    "armorMetal": "metal-iron",
+    "shaftOrFurnitureWood": "wood-ash",
+    "bladeOrEdge": "metal-iron",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "bow",
+      "quiver",
+      "knife"
+    ],
+    "materialNameRecommendations": {
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-teal",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "65/65 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "wyatt": {
+    "bodyCloth": "linen-rust",
+    "strapsLeather": "leather-saddle",
+    "armorMetal": "metal-dark-iron",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "revolver"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-rust",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "48/48 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "trooper": {
+    "bodyCloth": "linen-olive",
+    "strapsLeather": "leather-dark",
+    "armorMetal": "metal-dark-iron",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-dark-iron",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "rifle",
+      "knife",
+      "bayonet"
+    ],
+    "materialNameRecommendations": {
+      "iron": "metal-steel",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-olive"
+    },
+    "uvCoverage": "54/54 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "chandos": {
+    "bodyCloth": "linen-ivory",
+    "strapsLeather": "leather-dark",
+    "armorMetal": "metal-steel",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "sword",
+      "shield"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "paint-crimson",
+      "goldEdge": "paint-gold",
+      "iron": "metal-steel",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-ivory"
+    },
+    "uvCoverage": "48/48 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "tzilacatzin": {
+    "bodyCloth": "linen-ochre",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-bronze",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "stone-obsidian",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "macuahuitl"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-ochre",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "69/69 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "mgobozi": {
+    "bodyCloth": "linen-undyed",
+    "strapsLeather": "leather-dark",
+    "armorMetal": "metal-iron",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "metal-iron",
+    "bodySkin": "skin-deep",
+    "weaponObjects": [
+      "iklwa",
+      "shield"
+    ],
+    "materialNameRecommendations": {
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-undyed",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "59/59 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "yuekong": {
+    "bodyCloth": "linen-orange",
+    "strapsLeather": "leather-dark",
+    "armorMetal": "metal-iron",
+    "shaftOrFurnitureWood": "wood-ash",
+    "bladeOrEdge": "wood-oak",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "staff"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-orange",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "58/58 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "nihang": {
+    "bodyCloth": "linen-blue",
+    "strapsLeather": "leather-black",
+    "armorMetal": "metal-steel",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "tulwar",
+      "chakram"
+    ],
+    "materialNameRecommendations": {
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-blue"
+    },
+    "uvCoverage": "51/51 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "shade": {
+    "bodyCloth": "linen-black",
+    "strapsLeather": "leather-black",
+    "armorMetal": "metal-dark-iron",
+    "shaftOrFurnitureWood": "wood-ebony",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "kunaiF",
+      "kunaiB",
+      "shuriken",
+      "hook"
+    ],
+    "materialNameRecommendations": {
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-black"
+    },
+    "uvCoverage": "53/53 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "maori": {
+    "bodyCloth": "linen-ochre",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-iron",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "wood-walnut",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "taiaha",
+      "mere"
+    ],
+    "materialNameRecommendations": {
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-ochre",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "55/55 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "ethiopia": {
+    "bodyCloth": "linen-ivory",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-gold",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-deep",
+    "weaponObjects": [
+      "shotel",
+      "gasha",
+      "rifle"
+    ],
+    "materialNameRecommendations": {
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-ivory"
+    },
+    "uvCoverage": "63/63 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "duelist": {
+    "bodyCloth": "linen-crimson",
+    "strapsLeather": "leather-black",
+    "armorMetal": "metal-gold",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-polished-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "smallsword",
+      "dagger"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-crimson"
+    },
+    "uvCoverage": "51/51 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "iceman": {
+    "bodyCloth": "fur-natural",
+    "strapsLeather": "leather-weathered",
+    "armorMetal": "metal-copper",
+    "shaftOrFurnitureWood": "wood-ash",
+    "bladeOrEdge": "stone-flint",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "axe",
+      "sling",
+      "flint"
+    ],
+    "materialNameRecommendations": {
+      "bronze": "metal-bronze",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "fur-natural",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "49/49 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "celt": {
+    "bodyCloth": "linen-teal",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-gold",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "longsword",
+      "shield",
+      "gaesum"
+    ],
+    "materialNameRecommendations": {
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-teal",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "60/60 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "persian": {
+    "bodyCloth": "linen-crimson",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-gold",
+    "shaftOrFurnitureWood": "wood-ash",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "spear",
+      "spara",
+      "bow",
+      "akinakes"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-crimson",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "62/62 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "lapulapu": {
+    "bodyCloth": "linen-scarlet",
+    "strapsLeather": "leather-natural",
+    "armorMetal": "metal-gold",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "kampilan",
+      "kalasag",
+      "bangkaw"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "linen-scarlet",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "51/51 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "iceni": {
+    "bodyCloth": "linen-teal",
+    "strapsLeather": "leather-saddle",
+    "armorMetal": "metal-bronze",
+    "shaftOrFurnitureWood": "wood-oak",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "spear",
+      "shield",
+      "torch"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-teal",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "62/62 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "conquistador": {
+    "bodyCloth": "linen-undyed",
+    "strapsLeather": "leather-dark",
+    "armorMetal": "metal-polished-steel",
+    "shaftOrFurnitureWood": "wood-walnut",
+    "bladeOrEdge": "metal-steel",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "toledo",
+      "rodela",
+      "crossbow",
+      "standard"
+    ],
+    "materialNameRecommendations": {
+      "crimson": "linen-crimson",
+      "goldEdge": "metal-gold",
+      "iron": "metal-steel",
+      "ivory": "linen-ivory",
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "skin": "skin-warm",
+      "unnamed": "linen-undyed",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "54/54 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  },
+  "shanidar": {
+    "bodyCloth": "fur-natural",
+    "strapsLeather": "leather-weathered",
+    "armorMetal": "metal-iron",
+    "shaftOrFurnitureWood": "wood-ash",
+    "bladeOrEdge": "stone-flint",
+    "bodySkin": "skin-warm",
+    "weaponObjects": [
+      "spear",
+      "stone"
+    ],
+    "materialNameRecommendations": {
+      "leather": "leather-natural",
+      "shadow": "paint-black",
+      "unnamed": "fur-natural",
+      "wood": "wood-oak"
+    },
+    "uvCoverage": "51/51 exported primitives contain TEXCOORD_0",
+    "notes": "Use this as a UV and material assignment guide; no model GLB is automatically modified. Paint decals, logos and unique shield art need separate authored UV artwork."
+  }
+}
