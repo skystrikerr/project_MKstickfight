@@ -107,7 +107,9 @@ export function propModelAssetId(fighterId: string, propId: string): string {
 
 function modelUrls(): Record<string, () => Promise<string>> {
   // Node-only simulation tests have no Vite asset registry.
-  if (typeof import.meta.glob !== "function") return {};
+  // Vite replaces glob CALLS during compilation; the glob property itself
+  // does not exist at runtime. Test the environment, not that macro.
+  if (typeof window === "undefined") return {};
   // Globbed inside a function, not at module scope: the self-tests import
   // this module's neighbours under Node, where import.meta.glob does not
   // exist. Vite still sees the pattern statically and bundles every match.
