@@ -26,6 +26,7 @@ import { WeaponTrail } from "./trail";
 import { DienekesModel } from "./dienekes";
 import { FighterModel, fitPropModel, hasBodyModel, hasPropModel } from "./fighter-model";
 import { modelFor } from "./models";
+import { SUPPORT_GRIPS, supportWeapon } from "./weapon-grips";
 
 const ORDER = {
   cloth: 14,
@@ -560,7 +561,12 @@ export class StickRig {
       }
     }
 
-    this.body?.update(sk, opts.flash);
+    const support = SUPPORT_GRIPS[this.def.id];
+    const mainProp = support && this.props.find(p => p.def.id === support.prop);
+    const supportSide = support?.main === "F" ? "B" : "F";
+    const occupied = this.props.some(p => p.group.visible && !p.bakedIntoBody &&
+      (p.def.attach === `hand${supportSide}` || p.def.attach === `forearm${supportSide}`));
+    this.body?.update(supportWeapon(sk, this.def.id, !!mainProp?.group.visible && !occupied), opts.flash);
 
     if (this.dienekes) {
       // Preserve the existing javelin, projectile, shadow, and trail paths.
