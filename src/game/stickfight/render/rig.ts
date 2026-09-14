@@ -24,7 +24,7 @@ import {
 import type { StageLight } from "./shapes";
 import { WeaponTrail } from "./trail";
 import { DienekesModel } from "./dienekes";
-import { FighterModel, hasBodyModel } from "./fighter-model";
+import { FighterModel, fitPropModel, hasBodyModel } from "./fighter-model";
 import { modelFor } from "./models";
 
 const ORDER = {
@@ -284,6 +284,12 @@ export class StickRig {
       }
       this.props.push(entry);
       this.group.add(g);
+
+      // If this fighter has a model for the prop, it replaces what is drawn
+      // inside the group and nothing else: the rig still places the group, the
+      // sim still measures reach off the flat parts, and a conditional prop
+      // still appears on exactly the frames it did.
+      if (hasBodyModel(def.id)) void fitPropModel(def.id, prop.id, g, light, def.palette);
 
       // The furthest point of a hand-held prop is the weapon tip.
       if (prop.attach === "handF" || prop.attach === "handB") {
