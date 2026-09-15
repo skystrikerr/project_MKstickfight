@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import dossierPanelArt from "@/assets/ui/dossier-panel.webp";
 import { music } from "../engine/music";
 import { ACTION_LABELS, BINDABLE_ACTIONS, codeLabel, defaultKeyMap, type BindableAction, type KeyMap } from "../keybinds";
 import { CONTROLS, P2_CONTROLS, PAD_CONTROLS, type ControlRow } from "../controls";
@@ -83,7 +84,10 @@ export function Settings({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="grain absolute inset-0 z-40 flex flex-col bg-[var(--ink)]">
+    <div
+      className="grain absolute inset-0 z-40 flex flex-col bg-[var(--ink)] bg-cover bg-center"
+      style={{ backgroundImage: `url(${dossierPanelArt})` }}
+    >
       <div className="flex items-center justify-between gap-3 border-b border-[var(--rule)] p-4">
         <h2 className="font-display text-3xl font-bold uppercase leading-none tracking-[0.08em] text-[var(--bone)]">
           Settings
