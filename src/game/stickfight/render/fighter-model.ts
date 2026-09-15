@@ -99,6 +99,9 @@ const PROP_ASSET_ALIASES: Readonly<Record<string, string>> = {
   "samurai:ya": "arrow",
   "mongol:nocked": "arrow",
   "zulu:isihlangu": "shield",
+  // The model ships as `bangkaw`; the prop that holds it is `bangkawHand`.
+  // The file was there the whole time and Lapulapu was swinging a flat one.
+  "lapulapu:bangkawHand": "bangkaw",
 };
 
 export function propModelAssetId(fighterId: string, propId: string): string {
