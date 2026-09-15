@@ -1,6 +1,7 @@
 /** Move list / command list, generated straight from the fighter's move data. */
 
 import { useMemo, useState } from "react";
+import dossierPanelArt from "@/assets/ui/dossier-panel.webp";
 import { getFighter, ROSTER } from "../fighters";
 import type { FighterDef, MoveDef } from "../types";
 import { INPUT_SCHEMES, renderNotation, schemeLegend, type InputScheme } from "../inputscheme";
@@ -110,7 +111,10 @@ export function MoveList({ fighterId, onClose }: { fighterId: string; onClose: (
   ).length;
 
   return (
-    <div className="grain absolute inset-0 z-30 flex flex-col bg-[var(--ink)]">
+    <div
+      className="grain absolute inset-0 z-30 flex flex-col bg-[var(--ink)] bg-cover bg-center"
+      style={{ backgroundImage: `url(${dossierPanelArt})` }}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--rule)] p-4">
         <div className="flex flex-wrap items-center gap-2">
           {ROSTER.map((f) => (

@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import dossierPanelArt from "@/assets/ui/dossier-panel.webp";
 import { dossierFor } from "../dossier";
 import { factionsFor } from "../factions";
 import { ROSTER, getFighter } from "../fighters";
@@ -94,7 +95,10 @@ export function FighterPage({
   };
 
   return (
-    <div className="grain absolute inset-0 z-30 flex flex-col bg-[var(--ink)]">
+    <div
+      className="grain absolute inset-0 z-30 flex flex-col bg-[var(--ink)] bg-cover bg-center"
+      style={{ backgroundImage: `url(${dossierPanelArt})` }}
+    >
       {/* Header: the roster strip, so you can jump rather than step 20 times. */}
       <div className="flex items-center justify-between gap-3 border-b border-[var(--rule)] px-4 py-2.5">
         <span className="shrink-0 font-display text-lg font-bold uppercase tracking-[0.12em] text-[var(--accent)]">

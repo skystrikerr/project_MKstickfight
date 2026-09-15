@@ -12,6 +12,7 @@ import { DUMMY_ACTIONS, type DummyAction } from "../engine/training";
 import { STAGE_THEMES, type StageTheme } from "../render/stage";
 import { Announcement, Hud } from "./Hud";
 import resultsArt from "@/assets/ui/results.webp";
+import pauseFrameArt from "@/assets/ui/pause-frame.webp";
 import { TouchControls } from "./TouchControls";
 import { renderNotation, renderPrompt } from "../inputscheme";
 
@@ -384,7 +385,8 @@ export function GameCanvas({
       </div>
 
       {paused && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/70">
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/70 px-8 py-10">
+          <img src={pauseFrameArt} alt="" className="pointer-events-none absolute inset-0 h-full w-full" />
           <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--bone)]">Paused</div>
           <div className="flex gap-2">
             <button

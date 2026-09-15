@@ -13,13 +13,38 @@
 import { getFighter } from "../fighters";
 import { MODIFIER_BY_ID, TOWER_BY_ID, type Tower, type TowerFloor } from "../towers";
 import { FighterPortrait } from "./Portrait";
+import { portraitFor } from "./art";
+import towerSelectArt from "@/assets/ui/tower-select.webp";
+import towerIntroArt from "@/assets/ui/tower-intro.webp";
+import towerCompleteArt from "@/assets/ui/tower-complete.webp";
+import resultsArt from "@/assets/ui/results.webp";
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, backdrop }: { children: React.ReactNode; backdrop: string }) {
   return (
-    <div className="grain absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-[var(--ink)] p-6">
-      {children}
+    <div
+      className="grain absolute inset-0 z-40 bg-[var(--ink)] bg-cover bg-center p-6"
+      style={{ backgroundImage: `url(${backdrop})` }}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[#0c110f]/70" />
+      <div className="relative flex h-full w-full flex-col items-center justify-center gap-6 overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
+}
+
+function StoryPortrait({ def, className, facing = 1 }: {
+  def: ReturnType<typeof getFighter>;
+  className: string;
+  facing?: 1 | -1;
+}) {
+  const image = portraitFor(def.id);
+  return image ? (
+    <div className={`relative overflow-hidden border border-[var(--rule)] bg-[#160f0d] ${className}`}>
+      <img src={image} alt="" className="h-full w-full object-cover object-[50%_20%]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-black/45" />
+    </div>
+  ) : <FighterPortrait def={def} className={className} facing={facing} />;
 }
 
 const PRIMARY =
@@ -76,7 +101,7 @@ export function TowerSelect({
   onQuit: () => void;
 }) {
   return (
-    <Shell>
+    <Shell backdrop={towerSelectArt}>
       <Rule label="Towers" />
       <div className="grid w-full max-w-4xl gap-3 sm:grid-cols-3">
         {towers.map((t) => {
@@ -140,7 +165,7 @@ export function FloorCard({
   const me = getFighter(playerId);
   const them = getFighter(floor.opponent);
   return (
-    <Shell>
+    <Shell backdrop={towerIntroArt}>
       <Rule
         label={`${tower.name} · Floor ${floor.index}${tower.survival ? "" : ` of ${tower.floors}`} · ${floor.level}`}
       />
@@ -154,7 +179,7 @@ export function FloorCard({
               </span>
             )}
             <div className="flex w-40 flex-col items-center sm:w-52">
-              <FighterPortrait def={def} className="h-40 w-40 sm:h-52 sm:w-52" facing={i === 0 ? 1 : -1} />
+              <StoryPortrait def={def} className="h-40 w-40 sm:h-52 sm:w-52" facing={i === 0 ? 1 : -1} />
               <span
                 className="mt-1 h-px w-10"
                 style={{ background: i === 0 ? (playerSkinAccent ?? def.palette.accent) : def.palette.accent }}
@@ -223,7 +248,7 @@ export function TowerLost({
   const them = getFighter(floor.opponent);
   const survival = !!tower.survival;
   return (
-    <Shell>
+    <Shell backdrop={resultsArt}>
       <div className="font-display text-7xl font-bold uppercase tracking-[0.02em] text-[var(--blood)] sm:text-8xl">
         Defeated
       </div>
@@ -262,8 +287,8 @@ export function TowerCleared({
 }) {
   const me = getFighter(playerId);
   return (
-    <Shell>
-      <FighterPortrait def={me} className="h-44 w-40" />
+    <Shell backdrop={towerCompleteArt}>
+      <StoryPortrait def={me} className="h-44 w-40" />
       <div className="text-center">
         <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[var(--accent)]">
           Tower cleared · {cleared} floor{cleared === 1 ? "" : "s"}
