@@ -5,6 +5,7 @@
  */
 
 import * as THREE from "three";
+import { frameScale } from "./ink";
 import { CAMERA, GROUND_Y, STAGE_HALF_WIDTH } from "../constants";
 import { projectileArmed } from "../engine/match";
 import type { Match, Projectile, Zone } from "../engine/match";
@@ -301,7 +302,8 @@ export class GameRenderer {
     const focus = match.cameraFocus();
     const wantX = focus.spread + CAMERA.padding;
     const wantY = (focus.vspread + CAMERA.vpadding) * this.aspect;
-    const want = Math.max(CAMERA.minViewWidth, Math.min(this.maxViewWidth, Math.max(wantX, wantY)));
+    const want = frameScale()
+      * Math.max(CAMERA.minViewWidth, Math.min(this.maxViewWidth, Math.max(wantX, wantY)));
     this.viewWidth += (want - this.viewWidth) * CAMERA.lerp;
 
     // A spike in screen shake means something heavy landed: punch the camera

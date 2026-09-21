@@ -12,6 +12,7 @@
  * job and not one worth blocking 26 bodies on.
  */
 import * as THREE from "three";
+import { LIGHTS, outlineFor, toonify } from "./ink";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { BONES, type Joint, type Skeleton } from "../skeleton";
 import type { FighterPalette } from "../types";
@@ -190,15 +191,16 @@ function tint(name: string | undefined, base: THREE.Color, palette?: FighterPale
  */
 function ensureLights(scene: THREE.Object3D, light?: StageLight) {
   if (scene.getObjectByName("fighterKey")) return;
-  const key = new THREE.DirectionalLight(light?.key ?? "#fff4e2", 1.55);
+  const L = LIGHTS();
+  const key = new THREE.DirectionalLight(light?.key ?? "#fff4e2", L.key);
   key.name = "fighterKey";
   key.position.set(-0.45, 1.0, 0.85);
   scene.add(key);
   const fill = new THREE.HemisphereLight(
-    light?.key ?? "#ffffff", light?.fill ?? "#33281c", 1.35);
+    light?.key ?? "#ffffff", light?.fill ?? "#33281c", L.fill);
   fill.name = "fighterFill";
   scene.add(fill);
-  const rim = new THREE.DirectionalLight("#9fc0ff", 0.42);
+  const rim = new THREE.DirectionalLight("#9fc0ff", L.rim);
   rim.name = "fighterRim";
   rim.position.set(0.7, 0.25, -0.9);
   scene.add(rim);
@@ -290,11 +292,13 @@ export async function fitPropModel(
     const src = o.material as THREE.MeshStandardMaterial;
     let mat = shared.get(src.uuid);
     if (!mat) {
-      mat = src.clone();
+      mat = toonify(src.clone()) as THREE.MeshStandardMaterial;
       shared.set(src.uuid, mat);
     }
     geo.computeVertexNormals();
     built.push(new THREE.Mesh(geo, mat));
+    const ink = outlineFor(geo);
+    if (ink) built.push(ink);
   });
   if (!built.length) return false;
 
@@ -412,7 +416,7 @@ export class FighterModel {
             // read flat while he read like a character.
             const base = src.color.clone();
             entry = {
-              material: src.clone(),
+              material: toonify(src.clone()) as THREE.MeshStandardMaterial,
               base,
             };
             seen.set(key, entry);
@@ -421,6 +425,8 @@ export class FighterModel {
 
           geo.computeVertexNormals();
           group.add(new THREE.Mesh(geo, entry.material));
+          const ink = outlineFor(geo);
+          if (ink) group.add(ink);
         }
       }
       this.parts.set(part, group);

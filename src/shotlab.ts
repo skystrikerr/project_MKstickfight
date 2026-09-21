@@ -24,6 +24,7 @@ import { EMPTY_INPUT } from "@/game/stickfight/engine/input";
 import { GameRenderer } from "@/game/stickfight/render/renderer";
 import { setDetail } from "@/game/stickfight/render/detail";
 import { stageRulesFor, STAGE_THEMES, type StageTheme } from "@/game/stickfight/render/stage";
+import { setFraming, setLook, type Look } from "@/game/stickfight/render/ink";
 
 const q = new URLSearchParams(location.search);
 const num = (k: string, d: number) => Number(q.get(k) ?? d);
@@ -32,6 +33,10 @@ const num = (k: string, d: number) => Number(q.get(k) ?? d);
 // so it has to be set before the renderer is constructed - which is why this
 // sits above the canvas setup rather than with the other per-fighter options.
 if (q.has("detail")) setDetail(q.get("detail") as "full" | "reduced" | "off");
+
+// Presentation, for before/after shots of the outline and ramp.
+if (q.has("look")) setLook(q.get("look") as Look);
+if (q.has("frame")) setFraming(num("frame", 1));
 
 const theme = (q.get("stage") ?? "colosseum") as StageTheme;
 const canvas = document.getElementById("c") as HTMLCanvasElement;
