@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plank Fighter 3D Lab</title>
+    <style>
+      html, body { margin: 0; width: 100%; height: 100%; background: #171a20; color: #f5ead7; font: 14px system-ui, sans-serif; }
+      #app { width: 100%; height: 100%; }
+      canvas { display: block; }
+      #toolbar { position: fixed; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; max-width: calc(100% - 32px); }
+      button { border: 1px solid #b98d51; background: #1c2028df; color: #f5ead7; padding: 10px 14px; cursor: pointer; }
+      button[aria-pressed="true"] { background: #ad653b; }
+      #note { position: fixed; left: 16px; top: 12px; padding: 10px 14px; background: #141820cc; max-width: min(400px, calc(100% - 60px)); line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="note">Plank 3D prototype · drag to rotate · scroll to zoom<br />Costume, motion and materials are experimental; gameplay still uses the current renderer.</div>
+    <div id="toolbar">
+      <button data-pose="idle" aria-pressed="true">Idle</button>
+      <button data-pose="walk" aria-pressed="false">Walk</button>
+      <button data-pose="guard" aria-pressed="false">Guard</button>
+      <button data-pose="strike" aria-pressed="false">Attack preview</button>
+    </div>
+    <script type="module" src="/src/planklab.ts"></script>
+  </body>
+</html>
