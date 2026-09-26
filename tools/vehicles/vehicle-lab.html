@@ -1,0 +1,99 @@
+<!doctype html>
+<!-- Renders a procedurally built vehicle and exports it as GLB.
+     Driven by tools/vehicles/export-vehicles.mjs; open by hand (served from the
+     repo root) to orbit the car: /tools/vehicles/vehicle-lab.html?car=blue-murder -->
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Vehicle Lab</title>
+<style>html,body{margin:0;height:100%;background:#050507;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">
+{ "imports": {
+  "three": "/node_modules/three/build/three.module.js",
+  "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+
+const params = new URLSearchParams(location.search);
+const car = params.get("car") ?? "blue-murder";
+const { buildBlueMurder } = await import(`./${car}.js`);
+const builders = { "blue-murder": buildBlueMurder };
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060608);
+scene.fog = new THREE.Fog(0x060608, 9, 20);
+
+// cracked night asphalt, like the character-select card
+function asphalt() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 1024;
+  const x = c.getContext("2d");
+  x.fillStyle = "#3a3a3c"; x.fillRect(0, 0, 1024, 1024);
+  const d = x.getImageData(0, 0, 1024, 1024);
+  for (let i = 0; i < d.data.length; i += 4) { const n = (Math.random() - .5) * 50; d.data[i] += n; d.data[i+1] += n; d.data[i+2] += n; }
+  x.putImageData(d, 0, 0);
+  x.strokeStyle = "#1a1a1b"; x.lineWidth = 3;
+  for (let k = 0; k < 14; k++) { let px = Math.random()*1024, py = Math.random()*1024; x.beginPath(); x.moveTo(px, py);
+    for (let s = 0; s < 8; s++) { px += (Math.random()-.5)*120; py += (Math.random()-.5)*120; x.lineTo(px, py); } x.stroke(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const ground = new THREE.Mesh(new THREE.CircleGeometry(14, 48), new THREE.MeshStandardMaterial({ map: asphalt(), roughness: 0.95 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+scene.add(new THREE.HemisphereLight(0x8fa3c8, 0x201c18, 0.9));
+const key = new THREE.SpotLight(0xfff1dd, 160, 30, 0.55, 0.5, 1.4);
+key.position.set(4, 7, 5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x7d9cff, 1.2); rim.position.set(-5, 3, -4); scene.add(rim);
+const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-3, 2, 5); scene.add(fill);
+
+const model = builders[car]();
+model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+scene.add(model);
+
+const camera = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.05, 60);
+camera.position.set(5.2, 2.0, 4.6);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.6, 0.1);
+controls.update();
+
+function frame() { controls.update(); renderer.render(scene, camera); }
+renderer.setAnimationLoop(frame);
+
+window.lab = {
+  view(pos, target = [0, 0.6, 0.1], fov = 32) {
+    camera.position.set(...pos); camera.fov = fov; camera.updateProjectionMatrix();
+    controls.target.set(...target); controls.update(); renderer.render(scene, camera);
+  },
+  stats() {
+    let tris = 0, meshes = 0; const mats = new Set();
+    model.traverse((o) => { if (o.isMesh) { meshes++; mats.add(o.material.name); const g = o.geometry; tris += (g.index ? g.index.count : g.attributes.position.count) / 3; } });
+    const b = new THREE.Box3().setFromObject(model);
+    return { tris, meshes, materials: [...mats], size: b.getSize(new THREE.Vector3()).toArray().map((v) => +v.toFixed(3)) };
+  },
+  async exportGLB() {
+    const buf = await new GLTFExporter().parseAsync(model, { binary: true, maxTextureSize: 2048 });
+    const bytes = new Uint8Array(buf); let s = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return btoa(s);
+  },
+};
+window.labReady = true;
+</script>
+</body>
+</html>
