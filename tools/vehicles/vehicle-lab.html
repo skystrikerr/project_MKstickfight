@@ -22,8 +22,8 @@ import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
 
 const params = new URLSearchParams(location.search);
 const car = params.get("car") ?? "blue-murder";
-const { buildBlueMurder } = await import(`./${car}.js`);
-const builders = { "blue-murder": buildBlueMurder };
+// each car module exports a single build function
+const build = Object.values(await import(`./${car}.js`)).find((f) => typeof f === "function");
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1);
@@ -62,7 +62,7 @@ scene.add(key);
 const rim = new THREE.DirectionalLight(0x7d9cff, 1.2); rim.position.set(-5, 3, -4); scene.add(rim);
 const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-3, 2, 5); scene.add(fill);
 
-const model = builders[car]();
+const model = build();
 model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 scene.add(model);
 

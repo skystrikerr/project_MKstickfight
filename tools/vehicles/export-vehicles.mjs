@@ -18,7 +18,7 @@ try { ({ chromium } = require("playwright")); } catch {
   ({ chromium } = require(path.join(execSync("npm root -g").toString().trim(), "playwright")));
 }
 
-const cars = process.argv.slice(2).length ? process.argv.slice(2) : ["blue-murder"];
+const cars = process.argv.slice(2).length ? process.argv.slice(2) : ["blue-murder", "mail-truck"];
 const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript" };
 const server = createServer(async (req, res) => {
   try {
@@ -52,9 +52,15 @@ await mkdir(path.join(root, "assets/vehicles/previews"), { recursive: true });
 for (const car of cars) {
   await page.goto(`http://localhost:${port}/tools/vehicles/vehicle-lab.html?car=${car}`);
   await page.waitForFunction(() => window.labReady, null, { timeout: 60000 });
-  console.log(car, await page.evaluate(() => window.lab.stats()));
+  const stats = await page.evaluate(() => window.lab.stats());
+  console.log(car, stats);
+  // views are framed for a ~5.9 m sedan; scale them to this vehicle
+  const k = Math.max(stats.size[2] / 5.9, stats.size[1] / 1.8 * 0.75, 1);
+  const lift = Math.max(0, stats.size[1] - 1.8) * 0.45;
   for (const [name, [pos, target, fov]] of Object.entries(views)) {
-    await page.evaluate(([p, t, f]) => window.lab.view(p, t, f), [pos, target, fov]);
+    const p = pos.map((v, i) => v * k + (i === 1 ? lift : 0));
+    const t = target.map((v, i) => v + (i === 1 ? lift : 0));
+    await page.evaluate(([p, t, f]) => window.lab.view(p, t, f), [p, t, fov]);
     await page.waitForTimeout(150);
     await page.screenshot({ path: path.join(root, `assets/vehicles/previews/${car}-${name}.png`) });
   }
