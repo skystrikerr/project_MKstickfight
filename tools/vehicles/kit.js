@@ -213,3 +213,70 @@ export function quad(a, b, c, d, uvScale) {
   g.computeVertexNormals();
   return g;
 }
+
+// Livery atlas: a canvas split into horizontal bands (left side, right side,
+// top, front|rear ends, a dark strip) plus the projections that map world
+// points into each band. UVs are assigned per triangle by facing direction.
+// Units are metres; the vehicle faces +Z. Side bands use S px per metre in both
+// directions so lettering keeps its proportions.
+export function createAtlas({ width = 2048, height = 2048, spanZ, spanY, spanX, sideH, topH, endH, endMinZ, endMinY = Infinity }) {
+  const S = width / (2 * spanZ);
+  const L0 = 0, R0 = sideH, T0 = 2 * sideH, E0 = 2 * sideH + topH;
+  const endW = width / 2;
+  const endSX = endW / (2 * spanX), endSY = endH / spanY;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#0c0c0c";
+  ctx.fillRect(0, 0, width, height);
+  const atlas = {
+    S, L0, R0, T0, E0, width, height, sideH, topH, endH, endW, canvas, ctx,
+    // Left side is seen from -X (nose on the right); right side from +X.
+    sidePx: (side, z, y) => [side === "L" ? (z + spanZ) * S : (spanZ - z) * S, (side === "L" ? L0 : R0) + (spanY - y) * S],
+    topPx: (z, x) => [(z + spanZ) * S, T0 + ((x + spanX) / (2 * spanX)) * topH],
+    endPx: (end, x, y) => [end === "F" ? (x + spanX) * endSX : endW + (spanX - x) * endSX, E0 + (spanY - y) * endSY],
+    darkUV: [0.5, (height - 8) / height],
+    // Assign atlas UVs to a non-indexed geometry. Faces pointing along ±Z only
+    // take the end bands when they sit beyond endMinZ (or above endMinY);
+    // otherwise they are wheel-well walls and get the dark strip.
+    uvs(geo) {
+      geo.computeVertexNormals();
+      const p = geo.attributes.position;
+      const uv = new Float32Array(p.count * 2);
+      const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+      const e = new THREE.Vector3(), n = new THREE.Vector3();
+      for (let t = 0; t < p.count; t += 3) {
+        a.fromBufferAttribute(p, t);
+        b.fromBufferAttribute(p, t + 1);
+        c.fromBufferAttribute(p, t + 2);
+        n.subVectors(c, b).cross(e.subVectors(a, b)).normalize();
+        const cz = (a.z + b.z + c.z) / 3, cy = (a.y + b.y + c.y) / 3;
+        const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
+        [a, b, c].forEach((v, k) => {
+          let px = null;
+          if (ax >= ay && ax >= az) px = atlas.sidePx(n.x < 0 ? "L" : "R", v.z, v.y);
+          else if (ay >= az) px = n.y > 0 ? atlas.topPx(v.z, v.x) : null;
+          else if (Math.abs(cz) > endMinZ || cy > endMinY) px = atlas.endPx(n.z > 0 ? "F" : "R", v.x, v.y);
+          const i = (t + k) * 2;
+          uv[i] = px ? px[0] / width : atlas.darkUV[0];
+          uv[i + 1] = px ? px[1] / height : atlas.darkUV[1];
+        });
+      }
+      geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+      return geo;
+    },
+    texture(name) {
+      ctx.fillStyle = "#0c0c0c";
+      ctx.fillRect(0, height - 16, width, 16);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.flipY = false;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 8;
+      tex.userData.mimeType = "image/jpeg";
+      tex.name = name;
+      return tex;
+    },
+  };
+  return atlas;
+}
