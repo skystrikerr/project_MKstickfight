@@ -19,6 +19,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 const params = new URLSearchParams(location.search);
 const car = params.get("car") ?? "blue-murder";
@@ -36,6 +37,10 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x060608);
 scene.fog = new THREE.Fog(0x060608, 9, 20);
+// A dim studio reflection so metal and chrome read as they would in-engine,
+// kept low to preserve the night-time look.
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.3;
 
 // cracked night asphalt, like the character-select card
 function asphalt() {
@@ -65,6 +70,17 @@ const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-3, 2,
 const model = build();
 model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 scene.add(model);
+// The lights are framed for a ~5.9 m car; push the key spot back and up for
+// bigger vehicles so the whole thing sits inside its cone.
+{
+  const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+  const k = Math.max(1, size.z / 5.9, size.y / 2.4);
+  key.position.multiplyScalar(k);
+  key.distance = 30 * k;
+  key.intensity = 160 * k * k;
+  key.target.position.set(0, size.y * 0.3, 0);
+  scene.add(key.target);
+}
 
 const camera = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.05, 60);
 camera.position.set(5.2, 2.0, 4.6);

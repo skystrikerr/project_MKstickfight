@@ -18,7 +18,7 @@ try { ({ chromium } = require("playwright")); } catch {
   ({ chromium } = require(path.join(execSync("npm root -g").toString().trim(), "playwright")));
 }
 
-const cars = process.argv.slice(2).length ? process.argv.slice(2) : ["blue-murder", "mail-truck", "last-song"];
+const cars = process.argv.slice(2).length ? process.argv.slice(2) : ["blue-murder", "mail-truck", "last-song", "mile-marker"];
 const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript" };
 const server = createServer(async (req, res) => {
   try {

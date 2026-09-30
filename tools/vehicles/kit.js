@@ -219,7 +219,9 @@ export function quad(a, b, c, d, uvScale) {
 // points into each band. UVs are assigned per triangle by facing direction.
 // Units are metres; the vehicle faces +Z. Side bands use S px per metre in both
 // directions so lettering keeps its proportions.
-export function createAtlas({ width = 2048, height = 2048, spanZ, spanY, spanX, sideH, topH, endH, endMinZ, endMinY = Infinity }) {
+export function createAtlas({
+  width = 2048, height = 2048, spanZ, spanY, spanX, sideH, topH, endH, endMinZ, endMinY = Infinity, centerZ = 0,
+}) {
   const S = width / (2 * spanZ);
   const L0 = 0, R0 = sideH, T0 = 2 * sideH, E0 = 2 * sideH + topH;
   const endW = width / 2;
@@ -233,12 +235,16 @@ export function createAtlas({ width = 2048, height = 2048, spanZ, spanY, spanX, 
   const atlas = {
     S, L0, R0, T0, E0, width, height, sideH, topH, endH, endW, canvas, ctx,
     // Left side is seen from -X (nose on the right); right side from +X.
-    sidePx: (side, z, y) => [side === "L" ? (z + spanZ) * S : (spanZ - z) * S, (side === "L" ? L0 : R0) + (spanY - y) * S],
-    topPx: (z, x) => [(z + spanZ) * S, T0 + ((x + spanX) / (2 * spanX)) * topH],
+    // The side and top bands cover z in centerZ ± spanZ.
+    sidePx: (side, z, y) => [
+      side === "L" ? (z - centerZ + spanZ) * S : (spanZ - z + centerZ) * S,
+      (side === "L" ? L0 : R0) + (spanY - y) * S,
+    ],
+    topPx: (z, x) => [(z - centerZ + spanZ) * S, T0 + ((x + spanX) / (2 * spanX)) * topH],
     endPx: (end, x, y) => [end === "F" ? (x + spanX) * endSX : endW + (spanX - x) * endSX, E0 + (spanY - y) * endSY],
     darkUV: [0.5, (height - 8) / height],
     // Assign atlas UVs to a non-indexed geometry. Faces pointing along ±Z only
-    // take the end bands when they sit beyond endMinZ (or above endMinY);
+    // take the end bands when they sit beyond centerZ ± endMinZ (or above endMinY);
     // otherwise they are wheel-well walls and get the dark strip.
     uvs(geo) {
       geo.computeVertexNormals();
@@ -257,7 +263,7 @@ export function createAtlas({ width = 2048, height = 2048, spanZ, spanY, spanX, 
           let px = null;
           if (ax >= ay && ax >= az) px = atlas.sidePx(n.x < 0 ? "L" : "R", v.z, v.y);
           else if (ay >= az) px = n.y > 0 ? atlas.topPx(v.z, v.x) : null;
-          else if (Math.abs(cz) > endMinZ || cy > endMinY) px = atlas.endPx(n.z > 0 ? "F" : "R", v.x, v.y);
+          else if (Math.abs(cz - centerZ) > endMinZ || cy > endMinY) px = atlas.endPx(n.z > 0 ? "F" : "R", v.x, v.y);
           const i = (t + k) * 2;
           uv[i] = px ? px[0] / width : atlas.darkUV[0];
           uv[i + 1] = px ? px[1] / height : atlas.darkUV[1];
